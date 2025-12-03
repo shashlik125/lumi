@@ -305,158 +305,295 @@ h1 {
 }
 
 @media (max-width: 1200px) {
-  .emoji-container.second-emoji {
-    left: 0;
-  }
-  
-  .emoji-container.third-emoji {
-    right: 0;
-  }
-  
-  .emoji-container.eleventh-emoji {
-    right: -100px;
-  }
-  
-  .emoji-container.twelfth-emoji {
-    right: -50px;
-  }
-  
-  .emoji-container.ninth-emoji {
-    left: -20%;
-  }
-  
-  .emoji-container.tenth-emoji {
-    left: -30%;
-  }
-  
-  .emoji-container.eighth-emoji {
-    left: -10%;
-  }
+    .emoji-container.second-emoji {
+        left: -5%;
+    }
+    
+    .emoji-container.third-emoji {
+        right: -50px;
+    }
+    
+    .emoji-container.eleventh-emoji {
+        right: -200px;
+    }
+    
+    .emoji-container.twelfth-emoji {
+        right: -100px;
+    }
+    
+    .emoji-container.ninth-emoji {
+        left: -30%;
+    }
+    
+    .emoji-container.tenth-emoji {
+        left: -40%;
+    }
 }
 
+/* Планшеты (768px - 992px) */
 @media (max-width: 992px) {
-  h1 {
-    font-size: 36px;
-    white-space: normal;
-  }
-  
-  .welcome-text p {
-    font-size: 20px;
-    max-width: 500px;
-  }
-  
-  .emoji-container.fourth-emoji,
-  .emoji-container.fifth-emoji,
-  .emoji-container.sixth-emoji {
-    display: none;
-  }
-  
-  .emoji-image {
-    max-width: 200px !important;
-  }
-  
-  .header-image {
-    width: 150px !important;
-  }
+    h1 {
+        font-size: 36px;
+        white-space: normal;
+    }
+    
+    .welcome-text p {
+        font-size: 20px;
+        max-width: 500px;
+    }
+    
+    .emoji-container.fourth-emoji,
+    .emoji-container.fifth-emoji,
+    .emoji-container.sixth-emoji {
+        display: none;
+    }
+    
+    .emoji-image {
+        max-width: 200px !important;
+    }
+    
+    .header-image {
+        width: 150px !important;
+    }
+    
+    .emoji-container.second-emoji {
+        left: 0;
+    }
+    
+    .emoji-container.third-emoji {
+        right: 0;
+    }
+    
+    .emoji-container.eleventh-emoji {
+        right: -100px;
+    }
+    
+    .emoji-container.twelfth-emoji {
+        right: -50px;
+    }
+    
+    .emoji-container.ninth-emoji {
+        left: -20%;
+    }
+    
+    .emoji-container.tenth-emoji {
+        left: -30%;
+    }
+    
+    .emoji-container.eighth-emoji {
+        left: -10%;
+    }
+    
+    .bottom-image-container img {
+        transform: scale(8);
+    }
 }
 
+/* Большие телефоны (576px - 768px) */
 @media (max-width: 768px) {
-  body {
-    padding: 0 15px 30px;
-    font-size: 16px;
-  }
-  
-  h1 {
-    font-size: 32px;
-    white-space: normal;
-  }
-  
-  .welcome-text {
-    width: 98vw;
-    padding: 30px 15px;
-  }
-  
-  .welcome-text p {
-    font-size: 18px;
-    max-width: 100%;
-  }
-  
-  .actions {
-    flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 30px;
-  }
-  
-  .btn {
-    width: 200px;
-    font-size: 16px;
-    padding: 12px 20px;
-  }
-  
-  .logo {
-    font-size: 24px;
-  }
-  
-  nav a {
-    padding: 8px 12px;
-    font-size: 16px;
-  }
-  
-  /* Скрываем большинство эмодзи на мобильных */
-  .emoji-container.second-emoji,
-  .emoji-container.third-emoji,
-  .emoji-container.fourth-emoji,
-  .emoji-container.fifth-emoji,
-  .emoji-container.sixth-emoji,
-  .emoji-container.eighth-emoji,
-  .emoji-container.ninth-emoji,
-  .emoji-container.tenth-emoji,
-  .emoji-container.eleventh-emoji,
-  .emoji-container.twelfth-emoji {
-    display: none;
-  }
-  
-  .header-image-wrapper {
-    top: 150px;
-  }
-  
-  .main-content {
-    gap: 40px;
-  }
+    body {
+        padding: 0 15px 30px;
+        font-size: 16px;
+    }
+    
+    h1 {
+        font-size: 32px;
+        white-space: normal;
+    }
+    
+    .welcome-text {
+        width: 98vw;
+        padding: 30px 15px;
+    }
+    
+    .welcome-text p {
+        font-size: 18px;
+        max-width: 100%;
+    }
+    
+    .actions {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .btn {
+        width: 200px;
+        font-size: 16px;
+        padding: 12px 20px;
+    }
+    
+    .logo {
+        font-size: 24px;
+    }
+    
+    nav a {
+        padding: 8px 12px;
+        font-size: 16px;
+    }
+    
+    /* Скрываем большинство эмодзи на мобильных */
+    .emoji-container.second-emoji,
+    .emoji-container.third-emoji,
+    .emoji-container.fourth-emoji,
+    .emoji-container.fifth-emoji,
+    .emoji-container.sixth-emoji,
+    .emoji-container.eighth-emoji,
+    .emoji-container.ninth-emoji,
+    .emoji-container.tenth-emoji,
+    .emoji-container.eleventh-emoji,
+    .emoji-container.twelfth-emoji {
+        display: none;
+    }
+    
+    .header-image-wrapper {
+        top: 150px;
+    }
+    
+    .main-content {
+        gap: 40px;
+    }
+    
+    .bottom-image-container {
+        height: 50px;
+    }
+    
+    .bottom-image-container img {
+        transform: scale(6);
+    }
 }
 
-@media (max-width: 480px) {
-  h1 {
-    font-size: 28px;
-  }
-  
-  .welcome-text {
-    padding: 20px 10px;
-  }
-  
-  .welcome-text p {
-    font-size: 16px;
-  }
-  
-  .btn {
-    width: 180px;
-    padding: 10px 16px;
-  }
-  
-  header {
-    flex-direction: column;
-    gap: 15px;
-    margin-bottom: 30px;
-  }
-  
-  .logo {
-    margin-right: 0;
-  }
-  
-  nav {
-    margin-left: 0;
-  }
+/* Маленькие телефоны (до 576px) */
+@media (max-width: 576px) {
+    h1 {
+        font-size: 28px;
+    }
+    
+    .welcome-text {
+        padding: 20px 10px;
+    }
+    
+    .welcome-text p {
+        font-size: 16px;
+    }
+    
+    .btn {
+        width: 180px;
+        padding: 10px 16px;
+        font-size: 15px;
+    }
+    
+    header {
+        padding: 15px 10px !important;
+        margin-bottom: 20px;
+        flex-direction: row; /* Важно: всегда в строке! */
+        justify-content: space-between; /* Lumi слева, Регистрация справа */
+    }
+    
+    .logo {
+        font-size: 22px;
+        margin-right: 0;
+    }
+    
+    nav {
+        margin-left: 0;
+    }
+    
+    nav a {
+        padding: 6px 10px;
+        font-size: 15px;
+    }
+    
+    .header-image-wrapper {
+        top: 100px;
+    }
+    
+    .header-image {
+        width: 120px !important;
+    }
+    
+    .bottom-image-container {
+        height: 40px;
+    }
+    
+    .bottom-image-container img {
+        transform: scale(4);
+    }
+}
+
+/* Очень маленькие телефоны (до 375px) */
+@media (max-width: 375px) {
+    .logo {
+        font-size: 20px;
+    }
+    
+    nav a {
+        font-size: 14px;
+        padding: 5px 8px;
+    }
+    
+    h1 {
+        font-size: 26px;
+    }
+    
+    .btn {
+        width: 160px;
+        padding: 9px 14px;
+        font-size: 14px;
+    }
+    
+    .bottom-image-container img {
+        transform: scale(3);
+    }
+}
+
+/* Ландшафтная ориентация на мобильных */
+@media (max-width: 768px) and (orientation: landscape) {
+    .header-image-wrapper {
+        top: 80px;
+    }
+    
+    .main-content {
+        gap: 20px;
+        padding-bottom: 20px;
+    }
+    
+    .welcome-text {
+        padding: 20px 10px;
+    }
+    
+    .actions {
+        flex-direction: row;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .btn {
+        width: auto;
+        min-width: 120px;
+        padding: 10px 15px;
+    }
+    
+    .bottom-image-container {
+        height: 40px;
+    }
+}
+
+/* Большие экраны (более 1400px) */
+@media (min-width: 1400px) {
+    .welcome-text {
+        max-width: 1000px;
+    }
+    
+    h1 {
+        font-size: 48px;
+    }
+    
+    .welcome-text p {
+        font-size: 24px;
+        max-width: 900px;
+    }
 }
 </style>
 {% endblock %}

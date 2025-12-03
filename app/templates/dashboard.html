@@ -443,35 +443,34 @@ h1 {
   }
 }
 
-/* МОБИЛЬНАЯ ВЕРСИЯ - ИСПРАВЛЕННАЯ */
 /* Мобильные устройства */
 @media (max-width: 768px) {
   body {
     font-size: 16px;
-    padding-top: 70px; /* Уменьшил для более короткой страницы */
+    padding-top: 70px;
   }
   
   h1 {
     font-size: 32px;
     white-space: normal;
-    margin-bottom: 15px; /* Уменьшил отступ */
+    margin-bottom: 15px;
   }
   
   .welcome-text {
-    padding: 25px 20px; /* Уменьшил паддинг */
+    padding: 25px 20px;
   }
   
   .welcome-text p {
     font-size: 18px;
     max-width: 100%;
-    margin-bottom: 20px; /* Уменьшил отступ */
+    margin-bottom: 20px;
   }
   
   .actions {
     flex-direction: column;
     align-items: center;
-    gap: 12px; /* Уменьшил отступ */
-    margin-bottom: 25px; /* Уменьшил отступ */
+    gap: 12px;
+    margin-bottom: 25px;
   }
   
   .btn {
@@ -481,30 +480,52 @@ h1 {
   }
   
   header {
-    padding: 12px 15px; /* Уменьшил паддинг */
-    margin: 0 0 20px; /* Уменьшил отступ */
-    min-height: 60px; /* Уменьшил высоту */
+    padding: 12px 15px;
+    margin: 0 0 20px;
+    min-height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
   }
   
   .logo {
-    font-size: 22px; /* Уменьшил размер */
-    display: block; /* Оставляем видимым или нет? Если нужно скрыть - display: none */
+    font-size: 22px;
+    display: block;
   }
   
   nav {
     display: flex;
-    gap: 8px; /* Уменьшил отступ */
+    gap: 8px;
     flex-wrap: nowrap;
-    overflow-x: auto; /* Добавил скролл если не помещается */
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     padding: 5px 0;
+    order: 2;
+    margin: 0 auto;
   }
   
   nav a {
-    padding: 6px 10px; /* Уменьшил паддинг */
-    font-size: 14px; /* Уменьшил шрифт */
+    padding: 6px 10px;
+    font-size: 14px;
     white-space: nowrap;
-    flex-shrink: 0; /* Чтобы не сжимались */
+    flex-shrink: 0;
+  }
+  
+  .user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    order: 3;
+  }
+  
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .user span {
+    display: none;
   }
   
   /* Скрываем большинство эмодзи на мобильных */
@@ -525,35 +546,35 @@ h1 {
   .emoji-container:first-child {
     display: block;
     position: absolute;
-    top: -80px; /* Поднимаем над картинкой */
+    top: -80px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 10;
   }
   
   .emoji-image {
-    max-width: 120px; /* Уменьшил размер */
+    max-width: 120px;
   }
   
   .main-content {
-    gap: 25px; /* Уменьшил отступ */
-    padding-bottom: 30px; /* Уменьшил отступ */
-    margin-top: 180px; /* Уменьшил отступ сверху */
+    gap: 25px;
+    padding-bottom: 30px;
+    margin-top: 180px;
   }
   
   .header-image-wrapper {
-    top: 50px; /* Подняли картинку выше */
+    top: 50px;
     position: relative;
   }
   
   .header-image {
-    width: 150px !important; /* Уменьшил размер */
+    width: 150px !important;
     height: auto;
   }
   
   .images-container {
-    height: 180px; /* Уменьшил высоту */
-    margin-bottom: 15px; /* Уменьшил отступ */
+    height: 180px;
+    margin-bottom: 15px;
     position: relative;
     display: flex;
     justify-content: center;
@@ -561,20 +582,20 @@ h1 {
   }
   
   .features {
-    margin-top: 30px; /* Уменьшил отступ */
+    margin-top: 30px;
   }
   
   .card {
-    padding: 20px 15px; /* Уменьшил паддинг */
-    min-height: 180px; /* Уменьшил высоту */
+    padding: 20px 15px;
+    min-height: 180px;
   }
   
   .card h3 {
-    font-size: 18px; /* Уменьшил размер */
+    font-size: 18px;
   }
   
   .card p {
-    font-size: 14px; /* Уменьшил размер */
+    font-size: 14px;
   }
   
   /* На мобильных эллипс точно скрыт */
@@ -585,7 +606,7 @@ h1 {
 
 @media (max-width: 480px) {
   body {
-    padding-top: 65px; /* Еще меньше для телефона */
+    padding-top: 65px;
   }
   
   h1 {
@@ -619,46 +640,98 @@ h1 {
     padding: 5px 8px;
   }
   
+  .user-avatar {
+    width: 24px;
+    height: 24px;
+  }
+  
   /* Главный смайлик */
   .emoji-container:first-child {
-    top: -60px; /* Меньше подъем для телефона */
+    top: -60px;
   }
   
   .emoji-image {
-    max-width: 100px; /* Еще меньше для телефона */
+    max-width: 100px;
   }
   
   .images-container {
-    height: 150px; /* Еще меньше высота */
+    height: 150px;
   }
   
   .header-image-wrapper {
-    top: 40px; /* Подняли еще выше */
+    top: 40px;
   }
   
   .header-image {
-    width: 120px !important; /* Еще меньше для телефона */
+    width: 120px !important;
   }
   
   .main-content {
-    margin-top: 150px; /* Еще меньше отступ сверху */
+    margin-top: 150px;
     gap: 20px;
   }
+}
+
+@media (max-width: 360px) {
+  h1 {
+    font-size: 24px;
+  }
   
-  /* Убираем горизонтальный скролл на очень маленьких экранах */
-  @media (max-width: 360px) {
-    nav {
-      flex-wrap: wrap; /* Разрешаем перенос на новую строку */
-      justify-content: center;
-      overflow-x: visible;
-    }
-    
-    nav a {
-      min-width: 75px; /* Минимальная ширина чтобы "Настроение" не обрезалось */
-      text-align: center;
-    }
+  nav {
+    flex-wrap: wrap;
+    justify-content: center;
+    overflow-x: visible;
+    gap: 5px;
+  }
+  
+  nav a {
+    font-size: 11px;
+    padding: 4px 6px;
+    min-width: 70px;
+    text-align: center;
+  }
+  
+  .logo {
+    font-size: 18px;
+  }
+  
+  .emoji-container:first-child {
+    top: -50px;
+  }
+  
+  .emoji-image {
+    max-width: 80px;
+  }
+  
+  .header-image-wrapper {
+    top: 30px;
+  }
+  
+  .header-image {
+    width: 100px !important;
+  }
+  
+  .images-container {
+    height: 130px;
+  }
+  
+  .main-content {
+    margin-top: 130px;
+  }
+  
+  .card {
+    padding: 15px 12px;
+  }
+  
+  .card h3 {
+    font-size: 16px;
+  }
+  
+  .card p {
+    font-size: 13px;
   }
 }
+
 </style>
 {% endblock %}
 

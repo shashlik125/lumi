@@ -176,7 +176,7 @@ nav a {
   z-index: 90;
 }
 
-/* Эллипс внизу - исправленная версия */
+/* Эллипс внизу - ТОЛЬКО для десктопа */
 .bottom-ellipse {
   position: absolute;
   bottom: 0;
@@ -185,7 +185,7 @@ nav a {
   z-index: -1;
   opacity: 0.7;
   pointer-events: none;
-  height: 200px; /* Ограничиваем высоту */
+  height: 120px; /* Минимальная высота */
   overflow: hidden;
 }
 
@@ -193,9 +193,9 @@ nav a {
   width: 100%;
   height: auto;
   position: absolute;
-  bottom: -50px; /* Поднимаем немного вверх */
+  bottom: -20px; /* Поднял выше */
   left: 0;
-  transform: scale(2.5); /* Уменьшаем масштаб */
+  transform: scale(1.8); /* Уменьшил масштаб */
   transform-origin: center bottom;
 }
 
@@ -211,7 +211,7 @@ nav a {
   align-items: center;
   gap: 40px;
   margin: 0 auto;
-  padding: 0 0 80px;
+  padding: 0 0 20px; /* Уменьшил нижний padding */
   position: relative;
   z-index: 10;
   flex: 1;
@@ -346,6 +346,7 @@ h1 {
   }
 }
 
+/* Для планшетов - начинаем скрывать */
 @media (max-width: 992px) {
   h1 {
     font-size: 36px;
@@ -379,12 +380,13 @@ h1 {
     height: 300px;
   }
   
-  .bottom-ellipse img {
-    transform: scale(2);
-    bottom: -30px;
+  /* На планшетах уже убираем эллипс */
+  .bottom-ellipse {
+    display: none;
   }
 }
 
+/* Мобильные устройства */
 @media (max-width: 768px) {
   body {
     font-size: 16px;
@@ -442,7 +444,7 @@ h1 {
   
   .main-content {
     gap: 30px;
-    padding-bottom: 60px;
+    padding-bottom: 40px;
   }
   
   .header-image-wrapper {
@@ -454,13 +456,13 @@ h1 {
     margin-bottom: 20px;
   }
   
-  .bottom-ellipse {
-    height: 150px;
+  header {
+    margin: 0 0 30px;
   }
   
-  .bottom-ellipse img {
-    transform: scale(1.5);
-    bottom: -20px;
+  /* На мобильных эллипс точно скрыт */
+  .bottom-ellipse {
+    display: none;
   }
 }
 
@@ -483,18 +485,7 @@ h1 {
   }
   
   header {
-    flex-direction: row;
-    justify-content: space-between;
-    gap: 0;
-    margin-bottom: 30px;
-  }
-  
-  .logo {
-    margin-right: 0;
-  }
-  
-  nav {
-    margin-left: 0;
+    margin-bottom: 20px;
   }
   
   .images-container {
@@ -574,7 +565,7 @@ h1 {
   </div>
 </div>
 
-<!-- Эллипс в самом низу страницы -->
+<!-- Эллипс в самом низу страницы - ТОЛЬКО для десктопа -->
 <div class="bottom-ellipse">
   <img src="{{ url_for('static', filename='images/Ellipse 746.png') }}" alt="Background ellipse" />
 </div>

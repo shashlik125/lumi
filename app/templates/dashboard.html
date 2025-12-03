@@ -443,31 +443,35 @@ h1 {
   }
 }
 
+/* МОБИЛЬНАЯ ВЕРСИЯ - ИСПРАВЛЕННАЯ */
 /* Мобильные устройства */
 @media (max-width: 768px) {
   body {
     font-size: 16px;
+    padding-top: 70px; /* Уменьшил для более короткой страницы */
   }
   
   h1 {
     font-size: 32px;
     white-space: normal;
+    margin-bottom: 15px; /* Уменьшил отступ */
   }
   
   .welcome-text {
-    padding: 30px 20px;
+    padding: 25px 20px; /* Уменьшил паддинг */
   }
   
   .welcome-text p {
     font-size: 18px;
     max-width: 100%;
+    margin-bottom: 20px; /* Уменьшил отступ */
   }
   
   .actions {
     flex-direction: column;
     align-items: center;
-    gap: 15px;
-    margin-bottom: 30px;
+    gap: 12px; /* Уменьшил отступ */
+    margin-bottom: 25px; /* Уменьшил отступ */
   }
   
   .btn {
@@ -476,13 +480,31 @@ h1 {
     padding: 12px 20px;
   }
   
+  header {
+    padding: 12px 15px; /* Уменьшил паддинг */
+    margin: 0 0 20px; /* Уменьшил отступ */
+    min-height: 60px; /* Уменьшил высоту */
+  }
+  
   .logo {
-    font-size: 24px;
+    font-size: 22px; /* Уменьшил размер */
+    display: block; /* Оставляем видимым или нет? Если нужно скрыть - display: none */
+  }
+  
+  nav {
+    display: flex;
+    gap: 8px; /* Уменьшил отступ */
+    flex-wrap: nowrap;
+    overflow-x: auto; /* Добавил скролл если не помещается */
+    -webkit-overflow-scrolling: touch;
+    padding: 5px 0;
   }
   
   nav a {
-    padding: 8px 12px;
-    font-size: 16px;
+    padding: 6px 10px; /* Уменьшил паддинг */
+    font-size: 14px; /* Уменьшил шрифт */
+    white-space: nowrap;
+    flex-shrink: 0; /* Чтобы не сжимались */
   }
   
   /* Скрываем большинство эмодзи на мобильных */
@@ -499,22 +521,60 @@ h1 {
     display: none;
   }
   
+  /* Главный смайлик - позиционируем над картинкой */
+  .emoji-container:first-child {
+    display: block;
+    position: absolute;
+    top: -80px; /* Поднимаем над картинкой */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+  }
+  
+  .emoji-image {
+    max-width: 120px; /* Уменьшил размер */
+  }
+  
   .main-content {
-    gap: 30px;
-    padding-bottom: 40px;
+    gap: 25px; /* Уменьшил отступ */
+    padding-bottom: 30px; /* Уменьшил отступ */
+    margin-top: 180px; /* Уменьшил отступ сверху */
   }
   
   .header-image-wrapper {
-    top: 100px;
+    top: 50px; /* Подняли картинку выше */
+    position: relative;
+  }
+  
+  .header-image {
+    width: 150px !important; /* Уменьшил размер */
+    height: auto;
   }
   
   .images-container {
-    height: 250px;
-    margin-bottom: 20px;
+    height: 180px; /* Уменьшил высоту */
+    margin-bottom: 15px; /* Уменьшил отступ */
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   
-  header {
-    margin: 0 0 30px;
+  .features {
+    margin-top: 30px; /* Уменьшил отступ */
+  }
+  
+  .card {
+    padding: 20px 15px; /* Уменьшил паддинг */
+    min-height: 180px; /* Уменьшил высоту */
+  }
+  
+  .card h3 {
+    font-size: 18px; /* Уменьшил размер */
+  }
+  
+  .card p {
+    font-size: 14px; /* Уменьшил размер */
   }
   
   /* На мобильных эллипс точно скрыт */
@@ -524,6 +584,10 @@ h1 {
 }
 
 @media (max-width: 480px) {
+  body {
+    padding-top: 65px; /* Еще меньше для телефона */
+  }
+  
   h1 {
     font-size: 28px;
   }
@@ -542,19 +606,57 @@ h1 {
   }
   
   header {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    padding: 10px 12px;
+  }
+  
+  .logo {
+    font-size: 20px;
+  }
+  
+  nav a {
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+  
+  /* Главный смайлик */
+  .emoji-container:first-child {
+    top: -60px; /* Меньше подъем для телефона */
+  }
+  
+  .emoji-image {
+    max-width: 100px; /* Еще меньше для телефона */
   }
   
   .images-container {
-    height: 200px;
+    height: 150px; /* Еще меньше высота */
   }
   
   .header-image-wrapper {
-    top: 80px;
+    top: 40px; /* Подняли еще выше */
   }
   
   .header-image {
-    width: 120px !important;
+    width: 120px !important; /* Еще меньше для телефона */
+  }
+  
+  .main-content {
+    margin-top: 150px; /* Еще меньше отступ сверху */
+    gap: 20px;
+  }
+  
+  /* Убираем горизонтальный скролл на очень маленьких экранах */
+  @media (max-width: 360px) {
+    nav {
+      flex-wrap: wrap; /* Разрешаем перенос на новую строку */
+      justify-content: center;
+      overflow-x: visible;
+    }
+    
+    nav a {
+      min-width: 75px; /* Минимальная ширина чтобы "Настроение" не обрезалось */
+      text-align: center;
+    }
   }
 }
 </style>

@@ -173,18 +173,6 @@ nav a {
   z-index: 90;
 }
 
-.emoji-container.t {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 70px;
-  z-index: -1;
-  text-align: center;
-  transform: scale(10);
-  transform-origin: bottom center;
-  opacity: 0.7;
-}
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -275,6 +263,42 @@ h1 {
 @keyframes fadeIn {
   from {opacity: 0; transform: translateY(20px);}
   to {opacity: 1; transform: translateY(0);}
+}
+
+
+/* НИЖНЯЯ КАРТИНКА - ФИКСИРОВАННАЯ */
+.bottom-background {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.bottom-background img {
+    width: 100%;
+    height: auto;
+    min-width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    transform: scale(3);
+    transform-origin: bottom center;
+    opacity: 0.7;
+}
+
+/* Увеличиваем z-index основного контента */
+.main-content {
+    position: relative;
+    z-index: 2;
+}
+
+/* Убираем лишние отступы */
+body {
+    padding-bottom: 0 !important;
 }
 
 /* Адаптивность */
@@ -391,160 +415,33 @@ h1 {
 
 /* Большие телефоны (576px - 768px) */
 @media (max-width: 768px) {
-    body {
-        padding: 0 15px 30px;
-        font-size: 16px;
+    .bottom-background {
+        height: 70px;
     }
     
-    h1 {
-        font-size: 32px;
-        white-space: normal;
+    .bottom-background img {
+        transform: scale(2.5);
+    }
+}
+
+@media (max-width: 576px) {
+    .bottom-background {
+        height: 60px;
     }
     
-    .welcome-text {
-        width: 98vw;
-        padding: 30px 15px;
+    .bottom-background img {
+        transform: scale(2);
     }
-    
-    .welcome-text p {
-        font-size: 18px;
-        max-width: 100%;
-    }
-    
-    .actions {
-        flex-direction: column;
-        align-items: center;
-        gap: 15px;
-        margin-bottom: 30px;
-    }
-    
-    .btn {
-        width: 200px;
-        font-size: 16px;
-        padding: 12px 20px;
-    }
-    
-    .logo {
-        font-size: 24px;
-    }
-    
-    nav a {
-        padding: 8px 12px;
-        font-size: 16px;
-    }
-    
-    /* Скрываем большинство эмодзи на мобильных */
-    .emoji-container.second-emoji,
-    .emoji-container.third-emoji,
-    .emoji-container.fourth-emoji,
-    .emoji-container.fifth-emoji,
-    .emoji-container.sixth-emoji,
-    .emoji-container.eighth-emoji,
-    .emoji-container.ninth-emoji,
-    .emoji-container.tenth-emoji,
-    .emoji-container.eleventh-emoji,
-    .emoji-container.twelfth-emoji {
-        display: none;
-    }
-    
-    .header-image-wrapper {
-        top: 150px;
-    }
-    
-    .main-content {
-        gap: 40px;
-    }
-    
-    .bottom-image-container {
+}
+
+
+@media (max-width: 375px) {
+    .bottom-background {
         height: 50px;
     }
     
-    .bottom-image-container img {
-        transform: scale(6);
-    }
-}
-
-/* Маленькие телефоны (до 576px) */
-@media (max-width: 576px) {
-    h1 {
-        font-size: 28px;
-    }
-    
-    .welcome-text {
-        padding: 20px 10px;
-    }
-    
-    .welcome-text p {
-        font-size: 16px;
-    }
-    
-    .btn {
-        width: 180px;
-        padding: 10px 16px;
-        font-size: 15px;
-    }
-    
-    header {
-        padding: 15px 10px !important;
-        margin-bottom: 20px;
-        flex-direction: row; /* Важно: всегда в строке! */
-        justify-content: space-between; /* Lumi слева, Регистрация справа */
-    }
-    
-    .logo {
-        font-size: 22px;
-        margin-right: 0;
-    }
-    
-    nav {
-        margin-left: 0;
-    }
-    
-    nav a {
-        padding: 6px 10px;
-        font-size: 15px;
-    }
-    
-    .header-image-wrapper {
-        top: 100px;
-    }
-    
-    .header-image {
-        width: 120px !important;
-    }
-    
-    .bottom-image-container {
-        height: 40px;
-    }
-    
-    .bottom-image-container img {
-        transform: scale(4);
-    }
-}
-
-/* Очень маленькие телефоны (до 375px) */
-@media (max-width: 375px) {
-    .logo {
-        font-size: 20px;
-    }
-    
-    nav a {
-        font-size: 14px;
-        padding: 5px 8px;
-    }
-    
-    h1 {
-        font-size: 26px;
-    }
-    
-    .btn {
-        width: 160px;
-        padding: 9px 14px;
-        font-size: 14px;
-    }
-    
-    .bottom-image-container img {
-        transform: scale(3);
+    .bottom-background img {
+        transform: scale(1.5);
     }
 }
 
@@ -644,9 +541,9 @@ h1 {
     <img src="{{ url_for('static', filename='images/Mask group.png') }}" alt="Lumi" class="header-image" />
   </div>
 </div>
-<div class="emoji-container t">
-    <img src="{{ url_for('static', filename='images/Ellipse 746.png') }}" alt="Emoji 12" class="emoji-image" />
-  </div>
+<!-- НИЖНЯЯ КАРТИНКА - ОТДЕЛЬНЫМ ЭЛЕМЕНТОМ -->
+<div class="bottom-background">
+    <img src="{{ url_for('static', filename='images/Ellipse 746.png') }}" alt="Background" />
 </div>
 
 <div class="main-content">

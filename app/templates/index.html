@@ -270,43 +270,24 @@ h1 {
   to {opacity: 1; transform: translateY(0);}
 }
 
-@media (max-width: 1024px) {
-  .images-container {
-    min-height: 400px;
-  }
-  
-  .emoji-image {
-    max-width: 200px !important;
-  }
-  
-  .emoji-container.second-emoji .emoji-image {
-    max-width: 150px;
-  }
-  
-  .main-content {
-    margin-top: 400px;
-  }
-  
-  h1 {
-    font-size: 56px;
-  }
-}
 
-/* Планшеты и телефоны (768px и меньше) - СКРЫВАЕМ СМАЙЛИКИ */
+/* ========== НА ТЕЛЕФОНАХ УБИРАЕМ ВСЕ ЭМОДЖИ ========== */
+
+/* На планшетах и телефонах (768px и меньше) */
 @media (max-width: 768px) {
-  /* Скрываем все смайлики */
+  /* Скрываем ВСЕ эмоджи и контейнер с ними */
   .images-container {
     display: none !important;
   }
   
-  /* Убираем большой отступ сверху */
+  /* Уменьшаем отступ сверху, т.к. эмоджи скрыты */
   .main-content {
-    margin-top: 150px !important;
+    margin-top: 150px !important; /* Уменьшили с 700px */
     margin-bottom: 50px;
     gap: 40px;
   }
   
-  /* Адаптируем текст */
+  /* Текст */
   .welcome-text {
     padding: 30px 40px;
   }
@@ -314,12 +295,10 @@ h1 {
   h1 {
     font-size: 36px;
     white-space: normal;
-    margin-bottom: 20px;
   }
   
   .welcome-text p {
     font-size: 18px;
-    line-height: 1.5;
   }
   
   /* Кнопки */
@@ -328,17 +307,15 @@ h1 {
     padding: 12px 24px;
   }
   
-  /* Карточки features */
+  /* Карточки */
   .features {
     margin-top: 30px;
     grid-template-columns: 1fr;
     gap: 20px;
-    max-width: 500px;
   }
   
   .card {
     padding: 25px 30px;
-    min-height: auto;
     top: 0;
   }
   
@@ -354,7 +331,6 @@ h1 {
   /* Хедер */
   header {
     padding: 10px 15px !important;
-    min-height: 70px;
   }
   
   nav {
@@ -376,7 +352,6 @@ h1 {
   .main-content {
     margin-top: 120px !important;
     gap: 30px;
-    padding: 0 10px;
   }
   
   .welcome-text {
@@ -389,14 +364,11 @@ h1 {
   
   .welcome-text p {
     font-size: 16px;
-    margin-bottom: 20px;
   }
   
-  /* Кнопки в колонку */
   .actions {
     flex-direction: column;
-    align-items: center;
-    gap: 12px;
+    gap: 10px;
   }
   
   .btn {
@@ -404,10 +376,8 @@ h1 {
     max-width: 250px;
   }
   
-  /* Хедер компактнее */
   header {
     padding: 8px 10px !important;
-    min-height: 60px;
   }
   
   .logo {
@@ -428,10 +398,6 @@ h1 {
     height: 28px;
   }
   
-  .features {
-    margin-top: 20px;
-  }
-  
   .card {
     padding: 20px 25px;
   }
@@ -447,13 +413,8 @@ h1 {
 
 /* Очень маленькие телефоны (360px и меньше) */
 @media (max-width: 360px) {
-  .logo {
-    font-size: 20px;
-  }
-  
-  nav a {
-    font-size: 12px;
-    padding: 5px 8px;
+  .main-content {
+    margin-top: 100px !important;
   }
   
   h1 {
@@ -467,6 +428,15 @@ h1 {
   .btn {
     padding: 10px 20px;
     font-size: 15px;
+  }
+  
+  .logo {
+    font-size: 20px;
+  }
+  
+  nav a {
+    font-size: 12px;
+    padding: 5px 8px;
   }
 }
 

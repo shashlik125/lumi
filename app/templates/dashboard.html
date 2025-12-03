@@ -170,15 +170,24 @@ nav a.active::after {
   background: #f2f2f2;
 }
 
-/* Контейнер для изображений - как в index */
+/* Контейнер для изображений - переделываем структуру */
 .images-container {
   position: relative;
   width: 100%;
-  height: 400px;
-  margin: 100px auto 30px;
+  height: 500px; /* Увеличил высоту для большего пространства */
+  margin: 100px auto 50px; /* Увеличил отступ снизу */
   display: flex;
-  justify-content: center;
+  flex-direction: column; /* Меняем на колонку */
+  justify-content: space-between; /* Распределяем пространство */
   align-items: center;
+}
+
+/* Основной смайлик - размещаем ВЫШЕ */
+.main-emoji-container {
+  position: relative;
+  z-index: 15;
+  margin-bottom: 50px; /* Отступ между смайликом и Mask group */
+  text-align: center;
 }
 
 .emoji-image {
@@ -188,30 +197,32 @@ nav a.active::after {
   animation: float 3s ease-in-out infinite;
 }
 
+/* Контейнер для Mask group - размещаем НИЖЕ */
 .header-image-wrapper {
   display: flex;
   justify-content: center;
   width: 100%;
-  position: absolute;
-  top: 200px;
-  z-index: 5;
+  position: relative;
+  z-index: 10;
+  margin-top: 20px; /* Дополнительный отступ сверху */
 }
 
 .header-image {
   width: 200px !important;
   height: auto;
   position: relative;
-  z-index: 5;
+  z-index: 10;
 }
 
+/* Остальные эмодзи (фон) */
 .emoji-container {
   max-width: 100%;
 }
 
 .emoji-container.second-emoji {
   position: absolute;
-  top: 150px;
-  left: -10%;
+  top: 50px; /* Поднял выше */
+  left: 5%;
   z-index: 9;
 }
 
@@ -223,64 +234,64 @@ nav a.active::after {
 
 .emoji-container.third-emoji {
   position: absolute;
-  top: 280px;
-  right: -100px;
+  top: 300px; /* Опустил ниже */
+  right: 5%;
   z-index: 8;
 }
 
 .emoji-container.fourth-emoji {
   position: absolute;
-  top: 120px;
-  left: 25%;
+  top: 80px;
+  left: 20%;
   z-index: 7;
 }
 
 .emoji-container.fifth-emoji {
   position: absolute;
   top: 30px;
-  left: 80%;
+  left: 75%;
   z-index: 6;
 }
 
 .emoji-container.sixth-emoji {
   position: absolute;
-  top: 200px;
-  left: 100%;
+  top: 250px;
+  left: 85%;
   z-index: 7;
 }
 
 .emoji-container.eighth-emoji {
   position: absolute;
   top: 380px;
-  left: -15%;
+  left: 10%;
   z-index: 8;
 }
 
 .emoji-container.ninth-emoji {
   position: absolute;
-  top: 500px;
-  left: -40%;
+  top: 450px;
+  left: 15%;
   z-index: 9;
 }
 
 .emoji-container.tenth-emoji {
   position: absolute;
-  top: 80px;
-  left: -50%;
+  top: 50px;
+  left: 10%;
   z-index: 12;
 }
 
 .emoji-container.eleventh-emoji {
   position: absolute;
-  top: 50px;
-  right: -300px;
+  top: 100px;
+  right: 10%;
   z-index: 11;
 }
 
 .emoji-container.twelfth-emoji {
   position: absolute;
-  top: 500px;
-  right: -170px;
+  top: 400px;
+  right: 15%;
   z-index: 90;
 }
 
@@ -415,57 +426,61 @@ h1 {
 /* Адаптивность */
 @media (max-width: 1400px) {
   .emoji-container.second-emoji {
-    left: -5%;
+    left: 3%;
   }
   
   .emoji-container.third-emoji {
-    right: -50px;
+    right: 3%;
   }
   
   .emoji-container.eleventh-emoji {
-    right: -200px;
+    right: 8%;
   }
   
   .emoji-container.twelfth-emoji {
-    right: -100px;
+    right: 10%;
   }
   
   .emoji-container.ninth-emoji {
-    left: -30%;
+    left: 12%;
   }
   
   .emoji-container.tenth-emoji {
-    left: -40%;
+    left: 8%;
   }
 }
 
 @media (max-width: 1200px) {
+  .images-container {
+    height: 450px;
+  }
+  
   .emoji-container.second-emoji {
-    left: 0;
+    left: 2%;
   }
   
   .emoji-container.third-emoji {
-    right: 0;
+    right: 2%;
   }
   
   .emoji-container.eleventh-emoji {
-    right: -100px;
+    right: 5%;
   }
   
   .emoji-container.twelfth-emoji {
-    right: -50px;
+    right: 8%;
   }
   
   .emoji-container.ninth-emoji {
-    left: -20%;
+    left: 10%;
   }
   
   .emoji-container.tenth-emoji {
-    left: -30%;
+    left: 5%;
   }
   
   .emoji-container.eighth-emoji {
-    left: -10%;
+    left: 8%;
   }
 }
 
@@ -495,13 +510,14 @@ h1 {
     width: 150px !important;
   }
   
-  .header-image-wrapper {
-    top: 150px;
+  .images-container {
+    height: 400px;
+    margin-top: 80px;
+    margin-bottom: 30px;
   }
   
-  .images-container {
-    height: 300px;
-    margin-top: 80px;
+  .main-emoji-container {
+    margin-bottom: 40px;
   }
   
   .features {
@@ -561,7 +577,7 @@ h1 {
     font-size: 14px;
   }
   
-  /* Скрываем большинство эмодзи на мобильных */
+  /* На мобильных оставляем только основной смайлик и Mask group */
   .emoji-container.second-emoji,
   .emoji-container.third-emoji,
   .emoji-container.fourth-emoji,
@@ -580,14 +596,22 @@ h1 {
     padding-bottom: 40px;
   }
   
-  .header-image-wrapper {
-    top: 100px;
-  }
-  
   .images-container {
-    height: 250px;
+    height: 350px;
     margin-bottom: 20px;
     margin-top: 60px;
+  }
+  
+  .main-emoji-container {
+    margin-bottom: 30px;
+  }
+  
+  .emoji-image {
+    max-width: 150px !important;
+  }
+  
+  .header-image {
+    width: 120px !important;
   }
   
   .features {
@@ -655,19 +679,20 @@ h1 {
   }
   
   .emoji-image {
-    max-width: 150px !important;
+    max-width: 120px !important;
   }
   
   .header-image {
-    width: 120px !important;
-  }
-  
-  .header-image-wrapper {
-    top: 80px;
+    width: 100px !important;
   }
   
   .images-container {
-    height: 200px;
+    height: 300px;
+    margin-top: 50px;
+  }
+  
+  .main-emoji-container {
+    margin-bottom: 25px;
   }
   
   .card {
@@ -694,19 +719,20 @@ h1 {
   }
   
   .emoji-image {
-    max-width: 120px !important;
+    max-width: 100px !important;
   }
   
   .header-image {
-    width: 100px !important;
-  }
-  
-  .header-image-wrapper {
-    top: 60px;
+    width: 80px !important;
   }
   
   .images-container {
-    height: 180px;
+    height: 250px;
+    margin-top: 40px;
+  }
+  
+  .main-emoji-container {
+    margin-bottom: 20px;
   }
 }
 </style>
@@ -755,9 +781,12 @@ h1 {
 
 <div class="container">
   <div class="images-container">
-    <div class="emoji-container">
+    <!-- Основной смайлик - теперь отдельный контейнер -->
+    <div class="main-emoji-container">
       <img src="{{ url_for('static', filename='images/😜.png') }}" alt="Emoji" class="emoji-image" />
     </div>
+    
+    <!-- Фоновые эмодзи -->
     <div class="emoji-container second-emoji">
       <img src="{{ url_for('static', filename='images/😳.png') }}" alt="Emoji 2" class="emoji-image" />
     </div>
@@ -788,6 +817,8 @@ h1 {
     <div class="emoji-container twelfth-emoji">
       <img src="{{ url_for('static', filename='images/😈 copy.png') }}" alt="Emoji 12" class="emoji-image" />
     </div>
+    
+    <!-- Mask group - теперь отдельно внизу -->
     <div class="header-image-wrapper">
       <img src="{{ url_for('static', filename='images/Mask group.png') }}" alt="Lumi" class="header-image" />
     </div>

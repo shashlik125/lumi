@@ -449,18 +449,20 @@ h1 {
     gap: 10px;
     align-items: center;
     min-height: 70px;
+    justify-content: space-between;
   }
   
   nav {
-    order: 2;
+    order: 1;
     width: auto;
     justify-content: center;
     flex-wrap: nowrap;
     gap: 10px;
-    margin: 0 10px;
+    margin: 0 auto;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     padding: 5px 0;
+    flex-grow: 1;
   }
   
   nav a {
@@ -471,19 +473,21 @@ h1 {
   }
   
   .user {
-    position: static;
-    order: 3;
+    order: 2;
     margin-left: auto;
+    min-width: 40px; /* Минимальная ширина для аватара */
+  }
+
+  .user span {
+    display: none; /* Скрываем имя пользователя */
   }
   
   .logo {
-    order: 1;
-    font-size: 24px;
-    margin-right: 0;
+    display: none;
   }
   
   .main-content {
-    margin-top: 150px;
+    margin-top: 120px;
     gap: 50px;
     padding: 0 15px;
   }
@@ -557,6 +561,8 @@ h1 {
   
   .header-image {
     width: 120px;
+    height: 120px; /* Фиксируем квадратную форму */
+    object-fit: contain; 
   }
   
   .images-container {
@@ -585,15 +591,15 @@ h1 {
   }
   
   .user span {
-    font-size: 14px;
+    display: none; /* Убрал дублирование, оставляем только здесь */
   }
   
   .logo {
-    font-size: 22px;
+    display: none;
   }
   
   .main-content {
-    margin-top: 120px;
+    margin-top: 100px;
     gap: 30px;
     padding: 0 10px;
   }
@@ -639,12 +645,14 @@ h1 {
     max-width: 100px;
   }
   
-  .header-image {
-    width: 100px;
+  .header-image-wrapper {
+    top: 30px; /* Добавил позиционирование для wrapper */
   }
   
-  .user span {
-    display: none;
+  .header-image {
+    width: 100px;
+    height: 100px; 
+    object-fit: contain;
   }
   
   .user {
@@ -663,11 +671,15 @@ h1 {
   }
   
   .logo {
-    font-size: 20px;
+    display: none; /* Добавил - скрываем логотип */
+  }
+  
+  .user span {
+    display: none; /* Добавил - скрываем имя пользователя */
   }
   
   .main-content {
-    margin-top: 100px;
+    margin-top: 80px; /* Уменьшил с 100px до 80px для компактности */
   }
   
   h1 {
@@ -688,14 +700,21 @@ h1 {
     max-width: 80px;
   }
   
+  .header-image-wrapper {
+    top: 20px; /* Добавил - позиционируем картинку */
+  }
+  
   .header-image {
     width: 80px;
+    height: 80px;
+    object-fit: contain;
   }
   
   .images-container {
     height: 150px;
   }
 }
+
 </style>
 {% endblock %}
 

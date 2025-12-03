@@ -174,8 +174,8 @@ nav a.active::after {
 .images-container {
   position: relative;
   width: 100%;
-  height: 500px; /* Увеличил высоту для большего пространства */
-  margin: 100px auto 50px; /* Увеличил отступ снизу */
+  height: 380px; /* Уменьшил высоту */
+  margin: 90px auto 40px; /* Уменьшил отступы */
   display: flex;
   flex-direction: column; /* Меняем на колонку */
   justify-content: space-between; /* Распределяем пространство */
@@ -186,7 +186,7 @@ nav a.active::after {
 .main-emoji-container {
   position: relative;
   z-index: 15;
-  margin-bottom: 50px; /* Отступ между смайликом и Mask group */
+  margin-bottom: 25px; /* Уменьшил отступ */
   text-align: center;
 }
 
@@ -204,7 +204,7 @@ nav a.active::after {
   width: 100%;
   position: relative;
   z-index: 10;
-  margin-top: 20px; /* Дополнительный отступ сверху */
+  margin-top: 10px; /* Уменьшил отступ */
 }
 
 .header-image {
@@ -234,7 +234,7 @@ nav a.active::after {
 
 .emoji-container.third-emoji {
   position: absolute;
-  top: 300px; /* Опустил ниже */
+  top: 280px; /* Опустил ниже */
   right: 5%;
   z-index: 8;
 }
@@ -262,14 +262,14 @@ nav a.active::after {
 
 .emoji-container.eighth-emoji {
   position: absolute;
-  top: 380px;
+  top: 320px;
   left: 10%;
   z-index: 8;
 }
 
 .emoji-container.ninth-emoji {
   position: absolute;
-  top: 450px;
+  top: 350px;
   left: 15%;
   z-index: 9;
 }
@@ -290,7 +290,7 @@ nav a.active::after {
 
 .emoji-container.twelfth-emoji {
   position: absolute;
-  top: 400px;
+  top: 320px;
   right: 15%;
   z-index: 90;
 }
@@ -452,7 +452,7 @@ h1 {
 
 @media (max-width: 1200px) {
   .images-container {
-    height: 450px;
+    height: 350px;
   }
   
   .emoji-container.second-emoji {
@@ -511,13 +511,13 @@ h1 {
   }
   
   .images-container {
-    height: 400px;
+    height: 300px; /* Уменьшил для планшетов */
     margin-top: 80px;
-    margin-bottom: 30px;
+    margin-bottom: 20px; /* Уменьшил */
   }
   
   .main-emoji-container {
-    margin-bottom: 40px;
+    margin-bottom: 20px; /* Уменьшил */
   }
   
   .features {
@@ -597,13 +597,13 @@ h1 {
   }
   
   .images-container {
-    height: 350px;
-    margin-bottom: 20px;
-    margin-top: 60px;
+    height: 250px; /* Уменьшил для мобильных */
+    margin-bottom: 15px; /* Уменьшил */
+    margin-top: 70px;
   }
   
   .main-emoji-container {
-    margin-bottom: 30px;
+    margin-bottom: 15px; /* Уменьшил */
   }
   
   .emoji-image {
@@ -687,12 +687,12 @@ h1 {
   }
   
   .images-container {
-    height: 300px;
-    margin-top: 50px;
+    height: 220px; /* Уменьшил для маленьких экранов */
+    margin-top: 60px;
   }
   
   .main-emoji-container {
-    margin-bottom: 25px;
+    margin-bottom: 10px; /* Уменьшил */
   }
   
   .card {
@@ -727,12 +727,12 @@ h1 {
   }
   
   .images-container {
-    height: 250px;
-    margin-top: 40px;
+    height: 200px; /* Уменьшил для очень маленьких экранов */
+    margin-top: 50px;
   }
   
   .main-emoji-container {
-    margin-bottom: 20px;
+    margin-bottom: 5px; /* Уменьшил */
   }
 }
 </style>

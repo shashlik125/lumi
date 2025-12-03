@@ -17,23 +17,29 @@ body {
   color: #264653;
   display: flex;
   flex-direction: column;
-  align-items: center;
   min-height: 100vh;
-  padding: 0 20px 40px;
   font-size: 18px;
   overflow-x: hidden;
   position: relative;
 }
 
-header {
+.container {
   width: 100%;
   max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 15px 0 !important;
-  position: relative;
-  margin: 0 auto 50px;
+  padding: 15px 0;
+  margin: 0 0 50px;
   user-select: none;
 }
 
@@ -61,11 +67,10 @@ nav a {
 .images-container {
   position: relative;
   width: 100%;
-  max-width: 1100px;
+  height: 400px;
   margin: 0 auto 30px;
   display: flex;
   justify-content: center;
-  min-height: 400px;
 }
 
 .emoji-image {
@@ -171,23 +176,27 @@ nav a {
   z-index: 90;
 }
 
-.emoji-container.t {
-  position: fixed;
-  bottom: -300px; /* Опускаем картинку вниз */
+/* Эллипс внизу - исправленная версия */
+.bottom-ellipse {
+  position: absolute;
+  bottom: 0;
   left: 0;
   width: 100%;
-  height: auto;
   z-index: -1;
-  text-align: center;
   opacity: 0.7;
-  transform: none; /* Убираем масштабирование */
+  pointer-events: none;
+  height: 200px; /* Ограничиваем высоту */
+  overflow: hidden;
 }
 
-.emoji-container.t .emoji-image {
-  max-width: 100% !important;
+.bottom-ellipse img {
   width: 100%;
   height: auto;
-  animation: none;
+  position: absolute;
+  bottom: -50px; /* Поднимаем немного вверх */
+  left: 0;
+  transform: scale(2.5); /* Уменьшаем масштаб */
+  transform-origin: center bottom;
 }
 
 @keyframes float {
@@ -197,15 +206,15 @@ nav a {
 
 .main-content {
   width: 100%;
-  max-width: 1100px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 60px;
+  gap: 40px;
   margin: 0 auto;
-  padding: 100px 0 40px;
+  padding: 0 0 80px;
   position: relative;
   z-index: 10;
+  flex: 1;
 }
 
 .welcome-text {
@@ -214,9 +223,8 @@ nav a {
   border-radius: 20px;
   text-align: center;
   animation: fadeIn 1.2s ease;
-  margin: 0 auto;
+  margin: 0;
   box-sizing: border-box;
-  /* Убрал белый фон и backdrop-filter */
 }
 
 h1 {
@@ -367,14 +375,18 @@ h1 {
     top: 150px;
   }
   
-  .emoji-container.t {
-    bottom: -200px;
+  .images-container {
+    height: 300px;
+  }
+  
+  .bottom-ellipse img {
+    transform: scale(2);
+    bottom: -30px;
   }
 }
 
 @media (max-width: 768px) {
   body {
-    padding: 0 15px 30px;
     font-size: 16px;
   }
   
@@ -384,7 +396,6 @@ h1 {
   }
   
   .welcome-text {
-    width: 100%;
     padding: 30px 20px;
   }
   
@@ -430,16 +441,26 @@ h1 {
   }
   
   .main-content {
-    gap: 40px;
-    padding-top: 60px;
+    gap: 30px;
+    padding-bottom: 60px;
   }
   
   .header-image-wrapper {
     top: 100px;
   }
   
-  .emoji-container.t {
-    bottom: -150px;
+  .images-container {
+    height: 250px;
+    margin-bottom: 20px;
+  }
+  
+  .bottom-ellipse {
+    height: 150px;
+  }
+  
+  .bottom-ellipse img {
+    transform: scale(1.5);
+    bottom: -20px;
   }
 }
 
@@ -475,71 +496,86 @@ h1 {
   nav {
     margin-left: 0;
   }
+  
+  .images-container {
+    height: 200px;
+  }
+  
+  .header-image-wrapper {
+    top: 80px;
+  }
+  
+  .header-image {
+    width: 120px !important;
+  }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<header>
-  <div class="logo">Lumi</div>
-  <nav>
-    <a href="{{ url_for('auth.register') }}">Регистрация</a>
-  </nav>
-</header>
+<div class="container">
+  <header>
+    <div class="logo">Lumi</div>
+    <nav>
+      <a href="{{ url_for('auth.register') }}">Регистрация</a>
+    </nav>
+  </header>
 
-<div class="images-container">
-  <div class="emoji-container">
-    <img src="{{ url_for('static', filename='images/😜.png') }}" alt="Emoji" class="emoji-image" />
-  </div>
-  <div class="emoji-container second-emoji">
-    <img src="{{ url_for('static', filename='images/😳.png') }}" alt="Emoji 2" class="emoji-image" />
-  </div>
-  <div class="emoji-container third-emoji">
-    <img src="{{ url_for('static', filename='images/1.png') }}" alt="Emoji 3" class="emoji-image" />
-  </div>
-  <div class="emoji-container fourth-emoji">
-    <img src="{{ url_for('static', filename='images/😰.png') }}" alt="Emoji 4" class="emoji-image" />
-  </div>
-  <div class="emoji-container fifth-emoji">
-    <img src="{{ url_for('static', filename='images/😡.png') }}" alt="Emoji 5" class="emoji-image" />
-  </div>
-  <div class="emoji-container sixth-emoji">
-    <img src="{{ url_for('static', filename='images/😚.png') }}" alt="Emoji 6" class="emoji-image" />
-  </div>
-  <div class="emoji-container eighth-emoji">
-    <img src="{{ url_for('static', filename='images/😍.png') }}" alt="Emoji 8" class="emoji-image" />
-  </div>
-  <div class="emoji-container ninth-emoji">
-    <img src="{{ url_for('static', filename='images/😈.png') }}" alt="Emoji 9" class="emoji-image" />
-  </div>
-  <div class="emoji-container tenth-emoji">
-    <img src="{{ url_for('static', filename='images/🤯.png') }}" alt="Emoji 10" class="emoji-image" />
-  </div>
-  <div class="emoji-container eleventh-emoji">
-    <img src="{{ url_for('static', filename='images/🤯 copy.png') }}" alt="Emoji 11" class="emoji-image" />
-  </div>
-  <div class="emoji-container twelfth-emoji">
-    <img src="{{ url_for('static', filename='images/😈 copy.png') }}" alt="Emoji 12" class="emoji-image" />
-  </div>
-  <div class="header-image-wrapper">
-    <img src="{{ url_for('static', filename='images/Mask group.png') }}" alt="Lumi" class="header-image" />
-  </div>
-</div>
-
-<div class="emoji-container t">
-    <img src="{{ url_for('static', filename='images/Ellipse 746.png') }}" alt="Background ellipse" class="emoji-image" />
-</div>
-
-<div class="main-content">
-  <div class="welcome-text">
-    <h1>Добро пожаловать в Lumi!</h1>
-    <div class="actions">
-      <a href="{{ url_for('auth.login') }}" class="btn primary">Войти</a>
-      <a href="{{ url_for('auth.register') }}" class="btn secondary">Регистрация</a>
+  <div class="images-container">
+    <div class="emoji-container">
+      <img src="{{ url_for('static', filename='images/😜.png') }}" alt="Emoji" class="emoji-image" />
     </div>
-    <p>
-      Это приложение — удобный трекер настроения, который помогает ежедневно отслеживать эмоциональное состояние и выявлять причины позитивных и негативных перепадов в настроении. С его помощью можно понять свои эмоциональные паттерны, улучшить самосознание и повысить качество жизни.
-    </p>
+    <div class="emoji-container second-emoji">
+      <img src="{{ url_for('static', filename='images/😳.png') }}" alt="Emoji 2" class="emoji-image" />
+    </div>
+    <div class="emoji-container third-emoji">
+      <img src="{{ url_for('static', filename='images/1.png') }}" alt="Emoji 3" class="emoji-image" />
+    </div>
+    <div class="emoji-container fourth-emoji">
+      <img src="{{ url_for('static', filename='images/😰.png') }}" alt="Emoji 4" class="emoji-image" />
+    </div>
+    <div class="emoji-container fifth-emoji">
+      <img src="{{ url_for('static', filename='images/😡.png') }}" alt="Emoji 5" class="emoji-image" />
+    </div>
+    <div class="emoji-container sixth-emoji">
+      <img src="{{ url_for('static', filename='images/😚.png') }}" alt="Emoji 6" class="emoji-image" />
+    </div>
+    <div class="emoji-container eighth-emoji">
+      <img src="{{ url_for('static', filename='images/😍.png') }}" alt="Emoji 8" class="emoji-image" />
+    </div>
+    <div class="emoji-container ninth-emoji">
+      <img src="{{ url_for('static', filename='images/😈.png') }}" alt="Emoji 9" class="emoji-image" />
+    </div>
+    <div class="emoji-container tenth-emoji">
+      <img src="{{ url_for('static', filename='images/🤯.png') }}" alt="Emoji 10" class="emoji-image" />
+    </div>
+    <div class="emoji-container eleventh-emoji">
+      <img src="{{ url_for('static', filename='images/🤯 copy.png') }}" alt="Emoji 11" class="emoji-image" />
+    </div>
+    <div class="emoji-container twelfth-emoji">
+      <img src="{{ url_for('static', filename='images/😈 copy.png') }}" alt="Emoji 12" class="emoji-image" />
+    </div>
+    <div class="header-image-wrapper">
+      <img src="{{ url_for('static', filename='images/Mask group.png') }}" alt="Lumi" class="header-image" />
+    </div>
   </div>
+
+  <div class="main-content">
+    <div class="welcome-text">
+      <h1>Добро пожаловать в Lumi!</h1>
+      <div class="actions">
+        <a href="{{ url_for('auth.login') }}" class="btn primary">Войти</a>
+        <a href="{{ url_for('auth.register') }}" class="btn secondary">Регистрация</a>
+      </div>
+      <p>
+        Это приложение — удобный трекер настроения, который помогает ежедневно отслеживать эмоциональное состояние и выявлять причины позитивных и негативных перепадов в настроении. С его помощью можно понять свои эмоциональные паттерны, улучшить самосознание и повысить качество жизни.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Эллипс в самом низу страницы -->
+<div class="bottom-ellipse">
+  <img src="{{ url_for('static', filename='images/Ellipse 746.png') }}" alt="Background ellipse" />
 </div>
 {% endblock %}

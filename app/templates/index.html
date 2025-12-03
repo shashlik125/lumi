@@ -79,11 +79,12 @@ nav a {
 }
 
 .header-image-wrapper {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  position: relative;
-  top: 300px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    position: relative;
+    top: 150px; /* МЕНЯЕМ: было 300px, теперь 150px */
+    z-index: 5;
 }
 
 .header-image {
@@ -179,18 +180,18 @@ nav a {
   50% { transform: translateY(-8px); }
 }
 
+/* ИСПРАВЛЕННЫЙ .main-content */
 .main-content {
-  width: 100vw;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 80px;
-  position: absolute;
-  bottom: 10px;
-  left: 0;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 40px;
+    position: relative; /* МЕНЯЕМ с absolute на relative */
+    z-index: 2;
+    padding: 20px;
+    margin-top: 20px;
+    box-sizing: border-box;
 }
 
 .welcome-text {
@@ -212,13 +213,6 @@ h1 {
   margin: 0 0 24px;
   line-height: 1.1;
   white-space: nowrap;
-}
-
-.welcome-text p {
-  font-size: 22px;
-  line-height: 1.6;
-  margin: 0 auto 30px;
-  max-width: 800px;
 }
 
 .actions {
@@ -269,13 +263,12 @@ h1 {
 
 
 
-/* НИЖНЯЯ КАРТИНКА - ФИКСИРОВАННАЯ И ПРАВИЛЬНАЯ */
 .bottom-background {
     position: fixed;
-    bottom: -30px; /* Поднимаем чтобы не было белой полосы */
+    bottom: 0; /* МЕНЯЕМ: было -30px, теперь 0 */
     left: 0;
     width: 100%;
-    height: 150px;
+    height: 200px; /* УВЕЛИЧИВАЕМ высоту */
     z-index: 1;
     pointer-events: none;
     overflow: hidden;
@@ -285,22 +278,8 @@ h1 {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: bottom;
-    opacity: 0.7;
-}
-
-/* ИСПРАВЛЕННЫЙ .main-content */
-.main-content {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 40px;
-    position: relative; /* МЕНЯЕМ с absolute на relative */
-    z-index: 2;
-    padding: 20px;
-    margin-top: 20px;
-    box-sizing: border-box;
+    object-position: center bottom; 
+    opacity: 0.8; 
 }
 
 /* ДОБАВЬТЕ ЭТО ДЛЯ body */
@@ -312,6 +291,14 @@ body {
 /* ОБНОВЛЕННЫЕ МЕДИА-ЗАПРОСЫ ДЛЯ НИЖНЕЙ КАРТИНКИ */
 
 @media (max-width: 768px) {
+
+   .header-image-wrapper {
+        top: 80px; /* Еще выше на телефонах */
+    }
+     .main-content {
+        padding: 60px 15px 15px; /* Меньше отступ сверху */
+    }
+    
     /* ПРАВИЛЬНОЕ СКРЫТИЕ ЭМОДЗИ */
     .emoji-container.second-emoji,
     .emoji-container.third-emoji,
@@ -328,26 +315,39 @@ body {
     
     /* НИЖНЯЯ КАРТИНКА НА МОБИЛЬНЫХ */
     .bottom-background {
-        height: 100px;
-        bottom: -20px;
+        height: 150px; /* Меньше на телефонах */
     }
-    
-    /* УБИРАЕМ .bottom-image-container - ЕГО НЕТ! */
 }
+    
 
 @media (max-width: 576px) {
+    .header-image-wrapper {
+        top: 60px; /* Совсем близко на маленьких телефонах */
+    }
+    
+    .main-content {
+        padding: 40px 10px 10px; /* Еще меньше отступ */
+    }
+    
     .bottom-background {
-        height: 80px;
-        bottom: -15px;
+        height: 120px;
     }
 }
 
 @media (max-width: 375px) {
+    .header-image-wrapper {
+        top: 40px;
+    }
+    
+    .main-content {
+        padding: 30px 10px 10px;
+    }
+    
     .bottom-background {
-        height: 60px;
-        bottom: -10px;
+        height: 100px;
     }
 }
+
 
 /* Адаптивность */
 @media (max-width: 1400px) {
@@ -377,28 +377,12 @@ body {
 }
 
 @media (max-width: 1200px) {
-    .emoji-container.second-emoji {
-        left: -5%;
+    .header-image-wrapper {
+        top: 120px; /* Адаптируем для планшетов */
     }
     
-    .emoji-container.third-emoji {
-        right: -50px;
-    }
-    
-    .emoji-container.eleventh-emoji {
-        right: -200px;
-    }
-    
-    .emoji-container.twelfth-emoji {
-        right: -100px;
-    }
-    
-    .emoji-container.ninth-emoji {
-        left: -30%;
-    }
-    
-    .emoji-container.tenth-emoji {
-        left: -40%;
+    .main-content {
+        padding: 80px 20px 20px; /* Меньше отступ сверху */
     }
 }
 

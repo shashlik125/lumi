@@ -166,12 +166,9 @@ nav a.active::after {
 
 /* Остальные стили для index.html */
 .images-container {
-  position: relative;
-  width: 100%;
-  max-width: 1100px;
-  margin: 50px auto 30px;
   display: flex;
   justify-content: center;
+  align-items: center;
 }
 
 .emoji-image {
@@ -475,11 +472,11 @@ h1 {
   .user {
     order: 2;
     margin-left: auto;
-    min-width: 40px; /* Минимальная ширина для аватара */
+    min-width: 40px;
   }
 
   .user span {
-    display: none; /* Скрываем имя пользователя */
+    display: none;
   }
   
   .logo {
@@ -561,13 +558,16 @@ h1 {
   
   .header-image {
     width: 120px;
-    height: 120px; /* Фиксируем квадратную форму */
-    object-fit: contain; 
+    height: 120px;
+    object-fit: contain;
   }
   
   .images-container {
     height: 200px;
     margin: 20px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }
 
@@ -591,7 +591,7 @@ h1 {
   }
   
   .user span {
-    display: none; /* Убрал дублирование, оставляем только здесь */
+    display: none;
   }
   
   .logo {
@@ -646,17 +646,23 @@ h1 {
   }
   
   .header-image-wrapper {
-    top: 30px; /* Добавил позиционирование для wrapper */
+    top: 30px;
   }
   
   .header-image {
     width: 100px;
-    height: 100px; 
+    height: 100px;
     object-fit: contain;
   }
   
   .user {
     padding: 5px;
+  }
+  
+  .images-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }
 
@@ -671,15 +677,15 @@ h1 {
   }
   
   .logo {
-    display: none; /* Добавил - скрываем логотип */
+    display: none;
   }
   
   .user span {
-    display: none; /* Добавил - скрываем имя пользователя */
+    display: none;
   }
   
   .main-content {
-    margin-top: 80px; /* Уменьшил с 100px до 80px для компактности */
+    margin-top: 80px;
   }
   
   h1 {
@@ -690,9 +696,8 @@ h1 {
     font-size: 14px;
   }
   
-  /* Скрываем 1-2 пункта меню если совсем не помещается */
-  nav a:nth-child(4),
-  nav a:nth-child(5) {
+  /* Скрываем только последний пункт меню чтобы "Настроение" не обрезалось */
+  nav a:last-child {
     display: none;
   }
   
@@ -701,7 +706,7 @@ h1 {
   }
   
   .header-image-wrapper {
-    top: 20px; /* Добавил - позиционируем картинку */
+    top: 20px;
   }
   
   .header-image {
@@ -712,9 +717,11 @@ h1 {
   
   .images-container {
     height: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }
-
 </style>
 {% endblock %}
 

@@ -447,288 +447,230 @@ h1 {
 @media (max-width: 768px) {
   body {
     font-size: 16px;
-    padding-top: 70px;
+    padding-top: 60px; /* Уменьшил с 70px */
   }
   
   h1 {
-    font-size: 32px;
+    font-size: 30px; /* Уменьшил с 32px */
     white-space: normal;
-    margin-bottom: 15px;
+    margin-bottom: 10px; /* Уменьшил с 15px */
   }
   
   .welcome-text {
-    padding: 25px 20px;
+    padding: 20px 15px; /* Уменьшил с 25px 20px */
   }
   
   .welcome-text p {
-    font-size: 18px;
+    font-size: 16px; /* Уменьшил с 18px */
     max-width: 100%;
-    margin-bottom: 20px;
+    margin-bottom: 15px; /* Уменьшил с 20px */
   }
   
   .actions {
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 25px;
+    gap: 10px; /* Уменьшил с 12px */
+    margin-bottom: 20px; /* Уменьшил с 25px */
   }
   
   .btn {
-    width: 200px;
-    font-size: 16px;
-    padding: 12px 20px;
+    width: 180px; /* Уменьшил с 200px */
+    font-size: 15px; /* Уменьшил с 16px */
+    padding: 10px 16px; /* Уменьшил с 12px 20px */
   }
   
   header {
-    padding: 12px 15px;
-    margin: 0 0 20px;
-    min-height: 60px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    padding: 10px 12px; /* Уменьшил с 12px 15px */
+    margin: 0 0 15px; /* Уменьшил с 20px */
+    min-height: 55px; /* Уменьшил с 60px */
   }
   
   .logo {
-    font-size: 22px;
-    display: block;
+    font-size: 20px; /* Уменьшил с 22px */
   }
   
   nav {
-    display: flex;
-    gap: 8px;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 5px 0;
-    order: 2;
-    margin: 0 auto;
+    gap: 6px; /* Уменьшил с 8px */
   }
   
   nav a {
-    padding: 6px 10px;
-    font-size: 14px;
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
-  
-  .user {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-left: auto;
-    order: 3;
+    padding: 5px 8px; /* Уменьшил с 6px 10px */
+    font-size: 13px; /* Уменьшил с 14px */
   }
   
   .user-avatar {
-    width: 28px;
-    height: 28px;
-  }
-  
-  .user span {
-    display: none;
-  }
-  
-  /* Скрываем большинство эмодзи на мобильных */
-  .emoji-container.second-emoji,
-  .emoji-container.third-emoji,
-  .emoji-container.fourth-emoji,
-  .emoji-container.fifth-emoji,
-  .emoji-container.sixth-emoji,
-  .emoji-container.eighth-emoji,
-  .emoji-container.ninth-emoji,
-  .emoji-container.tenth-emoji,
-  .emoji-container.eleventh-emoji,
-  .emoji-container.twelfth-emoji {
-    display: none;
-  }
-  
-  /* Главный смайлик - позиционируем над картинкой */
-  .emoji-container:first-child {
-    display: block;
-    position: absolute;
-    top: -80px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-  }
-  
-  .emoji-image {
-    max-width: 120px;
-  }
-  
-  .main-content {
-    gap: 25px;
-    padding-bottom: 30px;
-    margin-top: 180px;
-  }
-  
-  .header-image-wrapper {
-    top: 50px;
-    position: relative;
-  }
-  
-  .header-image {
-    width: 150px !important;
-    height: auto;
-  }
-  
-  .images-container {
-    height: 180px;
-    margin-bottom: 15px;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-  
-  .features {
-    margin-top: 30px;
-  }
-  
-  .card {
-    padding: 20px 15px;
-    min-height: 180px;
-  }
-  
-  .card h3 {
-    font-size: 18px;
-  }
-  
-  .card p {
-    font-size: 14px;
-  }
-  
-  /* На мобильных эллипс точно скрыт */
-  .bottom-ellipse {
-    display: none;
-  }
-}
-
-@media (max-width: 480px) {
-  body {
-    padding-top: 65px;
-  }
-  
-  h1 {
-    font-size: 28px;
-  }
-  
-  .welcome-text {
-    padding: 20px 15px;
-  }
-  
-  .welcome-text p {
-    font-size: 16px;
-  }
-  
-  .btn {
-    width: 180px;
-    padding: 10px 16px;
-  }
-  
-  header {
-    margin-bottom: 15px;
-    padding: 10px 12px;
-  }
-  
-  .logo {
-    font-size: 20px;
-  }
-  
-  nav a {
-    font-size: 12px;
-    padding: 5px 8px;
-  }
-  
-  .user-avatar {
-    width: 24px;
+    width: 24px; /* Уменьшил с 28px */
     height: 24px;
   }
   
   /* Главный смайлик */
   .emoji-container:first-child {
-    top: -60px;
+    top: -60px; /* Уменьшил подъем с -80px */
   }
   
   .emoji-image {
-    max-width: 100px;
-  }
-  
-  .images-container {
-    height: 150px;
-  }
-  
-  .header-image-wrapper {
-    top: 40px;
-  }
-  
-  .header-image {
-    width: 120px !important;
+    max-width: 100px; /* Уменьшил с 120px */
   }
   
   .main-content {
-    margin-top: 150px;
-    gap: 20px;
+    gap: 20px; /* Уменьшил с 25px */
+    padding-bottom: 25px; /* Уменьшил с 30px */
+    margin-top: 140px; /* Уменьшил с 180px - САМОЕ ВАЖНОЕ! */
+  }
+  
+  .header-image-wrapper {
+    top: 30px; /* Подняли выше с 50px */
+  }
+  
+  .header-image {
+    width: 120px !important; /* Уменьшил с 150px */
+  }
+  
+  .images-container {
+    height: 140px; /* Уменьшил с 180px */
+    margin-bottom: 10px; /* Уменьшил с 15px */
+  }
+  
+  .features {
+    margin-top: 20px; /* Уменьшил с 30px */
+  }
+  
+  .card {
+    padding: 18px 12px; /* Уменьшил с 20px 15px */
+    min-height: 160px; /* Уменьшил с 180px */
+  }
+  
+  .card h3 {
+    font-size: 16px; /* Уменьшил с 18px */
+    margin-bottom: 10px; /* Уменьшил */
+  }
+  
+  .card p {
+    font-size: 13px; /* Уменьшил с 14px */
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding-top: 55px; /* Уменьшил с 65px */
+  }
+  
+  h1 {
+    font-size: 26px; /* Уменьшил с 28px */
+  }
+  
+  .welcome-text {
+    padding: 18px 12px; /* Уменьшил с 20px 15px */
+  }
+  
+  .welcome-text p {
+    font-size: 15px; /* Уменьшил с 16px */
+  }
+  
+  .btn {
+    width: 160px; /* Уменьшил с 180px */
+    padding: 9px 14px; /* Уменьшил с 10px 16px */
+  }
+  
+  header {
+    margin-bottom: 10px; /* Уменьшил с 15px */
+    padding: 8px 10px; /* Уменьшил с 10px 12px */
+  }
+  
+  .logo {
+    font-size: 18px; /* Уменьшил с 20px */
+  }
+  
+  nav a {
+    font-size: 12px; /* Оставил */
+    padding: 4px 6px; /* Уменьшил с 5px 8px */
+  }
+  
+  .user-avatar {
+    width: 22px; /* Уменьшил с 24px */
+    height: 22px;
+  }
+  
+  .emoji-container:first-child {
+    top: -40px; /* Уменьшил с -60px */
+  }
+  
+  .emoji-image {
+    max-width: 80px; /* Уменьшил с 100px */
+  }
+  
+  .images-container {
+    height: 120px; /* Уменьшил с 150px */
+  }
+  
+  .header-image-wrapper {
+    top: 25px; /* Уменьшил с 40px */
+  }
+  
+  .header-image {
+    width: 100px !important; /* Уменьшил с 120px */
+  }
+  
+  .main-content {
+    margin-top: 120px; /* Уменьшил с 150px */
+    gap: 15px; /* Уменьшил с 20px */
   }
 }
 
 @media (max-width: 360px) {
-  h1 {
-    font-size: 24px;
+  body {
+    padding-top: 50px; /* Уменьшил */
   }
   
-  nav {
-    flex-wrap: wrap;
-    justify-content: center;
-    overflow-x: visible;
-    gap: 5px;
+  h1 {
+    font-size: 22px; /* Уменьшил с 24px */
   }
   
   nav a {
     font-size: 11px;
-    padding: 4px 6px;
-    min-width: 70px;
-    text-align: center;
+    padding: 3px 5px; /* Уменьшил с 4px 6px */
+    min-width: 65px; /* Уменьшил с 70px */
   }
   
   .logo {
-    font-size: 18px;
+    font-size: 16px; /* Уменьшил с 18px */
   }
   
   .emoji-container:first-child {
-    top: -50px;
+    top: -30px; /* Уменьшил с -50px */
   }
   
   .emoji-image {
-    max-width: 80px;
+    max-width: 70px; /* Уменьшил с 80px */
   }
   
   .header-image-wrapper {
-    top: 30px;
+    top: 20px; /* Уменьшил с 30px */
   }
   
   .header-image {
-    width: 100px !important;
+    width: 80px !important; /* Уменьшил с 100px */
   }
   
   .images-container {
-    height: 130px;
+    height: 100px; /* Уменьшил с 130px */
   }
   
   .main-content {
-    margin-top: 130px;
+    margin-top: 100px; /* Уменьшил с 130px */
   }
   
   .card {
-    padding: 15px 12px;
+    padding: 12px 10px; /* Уменьшил с 15px 12px */
+    min-height: 140px; /* Уменьшил */
   }
   
   .card h3 {
-    font-size: 16px;
+    font-size: 15px; /* Уменьшил с 16px */
   }
   
   .card p {
-    font-size: 13px;
+    font-size: 12px; /* Уменьшил с 13px */
   }
 }
 

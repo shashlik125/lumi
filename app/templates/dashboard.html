@@ -4,14 +4,11 @@
 
 {% block extra_css %}
 <style>
-
 * {
   font-family: 'Montserrat', sans-serif !important;
-}
-
-* {
   box-sizing: border-box;
 }
+
 body {
   margin: 0;
   font-family: 'Montserrat', sans-serif;
@@ -55,7 +52,6 @@ header {
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
   min-height: 80px;
   
-  /* Добавляем градиент прямо к фону хедера */
   background: linear-gradient(to bottom, 
     white 0%, 
     white 70%,
@@ -270,16 +266,15 @@ nav a.active::after {
 .emoji-container.eleventh-emoji {
   position: absolute;
   top: 70px;
-  right: -300px; /* 30px от правого края */
+  right: -300px;
   z-index: 11;
 }
 
 .emoji-container.twelfth-emoji {
   position: absolute;
   top: 635px;
-  right: -170px; /* 50px от правого края */
+  right: -170px;
   z-index: 90;
-  
 }
 
 @keyframes float {
@@ -367,9 +362,9 @@ h1 {
 .features {
   margin-top: 120px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Фиксированные 3 колонки */
-  gap: 30px; /* Увеличиваем расстояние */
-  max-width: 1300px; /* Увеличиваем максимальную ширину */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 30px;
+  max-width: 1300px;
   width: 100%;
 }
 
@@ -386,14 +381,14 @@ h1 {
   justify-content: center;
   position: relative;
   top: -80px;
-  min-width: 0; /* Предотвращает съезжание */
+  min-width: 0;
 }
 
 .card h3 {
-  font-size: 24px; /* Немного меньше для одной строки */
+  font-size: 24px;
   margin-bottom: 20px;
   color: #000000;
-  white-space: nowrap; /* Запрещает перенос текста */
+  white-space: nowrap;
 }
 
 .card p {
@@ -402,7 +397,6 @@ h1 {
   color: #000000;
 }
 
-
 @keyframes fadeIn {
   from {opacity: 0; transform: translateY(20px);}
   to {opacity: 1; transform: translateY(0);}
@@ -410,7 +404,6 @@ h1 {
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
 
-/* Измени стили для h1 */
 h1 {
   font-family: 'Montserrat', sans-serif;
   font-weight: 900;
@@ -421,14 +414,13 @@ h1 {
   white-space: nowrap;
 }
 
-
 @media (max-width: 1200px) {
   .emoji-image {
     max-width: 250px;
   }
   
   .features {
-    grid-template-columns: repeat(3, 1fr); /* Оставляем 3 колонки */
+    grid-template-columns: repeat(3, 1fr);
     max-width: 1100px;
   }
 }
@@ -443,49 +435,71 @@ h1 {
   }
   
   .features {
-    grid-template-columns: repeat(2, 1fr); /* 2 колонки на планшетах */
+    grid-template-columns: repeat(2, 1fr);
     max-width: 800px;
     gap: 25px;
   }
 }
 
+/* МОБИЛЬНАЯ ВЕРСИЯ - ИСПРАВЛЕННАЯ */
 @media (max-width: 768px) {
   header {
     padding: 15px;
-    flex-direction: column;
-    gap: 15px;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    min-height: 70px;
   }
   
   nav {
-    order: 3;
-    width: 100%;
+    order: 2;
+    width: auto;
     justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px 15px;
+    flex-wrap: nowrap;
+    gap: 10px;
+    margin: 0 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 5px 0;
+  }
+  
+  nav a {
+    font-size: 14px;
+    padding: 8px 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
   
   .user {
-    position: absolute;
-    top: 15px;
-    right: 15px;
+    position: static;
+    order: 3;
+    margin-left: auto;
+  }
+  
+  .logo {
+    order: 1;
+    font-size: 24px;
+    margin-right: 0;
   }
   
   .main-content {
-    margin-top: 400px;
+    margin-top: 150px;
     gap: 50px;
     padding: 0 15px;
   }
   
   .welcome-text {
-    padding: 30px 40px;
+    padding: 30px 20px;
   }
   
   h1 {
-    font-size: 42px;
+    font-size: 32px;
+    white-space: normal;
+    text-align: center;
   }
   
   .welcome-text p {
-    font-size: 18px;
+    font-size: 16px;
   }
   
   .btn {
@@ -494,46 +508,106 @@ h1 {
   }
   
   .features {
-    grid-template-columns: 1fr; /* 1 колонка на мобильных */
+    grid-template-columns: 1fr;
     max-width: 500px;
     gap: 20px;
+    margin-top: 50px;
+  }
+  
+  .card {
+    top: 0;
+    padding: 25px 20px;
+    min-height: auto;
   }
   
   .card h3 {
-    font-size: 22px; /* Уменьшаем заголовки на мобильных */
-    white-space: normal; /* Разрешаем перенос на мобильных */
+    font-size: 20px;
+    white-space: normal;
+  }
+  
+  .card p {
+    font-size: 16px;
+  }
+  
+  /* Скрываем большинство эмодзи на мобильных */
+  .emoji-container.second-emoji,
+  .emoji-container.third-emoji,
+  .emoji-container.fourth-emoji,
+  .emoji-container.fifth-emoji,
+  .emoji-container.sixth-emoji,
+  .emoji-container.eighth-emoji,
+  .emoji-container.ninth-emoji,
+  .emoji-container.tenth-emoji,
+  .emoji-container.eleventh-emoji,
+  .emoji-container.twelfth-emoji {
+    display: none;
+  }
+  
+  .emoji-container:first-child {
+    display: block;
   }
   
   .emoji-image {
-    max-width: 150px;
+    max-width: 120px;
+  }
+  
+  .header-image-wrapper {
+    top: 50px;
+  }
+  
+  .header-image {
+    width: 120px;
+  }
+  
+  .images-container {
+    height: 200px;
+    margin: 20px auto;
   }
 }
 
 @media (max-width: 480px) {
   body {
-    padding-top: 70px;
+    padding-top: 60px;
+  }
+  
+  header {
+    padding: 10px 15px;
+    min-height: 60px;
+  }
+  
+  nav {
+    gap: 5px;
+  }
+  
+  nav a {
+    font-size: 12px;
+    padding: 6px 8px;
   }
   
   .user span {
-    display: none;
+    font-size: 14px;
+  }
+  
+  .logo {
+    font-size: 22px;
   }
   
   .main-content {
-    margin-top: 300px;
+    margin-top: 120px;
     gap: 30px;
     padding: 0 10px;
   }
   
   .welcome-text {
-    padding: 20px 25px;
+    padding: 20px 15px;
   }
   
   h1 {
-    font-size: 32px;
+    font-size: 28px;
   }
   
   .welcome-text p {
-    font-size: 16px;
+    font-size: 15px;
   }
   
   .actions {
@@ -551,42 +625,77 @@ h1 {
   
   .card {
     padding: 20px 15px;
-    min-height: 200px; /* Уменьшаем высоту на мобильных */
   }
   
   .card h3 {
-    font-size: 20px;
+    font-size: 18px;
   }
   
   .card p {
-    font-size: 16px;
+    font-size: 14px;
   }
   
   .emoji-image {
-    max-width: 120px;
+    max-width: 100px;
+  }
+  
+  .header-image {
+    width: 100px;
+  }
+  
+  .user span {
+    display: none;
+  }
+  
+  .user {
+    padding: 5px;
   }
 }
 
 @media (max-width: 360px) {
-  .main-content {
-    margin-top: 250px;
+  header {
+    padding: 8px 10px;
   }
   
   nav a {
-    font-size: 14px;
-    padding: 8px 12px;
+    font-size: 11px;
+    padding: 5px 6px;
   }
   
   .logo {
+    font-size: 20px;
+  }
+  
+  .main-content {
+    margin-top: 100px;
+  }
+  
+  h1 {
     font-size: 24px;
   }
   
-  .card {
-    padding: 15px 12px;
-    min-height: 180px;
+  .welcome-text p {
+    font-size: 14px;
+  }
+  
+  /* Скрываем 1-2 пункта меню если совсем не помещается */
+  nav a:nth-child(4),
+  nav a:nth-child(5) {
+    display: none;
+  }
+  
+  .emoji-image {
+    max-width: 80px;
+  }
+  
+  .header-image {
+    width: 80px;
+  }
+  
+  .images-container {
+    height: 150px;
   }
 }
-
 </style>
 {% endblock %}
 
@@ -594,23 +703,23 @@ h1 {
 <header>
   <div class="logo">Lumi</div>
   <nav>
-  <a href="{{ url_for('main.chart') }}" 
-     class="{% if request.endpoint == 'main.chart' %}active{% endif %}">
-    Настроение
-  </a>
-  <a href="{{ url_for('main.dashboard') }}" 
-     class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">
-    Главная
-  </a>
-  <a href="{{ url_for('main.calendar') }}" 
-     class="{% if request.endpoint == 'main.calendar' %}active{% endif %}">
-    Календарь
-  </a>
-  <a href="{{ url_for('main.cycle_diary') }}" 
-     class="{% if request.endpoint == 'main.cycle_diary' %}active{% endif %}">
-    Дневник цикла
-  </a>
-</nav>
+    <a href="{{ url_for('main.chart') }}" 
+       class="{% if request.endpoint == 'main.chart' %}active{% endif %}">
+      Настроение
+    </a>
+    <a href="{{ url_for('main.dashboard') }}" 
+       class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+      Главная
+    </a>
+    <a href="{{ url_for('main.calendar') }}" 
+       class="{% if request.endpoint == 'main.calendar' %}active{% endif %}">
+      Календарь
+    </a>
+    <a href="{{ url_for('main.cycle_diary') }}" 
+       class="{% if request.endpoint == 'main.cycle_diary' %}active{% endif %}">
+      Дневник цикла
+    </a>
+  </nav>
   <div class="user" tabindex="0" aria-haspopup="true" aria-expanded="false">
     <span id="username">
         {% if current_user.is_authenticated %}
@@ -703,7 +812,6 @@ h1 {
 
 {% block extra_js %}
 <script>
-// JavaScript для выпадающего меню пользователя
 document.addEventListener('DOMContentLoaded', function() {
     initEventListeners();
 });
@@ -730,25 +838,20 @@ function toggleMenu() {
     }
 }
 
-// Глобальная функция для уведомлений
 function showToast(message, type = 'success') {
-    // Remove existing toasts
     const existingToasts = document.querySelectorAll('.toast');
     existingToasts.forEach(toast => toast.remove());
     
-    // Create new toast
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.textContent = message;
     
     document.body.appendChild(toast);
     
-    // Animate in
     setTimeout(() => {
         toast.classList.add('show');
     }, 10);
     
-    // Remove after 3 seconds
     setTimeout(() => {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);

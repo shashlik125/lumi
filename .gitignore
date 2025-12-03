@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+venv/
+.env
+*.db
+*.sqlite3
+.DS_Store
+.idea/
+.vscode/
+lumi_db_backup.sql
+database_dump.sql

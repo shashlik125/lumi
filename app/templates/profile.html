@@ -1,0 +1,924 @@
+{% extends "base.html" %}
+
+{% block title %}Lumi — Профиль{% endblock %}
+
+{% block extra_css %}
+<style>
+* {
+  font-family: 'Montserrat', sans-serif !important;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+  background: linear-gradient(to right, #60F4E3 0%, #FFEFFD 50%, #FF70EC 100%);
+  color: #264653;
+  min-height: 100vh;
+  padding-top: 80px;
+  font-size: 18px;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Стили хедера */
+header {
+  background: white;
+  padding: 20px 5%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  min-height: 80px;
+  background: linear-gradient(to bottom, 
+    white 0%, 
+    white 70%,
+    rgba(255,255,255,0.9) 80%, 
+    rgba(255,255,255,0.7) 90%,
+    rgba(255,255,255,0.4) 95%,
+    rgba(255,255,255,0) 100%);
+}
+
+.logo {
+  font-size: 28px;
+  font-weight: 700;
+  color: #264653;
+}
+
+nav {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.nav-link {
+  text-decoration: none;
+  color: #264653;
+  font-weight: 600;
+  position: relative;
+  padding: 10px 15px;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #FF70EC;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  color: #264653;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+/* Основной контент */
+main { 
+  padding: 40px 20px; 
+  max-width: 1000px; 
+  margin: 0 auto; 
+}
+
+h2 { 
+  margin-bottom: 40px; 
+  text-align: center; 
+  font-size: 42px;
+  color: #000000;
+  position: relative;
+  padding-bottom: 15px;
+  font-weight: 900;
+}
+
+h2:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: linear-gradient(to right, #60F4E3, #FF70EC);
+  border-radius: 2px;
+}
+
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.profile-card {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+  padding: 40px; 
+  border-radius: 20px; 
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.profile-card:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(to right, #60F4E3, #FF70EC);
+}
+
+.profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+}
+
+.avatar-container {
+  position: relative;
+  display: inline-block;
+}
+
+.avatar {
+  width: 150px; 
+  height: 150px; 
+  border-radius: 50%; 
+  object-fit: cover; 
+  border: 4px solid #60F4E3;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+}
+
+.avatar-actions {
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.avatar-btn {
+  background: #60F4E3;
+  color: #264653;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  transition: all 0.3s ease;
+  border: 2px solid white;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.avatar-btn:hover {
+  background: #48cbbd;
+  transform: scale(1.1);
+}
+
+.avatar-btn.delete {
+  background: #FF70EC;
+  color: white;
+}
+
+.avatar-btn.delete:hover {
+  background: #e15cd2;
+}
+
+#avatarUpload {
+  display: none;
+}
+
+.user-name {
+  font-size: 28px;
+  font-weight: 700;
+  margin-top: 10px;
+  color: #000000;
+}
+
+.user-email {
+  color: #6c757d;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 16px;
+  color: #264653;
+}
+
+.form-input {
+  padding: 16px 20px; 
+  border: 2px solid #e9ecef; 
+  border-radius: 12px; 
+  font-size: 16px;
+  font-family: 'Montserrat', sans-serif;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.form-input:focus {
+  border-color: #60F4E3;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(96, 244, 227, 0.2);
+  transform: translateY(-2px);
+}
+
+.form-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.btn { 
+  padding: 16px 32px; 
+  border: none; 
+  border-radius: 14px; 
+  font-weight: 600; 
+  cursor: pointer; 
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  text-decoration: none;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.btn-primary { 
+  background: #FF70EC; 
+  color: white; 
+}
+
+.btn-primary:hover { 
+  background: #e15cd2; 
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 112, 236, 0.3);
+}
+
+.btn-secondary { 
+  background: #60F4E3; 
+  color: #264653; 
+}
+
+.btn-secondary:hover { 
+  background: #48cbbd; 
+  transform: translateY(-2px);
+}
+
+.btn-danger { 
+  background: #FF4757; 
+  color: white; 
+}
+
+.btn-danger:hover { 
+  background: #ff3742; 
+  transform: translateY(-2px);
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 25px;
+  margin-top: 20px;
+}
+
+.stat-item {
+  background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.7) 100%);
+  padding: 25px 20px;
+  border-radius: 16px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  text-align: center;
+  border-left: 4px solid #60F4E3;
+  transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #FF70EC;
+  margin-bottom: 8px;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.toast {
+  position: fixed;
+  top: 100px;
+  right: 20px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  color: white;
+  font-weight: 600;
+  z-index: 1000;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  transform: translateX(150%);
+  transition: transform 0.3s ease;
+}
+
+.toast.show {
+  transform: translateX(0);
+}
+
+.toast.success {
+  background: #2ed573;
+}
+
+.toast.error {
+  background: #ff4757;
+}
+
+.toast.info {
+  background: #60F4E3;
+  color: #264653;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 1001;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(5px);
+}
+
+.modal-content {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+  padding: 40px;
+  border-radius: 20px;
+  max-width: 450px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  backdrop-filter: blur(10px);
+  position: relative;
+}
+
+.modal-content:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: linear-gradient(to right, #60F4E3, #FF70EC);
+  border-radius: 20px 20px 0 0;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.modal-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #000000;
+}
+
+.close-modal {
+  background: none;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  color: #6c757d;
+  transition: all 0.3s ease;
+}
+
+.close-modal:hover {
+  color: #264653;
+  transform: scale(1.1);
+}
+
+.password-form .form-group {
+  margin-bottom: 20px;
+}
+
+.account-actions {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .form-actions {
+    flex-direction: column;
+  }
+  
+  .btn {
+    justify-content: center;
+  }
+  
+  .profile-header {
+    text-align: center;
+  }
+  
+  .avatar-actions {
+    bottom: 8px;
+  }
+  
+  .avatar-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .account-actions {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  main {
+    padding: 20px 15px;
+  }
+  
+  .profile-card {
+    padding: 30px 25px;
+  }
+  
+  h2 {
+    font-size: 32px;
+  }
+  
+  .user-name {
+    font-size: 24px;
+  }
+  
+  .avatar {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .modal-content {
+    padding: 30px 25px;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<header>
+  <div class="logo">Lumi</div>
+  <nav>
+    <a href="{{ url_for('main.dashboard') }}" class="nav-link">
+      <i class="fas fa-arrow-left"></i> На главную
+    </a>
+    <div class="user-info">
+      <span id="username">
+        {% if current_user.is_authenticated %}
+          {{ current_user.first_name or current_user.username }}
+        {% else %}
+          Пользователь
+        {% endif %}
+      </span>
+      {% if current_user.avatar_path %}
+        <img src="{{ url_for('static', filename=current_user.avatar_path) }}" alt="Аватар" class="user-avatar">
+      {% else %}
+        <img src="https://ui-avatars.com/api/?name={{ current_user.first_name or 'Пользователь' }}&background=60F4E3&color=264653" alt="Аватар" class="user-avatar">
+      {% endif %}
+    </div>
+  </nav>
+</header>
+
+<main>
+  <h2>Профиль пользователя</h2>
+  
+  <div class="profile-container">
+    <!-- Карточка профиля -->
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="avatar-container">
+          {% if current_user.avatar_path %}
+            <img id="avatarPreview" 
+                 src="{{ url_for('static', filename=current_user.avatar_path) }}" 
+                 alt="Аватар" 
+                 class="avatar">
+          {% else %}
+            <img id="avatarPreview" 
+                 src="https://ui-avatars.com/api/?name={{ current_user.first_name or 'Пользователь' }}&background=60F4E3&color=264653&size=150" 
+                 alt="Аватар" 
+                 class="avatar">
+          {% endif %}
+          <div class="avatar-actions">
+            <button class="avatar-btn" onclick="document.getElementById('avatarUpload').click()" title="Загрузить аватар">
+              <i class="fas fa-camera"></i>
+            </button>
+            {% if current_user.avatar_path %}
+            <button class="avatar-btn delete" onclick="deleteAvatar()" title="Удалить аватар">
+              <i class="fas fa-trash"></i>
+            </button>
+            {% endif %}
+          </div>
+          <input type="file" id="avatarUpload" accept="image/*">
+        </div>
+        
+        <div>
+          <div class="user-name">{{ current_user.first_name or 'Пользователь' }} {{ current_user.last_name or '' }}</div>
+          <div class="user-email">@{{ current_user.username }}</div>
+        </div>
+      </div>
+      
+      <form id="profileForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="first_name">Имя</label>
+            <input type="text" id="first_name" name="first_name" 
+                   value="{{ current_user.first_name or '' }}" 
+                   placeholder="Введите ваше имя">
+          </div>
+          
+          <div class="form-group">
+            <label for="last_name">Фамилия</label>
+            <input type="text" id="last_name" name="last_name" 
+                   value="{{ current_user.last_name or '' }}" 
+                   placeholder="Введите вашу фамилию">
+          </div>
+          
+          <div class="form-group">
+            <label for="username">Логин</label>
+            <input type="text" id="username" name="username" 
+                   value="{{ current_user.username }}" 
+                   placeholder="Логин" readonly
+                   style="background: #f8f9fa; color: #6c757d;">
+          </div>
+        </div>
+        
+        <div class="form-actions">
+          <button type="button" class="btn btn-primary" id="saveBtn">
+            <i class="fas fa-save"></i> Сохранить изменения
+          </button>
+          <button type="button" class="btn btn-secondary" id="cancelBtn">
+            <i class="fas fa-times"></i> Отменить
+          </button>
+          <a href="{{ url_for('main.export_data') }}" class="btn btn-secondary" id="exportBtn">
+            <i class="fas fa-download"></i> Экспорт данных
+          </a>
+        </div>
+      </form>
+    </div>
+    
+    <!-- Статистика -->
+    <div class="profile-card">
+      <h3 style="margin-bottom: 25px; font-size: 24px; color: #000000; text-align: center;">Статистика настроения</h3>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value" id="totalEntries">0</div>
+          <div class="stat-label">Всего записей</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="avgMood">0.0</div>
+          <div class="stat-label">Среднее настроение</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="goodDays">0</div>
+          <div class="stat-label">Хороших дней</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="streak">0</div>
+          <div class="stat-label">Текущая серия</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Действия с аккаунтом -->
+    <div class="profile-card">
+      <h3 style="margin-bottom: 25px; font-size: 24px; color: #000000; text-align: center;">Управление аккаунтом</h3>
+      <div class="account-actions">
+        <button type="button" class="btn btn-secondary" onclick="openPasswordModal()">
+          <i class="fas fa-key"></i> Сменить пароль
+        </button>
+        <button type="button" class="btn btn-danger" onclick="deleteAccount()">
+          <i class="fas fa-trash"></i> Удалить аккаунт
+        </button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Модальное окно смены пароля -->
+<div class="modal" id="passwordModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 class="modal-title">Смена пароля</h3>
+      <button class="close-modal" onclick="closePasswordModal()">×</button>
+    </div>
+    <form id="passwordForm" class="password-form">
+      <div class="form-group">
+        <label for="current_password">Текущий пароль</label>
+        <input type="password" id="current_password" name="current_password" class="form-input" required>
+      </div>
+      <div class="form-group">
+        <label for="new_password">Новый пароль</label>
+        <input type="password" id="new_password" name="new_password" class="form-input" required>
+      </div>
+      <div class="form-group">
+        <label for="confirm_password">Подтвердите новый пароль</label>
+        <input type="password" id="confirm_password" name="confirm_password" class="form-input" required>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-primary" onclick="changePassword()">
+          <i class="fas fa-key"></i> Сменить пароль
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="closePasswordModal()">
+          <i class="fas fa-times"></i> Отмена
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Обработка загрузки аватара
+document.getElementById('avatarUpload').addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('Файл слишком большой (макс. 5MB)', 'error');
+            return;
+        }
+        
+        const formData = new FormData();
+        formData.append('avatar', file);
+        
+        try {
+            const response = await fetch('/api/upload_avatar', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                document.getElementById('avatarPreview').src = URL.createObjectURL(file);
+                updateAvatarDeleteButton(true);
+                showToast('Аватар успешно обновлен!', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showToast(result.error || 'Ошибка загрузки аватара', 'error');
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки аватара:', error);
+            showToast('Ошибка загрузки аватара', 'error');
+        }
+    }
+});
+
+// Функция удаления аватара
+async function deleteAvatar() {
+    if (!confirm('Вы уверены, что хотите удалить аватар?')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/delete_avatar', {
+            method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            const defaultAvatar = `https://ui-avatars.com/api/?name={{ current_user.first_name or 'Пользователь' }}&background=60F4E3&color=264653&size=150`;
+            document.getElementById('avatarPreview').src = defaultAvatar;
+            updateAvatarDeleteButton(false);
+            showToast('Аватар успешно удален!', 'success');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1000);
+        } else {
+            showToast(result.error || 'Ошибка удаления аватара', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка удаления аватара:', error);
+        showToast('Ошибка удаления аватара', 'error');
+    }
+}
+
+// Обновление кнопки удаления аватара
+function updateAvatarDeleteButton(show) {
+    const deleteBtn = document.querySelector('.avatar-btn.delete');
+    if (show) {
+        if (!deleteBtn) {
+            const avatarActions = document.querySelector('.avatar-actions');
+            const deleteButton = document.createElement('button');
+            deleteButton.className = 'avatar-btn delete';
+            deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
+            deleteButton.onclick = deleteAvatar;
+            deleteButton.title = 'Удалить аватар';
+            avatarActions.appendChild(deleteButton);
+        }
+    } else {
+        if (deleteBtn) {
+            deleteBtn.remove();
+        }
+    }
+}
+
+// Сохранение профиля
+document.getElementById('saveBtn').addEventListener('click', async function() {
+    const data = {
+        first_name: document.getElementById('first_name').value,
+        last_name: document.getElementById('last_name').value
+    };
+    
+    try {
+        const response = await fetch('/api/profile', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showToast('Профиль успешно обновлен!', 'success');
+            document.getElementById('username').textContent = data.first_name || 'Пользователь';
+        } else {
+            showToast(result.error || 'Ошибка обновления профиля', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('Ошибка сохранения профиля', 'error');
+    }
+});
+
+// Отмена изменений
+document.getElementById('cancelBtn').addEventListener('click', function() {
+    document.getElementById('profileForm').reset();
+    showToast('Изменения отменены', 'info');
+});
+
+// Загрузка статистики
+async function loadStats() {
+    try {
+        const response = await fetch('/api/stats');
+        if (response.ok) {
+            const stats = await response.json();
+            document.getElementById('totalEntries').textContent = stats.total_entries || 0;
+            document.getElementById('avgMood').textContent = stats.avg_mood || '0.0';
+            document.getElementById('goodDays').textContent = stats.good_days || 0;
+            document.getElementById('streak').textContent = stats.current_streak || 0;
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки статистики:', error);
+    }
+}
+
+// Функции для модального окна смены пароля
+function openPasswordModal() {
+    document.getElementById('passwordModal').style.display = 'flex';
+    document.getElementById('passwordForm').reset();
+}
+
+function closePasswordModal() {
+    document.getElementById('passwordModal').style.display = 'none';
+}
+
+async function changePassword() {
+    const data = {
+        current_password: document.getElementById('current_password').value,
+        new_password: document.getElementById('new_password').value,
+        confirm_password: document.getElementById('confirm_password').value
+    };
+    
+    try {
+        const response = await fetch('/api/change_password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showToast('Пароль успешно изменен!', 'success');
+            closePasswordModal();
+        } else {
+            showToast(result.error || 'Ошибка смены пароля', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('Ошибка смены пароля', 'error');
+    }
+}
+
+// Утилиты
+function showToast(message, type) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = `toast ${type} show`;
+    
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
+function deleteAccount() {
+    if (confirm('Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить.')) {
+        showToast('Функция удаления аккаунта в разработке', 'info');
+    }
+}
+
+// Загружаем статистику при загрузке страницы
+document.addEventListener('DOMContentLoaded', loadStats);
+
+// Закрытие модального окна при клике вне его
+document.getElementById('passwordModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closePasswordModal();
+    }
+});
+</script>
+{% endblock %}

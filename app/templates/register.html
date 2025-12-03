@@ -1,0 +1,633 @@
+{% extends "base.html" %}
+
+{% block title %}Lumi — Регистрация{% endblock %}
+
+{% block extra_css %}
+<style>
+* {
+  font-family: 'Montserrat', sans-serif !important;
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Montserrat', sans-serif;
+  background: linear-gradient(to right, #60F4E3 0%, #FFEFFD 50%, #FF70EC 100%);
+  color: #264653;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  padding: 0 20px 40px;
+  font-size: 18px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Фоновый контейнер для смайликов */
+.background-emojis {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.emoji-container {
+  position: absolute;
+  z-index: 1;
+}
+
+.emoji-image {
+  max-width: 300px !important;
+  height: auto;
+  filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+  animation: float 3s ease-in-out infinite;
+  opacity: 0.7;
+}
+
+.emoji-container.second-emoji {
+  top: 15%;
+  left: 5%;
+}
+
+.emoji-container.second-emoji .emoji-image {
+  max-width: 230px;
+  animation: float 3.5s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+.emoji-container.third-emoji {
+  top: 60%;
+  right: 5%;
+}
+
+.emoji-container.fourth-emoji {
+  top: 25%;
+  left: 25%;
+}
+
+.emoji-container.fifth-emoji {
+  top: 10%;
+  left: 75%;
+}
+
+.emoji-container.sixth-emoji {
+  top: 40%;
+  left: 85%;
+}
+
+.emoji-container.eighth-emoji {
+  top: 70%;
+  left: 10%;
+}
+
+.emoji-container.ninth-emoji {
+  top: 85%;
+  left: 5%;
+}
+
+.emoji-container.tenth-emoji {
+  top: 15%;
+  left: -5%;
+}
+
+.emoji-container.eleventh-emoji {
+  top: 10%;
+  right: -5%;
+}
+
+.emoji-container.twelfth-emoji {
+  top: 80%;
+  right: 10%;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+header {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px !important;
+  position: relative;
+  margin: 0 auto;
+  user-select: none;
+  margin-bottom: 50px;
+  z-index: 100;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 28px;
+  color: white;
+  letter-spacing: 1px;
+  margin: 0;
+  margin-right: auto;
+}
+
+nav {
+  margin-left: auto;
+}
+
+nav a {
+  font-weight: 600;
+  text-decoration: none;
+  color: white;
+  white-space: nowrap;
+  margin: 0;
+  padding: 10px 15px;
+}
+
+.main-content {
+  max-width: 1200px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 80px;
+  margin: 0 auto;
+  margin-top: 50px;
+  margin-bottom: 100px;
+  padding: 0 20px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 10;
+}
+
+.welcome-text {
+  max-width: 100%;
+  padding: 50px 60px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  text-align: center;
+  animation: fadeIn 1.2s ease;
+  box-sizing: border-box;
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 10;
+}
+
+h1 {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  font-size: 42px;
+  color: #000000;
+  margin: 0 0 24px;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.welcome-text p {
+  font-size: 22px;
+  line-height: 1.6;
+  margin: 0 auto 30px;
+  max-width: 600px;
+}
+
+.register-form {
+  max-width: 500px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 16px;
+  color: #264653;
+}
+
+.form-input {
+  padding: 16px 20px;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-size: 16px;
+  transition: all 0.3s ease;
+  background: white;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.form-input:focus {
+  border-color: #60F4E3;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(96, 244, 227, 0.2);
+}
+
+.password-strength {
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.strength-bar {
+  height: 4px;
+  background: #e9ecef;
+  border-radius: 2px;
+  margin-top: 5px;
+  overflow: hidden;
+}
+
+.strength-fill {
+  height: 100%;
+  width: 0%;
+  transition: width 0.3s ease;
+  border-radius: 2px;
+}
+
+.strength-weak { background: #ff4757; width: 33%; }
+.strength-medium { background: #ffa502; width: 66%; }
+.strength-strong { background: #2ed573; width: 100%; }
+
+.terms-agreement {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  color: #6c757d;
+  margin: 10px 0;
+  text-align: left;
+}
+
+.terms-agreement input {
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.terms-agreement a {
+  color: #FF70EC;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.terms-agreement a:hover {
+  color: #60F4E3;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 14px 28px;
+  border-radius: 14px;
+  font-size: 18px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  font-family: 'Montserrat', sans-serif;
+}
+
+.btn.primary {
+  background: #FF70EC;
+  color: white;
+}
+
+.btn.primary:hover {
+  background: #e15cd2;
+  transform: translateY(-2px);
+}
+
+.btn.secondary {
+  background: #60F4E3;
+  color: #264653;
+}
+
+.btn.secondary:hover {
+  background: #48cbbd;
+  transform: translateY(-2px);
+}
+
+.register-footer {
+  text-align: center;
+  margin-top: 30px;
+  color: #6c757d;
+  font-size: 16px;
+}
+
+.register-footer a {
+  color: #FF70EC;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.register-footer a:hover {
+  color: #60F4E3;
+}
+
+.flash-messages {
+  margin-bottom: 20px;
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.alert-error {
+  background: #ffe6e6;
+  color: #d63031;
+  border: 1px solid #ffcccc;
+}
+
+.alert-success {
+  background: #e6f7e6;
+  color: #27ae60;
+  border: 1px solid #ccffcc;
+}
+
+.features-preview {
+  margin-top: 40px;
+  padding: 25px;
+  background: rgba(96, 244, 227, 0.1);
+  border-radius: 16px;
+  text-align: left;
+}
+
+.features-preview h3 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: #264653;
+  text-align: center;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.feature-item:last-child {
+  margin-bottom: 0;
+}
+
+.feature-icon {
+  color: #FF70EC;
+  font-weight: bold;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(20px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+@media (max-width: 768px) {
+  h1 {
+    font-size: 36px;
+    white-space: normal;
+  }
+  
+  .welcome-text {
+    padding: 30px 40px;
+  }
+  
+  .welcome-text p {
+    font-size: 18px;
+  }
+  
+  .btn {
+    font-size: 16px;
+    padding: 12px 20px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .features-preview {
+    padding: 20px;
+  }
+  
+  /* Адаптация смайликов для мобильных */
+  .background-emojis {
+    display: none; /* Скрываем на мобильных для лучшей производительности */
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-text {
+    padding: 20px 25px;
+  }
+  
+  h1 {
+    font-size: 32px;
+  }
+  
+  .welcome-text p {
+    font-size: 16px;
+  }
+  
+  .actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
+  .features-preview {
+    padding: 15px;
+  }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Фоновые смайлики -->
+<div class="background-emojis">
+  <div class="emoji-container">
+    <img src="{{ url_for('static', filename='images/😜.png') }}" alt="Emoji" class="emoji-image" />
+  </div>
+  <div class="emoji-container second-emoji">
+    <img src="{{ url_for('static', filename='images/😳.png') }}" alt="Emoji 2" class="emoji-image" />
+  </div>
+  <div class="emoji-container third-emoji">
+    <img src="{{ url_for('static', filename='images/1.png') }}" alt="Emoji 3" class="emoji-image" />
+  </div>
+  <div class="emoji-container fourth-emoji">
+    <img src="{{ url_for('static', filename='images/😰.png') }}" alt="Emoji 4" class="emoji-image" />
+  </div>
+  <div class="emoji-container fifth-emoji">
+    <img src="{{ url_for('static', filename='images/😡.png') }}" alt="Emoji 5" class="emoji-image" />
+  </div>
+  <div class="emoji-container sixth-emoji">
+    <img src="{{ url_for('static', filename='images/😚.png') }}" alt="Emoji 6" class="emoji-image" />
+  </div>
+  <div class="emoji-container eighth-emoji">
+    <img src="{{ url_for('static', filename='images/😍.png') }}" alt="Emoji 8" class="emoji-image" />
+  </div>
+  <div class="emoji-container ninth-emoji">
+    <img src="{{ url_for('static', filename='images/😈.png') }}" alt="Emoji 9" class="emoji-image" />
+  </div>
+  <div class="emoji-container tenth-emoji">
+    <img src="{{ url_for('static', filename='images/🤯.png') }}" alt="Emoji 10" class="emoji-image" />
+  </div>
+  <div class="emoji-container eleventh-emoji">
+    <img src="{{ url_for('static', filename='images/🤯 copy.png') }}" alt="Emoji 11" class="emoji-image" />
+  </div>
+  <div class="emoji-container twelfth-emoji">
+    <img src="{{ url_for('static', filename='images/😈 copy.png') }}" alt="Emoji 12" class="emoji-image" />
+  </div>
+</div>
+
+<header>
+  <div class="logo">Lumi</div>
+  <nav>
+    <a href="{{ url_for('main.index') }}">Главная</a>
+    <a href="{{ url_for('auth.login') }}">Войти</a>
+  </nav>
+</header>
+
+<div class="main-content">
+  <div class="welcome-text gradient-box">
+    <h1>Присоединяйтесь!</h1>
+    <p>
+      Создайте аккаунт Lumi и начните отслеживать ваше настроение уже сегодня
+    </p>
+    
+    <!-- Flash сообщения -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <div class="flash-messages">
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+    
+    <form method="POST" class="register-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="first_name">Имя</label>
+          <input type="text" id="first_name" name="first_name" class="form-input" placeholder="Ваше имя" required>
+        </div>
+        <div class="form-group">
+          <label for="last_name">Фамилия</label>
+          <input type="text" id="last_name" name="last_name" class="form-input" placeholder="Ваша фамилия">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="username">Логин</label>
+        <input type="text" id="username" name="username" class="form-input" placeholder="Придумайте логин" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Пароль</label>
+        <input type="password" id="password" name="password" class="form-input" placeholder="Создайте пароль" required>
+        <div class="password-strength">
+          <div class="strength-bar">
+            <div class="strength-fill" id="strengthFill"></div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="confirm_password">Подтвердите пароль</label>
+        <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="Повторите пароль" required>
+      </div>
+      
+      <div class="terms-agreement">
+        <input type="checkbox" id="accept_tos" name="accept_tos" required>
+        <label for="accept_tos">
+          Я соглашаюсь с <a href="#">условиями использования</a> и <a href="#">политикой конфиденциальности</a>
+        </label>
+      </div>
+      
+      <div class="actions">
+        <button type="submit" class="btn primary">Создать аккаунт</button>
+        <a href="{{ url_for('auth.login') }}" class="btn secondary">Уже есть аккаунт</a>
+      </div>
+    </form>
+    
+    <div class="features-preview">
+      <h3>Что вас ждет в Lumi:</h3>
+      <div class="feature-item">
+        <span class="feature-icon">✓</span>
+        <span>Ежедневное отслеживание настроения</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">✓</span>
+        <span>Детальная аналитика и графики</span>
+      </div>
+      <div class="feature-item">
+        <span class="feature-icon">✓</span>
+        <span>Персональные рекомендации</span>
+      </div>
+    </div>
+    
+    <div class="register-footer">
+      <p>Уже зарегистрированы? <a href="{{ url_for('auth.login') }}">Войдите в аккаунт</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const passwordInput = document.getElementById('password');
+  const strengthFill = document.getElementById('strengthFill');
+  
+  if (passwordInput && strengthFill) {
+    passwordInput.addEventListener('input', function() {
+      const password = this.value;
+      let strength = 0;
+      
+      if (password.length >= 6) strength += 1;
+      if (password.length >= 8) strength += 1;
+      if (/[A-Z]/.test(password)) strength += 1;
+      if (/[0-9]/.test(password)) strength += 1;
+      if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+      
+      strengthFill.className = 'strength-fill';
+      if (strength <= 2) {
+        strengthFill.classList.add('strength-weak');
+      } else if (strength <= 4) {
+        strengthFill.classList.add('strength-medium');
+      } else {
+        strengthFill.classList.add('strength-strong');
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

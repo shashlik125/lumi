@@ -4,6 +4,7 @@
 
 {% block extra_css %}
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
 
 :root {
   --primary-color: #264653;
@@ -46,13 +47,29 @@ body {
   color: var(--dark);
   line-height: 1.6;
   min-height: 100vh;
+  font-size: 18px;
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
   padding-top: 80px; /* Отступ для фиксированного хедера */
 }
 
-/* ХЕДЕР */
+/* КОНТЕЙНЕР ДЛЯ ВСЕГО КОНТЕНТА */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
+}
+
+/* ХЕДЕР - АДАПТИВНЫЙ КАК В DASHBOARD */
 header {
   background: white;
-  padding: 20px 5%;
+  padding: 15px 5%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -77,11 +94,15 @@ header {
   font-size: 28px;
   font-weight: 700;
   color: #264653;
+  letter-spacing: 1px;
+  white-space: nowrap;
 }
 
 nav {
   display: flex;
-  gap: 20px;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 nav a {
@@ -89,9 +110,10 @@ nav a {
   color: #264653;
   font-weight: 600;
   position: relative;
-  padding: 10px 15px;
-  transition: var(--transition);
+  padding: 8px 12px;
+  transition: all 0.3s ease;
   font-size: 16px;
+  white-space: nowrap;
 }
 
 nav a::after {
@@ -102,10 +124,11 @@ nav a::after {
   width: 0;
   height: 2px;
   background: var(--accent-pink);
-  transition: var(--transition);
+  transition: all 0.3s ease;
 }
 
-nav a:hover::after {
+nav a:hover::after,
+nav a:focus::after {
   width: 100%;
 }
 
@@ -113,7 +136,8 @@ nav a.active::after {
   width: 100% !important;
 }
 
-.user {
+/* Стили для пользователя и аватара - как в dashboard */
+.user-wrapper {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -121,11 +145,13 @@ nav a.active::after {
   position: relative;
   padding: 5px 10px;
   border-radius: 8px;
-  transition: var(--transition);
+  transition: all 0.3s ease;
+  margin-left: auto;
+  white-space: nowrap;
 }
 
-.user:hover,
-.user:focus {
+.user-wrapper:hover,
+.user-wrapper:focus {
   background: rgba(255, 255, 255, 0.3);
 }
 
@@ -135,6 +161,7 @@ nav a.active::after {
   border-radius: 50%;
   border: 2px solid var(--white);
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  object-fit: cover;
 }
 
 .dropdown {
@@ -167,7 +194,7 @@ nav a.active::after {
   text-decoration: none;
   color: var(--text-color);
   font-weight: 500;
-  transition: var(--transition);
+  transition: all 0.3s ease;
 }
 
 .dropdown a:hover,
@@ -175,15 +202,13 @@ nav a.active::after {
   background: #f2f2f2;
 }
 
-
-
-
-
+/* ОСНОВНОЙ КОНТЕНТ СТРАНИЦЫ */
 main { 
-  padding: 30px 20px; 
+  padding: 30px 0; 
   max-width: 1200px; 
   margin: 0 auto; 
   min-height: calc(100vh - 140px);
+  width: 100%;
 }
 
 .page-header {
@@ -565,6 +590,155 @@ h1:after {
   background: var(--danger);
 }
 
+/* АДАПТИВНОСТЬ - ХЕДЕР */
+@media (max-width: 992px) {
+  .logo {
+    font-size: 24px;
+  }
+  
+  nav {
+    gap: 10px;
+  }
+  
+  nav a {
+    padding: 6px 10px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+  }
+  
+  header {
+    padding: 10px 15px;
+    min-height: 70px;
+  }
+  
+  .logo {
+    font-size: 22px;
+  }
+  
+  nav {
+    gap: 8px;
+  }
+  
+  nav a {
+    padding: 5px 8px;
+    font-size: 13px;
+  }
+  
+  .user-wrapper span {
+    display: none;
+  }
+  
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .main-chart {
+    height: 350px;
+  }
+  
+  .charts-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .side-charts {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+  
+  .side-chart {
+    height: 250px;
+  }
+  
+  .period-controls {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .period-title {
+    min-width: auto;
+    order: -1;
+    margin-bottom: 10px;
+  }
+  
+  .period-nav {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo {
+    font-size: 20px;
+  }
+  
+  nav {
+    gap: 5px;
+  }
+  
+  nav a {
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+  
+  .side-charts {
+    grid-template-columns: 1fr;
+  }
+  
+  .main-chart {
+    height: 300px;
+    padding: 15px;
+  }
+  
+  .side-chart {
+    height: 200px;
+    padding: 15px;
+  }
+  
+  .view-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .btn {
+    justify-content: center;
+  }
+  
+  .period-nav {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .mood-legend {
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .logo {
+    font-size: 18px;
+  }
+  
+  nav a {
+    font-size: 11px;
+    padding: 3px 5px;
+  }
+}
+
+/* АДАПТИВНОСТЬ - ОСНОВНОЙ КОНТЕНТ */
 @media (max-width: 968px) {
   .charts-container {
     grid-template-columns: 1fr;
@@ -649,24 +823,24 @@ h1:after {
 <header>
   <div class="logo">Lumi</div>
   <nav>
-  <a href="{{ url_for('main.chart') }}" 
-     class="{% if request.endpoint == 'main.chart' %}active{% endif %}">
-    Настроение
-  </a>
-  <a href="{{ url_for('main.dashboard') }}" 
-     class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">
-    Главная
-  </a>
-  <a href="{{ url_for('main.calendar') }}" 
-     class="{% if request.endpoint == 'main.calendar' %}active{% endif %}">
-    Календарь
-  </a>
-  <a href="{{ url_for('main.cycle_diary') }}" 
-     class="{% if request.endpoint == 'main.cycle_diary' %}active{% endif %}">
-    Дневник цикла
-  </a>
-</nav>
-  <div class="user" tabindex="0" aria-haspopup="true" aria-expanded="false">
+    <a href="{{ url_for('main.chart') }}" 
+       class="{% if request.endpoint == 'main.chart' %}active{% endif %}">
+      Настроение
+    </a>
+    <a href="{{ url_for('main.dashboard') }}" 
+       class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+      Главная
+    </a>
+    <a href="{{ url_for('main.calendar') }}" 
+       class="{% if request.endpoint == 'main.calendar' %}active{% endif %}">
+      Календарь
+    </a>
+    <a href="{{ url_for('main.cycle_diary') }}" 
+       class="{% if request.endpoint == 'main.cycle_diary' %}active{% endif %}">
+      Дневник цикла
+    </a>
+  </nav>
+  <div class="user-wrapper" tabindex="0" aria-haspopup="true" aria-expanded="false">
     <span id="username">
         {% if current_user.is_authenticated %}
             {{ current_user.first_name or current_user.username }}
@@ -686,167 +860,168 @@ h1:after {
   </div>
 </header>
 
-<main>
-  <div class="page-header">
-    <h1>Анализ настроения</h1>
-  </div>
+<div class="container">
+  <main>
+    <div class="page-header">
+      <h1>Анализ настроения</h1>
+    </div>
 
-  <div class="controls-container">
-    <div class="period-controls">
-      <div class="period-nav">
-        <button class="btn btn-primary" onclick="changePeriod(-1)">
-          <i class="fas fa-chevron-left"></i>
+    <div class="controls-container">
+      <div class="period-controls">
+        <div class="period-nav">
+          <button class="btn btn-primary" onclick="changePeriod(-1)">
+            <i class="fas fa-chevron-left"></i>
+          </button>
+          <button class="btn btn-secondary" onclick="goToday()">
+            <i class="fas fa-calendar-day"></i> Сегодня
+          </button>
+          <button class="btn btn-primary" onclick="changePeriod(1)">
+            <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+        <div class="period-title" id="periodLabel">Загрузка...</div>
+      </div>
+
+      <div class="view-controls">
+        <button class="btn btn-secondary view-btn" id="dayBtn" onclick="setView('day')">
+          <i class="fas fa-calendar-day"></i> День
         </button>
-        <button class="btn btn-secondary" onclick="goToday()">
-          <i class="fas fa-calendar-day"></i> Сегодня
+        <button class="btn btn-secondary view-btn" id="weekBtn" onclick="setView('week')">
+          <i class="fas fa-calendar-week"></i> Неделя
         </button>
-        <button class="btn btn-primary" onclick="changePeriod(1)">
-          <i class="fas fa-chevron-right"></i>
+        <button class="btn btn-secondary view-btn" id="monthBtn" onclick="setView('month')">
+          <i class="fas fa-calendar-alt"></i> Месяц
+        </button>
+        <button class="btn btn-secondary view-btn" id="yearBtn" onclick="setView('year')">
+          <i class="fas fa-calendar"></i> Год
         </button>
       </div>
-      <div class="period-title" id="periodLabel">Загрузка...</div>
     </div>
 
-    <div class="view-controls">
-      <button class="btn btn-secondary view-btn" id="dayBtn" onclick="setView('day')">
-        <i class="fas fa-calendar-day"></i> День
-      </button>
-      <button class="btn btn-secondary view-btn" id="weekBtn" onclick="setView('week')">
-        <i class="fas fa-calendar-week"></i> Неделя
-      </button>
-      <button class="btn btn-secondary view-btn" id="monthBtn" onclick="setView('month')">
-        <i class="fas fa-calendar-alt"></i> Месяц
-      </button>
-      <button class="btn btn-secondary view-btn" id="yearBtn" onclick="setView('year')">
-        <i class="fas fa-calendar"></i> Год
-      </button>
-    </div>
-  </div>
+    <div class="charts-container">
+      <!-- Основная диаграмма -->
+      <div class="main-chart">
+        <div class="chart-title" id="mainChartTitle">Настроение по дням</div>
+        <div class="chart-wrapper">
+          <canvas id="mainChart"></canvas>
+          <div class="no-data" id="mainChartNoData" style="display: none;">
+            <i class="fas fa-chart-line"></i>
+            <p>Нет данных для отображения</p>
+            <p>Добавьте записи настроения, чтобы увидеть статистику</p>
+            <a href="{{ url_for('main.calendar') }}" class="btn btn-primary">
+              <i class="fas fa-calendar"></i> Перейти к календарю
+            </a>
+          </div>
+          <div class="loading" id="mainChartLoading" style="display: none;">
+            <div class="loading-spinner"></div>
+          </div>
+        </div>
+      </div>
 
-  <div class="charts-container">
-    <!-- Основная диаграмма -->
-    <div class="main-chart">
-      <div class="chart-title" id="mainChartTitle">Настроение по дням</div>
-      <div class="chart-wrapper">
-        <canvas id="mainChart"></canvas>
-        <div class="no-data" id="mainChartNoData" style="display: none;">
+      <!-- Боковые диаграммы -->
+      <div class="side-charts">
+        <!-- Диаграмма распределения настроений -->
+        <div class="side-chart">
+          <div class="chart-title">Распределение настроений</div>
+          <div class="chart-wrapper">
+            <canvas id="distributionChart"></canvas>
+            <div class="no-data" id="distributionChartNoData" style="display: none;">
+              <i class="fas fa-chart-pie"></i>
+              <p>Нет данных</p>
+            </div>
+            <div class="loading" id="distributionChartLoading" style="display: none;">
+              <div class="loading-spinner"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Диаграмма по времени суток -->
+        <div class="side-chart">
+          <div class="chart-title">По времени суток</div>
+          <div class="chart-wrapper">
+            <canvas id="timeChart"></canvas>
+            <div class="no-data" id="timeChartNoData" style="display: none;">
+              <i class="fas fa-clock"></i>
+              <p>Нет данных</p>
+            </div>
+            <div class="loading" id="timeChartLoading" style="display: none;">
+              <div class="loading-spinner"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mood-legend">
+      <div class="legend-item">
+        <div class="legend-color good-color"></div>
+        <span>Хорошее настроение (7-10)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color neutral-color"></div>
+        <span>Нейтральное настроение (4-6)</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color bad-color"></div>
+        <span>Плохое настроение (1-3)</span>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-title">Всего записей</div>
+        <div class="stat-value" id="totalEntries">0</div>
+        <div class="stat-change" id="entriesChange">за текущий период</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Хороших дней</div>
+        <div class="stat-value" id="goodDays">0</div>
+        <div class="stat-change" id="goodDaysChange">% от общего числа</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Среднее настроение</div>
+        <div class="stat-value" id="avgMood">0.0</div>
+        <div class="stat-change" id="avgMoodChange">по шкале 1-10</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-title">Активность</div>
+        <div class="stat-value" id="activityLevel">0%</div>
+        <div class="stat-change">заполненных дней</div>
+      </div>
+    </div>
+
+    <div class="insights">
+      <h3 class="insights-title"><i class="fas fa-lightbulb"></i> Инсайты</h3>
+      <div class="insight-item">
+        <div class="insight-icon">
           <i class="fas fa-chart-line"></i>
-          <p>Нет данных для отображения</p>
-          <p>Добавьте записи настроения, чтобы увидеть статистику</p>
-          <a href="{{ url_for('main.calendar') }}" class="btn btn-primary">
-            <i class="fas fa-calendar"></i> Перейти к календарю
-          </a>
         </div>
-        <div class="loading" id="mainChartLoading" style="display: none;">
-          <div class="loading-spinner"></div>
+        <div class="insight-text">
+          <strong>Тенденция:</strong> <span id="trendText">Анализируем ваше настроение...</span>
         </div>
       </div>
-    </div>
-
-    <!-- Боковые диаграммы -->
-    <div class="side-charts">
-      <!-- Диаграмма распределения настроений -->
-      <div class="side-chart">
-        <div class="chart-title">Распределение настроений</div>
-        <div class="chart-wrapper">
-          <canvas id="distributionChart"></canvas>
-          <div class="no-data" id="distributionChartNoData" style="display: none;">
-            <i class="fas fa-chart-pie"></i>
-            <p>Нет данных</p>
-          </div>
-          <div class="loading" id="distributionChartLoading" style="display: none;">
-            <div class="loading-spinner"></div>
-          </div>
+      <div class="insight-item">
+        <div class="insight-icon">
+          <i class="fas fa-calendar"></i>
+        </div>
+        <div class="insight-text">
+          <strong>Лучший период:</strong> <span id="bestPeriodText">Определяем...</span>
         </div>
       </div>
-
-      <!-- Диаграмма по времени суток -->
-      <div class="side-chart">
-        <div class="chart-title">По времени суток</div>
-        <div class="chart-wrapper">
-          <canvas id="timeChart"></canvas>
-          <div class="no-data" id="timeChartNoData" style="display: none;">
-            <i class="fas fa-clock"></i>
-            <p>Нет данных</p>
-          </div>
-          <div class="loading" id="timeChartLoading" style="display: none;">
-            <div class="loading-spinner"></div>
-          </div>
+      <div class="insight-item">
+        <div class="insight-icon">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="insight-text">
+          <strong>Пиковое время:</strong> <span id="peakTimeText">Анализируем...</span>
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="mood-legend">
-    <div class="legend-item">
-      <div class="legend-color good-color"></div>
-      <span>Хорошее настроение (7-10)</span>
-    </div>
-    <div class="legend-item">
-      <div class="legend-color neutral-color"></div>
-      <span>Нейтральное настроение (4-6)</span>
-    </div>
-    <div class="legend-item">
-      <div class="legend-color bad-color"></div>
-      <span>Плохое настроение (1-3)</span>
-    </div>
-  </div>
-
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-title">Всего записей</div>
-      <div class="stat-value" id="totalEntries">0</div>
-      <div class="stat-change" id="entriesChange">за текущий период</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-title">Хороших дней</div>
-      <div class="stat-value" id="goodDays">0</div>
-      <div class="stat-change" id="goodDaysChange">% от общего числа</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-title">Среднее настроение</div>
-      <div class="stat-value" id="avgMood">0.0</div>
-      <div class="stat-change" id="avgMoodChange">по шкале 1-10</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-title">Активность</div>
-      <div class="stat-value" id="activityLevel">0%</div>
-      <div class="stat-change">заполненных дней</div>
-    </div>
-  </div>
-
-  <div class="insights">
-    <h3 class="insights-title"><i class="fas fa-lightbulb"></i> Инсайты</h3>
-    <div class="insight-item">
-      <div class="insight-icon">
-        <i class="fas fa-chart-line"></i>
-      </div>
-      <div class="insight-text">
-        <strong>Тенденция:</strong> <span id="trendText">Анализируем ваше настроение...</span>
-      </div>
-    </div>
-    <div class="insight-item">
-      <div class="insight-icon">
-        <i class="fas fa-calendar"></i>
-      </div>
-      <div class="insight-text">
-        <strong>Лучший период:</strong> <span id="bestPeriodText">Определяем...</span>
-      </div>
-    </div>
-    <div class="insight-item">
-      <div class="insight-icon">
-        <i class="fas fa-clock"></i>
-      </div>
-      <div class="insight-text">
-        <strong>Пиковое время:</strong> <span id="peakTimeText">Анализируем...</span>
-      </div>
-    </div>
-  </div>
-</main>
+  </main>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-
 <script>
 // JavaScript для выпадающего меню пользователя
 document.addEventListener('DOMContentLoaded', function() {
@@ -854,14 +1029,14 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initEventListeners() {
-    const userElement = document.querySelector('.user');
+    const userElement = document.querySelector('.user-wrapper');
     if (userElement) {
         userElement.addEventListener('click', toggleMenu);
     }
     
     document.addEventListener('click', function(e) {
         const menu = document.getElementById('userMenu');
-        const user = document.querySelector('.user');
+        const user = document.querySelector('.user-wrapper');
         if (menu && menu.classList.contains('show') && user && !user.contains(e.target)) {
             toggleMenu();
         }

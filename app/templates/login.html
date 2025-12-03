@@ -116,7 +116,7 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 15px 20px !important;
+  padding: 15px 0 !important; /* Убрал горизонтальные отступы */
   position: relative;
   margin: 0 auto;
   user-select: none;
@@ -130,11 +130,12 @@ header {
   color: white;
   letter-spacing: 1px;
   margin: 0;
-  margin-right: auto;
+  /* Убрал margin-right: auto */
 }
 
 nav {
-  margin-left: auto;
+  display: flex;
+  gap: 15px; /* Добавил отступ между ссылками */
 }
 
 nav a {
@@ -321,6 +322,7 @@ h1 {
   color: #60F4E3;
 }
 
+/* Flash сообщения - ИСПРАВЛЕНИЕ ПРОБЛЕМЫ 3 */
 .flash-messages {
   margin-bottom: 20px;
 }
@@ -330,6 +332,12 @@ h1 {
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
+  display: none; /* Скрываем по умолчанию - исправление проблемы 3 */
+}
+
+/* Показываем только если есть сообщения */
+.flash-messages:not(:empty) .alert {
+  display: block;
 }
 
 .alert-error {
@@ -349,10 +357,11 @@ h1 {
   to {opacity: 1; transform: translateY(0);}
 }
 
+/* МОБИЛЬНАЯ ВЕРСИЯ - только здесь вносим изменения для пунктов 1 и 2 */
 @media (max-width: 768px) {
   h1 {
     font-size: 36px;
-    white-space: normal;
+    white-space: normal; /* Проблема 2: теперь текст переносится */
   }
   
   .welcome-text {
@@ -378,6 +387,30 @@ h1 {
   .background-emojis {
     display: none; /* Скрываем на мобильных для лучшей производительности */
   }
+  
+  /* ПРОБЛЕМА 1: исправляем навигацию для мобильных */
+  header {
+    flex-direction: row; /* Оставляем в строке */
+    justify-content: space-between; /* Распределяем по краям */
+    align-items: center;
+    padding: 15px 0 !important;
+  }
+  
+  nav {
+    display: flex;
+    gap: 10px; /* Уменьшаем отступ на мобильных */
+    flex-wrap: nowrap; /* Запрещаем перенос на новую строку */
+  }
+  
+  nav a {
+    padding: 8px 12px;
+    font-size: 14px; /* Чуть уменьшаем шрифт на мобильных */
+    white-space: nowrap; /* Запрещаем перенос текста */
+  }
+  
+  .logo {
+    font-size: 24px; /* Уменьшаем логотип на мобильных */
+  }
 }
 
 @media (max-width: 480px) {
@@ -386,7 +419,7 @@ h1 {
   }
   
   h1 {
-    font-size: 32px;
+    font-size: 32px; /* Проблема 2: уменьшаем еще больше на очень маленьких экранах */
   }
   
   .welcome-text p {
@@ -400,6 +433,23 @@ h1 {
   
   .btn {
     width: 100%;
+  }
+  
+  /* Дополнительные правки для очень маленьких экранов */
+  nav a {
+    padding: 6px 8px;
+    font-size: 13px;
+  }
+  
+  .logo {
+    font-size: 22px;
+  }
+  
+  /* Если все еще не помещается, скрываем "Главная" на очень маленьких экранах */
+  @media (max-width: 360px) {
+    nav a:first-child {
+      display: none; /* Скрываем "Главная" на очень маленьких экранах */
+    }
   }
 }
 </style>

@@ -79,12 +79,11 @@ nav a {
 }
 
 .header-image-wrapper {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-    position: relative;
-    top: 150px; /* МЕНЯЕМ: было 300px, теперь 150px */
-    z-index: 5;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  position: relative;
+  top: 300px;
 }
 
 .header-image {
@@ -174,6 +173,18 @@ nav a {
   z-index: 90;
 }
 
+.emoji-container.t {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  z-index: -1;
+  text-align: center;
+  transform: scale(10);
+  transform-origin: bottom center;
+  opacity: 0.7;
+}
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -181,18 +192,17 @@ nav a {
 }
 
 .main-content {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center; 
-    gap: 40px;
-    position: relative;
-    z-index: 10; 
-    padding: 100px 20px 20px;
-    margin-top: 0;
-    box-sizing: border-box;
-    min-height: 70vh; 
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 80px;
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .welcome-text {
@@ -214,6 +224,13 @@ h1 {
   margin: 0 0 24px;
   line-height: 1.1;
   white-space: nowrap;
+}
+
+.welcome-text p {
+  font-size: 22px;
+  line-height: 1.6;
+  margin: 0 auto 30px;
+  max-width: 800px;
 }
 
 .actions {
@@ -260,93 +277,6 @@ h1 {
   to {opacity: 1; transform: translateY(0);}
 }
 
-
-.bottom-background {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 200px;
-    z-index: 5; 
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.bottom-background img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center bottom; 
-    opacity: 0.8; 
-}
-
-/* ДОБАВЬТЕ ЭТО ДЛЯ body */
-body {
-    padding-bottom: 100px !important; /* Место для картинки */
-    position: relative;
-}
-
-/* ОБНОВЛЕННЫЕ МЕДИА-ЗАПРОСЫ ДЛЯ НИЖНЕЙ КАРТИНКИ */
-
-@media (max-width: 768px) {
-
-   .header-image-wrapper {
-        top: 80px; /* Еще выше на телефонах */
-    }
-     .main-content {
-        padding: 60px 15px 15px; /* Меньше отступ сверху */
-    }
-    
-    /* ПРАВИЛЬНОЕ СКРЫТИЕ ЭМОДЗИ */
-    .emoji-container.second-emoji,
-    .emoji-container.third-emoji,
-    .emoji-container.fourth-emoji,
-    .emoji-container.fifth-emoji,
-    .emoji-container.sixth-emoji,
-    .emoji-container.eighth-emoji,
-    .emoji-container.ninth-emoji,
-    .emoji-container.tenth-emoji,
-    .emoji-container.eleventh-emoji,
-    .emoji-container.twelfth-emoji {
-        display: none;
-    }
-    
-    /* НИЖНЯЯ КАРТИНКА НА МОБИЛЬНЫХ */
-    .bottom-background {
-        height: 150px; /* Меньше на телефонах */
-    }
-}
-    
-
-@media (max-width: 576px) {
-    .header-image-wrapper {
-        top: 60px; /* Совсем близко на маленьких телефонах */
-    }
-    
-    .main-content {
-        padding: 40px 10px 10px; /* Еще меньше отступ */
-    }
-    
-    .bottom-background {
-        height: 120px;
-    }
-}
-
-@media (max-width: 375px) {
-    .header-image-wrapper {
-        top: 40px;
-    }
-    
-    .main-content {
-        padding: 30px 10px 10px;
-    }
-    
-    .bottom-background {
-        height: 100px;
-    }
-}
-
-
 /* Адаптивность */
 @media (max-width: 1400px) {
   .emoji-container.second-emoji {
@@ -375,89 +305,158 @@ body {
 }
 
 @media (max-width: 1200px) {
-    .header-image-wrapper {
-        top: 120px; /* Адаптируем для планшетов */
-    }
-    
-    .main-content {
-        padding: 80px 20px 20px; /* Меньше отступ сверху */
-    }
+  .emoji-container.second-emoji {
+    left: 0;
+  }
+  
+  .emoji-container.third-emoji {
+    right: 0;
+  }
+  
+  .emoji-container.eleventh-emoji {
+    right: -100px;
+  }
+  
+  .emoji-container.twelfth-emoji {
+    right: -50px;
+  }
+  
+  .emoji-container.ninth-emoji {
+    left: -20%;
+  }
+  
+  .emoji-container.tenth-emoji {
+    left: -30%;
+  }
+  
+  .emoji-container.eighth-emoji {
+    left: -10%;
+  }
 }
 
-/* Планшеты (768px - 992px) */
 @media (max-width: 992px) {
-    h1 {
-        font-size: 36px;
-        white-space: normal;
-    }
-    
-    .welcome-text p {
-        font-size: 20px;
-        max-width: 500px;
-    }
-    
-    .emoji-container.fourth-emoji,
-    .emoji-container.fifth-emoji,
-    .emoji-container.sixth-emoji {
-        display: none;
-    }
-    
-    .emoji-image {
-        max-width: 200px !important;
-    }
-    
-    .header-image {
-        width: 150px !important;
-    }
-    
-    .emoji-container.second-emoji {
-        left: 0;
-    }
-    
-    .emoji-container.third-emoji {
-        right: 0;
-    }
-    
-    .emoji-container.eleventh-emoji {
-        right: -100px;
-    }
-    
-    .emoji-container.twelfth-emoji {
-        right: -50px;
-    }
-    
-    .emoji-container.ninth-emoji {
-        left: -20%;
-    }
-    
-    .emoji-container.tenth-emoji {
-        left: -30%;
-    }
-    
-    .emoji-container.eighth-emoji {
-        left: -10%;
-    }
-    
-    .bottom-image-container img {
-        transform: scale(8);
-    }
+  h1 {
+    font-size: 36px;
+    white-space: normal;
+  }
+  
+  .welcome-text p {
+    font-size: 20px;
+    max-width: 500px;
+  }
+  
+  .emoji-container.fourth-emoji,
+  .emoji-container.fifth-emoji,
+  .emoji-container.sixth-emoji {
+    display: none;
+  }
+  
+  .emoji-image {
+    max-width: 200px !important;
+  }
+  
+  .header-image {
+    width: 150px !important;
+  }
 }
 
+@media (max-width: 768px) {
+  body {
+    padding: 0 15px 30px;
+    font-size: 16px;
+  }
+  
+  h1 {
+    font-size: 32px;
+    white-space: normal;
+  }
+  
+  .welcome-text {
+    width: 98vw;
+    padding: 30px 15px;
+  }
+  
+  .welcome-text p {
+    font-size: 18px;
+    max-width: 100%;
+  }
+  
+  .actions {
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .btn {
+    width: 200px;
+    font-size: 16px;
+    padding: 12px 20px;
+  }
+  
+  .logo {
+    font-size: 24px;
+  }
+  
+  nav a {
+    padding: 8px 12px;
+    font-size: 16px;
+  }
+  
+  /* Скрываем большинство эмодзи на мобильных */
+  .emoji-container.second-emoji,
+  .emoji-container.third-emoji,
+  .emoji-container.fourth-emoji,
+  .emoji-container.fifth-emoji,
+  .emoji-container.sixth-emoji,
+  .emoji-container.eighth-emoji,
+  .emoji-container.ninth-emoji,
+  .emoji-container.tenth-emoji,
+  .emoji-container.eleventh-emoji,
+  .emoji-container.twelfth-emoji {
+    display: none;
+  }
+  
+  .header-image-wrapper {
+    top: 150px;
+  }
+  
+  .main-content {
+    gap: 40px;
+  }
+}
 
-/* Большие экраны (более 1400px) */
-@media (min-width: 1400px) {
-    .welcome-text {
-        max-width: 1000px;
-    }
-    
-    h1 {
-        font-size: 48px;
-    }
-    
-    .welcome-text p {
-        font-size: 24px;
-        max-width: 900px;
-    }
+@media (max-width: 480px) {
+  h1 {
+    font-size: 28px;
+  }
+  
+  .welcome-text {
+    padding: 20px 10px;
+  }
+  
+  .welcome-text p {
+    font-size: 16px;
+  }
+  
+  .btn {
+    width: 180px;
+    padding: 10px 16px;
+  }
+  
+  header {
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+  }
+  
+  .logo {
+    margin-right: 0;
+  }
+  
+  nav {
+    margin-left: 0;
+  }
 }
 </style>
 {% endblock %}
@@ -508,6 +507,11 @@ body {
     <img src="{{ url_for('static', filename='images/Mask group.png') }}" alt="Lumi" class="header-image" />
   </div>
 </div>
+<div class="emoji-container t">
+    <img src="{{ url_for('static', filename='images/Ellipse 746.png') }}" alt="Emoji 12" class="emoji-image" />
+  </div>
+</div>
+
 <div class="main-content">
   <div class="welcome-text gradient-box">
     <h1>Добро пожаловать в Lumi!</h1>
@@ -519,8 +523,5 @@ body {
       Это приложение — удобный трекер настроения, который помогает ежедневно отслеживать эмоциональное состояние и выявлять причины позитивных и негативных перепадов в настроении. С его помощью можно понять свои эмоциональные паттерны, улучшить самосознание и повысить качество жизни.
     </p>
   </div>
-<!-- НИЖНЯЯ КАРТИНКА - ОТДЕЛЬНЫМ ЭЛЕМЕНТОМ -->
-<div class="bottom-background">
-    <img src="{{ url_for('static', filename='images/Ellipse 746.png') }}" alt="Background" />
-</div>
+
 {% endblock %}

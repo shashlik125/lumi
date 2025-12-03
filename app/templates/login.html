@@ -357,11 +357,14 @@ h1 {
   to {opacity: 1; transform: translateY(0);}
 }
 
-/* МОБИЛЬНАЯ ВЕРСИЯ - только здесь вносим изменения для пунктов 1 и 2 */
+/* МОБИЛЬНАЯ ВЕРСИЯ */
 @media (max-width: 768px) {
   h1 {
     font-size: 30px;
-    white-space: nowrap; /* Проблема 2: теперь текст переносится */
+    white-space: nowrap; 
+    text-align: left;
+    margin-left: 0;
+    padding-left: 0;
   }
   
   .welcome-text {
@@ -420,7 +423,10 @@ h1 {
   
   h1 {
     font-size: 32px;
-    white-space: nowrap; /* Проблема 2: уменьшаем еще больше на очень маленьких экранах */
+    white-space: nowrap; 
+    text-align: left;
+    margin-left: 0;
+    padding-left: 0;
   }
   
   .welcome-text p {

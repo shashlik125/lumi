@@ -672,6 +672,8 @@ nav a.active::after {
 
         /* МОБИЛЬНАЯ АДАПТИВНОСТЬ ДЛЯ ДНЕВНИКА ЦИКЛА */
 
+/* МОБИЛЬНАЯ АДАПТИВНОСТЬ ДЛЯ ДНЕВНИКА ЦИКЛА */
+
 @media (max-width: 1024px) {
     /* Планшеты и маленькие ноутбуки */
     main {
@@ -728,6 +730,7 @@ nav a.active::after {
         flex-shrink: 0;
         background: rgba(96, 244, 227, 0.1);
         border-radius: 20px;
+        position: relative;
     }
     
     nav a.active {
@@ -735,8 +738,13 @@ nav a.active::after {
         color: white;
     }
     
+    /* ВОССТАНАВЛИВАЕМ ПОДЧЕРКИВАНИЕ ДЛЯ АКТИВНОЙ СТРАНИЦЫ НА МОБИЛЬНЫХ */
     nav a.active::after {
-        display: none; /* Убираем подчеркивание на мобильных */
+        display: block !important; /* Восстанавливаем подчеркивание */
+        width: 100% !important;
+        height: 2px;
+        background: white; /* Белое подчеркивание для контраста на цветном фоне */
+        bottom: -3px;
     }
     
     /* Профиль пользователя */
@@ -981,6 +989,8 @@ nav a.active::after {
         border-color: transparent;
     }
 }
+
+/* Остальные медиа-запросы остаются без изменений */
 
 @media (max-width: 480px) {
     /* Еще более компактный для маленьких телефонов */

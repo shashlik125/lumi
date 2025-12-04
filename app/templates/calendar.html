@@ -1104,7 +1104,7 @@ if (calendar && monthYear) {
         window.location.href = `/calendar/day/${dateKey}`;
     }
 
-    // Основная функция отрисовки календаря
+       // Основная функция отрисовки календаря
     function renderCalendar() {
         calendar.innerHTML = "";
         const year = currentDate.getFullYear();
@@ -1121,6 +1121,7 @@ if (calendar && monthYear) {
         let startDay = firstDay.getDay();
         if (startDay === 0) startDay = 7;
 
+        // Добавляем дни предыдущего месяца
         const prevMonthDays = new Date(year, month, 0).getDate();
         for (let i = startDay - 1; i > 0; i--) {
             const day = createDayElement(prevMonthDays - i + 1, "other-month", true);
@@ -1129,6 +1130,7 @@ if (calendar && monthYear) {
 
         const today = new Date();
 
+        // Добавляем дни текущего месяца
         for (let i = 1; i <= daysInMonth; i++) {
             const dateKey = formatISO(year, month + 1, i);
             const day = createDayElement(i, "", false);
@@ -1165,18 +1167,23 @@ if (calendar && monthYear) {
             calendar.appendChild(day);
         }
 
+        // ОПРЕДЕЛЯЕМ СКОЛЬКО ДНЕЙ ДОБАВИТЬ ИЗ СЛЕДУЮЩЕГО МЕСЯЦА
+        // Всего ячеек в календаре
         const totalCells = 42;
-        const filledCells = startDay - 1 + daysInMonth;
-
+        // Уже добавленные ячейки (предыдущий месяц + текущий месяц)
+        const filledCells = (startDay - 1) + daysInMonth;
+        
+        // Добавляем дни следующего месяца только если нужно
         if (filledCells < totalCells) {
-            for (let i = 1; i <= totalCells - filledCells; i++) {
+            // Добавляем ровно столько дней, чтобы получилось ровно 42 ячейки (6 недель)
+            for (let i = 1; i <= (totalCells - filledCells); i++) {
                 const day = createDayElement(i, "other-month", true);
                 calendar.appendChild(day);
             }
         }
         
         updateStats();
-    }
+    } 
 
     function changeMonth(step) {
         currentDate.setMonth(currentDate.getMonth() + step);

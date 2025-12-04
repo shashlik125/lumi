@@ -494,68 +494,500 @@ h1:after {
     background: #2196F3;
 }
 
+/* МОБИЛЬНАЯ АДАПТИВНОСТЬ */
+
+@media (max-width: 1024px) {
+    /* Планшеты и маленькие ноутбуки */
+    main {
+        padding: 20px 15px;
+        max-width: 100%;
+    }
+    
+    .calendar-container {
+        padding: 20px;
+        border-radius: 18px;
+    }
+    
+    .calendar-title {
+        font-size: 20px;
+    }
+}
+
 @media (max-width: 768px) {
-  .calendar-header {
-    flex-direction: column;
-    gap: 15px;
-    align-items: flex-start;
-  }
-  
-  .calendar-controls {
-    width: 100%;
-    justify-content: space-between;
-  }
-  
-  .weekday {
-    padding: 5px;
-    font-size: 14px;
-  }
-  
-  .day-number {
-    font-size: 14px;
-  }
-  
-  .stats-container {
-    grid-template-columns: 1fr;
-  }
-  
-  .mood-legend {
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
-  }
+    /* Планшеты и большие телефоны */
+    body {
+        padding-top: 70px;
+    }
+    
+    header {
+        padding: 15px 20px;
+        min-height: 70px;
+    }
+    
+    .logo {
+        font-size: 24px;
+    }
+    
+    nav {
+        gap: 10px;
+    }
+    
+    nav a {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+    
+    .user-avatar {
+        width: 35px;
+        height: 35px;
+    }
+    
+    h1 {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+    
+    .page-header {
+        margin-bottom: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .calendar-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .calendar-title {
+        font-size: 18px;
+    }
+    
+    .calendar-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .today-btn {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+    
+    .calendar-btn {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .weekdays {
+        grid-template-columns: repeat(7, 1fr);
+        padding: 8px 0;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+    
+    .weekday {
+        padding: 8px 2px;
+        word-break: keep-all;
+    }
+    
+    .calendar-grid {
+        gap: 6px;
+    }
+    
+    .calendar-day {
+        border-radius: 10px;
+        padding: 4px;
+        min-height: 50px;
+    }
+    
+    .day-number {
+        font-size: 14px;
+        margin-bottom: 3px;
+    }
+    
+    .mood-indicator {
+        width: 16px;
+        height: 16px;
+        bottom: 4px;
+        right: 4px;
+    }
+    
+    .today-dot {
+        top: 4px;
+        right: 4px;
+        width: 6px;
+        height: 6px;
+    }
+    
+    .stats-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        margin-top: 25px;
+    }
+    
+    .stat-card {
+        padding: 15px;
+        border-radius: 16px;
+    }
+    
+    .stat-title {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+    
+    .stat-value {
+        font-size: 24px;
+    }
+    
+    .mood-legend {
+        padding: 12px;
+        border-radius: 16px;
+        gap: 12px;
+        margin-top: 20px;
+    }
+    
+    .legend-item {
+        font-size: 13px;
+        padding: 6px 10px;
+    }
+    
+    .legend-color {
+        width: 12px;
+        height: 12px;
+    }
 }
 
 @media (max-width: 480px) {
-  header {
-    flex-direction: column;
-    gap: 15px;
-    padding: 15px;
-  }
-  
-  nav {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .calendar-grid {
-    gap: 5px;
-  }
-  
-  .calendar-day {
-    padding: 3px;
-  }
-  
-  .day-number {
-    font-size: 12px;
-  }
-  
-  .mood-indicator {
-    width: 15px;
-    height: 15px;
-    bottom: 3px;
-    right: 3px;
-  }
+    /* Телефоны */
+    body {
+        padding-top: 60px;
+    }
+    
+    header {
+        flex-direction: column;
+        gap: 12px;
+        padding: 12px 15px;
+        min-height: auto;
+    }
+    
+    .logo {
+        font-size: 22px;
+        order: 1;
+        width: 100%;
+        text-align: center;
+    }
+    
+    nav {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 5px;
+    }
+    
+    nav a {
+        padding: 6px 10px;
+        font-size: 13px;
+        white-space: nowrap;
+    }
+    
+    .user {
+        order: 2;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        margin-left: auto;
+    }
+    
+    .user span {
+        display: none; /* Скрываем имя на очень маленьких экранах */
+    }
+    
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .dropdown {
+        min-width: 140px;
+        right: -10px;
+    }
+    
+    main {
+        padding: 15px 10px;
+    }
+    
+    h1 {
+        font-size: 22px;
+        text-align: center;
+        width: 100%;
+    }
+    
+    h1:after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+    
+    .calendar-container {
+        padding: 15px;
+        margin-bottom: 20px;
+        border-radius: 16px;
+    }
+    
+    .calendar-header {
+        gap: 10px;
+    }
+    
+    .calendar-controls {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    
+    .today-btn {
+        order: 1;
+        width: 100%;
+        text-align: center;
+        margin: 5px 0;
+    }
+    
+    .calendar-btn:nth-child(1) {
+        order: 0;
+    }
+    
+    .calendar-btn:nth-child(3) {
+        order: 2;
+        margin-left: auto;
+    }
+    
+    .weekday {
+        padding: 6px 1px;
+        font-size: 12px;
+    }
+    
+    .calendar-grid {
+        gap: 4px;
+    }
+    
+    .calendar-day {
+        min-height: 45px;
+        border-radius: 8px;
+        padding: 3px;
+    }
+    
+    .day-number {
+        font-size: 12px;
+    }
+    
+    .mood-indicator {
+        width: 14px;
+        height: 14px;
+        bottom: 3px;
+        right: 3px;
+    }
+    
+    .today-dot {
+        top: 3px;
+        right: 3px;
+        width: 5px;
+        height: 5px;
+    }
+    
+    .stats-container {
+        gap: 12px;
+    }
+    
+    .stat-card {
+        padding: 12px;
+    }
+    
+    .stat-title {
+        font-size: 13px;
+    }
+    
+    .stat-value {
+        font-size: 22px;
+    }
+    
+    .mood-legend {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    .legend-item {
+        width: 100%;
+        justify-content: center;
+        padding: 8px;
+    }
+    
+    /* Улучшаем тач-таргеты для пальцев */
+    .calendar-day,
+    .calendar-btn,
+    .today-btn,
+    nav a {
+        min-height: 44px; /* Минимальный размер для удобного тапа */
+    }
+    
+    .calendar-day {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Уведомления на мобильных */
+    .toast {
+        top: 70px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        text-align: center;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 360px) {
+    /* Очень маленькие телефоны */
+    .calendar-day {
+        min-height: 40px;
+    }
+    
+    .day-number {
+        font-size: 11px;
+    }
+    
+    nav a {
+        padding: 5px 8px;
+        font-size: 12px;
+    }
+    
+    .stat-title {
+        font-size: 12px;
+    }
+    
+    .stat-value {
+        font-size: 20px;
+    }
+    
+    .legend-item {
+        font-size: 12px;
+    }
+}
+
+/* Портретная ориентация */
+@media (max-height: 600px) and (orientation: portrait) {
+    .calendar-day {
+        min-height: 35px;
+    }
+    
+    .calendar-container {
+        padding: 12px;
+    }
+}
+
+/* Ландшафтная ориентация */
+@media (max-height: 500px) and (orientation: landscape) {
+    header {
+        padding: 10px 15px;
+        min-height: 60px;
+    }
+    
+    .logo {
+        font-size: 20px;
+    }
+    
+    nav a {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+    
+    main {
+        padding: 10px;
+    }
+    
+    .calendar-day {
+        min-height: 30px;
+    }
+    
+    .day-number {
+        font-size: 11px;
+    }
+}
+
+/* Анимации для лучшего UX на мобильных */
+@media (hover: none) {
+    /* Отключаем hover-эффекты для тач-устройств */
+    .calendar-day:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .stat-card:hover {
+        transform: none;
+        border-color: transparent;
+    }
+    
+    /* Добавляем active-эффекты вместо hover */
+    .calendar-day:active {
+        transform: scale(0.95);
+        opacity: 0.8;
+        transition: transform 0.1s ease;
+    }
+    
+    .calendar-btn:active,
+    .today-btn:active {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+}
+
+/* Поддержка тёмной темы на iOS */
+@media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(to right, #264653 0%, #3a5364 50%, #4a6170 100%);
+    }
+    
+    .calendar-container,
+    .stat-card,
+    .mood-legend {
+        background: #2c3e50;
+        color: #ecf0f1;
+    }
+    
+    .weekdays {
+        background: rgba(96, 244, 227, 0.15);
+        color: #bdc3c7;
+    }
+    
+    .calendar-day {
+        background: #34495e;
+        color: #ecf0f1;
+    }
+    
+    .other-month {
+        background: rgba(52, 73, 94, 0.5);
+        color: #7f8c8d;
+    }
+    
+    .current-day {
+        background: #60F4E3;
+        color: #2c3e50;
+    }
+}
+
+/* Оптимизация для Retina-дисплеев */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .calendar-day,
+    .stat-card,
+    .mood-legend {
+        border-width: 1.5px;
+    }
+    
+    .today-dot {
+        border-width: 2px;
+    }
 }
 </style>
 {% endblock %}

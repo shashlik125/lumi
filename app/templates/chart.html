@@ -54,22 +54,10 @@ body {
   padding-top: 80px; /* Отступ для фиксированного хедера */
 }
 
-/* КОНТЕЙНЕР ДЛЯ ВСЕГО КОНТЕНТА */
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  z-index: 2;
-}
-
-/* ХЕДЕР - АДАПТИВНЫЙ КАК В DASHBOARD */
+/* ХЕДЕР - БЕРЁМ ИЗ ДЕСКТОПНОЙ ВЕРСИИ (ПЕРВОГО ФАЙЛА) */
 header {
   background: white;
-  padding: 15px 5%;
+  padding: 20px 5%;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -81,6 +69,7 @@ header {
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
   min-height: 80px;
   
+  /* Добавляем градиент прямо к фону хедера */
   background: linear-gradient(to bottom, 
     white 0%, 
     white 70%,
@@ -94,15 +83,11 @@ header {
   font-size: 28px;
   font-weight: 700;
   color: #264653;
-  letter-spacing: 1px;
-  white-space: nowrap;
 }
 
 nav {
   display: flex;
-  gap: 15px;
-  flex-wrap: wrap;
-  justify-content: center;
+  gap: 20px;
 }
 
 nav a {
@@ -110,10 +95,9 @@ nav a {
   color: #264653;
   font-weight: 600;
   position: relative;
-  padding: 8px 12px;
-  transition: all 0.3s ease;
+  padding: 10px 15px;
+  transition: var(--transition);
   font-size: 16px;
-  white-space: nowrap;
 }
 
 nav a::after {
@@ -124,7 +108,7 @@ nav a::after {
   width: 0;
   height: 2px;
   background: var(--accent-pink);
-  transition: all 0.3s ease;
+  transition: var(--transition);
 }
 
 nav a:hover::after,
@@ -136,8 +120,7 @@ nav a.active::after {
   width: 100% !important;
 }
 
-/* Стили для пользователя и аватара - как в dashboard */
-.user-wrapper {
+.user {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -145,23 +128,20 @@ nav a.active::after {
   position: relative;
   padding: 5px 10px;
   border-radius: 8px;
-  transition: all 0.3s ease;
-  margin-left: auto;
-  white-space: nowrap;
+  transition: var(--transition);
 }
 
-.user-wrapper:hover,
-.user-wrapper:focus {
+.user:hover,
+.user:focus {
   background: rgba(255, 255, 255, 0.3);
 }
 
 .user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   border: 2px solid var(--white);
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-  object-fit: cover;
 }
 
 .dropdown {
@@ -194,12 +174,24 @@ nav a.active::after {
   text-decoration: none;
   color: var(--text-color);
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: var(--transition);
 }
 
 .dropdown a:hover,
 .dropdown a:focus {
   background: #f2f2f2;
+}
+
+/* КОНТЕЙНЕР ДЛЯ ВСЕГО КОНТЕНТА */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 2;
 }
 
 /* ОСНОВНОЙ КОНТЕНТ СТРАНИЦЫ */
@@ -590,23 +582,23 @@ h1:after {
   background: var(--danger);
 }
 
-/* АДАПТИВНОСТЬ - ХЕДЕР */
-@media (max-width: 992px) {
-  .logo {
-    font-size: 24px;
-  }
-  
-  nav {
-    gap: 10px;
-  }
-  
-  nav a {
-    padding: 6px 10px;
-    font-size: 14px;
+/* АДАПТИВНОСТЬ - ХЕДЕР - ТОЧНО КАК В ПЕРВОМ ФАЙЛЕ */
+@media (max-width: 1200px) {
+  .emoji-image {
+    max-width: 250px;
   }
 }
 
-/* АДАПТИВНОСТЬ - МОБИЛЬНАЯ ВЕРСИЯ (ТОЛЬКО КОНТЕНТ) */
+@media (max-width: 1024px) {
+  .main-content {
+    margin-top: 500px;
+  }
+  
+  .emoji-image {
+    max-width: 200px;
+  }
+}
+
 @media (max-width: 768px) {
     /* Компактный хедер для планшетов и телефонов */
     body {
@@ -671,7 +663,7 @@ h1:after {
     }
     
     /* Профиль пользователя */
-    .user-wrapper {
+    .user {
         order: 2;
         margin-left: auto; /* Прижимаем к правому краю */
         flex-shrink: 0;
@@ -681,7 +673,7 @@ h1:after {
         min-width: 50px; /* Минимальная ширина для аватара */
     }
     
-    .user-wrapper span {
+    .user span {
         display: none; /* Скрываем имя пользователя */
     }
     
@@ -943,13 +935,11 @@ h1:after {
         font-size: 12px;
     }
 }
-
-
-
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- ХЕДЕР ТОЧНО КАК В ПЕРВОМ ФАЙЛЕ -->
 <header>
   <div class="logo">Lumi</div>
   <nav>
@@ -970,7 +960,7 @@ h1:after {
       Дневник цикла
     </a>
   </nav>
-  <div class="user-wrapper" tabindex="0" aria-haspopup="true" aria-expanded="false">
+  <div class="user" tabindex="0" aria-haspopup="true" aria-expanded="false">
     <span id="username">
         {% if current_user.is_authenticated %}
             {{ current_user.first_name or current_user.username }}
@@ -1152,6 +1142,7 @@ h1:after {
 {% endblock %}
 
 {% block extra_js %}
+<!-- JavaScript для выпадающего меню пользователя - ТОЧНО КАК В ПЕРВОМ ФАЙЛЕ -->
 <script>
 // JavaScript для выпадающего меню пользователя
 document.addEventListener('DOMContentLoaded', function() {
@@ -1159,14 +1150,14 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initEventListeners() {
-    const userElement = document.querySelector('.user-wrapper');
+    const userElement = document.querySelector('.user');
     if (userElement) {
         userElement.addEventListener('click', toggleMenu);
     }
     
     document.addEventListener('click', function(e) {
         const menu = document.getElementById('userMenu');
-        const user = document.querySelector('.user-wrapper');
+        const user = document.querySelector('.user');
         if (menu && menu.classList.contains('show') && user && !user.contains(e.target)) {
             toggleMenu();
         }

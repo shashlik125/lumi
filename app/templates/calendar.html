@@ -1105,6 +1105,7 @@ if (calendar && monthYear) {
     }
 
        // Основная функция отрисовки календаря
+        // Основная функция отрисовки календаря
     function renderCalendar() {
         calendar.innerHTML = "";
         const year = currentDate.getFullYear();
@@ -1121,10 +1122,10 @@ if (calendar && monthYear) {
         let startDay = firstDay.getDay();
         if (startDay === 0) startDay = 7;
 
-        // Добавляем дни предыдущего месяца
+        // Добавляем дни предыдущего месяца - ИСПРАВЛЕНО
         const prevMonthDays = new Date(year, month, 0).getDate();
-        for (let i = startDay - 1; i >= 0; i--) {
-            const day = createDayElement(prevMonthDays - i, "other-month", true);
+        for (let i = startDay - 1; i > 0; i--) {
+            const day = createDayElement(prevMonthDays - i + 1, "other-month", true);
             calendar.appendChild(day);
         }
 
@@ -1183,7 +1184,7 @@ if (calendar && monthYear) {
         }
         
         updateStats();
-    } 
+    }
     
     function changeMonth(step) {
         currentDate.setMonth(currentDate.getMonth() + step);

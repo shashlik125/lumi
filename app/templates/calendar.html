@@ -536,16 +536,16 @@ h1:after {
     }
     
     nav a.active {
-      color: var(--dark);
+        color: var(--primary-color);
     }
     
     nav a.active::after {
-    display: block !important; /* Восстанавливаем подчеркивание */
-    width: 100% !important;
-    height: 2px;
-    background: var(--accent-pink);
-    bottom: 0;
-}
+        display: block !important; /* Восстанавливаем подчеркивание */
+        width: 100% !important;
+        height: 2px;
+        background: var(--accent-pink);
+        bottom: 0;
+    }
     
     /* Профиль пользователя */
     .user {
@@ -564,269 +564,252 @@ h1:after {
         height: 36px;
     }
     
-    /* Остальные стили для мобильных */
-    main {
-        padding: 20px 15px;
+    /* Мобильная версия emoji контейнера */
+    .images-container {
+        margin: 20px auto;
+        height: 200px;
+        position: relative;
+        top: 0;
+    }
+    
+    /* Скрываем все emoji кроме основных */
+    .emoji-container.second-emoji,
+    .emoji-container.third-emoji,
+    .emoji-container.fourth-emoji,
+    .emoji-container.fifth-emoji,
+    .emoji-container.sixth-emoji,
+    .emoji-container.eighth-emoji,
+    .emoji-container.ninth-emoji,
+    .emoji-container.tenth-emoji,
+    .emoji-container.eleventh-emoji,
+    .emoji-container.twelfth-emoji {
+        display: none !important;
+    }
+    
+    /* Оставляем только первый emoji и размещаем рядом с mask group */
+    .emoji-container {
+        position: absolute;
+        top: 50%;
+        left: 20%;
+        transform: translateY(-50%);
+        z-index: 6;
+    }
+    
+    .emoji-container .emoji-image {
+        max-width: 80px !important;
+        height: auto;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    /* Добавляем второй emoji с другой стороны */
+    .emoji-container::after {
+        content: '';
+        position: absolute;
+        right: -100px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 80px;
+        height: 80px;
+        background-image: url("{{ url_for('static', filename='images/😳.png') }}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        animation: float 3.5s ease-in-out infinite;
+        animation-delay: 0.5s;
+    }
+    
+    .header-image-wrapper {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 150px;
+        z-index: 7;
+    }
+    
+    .header-image {
+        width: 100%;
+        height: auto;
+    }
+    
+    /* Основной контент */
+    .main-content {
+        margin-top: 100px !important;
+        gap: 40px;
+        padding: 0 15px;
+    }
+    
+    .welcome-text {
+        padding: 25px 20px;
+        border-radius: 16px;
+        margin-top: 20px;
     }
     
     h1 {
-        font-size: 24px;
-        padding-bottom: 8px;
+        font-size: 32px;
+        margin-bottom: 16px;
     }
     
-    .calendar-container {
-        padding: 20px;
-        border-radius: 18px;
-        margin-bottom: 25px;
+    .welcome-text p {
+        font-size: 16px;
+        margin-bottom: 20px;
     }
     
-    .calendar-header {
+    .actions {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-        margin-bottom: 15px;
-    }
-    
-    .calendar-title {
-        font-size: 18px;
-    }
-    
-    .calendar-controls {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    .today-btn {
-        padding: 8px 16px;
-        font-size: 14px;
-    }
-    
-    .calendar-btn {
-        width: 36px;
-        height: 36px;
-    }
-    
-    .weekdays {
-        padding: 8px 0;
-        font-size: 14px;
-        margin-bottom: 8px;
-    }
-    
-    .weekday {
-        padding: 6px 2px;
-        font-size: 13px;
-    }
-    
-    .calendar-grid {
-        gap: 6px;
-    }
-    
-    .calendar-day {
-        min-height: 45px;
-        border-radius: 10px;
-        padding: 4px;
-    }
-    
-    .day-number {
-        font-size: 14px;
-        margin-bottom: 3px;
-    }
-    
-    .mood-indicator {
-        width: 16px;
-        height: 16px;
-        bottom: 4px;
-        right: 4px;
-    }
-    
-    .today-dot {
-        top: 4px;
-        right: 4px;
-        width: 6px;
-        height: 6px;
-    }
-    
-    .stats-container {
-        grid-template-columns: 1fr;
-        gap: 15px;
-        margin-top: 25px;
-    }
-    
-    .stat-card {
-        padding: 15px;
-        border-radius: 16px;
-    }
-    
-    .stat-title {
-        font-size: 14px;
-        margin-bottom: 8px;
-    }
-    
-    .stat-value {
-        font-size: 24px;
-    }
-    
-    .mood-legend {
-        padding: 12px;
-        border-radius: 16px;
         gap: 12px;
         margin-top: 20px;
-        flex-direction: column;
-        align-items: center;
     }
     
-    .legend-item {
-        font-size: 13px;
-        padding: 6px 10px;
+    .btn {
+        padding: 12px 20px;
+        font-size: 16px;
+        border-radius: 12px;
         width: 100%;
-        justify-content: center;
-    }
-    
-    .legend-color {
-        width: 12px;
-        height: 12px;
-    }
-    
-    /* Уведомления на мобильных */
-    .toast {
-        top: 70px;
-        right: 10px;
-        left: 10px;
-        max-width: none;
         text-align: center;
-        font-size: 13px;
+    }
+    
+    /* Особенности */
+    .features {
+        margin-top: 40px;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 10px;
+    }
+    
+    .card {
+        padding: 25px 20px;
+        min-height: 180px;
+        border-radius: 16px;
+        top: 0;
+    }
+    
+    .card h3 {
+        font-size: 20px;
+        margin-bottom: 15px;
+        white-space: normal;
+    }
+    
+    .card p {
+        font-size: 15px;
+        line-height: 1.5;
     }
     
     /* Убираем hover-эффекты для тач-устройств */
-    .calendar-day:hover,
-    .stat-card:hover {
+    .card:hover {
         transform: none;
-        box-shadow: none;
-        border-color: transparent;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+    
+    /* Выпадающее меню */
+    .dropdown {
+        position: fixed;
+        top: 60px;
+        right: 15px;
+        left: auto;
+        width: 160px;
+        border-radius: 12px;
+    }
+    
+    .dropdown a {
+        padding: 14px 16px;
+        font-size: 15px;
+    }
+    
+    /* Анимации */
+    @keyframes float {
+        0%, 100% { transform: translateY(-50%) translateX(0); }
+        50% { transform: translateY(-50%) translateX(-5px); }
     }
 }
 
 @media (max-width: 480px) {
-    /* Еще более компактный для маленьких телефонов */
-    body {
-        padding-top: 55px;
+    .images-container {
+        height: 180px;
     }
     
-    header {
-        padding: 8px 12px;
-        min-height: 55px;
-        gap: 10px;
+    .emoji-container {
+        left: 15%;
     }
     
-    nav {
-        gap: 6px;
+    .emoji-container::after {
+        right: -80px;
+        width: 70px;
+        height: 70px;
     }
     
-    nav a {
-        padding: 6px 10px;
-        font-size: 13px;
+    .header-image-wrapper {
+        width: 130px;
     }
     
-    .user-avatar {
-        width: 32px;
-        height: 32px;
+    .emoji-container .emoji-image {
+        max-width: 70px !important;
     }
     
-    main {
-        padding: 15px 10px;
+    .main-content {
+        margin-top: 80px !important;
     }
     
     h1 {
-        font-size: 22px;
+        font-size: 28px;
     }
     
-    .calendar-container {
-        padding: 15px;
-        margin-bottom: 20px;
-        border-radius: 16px;
+    .welcome-text p {
+        font-size: 15px;
     }
     
-    .calendar-title {
-        font-size: 16px;
+    .features {
+        margin-top: 30px;
     }
     
-    .today-btn {
-        padding: 6px 12px;
-        font-size: 13px;
+    .card {
+        padding: 20px 15px;
+        min-height: 160px;
     }
     
-    .calendar-btn {
-        width: 32px;
-        height: 32px;
+    .card h3 {
+        font-size: 18px;
     }
     
-    .calendar-btn i {
-        font-size: 12px;
-    }
-    
-    .weekday {
-        padding: 5px 1px;
-        font-size: 12px;
-    }
-    
-    .calendar-grid {
-        gap: 4px;
-    }
-    
-    .calendar-day {
-        min-height: 40px;
-        border-radius: 8px;
-        padding: 3px;
-    }
-    
-    .day-number {
-        font-size: 12px;
-    }
-    
-    .mood-indicator {
-        width: 14px;
-        height: 14px;
-        bottom: 3px;
-        right: 3px;
-    }
-    
-    .today-dot {
-        top: 3px;
-        right: 3px;
-        width: 5px;
-        height: 5px;
-    }
-    
-    .stat-title {
-        font-size: 13px;
-    }
-    
-    .stat-value {
-        font-size: 22px;
+    .card p {
+        font-size: 14px;
     }
 }
 
-/* Ландшафтная ориентация */
-@media (max-height: 500px) and (orientation: landscape) {
-    header {
-        padding: 6px 10px;
-        min-height: 50px;
+@media (max-width: 360px) {
+    .images-container {
+        height: 160px;
+    }
+    
+    .emoji-container {
+        left: 10%;
+    }
+    
+    .emoji-container::after {
+        right: -70px;
+        width: 60px;
+        height: 60px;
+    }
+    
+    .header-image-wrapper {
+        width: 110px;
+    }
+    
+    .emoji-container .emoji-image {
+        max-width: 60px !important;
     }
     
     nav a {
-        padding: 4px 8px;
-        font-size: 12px;
+        padding: 6px 10px;
+        font-size: 13px;
     }
     
     .user-avatar {
-        width: 30px;
-        height: 30px;
-    }
-    
-    .calendar-day {
-        min-height: 35px;
+        width: 32px;
+        height: 32px;
     }
 }
+</style>
+{% endblock %}
 </style>
 {% endblock %}
 

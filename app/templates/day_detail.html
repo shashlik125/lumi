@@ -118,11 +118,6 @@ main {
   margin-bottom: 10px;
 }
 
-.day-date {
-  color: var(--gray);
-  font-size: 16px;
-}
-
 .back-btn {
   background: var(--white);
   color: var(--dark);
@@ -147,13 +142,13 @@ main {
   background: var(--white);
   border-radius: var(--border-radius);
   box-shadow: var(--shadow);
-  padding: 25px;
+  padding: 15px 25px;
   margin-bottom: 20px;
 }
 
 .section-title {
-  font-size: 20px;
-  margin-bottom: 20px;
+  font-size: 18px;
+  margin-bottom: 15px;
   color: var(--dark);
   text-align: center;
   font-weight: 700;
@@ -161,26 +156,26 @@ main {
 
 .mood-display {
   text-align: center;
-  margin-bottom: 25px;
+  margin-bottom: 15px;
 }
 
 .mood-value {
-  font-size: 48px;
+  font-size: 36px;
   font-weight: 700;
-  margin-bottom: 10px;
-  color: var(--primary); /* Заменяем градиентный текст на обычный цвет */
+  margin-bottom: 8px;
+  color: var(--primary);
 }
 
 .mood-emoji {
-  font-size: 64px;
-  margin-bottom: 15px;
+  font-size: 48px;
+  margin-bottom: 10px;
 }
 
 .mood-note {
   background: var(--light);
-  padding: 15px;
+  padding: 10px 15px;
   border-radius: 12px;
-  margin-top: 15px;
+  margin-top: 10px;
   text-align: left;
   border-left: 4px solid var(--primary);
 }
@@ -206,7 +201,7 @@ main {
 .add-mood-section {
   background: var(--accent);
   border-radius: var(--border-radius);
-  padding: 25px;
+  padding: 15px 25px;
   margin-bottom: 20px;
   border: 2px solid var(--primary);
 }
@@ -269,19 +264,6 @@ main {
   padding: 10px;
   background: rgba(255, 255, 255, 0.7);
   border-radius: 10px;
-}
-
-.note-input {
-  width: 100%;
-  padding: 15px;
-  border-radius: 12px;
-  border: 2px solid #ddd;
-  margin: 15px 0;
-  font-family: 'Montserrat', sans-serif;
-  resize: vertical;
-  min-height: 80px;
-  transition: var(--transition);
-  font-size: 14px;
 }
 
 .note-input:focus {
@@ -557,15 +539,15 @@ main {
   }
   
   .mood-section, .add-mood-section, .positive-things, .hourly-mood-section {
-    padding: 20px;
+    padding: 12px 15px;
   }
   
   .mood-value {
-    font-size: 36px;
+    font-size: 28px;
   }
   
   .mood-emoji {
-    font-size: 48px;
+    font-size: 26px;
   }
   
   .hours-grid {
@@ -664,7 +646,6 @@ main {
 <main>
   <div class="day-header">
     <h2 class="day-title" id="dayTitle">Загрузка...</h2>
-    <div class="day-date" id="dayDate"></div>
   </div>
 
   <div class="mood-section">
@@ -708,8 +689,6 @@ main {
       5/10 - Нормально 😐
     </div>
     
-    <textarea class="note-input" id="moodNoteInput" placeholder="Опишите, что повлияло на ваше настроение сегодня... Что вас порадовало? Что огорчило?"></textarea>
-    
     <div class="form-actions">
       <button class="btn btn-primary" onclick="saveMood()">
         <i class="fas fa-save"></i> Сохранить настроение
@@ -725,7 +704,7 @@ main {
   </div>
 
   <div class="positive-things">
-    <h3 class="section-title">Что порадовало сегодня</h3>
+    <h3 class="section-title">Как настроение повлияло на ваш день?</h3>
     
     <!-- Форма для добавления радостного момента -->
     <div class="add-positive-form">
@@ -818,8 +797,6 @@ function updateDayView(dayMoods) {
         day: 'numeric'
     });
     
-    document.getElementById('dayDate').textContent = date;
-
     // Берем первую запись настроения за день (у нас одна запись на день)
     if (dayMoods.length > 0) {
         currentMood = dayMoods[0];
@@ -848,7 +825,6 @@ function showMoodDisplay(mood) {
     
     // Заполняем форму текущими значениями для редактирования
     document.getElementById('moodSlider').value = mood.mood;
-    document.getElementById('moodNoteInput').value = mood.note || '';
     updateMoodPreview();
 }
 
@@ -858,7 +834,6 @@ function showNoMood() {
     
     // Сбрасываем форму
     document.getElementById('moodSlider').value = 5;
-    document.getElementById('moodNoteInput').value = '';
     updateMoodPreview();
 }
 
@@ -893,7 +868,7 @@ function updateMoodPreview() {
 
 async function saveMood() {
     const moodValue = parseInt(document.getElementById('moodSlider').value);
-    const note = document.getElementById('moodNoteInput').value.trim();
+    const note = '';
 
     try {
         // Сохраняем настроение дня
@@ -903,7 +878,6 @@ async function saveMood() {
             body: JSON.stringify({
                 date: currentDate,
                 mood: moodValue,
-                note: note
             })
         });
 

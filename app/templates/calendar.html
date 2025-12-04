@@ -1123,7 +1123,7 @@ if (calendar && monthYear) {
 
         // Добавляем дни предыдущего месяца
         const prevMonthDays = new Date(year, month, 0).getDate();
-        for (let i = startDay - 2; i >= 0; i--) {
+        for (let i = startDay - 1; i >= 0; i--) {
             const day = createDayElement(prevMonthDays - i, "other-month", true);
             calendar.appendChild(day);
         }

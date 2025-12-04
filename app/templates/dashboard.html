@@ -449,66 +449,6 @@ h1 {
 }
 
 @media (max-width: 768px) {
-  header {
-    padding: 15px;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  nav {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px 15px;
-  }
-  
-  .user {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-  }
-  
-  .main-content {
-    margin-top: 400px;
-    gap: 50px;
-    padding: 0 15px;
-  }
-  
-  .welcome-text {
-    padding: 30px 40px;
-  }
-  
-  h1 {
-    font-size: 42px;
-  }
-  
-  .welcome-text p {
-    font-size: 18px;
-  }
-  
-  .btn {
-    font-size: 16px;
-    padding: 12px 20px;
-  }
-  
-  .features {
-    grid-template-columns: 1fr; /* 1 колонка на мобильных */
-    max-width: 500px;
-    gap: 20px;
-  }
-  
-  .card h3 {
-    font-size: 22px; /* Уменьшаем заголовки на мобильных */
-    white-space: normal; /* Разрешаем перенос на мобильных */
-  }
-  
-  .emoji-image {
-    max-width: 150px;
-  }
-}
-
-@media (max-width: 768px) {
     /* Компактный хедер для планшетов и телефонов */
     body {
         padding-top: 60px; /* Уменьшили отступ */
@@ -523,6 +463,13 @@ h1 {
         -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
         gap: 15px;
         justify-content: flex-start; /* Выравнивание по левому краю */
+        scrollbar-width: none; /* Скрываем скроллбар для Firefox */
+        -ms-overflow-style: none; /* Скрываем скроллбар для IE/Edge */
+    }
+    
+    /* Скрываем скроллбар для Webkit браузеров */
+    header::-webkit-scrollbar {
+        display: none;
     }
     
     /* УБИРАЕМ ЛОГОТИП LUMI */
@@ -546,18 +493,18 @@ h1 {
         white-space: nowrap; /* Не переносить текст */
         flex-shrink: 0;
         border-radius: 20px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(38, 70, 83, 0.1);
     }
     
     nav a.active {
         color: var(--primary-color);
+        background: rgba(255, 112, 236, 0.1);
+        border: 1px solid var(--accent-pink);
     }
     
     nav a.active::after {
-        display: block !important; /* Восстанавливаем подчеркивание */
-        width: 100% !important;
-        height: 2px;
-        background: var(--accent-pink);
-        bottom: 0;
+        display: none !important; /* Убираем подчеркивание для мобильных */
     }
     
     /* Профиль пользователя */
@@ -566,6 +513,9 @@ h1 {
         margin-left: auto; /* Прижимаем к правому краю */
         flex-shrink: 0;
         padding: 5px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 20px;
+        min-width: 50px; /* Минимальная ширина для аватара */
     }
     
     .user span {
@@ -573,8 +523,8 @@ h1 {
     }
     
     .user-avatar {
-        width: 36px;
-        height: 36px;
+        width: 32px;
+        height: 32px;
     }
     
     /* Мобильная версия emoji контейнера */

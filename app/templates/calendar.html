@@ -540,8 +540,12 @@ h1:after {
     }
     
     nav a.active::after {
-        display: none; /* Убираем подчеркивание на мобильных */
-    }
+    display: block !important; /* Восстанавливаем подчеркивание */
+    width: 100% !important;
+    height: 2px;
+    background: var(--accent-pink);
+    bottom: 0;
+}
     
     /* Профиль пользователя */
     .user {
@@ -1041,13 +1045,15 @@ if (calendar && monthYear) {
     let moods = [];
 
     document.addEventListener('DOMContentLoaded', function() {
-        loadMoodData();
+    // Загружаем и отображаем календарь сразу
+    loadMoodData().then(() => {
         renderCalendar();
         updateStats();
-        cleanupFutureEntries();
     });
+    cleanupFutureEntries();
+});
 
-    async function loadMoodData() {
+async function loadMoodData() {
     try {
         const response = await fetch(API_BASE);
         if (response.ok) {
@@ -1064,13 +1070,23 @@ if (calendar && monthYear) {
             
             console.log(`Отфильтрованы будущие записи. Осталось: ${moods.length} из ${allMoods.length}`);
             
-            renderCalendar();
-            updateStats();
+            return true; // Успешно загружено
+        } else {
+            // Если ошибка сервера, все равно показываем календарь
+            console.error('Ошибка загрузки настроений:', response.status);
+            moods = []; // Сбрасываем в пустой массив
+            return false;
         }
     } catch (error) {
-        console.error('Ошибка загрузки настроений:', error);
+        // Если сетевой ошибка, все равно показываем календарь
+        console.error('Сетевая ошибка загрузки настроений:', error);
+        moods = []; // Сбрасываем в пустой массив
+        return false;
     }
 }
+
+
+
     function formatISO(year, month, day) {
         return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     }
@@ -1151,6 +1167,93 @@ if (calendar && monthYear) {
             }
         }
     }
+
+// Функция для отображения календаря с существующими данными пользователя
+function renderCalendarWithDefaultData() {
+    if (calendar && monthYear) {
+        // Устанавливаем текущую дату
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+        
+        // Обновляем заголовок
+        const monthNames = [
+            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+        ];
+        monthYear.textContent = `${monthNames[month]} ${year}`;
+        
+        // Очищаем календарь
+        calendar.innerHTML = '';
+        
+        // === НАЧАЛО КОДА ИЗ renderCalendar() ===
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+        
+        let startDay = firstDay.getDay();
+        if (startDay === 0) startDay = 7;
+
+        const prevMonthDays = new Date(year, month, 0).getDate();
+        for (let i = startDay - 1; i > 0; i--) {
+            const day = createDayElement(prevMonthDays - i + 1, "other-month", true);
+            calendar.appendChild(day);
+        }
+
+        const currentDay = new Date();
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dateKey = formatISO(year, month + 1, i);
+            const day = createDayElement(i, "", false);
+
+            // Проверка на сегодняшний день
+            const isToday = currentDay.getDate() === i && 
+                           currentDay.getMonth() === month && 
+                           currentDay.getFullYear() === year;
+            if (isToday) {
+                day.classList.add("current-day");
+                
+                const todayDot = document.createElement("div");
+                todayDot.className = "today-dot";
+                todayDot.title = "Сегодня";
+                day.appendChild(todayDot);
+            }
+
+            // Ищем записи пользователя для этой даты
+            const dayMoods = moods.filter(entry => entry.date === dateKey);
+            if (dayMoods.length > 0) {
+                const avgMood = dayMoods.reduce((s, m) => s + m.mood, 0) / dayMoods.length;
+
+                if (avgMood >= 7) day.classList.add("mood-good");
+                else if (avgMood >= 4) day.classList.add("mood-neutral");
+                else day.classList.add("mood-bad");
+
+                const indicator = document.createElement("div");
+                indicator.classList.add("mood-indicator");
+                day.appendChild(indicator);
+            }
+
+            day.addEventListener('click', function(event) {
+                openDayDetail(dateKey, event);
+            });
+
+            calendar.appendChild(day);
+        }
+
+        const totalCells = 42;
+        const filledCells = startDay - 1 + daysInMonth;
+
+        if (filledCells < totalCells) {
+            for (let i = 1; i <= totalCells - filledCells; i++) {
+                const day = createDayElement(i, "other-month", true);
+                calendar.appendChild(day);
+            }
+        }
+        
+        // Обновляем статистику с данными пользователя
+        updateStats();
+    }
+}
 
     function createDayElement(dayNumber, className, isOtherMonth) {
         const dayElement = document.createElement("div");

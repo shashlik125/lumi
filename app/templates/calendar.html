@@ -50,7 +50,7 @@ body {
   padding-top: 80px; /* Отступ для фиксированного хедера */
 }
 
-/* ХЕДЕР КАК В INDEX.HTML */
+/* ХЕДЕР - ДЕСКТОПНАЯ ВЕРСИЯ (не меняем) */
 header {
   background: white;
   padding: 20px 5%;
@@ -455,7 +455,6 @@ h1:after {
     20%, 40%, 60%, 80% { transform: translateX(3px); }
 }
 
-
 /* Стили для уведомлений */
 .toast {
     position: fixed;
@@ -494,64 +493,89 @@ h1:after {
     background: #2196F3;
 }
 
-/* МОБИЛЬНАЯ АДАПТИВНОСТЬ */
-
-@media (max-width: 1024px) {
-    /* Планшеты и маленькие ноутбуки */
-    main {
-        padding: 20px 15px;
-        max-width: 100%;
-    }
-    
-    .calendar-container {
-        padding: 20px;
-        border-radius: 18px;
-    }
-    
-    .calendar-title {
-        font-size: 20px;
-    }
-}
+/* МОБИЛЬНАЯ АДАПТИВНОСТЬ - ТОЛЬКО ЗДЕСЬ МЕНЯЕМ */
 
 @media (max-width: 768px) {
-    /* Планшеты и большие телефоны */
+    /* Компактный хедер для планшетов и телефонов */
     body {
-        padding-top: 70px;
+        padding-top: 60px; /* Уменьшили отступ */
     }
     
     header {
-        padding: 15px 20px;
-        min-height: 70px;
+        padding: 10px 15px;
+        min-height: 60px; /* Уменьшили высоту */
+        flex-wrap: nowrap; /* Одна строка */
+        overflow-x: auto; /* Горизонтальная прокрутка если не помещается */
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
+        gap: 15px;
+        justify-content: flex-start; /* Выравнивание по левому краю */
     }
     
+    /* УБИРАЕМ ЛОГОТИП LUMI */
     .logo {
-        font-size: 24px;
+        display: none !important; /* Полностью скрываем логотип */
     }
     
+    /* Навигация - горизонтальная прокрутка */
     nav {
-        gap: 10px;
+        order: 1;
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0; /* Не сжимается */
+        margin: 0;
+        padding: 0;
     }
     
     nav a {
         padding: 8px 12px;
         font-size: 14px;
+        white-space: nowrap; /* Не переносить текст */
+        flex-shrink: 0;
+        background: rgba(96, 244, 227, 0.1);
+        border-radius: 20px;
+    }
+    
+    nav a.active {
+        background: var(--primary);
+        color: white;
+    }
+    
+    nav a.active::after {
+        display: none; /* Убираем подчеркивание на мобильных */
+    }
+    
+    /* Профиль пользователя */
+    .user {
+        order: 2;
+        margin-left: auto; /* Прижимаем к правому краю */
+        flex-shrink: 0;
+        padding: 5px;
+    }
+    
+    .user span {
+        display: none; /* Скрываем имя пользователя */
     }
     
     .user-avatar {
-        width: 35px;
-        height: 35px;
+        width: 36px;
+        height: 36px;
+    }
+    
+    /* Остальные стили для мобильных */
+    main {
+        padding: 20px 15px;
     }
     
     h1 {
         font-size: 24px;
-        margin-bottom: 10px;
+        padding-bottom: 8px;
     }
     
-    .page-header {
-        margin-bottom: 20px;
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
+    .calendar-container {
+        padding: 20px;
+        border-radius: 18px;
+        margin-bottom: 25px;
     }
     
     .calendar-header {
@@ -571,25 +595,24 @@ h1:after {
     }
     
     .today-btn {
-        padding: 6px 12px;
+        padding: 8px 16px;
         font-size: 14px;
     }
     
     .calendar-btn {
-        width: 35px;
-        height: 35px;
+        width: 36px;
+        height: 36px;
     }
     
     .weekdays {
-        grid-template-columns: repeat(7, 1fr);
         padding: 8px 0;
         font-size: 14px;
         margin-bottom: 8px;
     }
     
     .weekday {
-        padding: 8px 2px;
-        word-break: keep-all;
+        padding: 6px 2px;
+        font-size: 13px;
     }
     
     .calendar-grid {
@@ -597,9 +620,9 @@ h1:after {
     }
     
     .calendar-day {
+        min-height: 45px;
         border-radius: 10px;
         padding: 4px;
-        min-height: 50px;
     }
     
     .day-number {
@@ -646,74 +669,65 @@ h1:after {
         border-radius: 16px;
         gap: 12px;
         margin-top: 20px;
+        flex-direction: column;
+        align-items: center;
     }
     
     .legend-item {
         font-size: 13px;
         padding: 6px 10px;
+        width: 100%;
+        justify-content: center;
     }
     
     .legend-color {
         width: 12px;
         height: 12px;
     }
+    
+    /* Уведомления на мобильных */
+    .toast {
+        top: 70px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        text-align: center;
+        font-size: 13px;
+    }
+    
+    /* Убираем hover-эффекты для тач-устройств */
+    .calendar-day:hover,
+    .stat-card:hover {
+        transform: none;
+        box-shadow: none;
+        border-color: transparent;
+    }
 }
 
 @media (max-width: 480px) {
-    /* Телефоны */
+    /* Еще более компактный для маленьких телефонов */
     body {
-        padding-top: 60px;
+        padding-top: 55px;
     }
     
     header {
-        flex-direction: column;
-        gap: 12px;
-        padding: 12px 15px;
-        min-height: auto;
-    }
-    
-    .logo {
-        font-size: 22px;
-        order: 1;
-        width: 100%;
-        text-align: center;
+        padding: 8px 12px;
+        min-height: 55px;
+        gap: 10px;
     }
     
     nav {
-        order: 3;
-        width: 100%;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 5px;
+        gap: 6px;
     }
     
     nav a {
         padding: 6px 10px;
         font-size: 13px;
-        white-space: nowrap;
-    }
-    
-    .user {
-        order: 2;
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        margin-left: auto;
-    }
-    
-    .user span {
-        display: none; /* Скрываем имя на очень маленьких экранах */
     }
     
     .user-avatar {
         width: 32px;
         height: 32px;
-    }
-    
-    .dropdown {
-        min-width: 140px;
-        right: -10px;
     }
     
     main {
@@ -722,13 +736,6 @@ h1:after {
     
     h1 {
         font-size: 22px;
-        text-align: center;
-        width: 100%;
-    }
-    
-    h1:after {
-        left: 50%;
-        transform: translateX(-50%);
     }
     
     .calendar-container {
@@ -737,33 +744,26 @@ h1:after {
         border-radius: 16px;
     }
     
-    .calendar-header {
-        gap: 10px;
-    }
-    
-    .calendar-controls {
-        flex-wrap: wrap;
-        gap: 8px;
+    .calendar-title {
+        font-size: 16px;
     }
     
     .today-btn {
-        order: 1;
-        width: 100%;
-        text-align: center;
-        margin: 5px 0;
+        padding: 6px 12px;
+        font-size: 13px;
     }
     
-    .calendar-btn:nth-child(1) {
-        order: 0;
+    .calendar-btn {
+        width: 32px;
+        height: 32px;
     }
     
-    .calendar-btn:nth-child(3) {
-        order: 2;
-        margin-left: auto;
+    .calendar-btn i {
+        font-size: 12px;
     }
     
     .weekday {
-        padding: 6px 1px;
+        padding: 5px 1px;
         font-size: 12px;
     }
     
@@ -772,7 +772,7 @@ h1:after {
     }
     
     .calendar-day {
-        min-height: 45px;
+        min-height: 40px;
         border-radius: 8px;
         padding: 3px;
     }
@@ -795,14 +795,6 @@ h1:after {
         height: 5px;
     }
     
-    .stats-container {
-        gap: 12px;
-    }
-    
-    .stat-card {
-        padding: 12px;
-    }
-    
     .stat-title {
         font-size: 13px;
     }
@@ -810,92 +802,13 @@ h1:after {
     .stat-value {
         font-size: 22px;
     }
-    
-    .mood-legend {
-        flex-direction: column;
-        align-items: center;
-        gap: 10px;
-        padding: 10px;
-    }
-    
-    .legend-item {
-        width: 100%;
-        justify-content: center;
-        padding: 8px;
-    }
-    
-    /* Улучшаем тач-таргеты для пальцев */
-    .calendar-day,
-    .calendar-btn,
-    .today-btn,
-    nav a {
-        min-height: 44px; /* Минимальный размер для удобного тапа */
-    }
-    
-    .calendar-day {
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-    }
-    
-    /* Уведомления на мобильных */
-    .toast {
-        top: 70px;
-        right: 10px;
-        left: 10px;
-        max-width: none;
-        text-align: center;
-        font-size: 13px;
-    }
-}
-
-@media (max-width: 360px) {
-    /* Очень маленькие телефоны */
-    .calendar-day {
-        min-height: 40px;
-    }
-    
-    .day-number {
-        font-size: 11px;
-    }
-    
-    nav a {
-        padding: 5px 8px;
-        font-size: 12px;
-    }
-    
-    .stat-title {
-        font-size: 12px;
-    }
-    
-    .stat-value {
-        font-size: 20px;
-    }
-    
-    .legend-item {
-        font-size: 12px;
-    }
-}
-
-/* Портретная ориентация */
-@media (max-height: 600px) and (orientation: portrait) {
-    .calendar-day {
-        min-height: 35px;
-    }
-    
-    .calendar-container {
-        padding: 12px;
-    }
 }
 
 /* Ландшафтная ориентация */
 @media (max-height: 500px) and (orientation: landscape) {
     header {
-        padding: 10px 15px;
-        min-height: 60px;
-    }
-    
-    .logo {
-        font-size: 20px;
+        padding: 6px 10px;
+        min-height: 50px;
     }
     
     nav a {
@@ -903,56 +816,13 @@ h1:after {
         font-size: 12px;
     }
     
-    main {
-        padding: 10px;
+    .user-avatar {
+        width: 30px;
+        height: 30px;
     }
     
     .calendar-day {
-        min-height: 30px;
-    }
-    
-    .day-number {
-        font-size: 11px;
-    }
-}
-
-/* Анимации для лучшего UX на мобильных */
-@media (hover: none) {
-    /* Отключаем hover-эффекты для тач-устройств */
-    .calendar-day:hover {
-        transform: none;
-        box-shadow: none;
-    }
-    
-    .stat-card:hover {
-        transform: none;
-        border-color: transparent;
-    }
-    
-    /* Добавляем active-эффекты вместо hover */
-    .calendar-day:active {
-        transform: scale(0.95);
-        opacity: 0.8;
-        transition: transform 0.1s ease;
-    }
-    
-    .calendar-btn:active,
-    .today-btn:active {
-        transform: scale(0.95);
-        opacity: 0.8;
-    }
-}
-
-/* Оптимизация для Retina-дисплеев */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .calendar-day,
-    .stat-card,
-    .mood-legend {
-        border-width: 1.5px;
-    }
-    
-    .today-dot {
-        border-width: 2px;
+        min-height: 35px;
     }
 }
 </style>
@@ -1063,6 +933,8 @@ h1:after {
       <div class="stat-value" id="filledDays">0/30</div>
     </div>
   </div>
+  
+  <!-- УБИРАЕМ ПОСЛЕДНЮЮ ПЛАШКУ "Что порадовало сегодня" - ЕЁ ЗДЕСЬ НЕТ -->
 </main>
 {% endblock %}
 

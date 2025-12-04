@@ -670,7 +670,7 @@ nav a.active::after {
             100% { transform: rotate(360deg); }
         }
 
-        /* МОБИЛЬНАЯ АДАПТИВНОСТЬ ДЛЯ ДНЕВНИКА ЦИКЛА */
+        
 
 /* МОБИЛЬНАЯ АДАПТИВНОСТЬ ДЛЯ ДНЕВНИКА ЦИКЛА */
 
@@ -735,16 +735,32 @@ nav a.active::after {
     
     nav a.active {
         background: var(--primary);
-        color: white;
+        color: var(--dark);
     }
     
-    /* ВОССТАНАВЛИВАЕМ ПОДЧЕРКИВАНИЕ ДЛЯ АКТИВНОЙ СТРАНИЦЫ НА МОБИЛЬНЫХ */
-    nav a.active::after {
-        display: block !important; /* Восстанавливаем подчеркивание */
-        width: 100% !important;
+    /* ПОДЧЕРКИВАНИЕ АКТИВНОЙ СТРАНИЦЫ КАК НА ДЕСКТОПЕ */
+    nav a::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
         height: 2px;
-        background: white; /* Белое подчеркивание для контраста на цветном фоне */
-        bottom: -3px;
+        background: var(--accent-pink); /* Розовая линия как на десктопе */
+        transition: all 0.3s ease;
+        border-radius: 1px;
+    }
+    
+    nav a.active::after {
+        width: 100% !important; /* Полное подчеркивание для активной страницы */
+        background: var(--accent-pink); /* Тот же розовый цвет */
+    }
+    
+    /* При наведении (если устройство поддерживает hover) */
+    @media (hover: hover) {
+        nav a:hover::after {
+            width: 100%;
+        }
     }
     
     /* Профиль пользователя */
@@ -990,6 +1006,7 @@ nav a.active::after {
     }
 }
 
+/* Остальные медиа-запросы без изменений... */
 /* Остальные медиа-запросы остаются без изменений */
 
 @media (max-width: 480px) {

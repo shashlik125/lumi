@@ -424,171 +424,321 @@ h1 {
 }
 
 
-@media (max-width: 1200px) {
-  .emoji-image {
-    max-width: 250px;
-  }
-  
-  .features {
-    grid-template-columns: repeat(3, 1fr); /* Оставляем 3 колонки */
-    max-width: 1100px;
-  }
-}
-
-@media (max-width: 1024px) {
-  .main-content {
-    margin-top: 500px;
-  }
-  
-  .emoji-image {
-    max-width: 200px;
-  }
-  
-  .features {
-    grid-template-columns: repeat(2, 1fr); /* 2 колонки на планшетах */
-    max-width: 800px;
-    gap: 25px;
-  }
-}
-
 @media (max-width: 768px) {
-  header {
-    padding: 15px;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  nav {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px 15px;
-  }
-  
-  .user {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-  }
-  
-  .main-content {
-    margin-top: 400px;
-    gap: 50px;
-    padding: 0 15px;
-  }
-  
-  .welcome-text {
-    padding: 30px 40px;
-  }
-  
-  h1 {
-    font-size: 42px;
-  }
-  
-  .welcome-text p {
-    font-size: 18px;
-  }
-  
-  .btn {
-    font-size: 16px;
-    padding: 12px 20px;
-  }
-  
-  .features {
-    grid-template-columns: 1fr; /* 1 колонка на мобильных */
-    max-width: 500px;
-    gap: 20px;
-  }
-  
-  .card h3 {
-    font-size: 22px; /* Уменьшаем заголовки на мобильных */
-    white-space: normal; /* Разрешаем перенос на мобильных */
-  }
-  
-  .emoji-image {
-    max-width: 150px;
-  }
+    /* Компактный хедер для планшетов и телефонов */
+    body {
+        padding-top: 60px; /* Уменьшили отступ */
+    }
+    
+    header {
+        padding: 10px 15px;
+        min-height: 60px; /* Уменьшили высоту */
+        flex-wrap: nowrap; /* Одна строка */
+        overflow-x: auto; /* Горизонтальная прокрутка если не помещается */
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
+        gap: 15px;
+        justify-content: flex-start; /* Выравнивание по левому краю */
+    }
+    
+    /* УБИРАЕМ ЛОГОТИП LUMI */
+    .logo {
+        display: none !important; /* Полностью скрываем логотип */
+    }
+    
+    /* Навигация - горизонтальная прокрутка */
+    nav {
+        order: 1;
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0; /* Не сжимается */
+        margin: 0;
+        padding: 0;
+    }
+    
+    nav a {
+        padding: 8px 12px;
+        font-size: 14px;
+        white-space: nowrap; /* Не переносить текст */
+        flex-shrink: 0;
+        border-radius: 20px;
+    }
+    
+    nav a.active {
+        color: var(--primary-color);
+    }
+    
+    nav a.active::after {
+        display: block !important; /* Восстанавливаем подчеркивание */
+        width: 100% !important;
+        height: 2px;
+        background: var(--accent-pink);
+        bottom: 0;
+    }
+    
+    /* Профиль пользователя */
+    .user {
+        order: 2;
+        margin-left: auto; /* Прижимаем к правому краю */
+        flex-shrink: 0;
+        padding: 5px;
+    }
+    
+    .user span {
+        display: none; /* Скрываем имя пользователя */
+    }
+    
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+    }
+    
+    /* Мобильная версия emoji контейнера */
+    .images-container {
+        margin: 20px auto;
+        height: 200px;
+        position: relative;
+        top: 0;
+    }
+    
+    /* Скрываем все emoji кроме основных */
+    .emoji-container.second-emoji,
+    .emoji-container.third-emoji,
+    .emoji-container.fourth-emoji,
+    .emoji-container.fifth-emoji,
+    .emoji-container.sixth-emoji,
+    .emoji-container.eighth-emoji,
+    .emoji-container.ninth-emoji,
+    .emoji-container.tenth-emoji,
+    .emoji-container.eleventh-emoji,
+    .emoji-container.twelfth-emoji {
+        display: none !important;
+    }
+    
+    /* Оставляем только первый emoji и размещаем рядом с mask group */
+    .emoji-container {
+        position: absolute;
+        top: 50%;
+        left: 20%;
+        transform: translateY(-50%);
+        z-index: 6;
+    }
+    
+    .emoji-container .emoji-image {
+        max-width: 80px !important;
+        height: auto;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    /* Добавляем второй emoji с другой стороны */
+    .emoji-container::after {
+        content: '';
+        position: absolute;
+        right: -100px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 80px;
+        height: 80px;
+        background-image: url("{{ url_for('static', filename='images/😳.png') }}");
+        background-size: contain;
+        background-repeat: no-repeat;
+        animation: float 3.5s ease-in-out infinite;
+        animation-delay: 0.5s;
+    }
+    
+    .header-image-wrapper {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 150px;
+        z-index: 7;
+    }
+    
+    .header-image {
+        width: 100%;
+        height: auto;
+    }
+    
+    /* Основной контент */
+    .main-content {
+        margin-top: 100px !important;
+        gap: 40px;
+        padding: 0 15px;
+    }
+    
+    .welcome-text {
+        padding: 25px 20px;
+        border-radius: 16px;
+        margin-top: 20px;
+    }
+    
+    h1 {
+        font-size: 32px;
+        margin-bottom: 16px;
+    }
+    
+    .welcome-text p {
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+    
+    .actions {
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 20px;
+    }
+    
+    .btn {
+        padding: 12px 20px;
+        font-size: 16px;
+        border-radius: 12px;
+        width: 100%;
+        text-align: center;
+    }
+    
+    /* Особенности */
+    .features {
+        margin-top: 40px;
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 0 10px;
+    }
+    
+    .card {
+        padding: 25px 20px;
+        min-height: 180px;
+        border-radius: 16px;
+        top: 0;
+    }
+    
+    .card h3 {
+        font-size: 20px;
+        margin-bottom: 15px;
+        white-space: normal;
+    }
+    
+    .card p {
+        font-size: 15px;
+        line-height: 1.5;
+    }
+    
+    /* Убираем hover-эффекты для тач-устройств */
+    .card:hover {
+        transform: none;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+    }
+    
+    /* Выпадающее меню */
+    .dropdown {
+        position: fixed;
+        top: 60px;
+        right: 15px;
+        left: auto;
+        width: 160px;
+        border-radius: 12px;
+    }
+    
+    .dropdown a {
+        padding: 14px 16px;
+        font-size: 15px;
+    }
+    
+    /* Анимации */
+    @keyframes float {
+        0%, 100% { transform: translateY(-50%) translateX(0); }
+        50% { transform: translateY(-50%) translateX(-5px); }
+    }
 }
 
 @media (max-width: 480px) {
-  body {
-    padding-top: 70px;
-  }
-  
-  .user span {
-    display: none;
-  }
-  
-  .main-content {
-    margin-top: 300px;
-    gap: 30px;
-    padding: 0 10px;
-  }
-  
-  .welcome-text {
-    padding: 20px 25px;
-  }
-  
-  h1 {
-    font-size: 32px;
-  }
-  
-  .welcome-text p {
-    font-size: 16px;
-  }
-  
-  .actions {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .btn {
-    width: 100%;
-  }
-  
-  .features {
-    margin-top: 30px;
-  }
-  
-  .card {
-    padding: 20px 15px;
-    min-height: 200px; /* Уменьшаем высоту на мобильных */
-  }
-  
-  .card h3 {
-    font-size: 20px;
-  }
-  
-  .card p {
-    font-size: 16px;
-  }
-  
-  .emoji-image {
-    max-width: 120px;
-  }
+    .images-container {
+        height: 180px;
+    }
+    
+    .emoji-container {
+        left: 15%;
+    }
+    
+    .emoji-container::after {
+        right: -80px;
+        width: 70px;
+        height: 70px;
+    }
+    
+    .header-image-wrapper {
+        width: 130px;
+    }
+    
+    .emoji-container .emoji-image {
+        max-width: 70px !important;
+    }
+    
+    .main-content {
+        margin-top: 80px !important;
+    }
+    
+    h1 {
+        font-size: 28px;
+    }
+    
+    .welcome-text p {
+        font-size: 15px;
+    }
+    
+    .features {
+        margin-top: 30px;
+    }
+    
+    .card {
+        padding: 20px 15px;
+        min-height: 160px;
+    }
+    
+    .card h3 {
+        font-size: 18px;
+    }
+    
+    .card p {
+        font-size: 14px;
+    }
 }
 
 @media (max-width: 360px) {
-  .main-content {
-    margin-top: 250px;
-  }
-  
-  nav a {
-    font-size: 14px;
-    padding: 8px 12px;
-  }
-  
-  .logo {
-    font-size: 24px;
-  }
-  
-  .card {
-    padding: 15px 12px;
-    min-height: 180px;
-  }
+    .images-container {
+        height: 160px;
+    }
+    
+    .emoji-container {
+        left: 10%;
+    }
+    
+    .emoji-container::after {
+        right: -70px;
+        width: 60px;
+        height: 60px;
+    }
+    
+    .header-image-wrapper {
+        width: 110px;
+    }
+    
+    .emoji-container .emoji-image {
+        max-width: 60px !important;
+    }
+    
+    nav a {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+    
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+    }
 }
-
+</style>
+{% endblock %}
 </style>
 {% endblock %}
 

@@ -225,6 +225,35 @@ h1 {
   font-family: 'Montserrat', sans-serif;
 }
 
+.password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+
+.password-wrapper .form-input {
+  width: 100%;
+  padding-right: 50px; /* Место для кнопки */
+}
+
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 5px;
+  color: #6c757d;
+  transition: color 0.3s ease;
+  z-index: 2;
+}
+
+.toggle-password:hover {
+  color: #FF70EC;
+}
+
 .form-input:focus {
   border-color: #60F4E3;
   outline: none;
@@ -332,13 +361,11 @@ h1 {
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
-  display: none; /* Скрываем по умолчанию - исправление проблемы 3 */
+  margin-bottom: 10px;
+  text-align: center;
+  animation: fadeIn 0.3s ease;
 }
 
-/* Показываем только если есть сообщения */
-.flash-messages:not(:empty) .alert {
-  display: block;
-}
 
 .alert-error {
   background: #ffe6e6;
@@ -350,6 +377,10 @@ h1 {
   background: #e6f7e6;
   color: #27ae60;
   border: 1px solid #ccffcc;
+}
+
+.flash-messages:empty {
+  display: none;
 }
 
 @keyframes fadeIn {
@@ -515,15 +546,15 @@ h1 {
     </p>
     
     <!-- Flash сообщения -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <div class="flash-messages">
-          {% for category, message in messages %}
-            <div class="alert alert-{{ category }}">{{ message }}</div>
-          {% endfor %}
-        </div>
-      {% endif %}
-    {% endwith %}
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <div class="flash-messages">
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}
     
     <form method="POST" class="login-form">
       <div class="form-group">
@@ -531,11 +562,15 @@ h1 {
         <input type="text" id="username" name="username" class="form-input" placeholder="Введите ваш логин" required>
       </div>
       
-      <div class="form-group">
-        <label for="password">Пароль</label>
-        <input type="password" id="password" name="password" class="form-input" placeholder="Введите ваш пароль" required>
-      </div>
-      
+<div class="form-group">
+  <label for="password">Пароль</label>
+  <div class="password-wrapper">
+    <input type="password" id="password" name="password" class="form-input password-input" placeholder="Введите ваш пароль" required>
+    <button type="button" class="toggle-password" aria-label="Показать/скрыть пароль">
+      👁️
+    </button>
+  </div>
+</div>
       <div class="form-options">
         <label class="remember-me">
           <input type="checkbox" name="remember_me">
@@ -555,4 +590,30 @@ h1 {
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Функция показа/скрытия пароля
+  const togglePassword = document.querySelector('.toggle-password');
+  const passwordInput = document.querySelector('.password-input');
+  
+  if (togglePassword && passwordInput) {
+    togglePassword.addEventListener('click', function() {
+      const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passwordInput.setAttribute('type', type);
+      
+      // Меняем иконку
+      this.textContent = type === 'password' ? '👁️' : '🙈';
+    });
+  }
+  
+  // Автофокус на поле логина
+  const usernameInput = document.getElementById('username');
+  if (usernameInput) {
+    usernameInput.focus();
+  }
+});
+</script>
 {% endblock %}

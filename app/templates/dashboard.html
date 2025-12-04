@@ -4,7 +4,6 @@
 
 {% block extra_css %}
 <style>
-
 * {
   font-family: 'Montserrat', sans-serif !important;
 }
@@ -310,7 +309,7 @@ nav a.active::after {
   background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.75) 100%);
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
   text-align: center;
-  animation: fadeIn 1.2s ease;
+  animation: fadeInUp 1.2s ease;
   box-sizing: border-box;
 }
 
@@ -404,8 +403,7 @@ h1 {
   color: #000000;
 }
 
-
-@keyframes fadeIn {
+@keyframes fadeInUp {
   from {opacity: 0; transform: translateY(20px);}
   to {opacity: 1; transform: translateY(0);}
 }
@@ -423,6 +421,92 @@ h1 {
   white-space: nowrap;
 }
 
+@media (max-width: 1200px) {
+  .emoji-image {
+    max-width: 250px;
+  }
+  
+  .features {
+    grid-template-columns: repeat(3, 1fr); /* Оставляем 3 колонки */
+    max-width: 1100px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .main-content {
+    margin-top: 500px;
+  }
+  
+  .emoji-image {
+    max-width: 200px;
+  }
+  
+  .features {
+    grid-template-columns: repeat(2, 1fr); /* 2 колонки на планшетах */
+    max-width: 800px;
+    gap: 25px;
+  }
+}
+
+@media (max-width: 768px) {
+  header {
+    padding: 15px;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  nav {
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px 15px;
+  }
+  
+  .user {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+  }
+  
+  .main-content {
+    margin-top: 400px;
+    gap: 50px;
+    padding: 0 15px;
+  }
+  
+  .welcome-text {
+    padding: 30px 40px;
+  }
+  
+  h1 {
+    font-size: 42px;
+  }
+  
+  .welcome-text p {
+    font-size: 18px;
+  }
+  
+  .btn {
+    font-size: 16px;
+    padding: 12px 20px;
+  }
+  
+  .features {
+    grid-template-columns: 1fr; /* 1 колонка на мобильных */
+    max-width: 500px;
+    gap: 20px;
+  }
+  
+  .card h3 {
+    font-size: 22px; /* Уменьшаем заголовки на мобильных */
+    white-space: normal; /* Разрешаем перенос на мобильных */
+  }
+  
+  .emoji-image {
+    max-width: 150px;
+  }
+}
 
 @media (max-width: 768px) {
     /* Компактный хедер для планшетов и телефонов */
@@ -495,8 +579,8 @@ h1 {
     
     /* Мобильная версия emoji контейнера */
     .images-container {
-        margin: 20px auto;
-        height: 200px;
+        margin: 20px auto 10px;
+        height: 180px;
         position: relative;
         top: 0;
     }
@@ -515,54 +599,40 @@ h1 {
         display: none !important;
     }
     
-    /* Оставляем только первый emoji и размещаем рядом с mask group */
-    .emoji-container {
-        position: absolute;
-        top: 50%;
-        left: 20%;
-        transform: translateY(-50%);
-        z-index: 6;
+    /* Оставляем только первый emoji */
+    .emoji-container:first-of-type {
+        position: absolute !important;
+        top: 50% !important;
+        left: 15% !important;
+        transform: translateY(-50%) !important;
+        z-index: 6 !important;
+        width: 80px !important;
+        height: 80px !important;
     }
     
-    .emoji-container .emoji-image {
+    .emoji-container:first-of-type .emoji-image {
         max-width: 80px !important;
-        height: auto;
-        animation: float 3s ease-in-out infinite;
-    }
-    
-    /* Добавляем второй emoji с другой стороны */
-    .emoji-container::after {
-        content: '';
-        position: absolute;
-        right: -100px;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 80px;
-        height: 80px;
-        background-image: url("{{ url_for('static', filename='images/😳.png') }}");
-        background-size: contain;
-        background-repeat: no-repeat;
-        animation: float 3.5s ease-in-out infinite;
-        animation-delay: 0.5s;
+        height: auto !important;
+        animation: float 3s ease-in-out infinite !important;
     }
     
     .header-image-wrapper {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 150px;
-        z-index: 7;
+        position: absolute !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 140px !important;
+        z-index: 7 !important;
     }
     
     .header-image {
-        width: 100%;
-        height: auto;
+        width: 100% !important;
+        height: auto !important;
     }
     
     /* Основной контент */
     .main-content {
-        margin-top: 100px !important;
+        margin-top: 120px !important;
         gap: 40px;
         padding: 0 15px;
     }
@@ -576,6 +646,7 @@ h1 {
     h1 {
         font-size: 32px;
         margin-bottom: 16px;
+        white-space: normal;
     }
     
     .welcome-text p {
@@ -599,83 +670,82 @@ h1 {
     
     /* Особенности */
     .features {
-        margin-top: 40px;
-        grid-template-columns: 1fr;
-        gap: 20px;
-        padding: 0 10px;
+        margin-top: 40px !important;
+        grid-template-columns: 1fr !important;
+        gap: 20px !important;
+        padding: 0 10px !important;
     }
     
     .card {
-        padding: 25px 20px;
-        min-height: 180px;
-        border-radius: 16px;
-        top: 0;
+        padding: 25px 20px !important;
+        min-height: 180px !important;
+        border-radius: 16px !important;
+        top: 0 !important;
     }
     
     .card h3 {
-        font-size: 20px;
-        margin-bottom: 15px;
-        white-space: normal;
+        font-size: 20px !important;
+        margin-bottom: 15px !important;
+        white-space: normal !important;
     }
     
     .card p {
-        font-size: 15px;
-        line-height: 1.5;
-    }
-    
-    /* Убираем hover-эффекты для тач-устройств */
-    .card:hover {
-        transform: none;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        font-size: 15px !important;
+        line-height: 1.5 !important;
     }
     
     /* Выпадающее меню */
     .dropdown {
-        position: fixed;
-        top: 60px;
-        right: 15px;
-        left: auto;
-        width: 160px;
-        border-radius: 12px;
+        position: fixed !important;
+        top: 60px !important;
+        right: 15px !important;
+        left: auto !important;
+        width: 160px !important;
+        border-radius: 12px !important;
     }
     
     .dropdown a {
-        padding: 14px 16px;
-        font-size: 15px;
-    }
-    
-    /* Анимации */
-    @keyframes float {
-        0%, 100% { transform: translateY(-50%) translateX(0); }
-        50% { transform: translateY(-50%) translateX(-5px); }
+        padding: 14px 16px !important;
+        font-size: 15px !important;
     }
 }
 
 @media (max-width: 480px) {
+    body {
+        padding-top: 70px;
+    }
+    
+    .user span {
+        display: none;
+    }
+    
     .images-container {
-        height: 180px;
+        height: 150px;
+        margin: 15px auto 5px;
     }
     
-    .emoji-container {
-        left: 15%;
+    .emoji-container:first-of-type {
+        left: 10% !important;
+        width: 70px !important;
+        height: 70px !important;
     }
     
-    .emoji-container::after {
-        right: -80px;
-        width: 70px;
-        height: 70px;
+    .emoji-container:first-of-type .emoji-image {
+        max-width: 70px !important;
     }
     
     .header-image-wrapper {
-        width: 130px;
-    }
-    
-    .emoji-container .emoji-image {
-        max-width: 70px !important;
+        width: 120px !important;
     }
     
     .main-content {
         margin-top: 80px !important;
+        gap: 30px;
+        padding: 0 10px;
+    }
+    
+    .welcome-text {
+        padding: 20px 25px;
     }
     
     h1 {
@@ -686,45 +756,58 @@ h1 {
         font-size: 15px;
     }
     
+    .actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+    
     .features {
-        margin-top: 30px;
+        margin-top: 30px !important;
     }
     
     .card {
-        padding: 20px 15px;
-        min-height: 160px;
+        padding: 20px 15px !important;
+        min-height: 160px !important;
     }
     
     .card h3 {
-        font-size: 18px;
+        font-size: 18px !important;
     }
     
     .card p {
-        font-size: 14px;
+        font-size: 14px !important;
+    }
+    
+    .emoji-image {
+        max-width: 120px;
     }
 }
 
 @media (max-width: 360px) {
+    .main-content {
+        margin-top: 70px !important;
+    }
+    
     .images-container {
-        height: 160px;
+        height: 130px;
     }
     
-    .emoji-container {
-        left: 10%;
+    .emoji-container:first-of-type {
+        left: 8% !important;
+        width: 60px !important;
+        height: 60px !important;
     }
     
-    .emoji-container::after {
-        right: -70px;
-        width: 60px;
-        height: 60px;
+    .emoji-container:first-of-type .emoji-image {
+        max-width: 60px !important;
     }
     
     .header-image-wrapper {
-        width: 110px;
-    }
-    
-    .emoji-container .emoji-image {
-        max-width: 60px !important;
+        width: 100px !important;
     }
     
     nav a {
@@ -732,13 +815,15 @@ h1 {
         font-size: 13px;
     }
     
-    .user-avatar {
-        width: 32px;
-        height: 32px;
+    .logo {
+        font-size: 24px;
+    }
+    
+    .card {
+        padding: 15px 12px !important;
+        min-height: 140px !important;
     }
 }
-</style>
-{% endblock %}
 </style>
 {% endblock %}
 

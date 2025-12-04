@@ -607,71 +607,87 @@ h1:after {
 }
 
 @media (max-width: 768px) {
-  body {
-    font-size: 16px;
-  }
-  
-  header {
-    padding: 10px 15px;
-    min-height: 70px;
-  }
-  
-  .logo {
-    font-size: 22px;
-  }
-  
-  nav {
-    gap: 8px;
-  }
-  
-  nav a {
-    padding: 5px 8px;
-    font-size: 13px;
-  }
-  
-  .user-wrapper span {
-    display: none;
-  }
-  
-  .user-avatar {
-    width: 36px;
-    height: 36px;
-  }
-  
-  .main-chart {
-    height: 350px;
-  }
-  
-  .charts-container {
-    grid-template-columns: 1fr;
-  }
-  
-  .side-charts {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
-  
-  .side-chart {
-    height: 250px;
-  }
-  
-  .period-controls {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-  
-  .period-title {
-    min-width: auto;
-    order: -1;
-    margin-bottom: 10px;
-  }
-  
-  .period-nav {
-    width: 100%;
-    justify-content: center;
-  }
+    /* Компактный хедер для планшетов и телефонов */
+    body {
+        padding-top: 60px; /* Уменьшили отступ */
+    }
+    
+    header {
+        padding: 10px 15px;
+        min-height: 60px; /* Уменьшили высоту */
+        flex-wrap: nowrap; /* Одна строка */
+        overflow-x: auto; /* Горизонтальная прокрутка если не помещается */
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
+        gap: 15px;
+        justify-content: flex-start; /* Выравнивание по левому краю */
+        scrollbar-width: none; /* Скрываем скроллбар для Firefox */
+        -ms-overflow-style: none; /* Скрываем скроллбар для IE/Edge */
+    }
+    
+    /* Скрываем скроллбар для Webkit браузеров */
+    header::-webkit-scrollbar {
+        display: none;
+    }
+    
+    /* УБИРАЕМ ЛОГОТИП LUMI */
+    .logo {
+        display: none !important; /* Полностью скрываем логотип */
+    }
+    
+    /* Навигация - горизонтальная прокрутка */
+    nav {
+        order: 1;
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0; /* Не сжимается */
+        margin: 0;
+        padding: 0;
+    }
+    
+    nav a {
+        padding: 8px 12px;
+        font-size: 14px;
+        white-space: nowrap; /* Не переносить текст */
+        flex-shrink: 0;
+        border-radius: 0;
+        background: transparent;
+        border: none;
+    }
+    
+    nav a.active {
+        color: var(--primary-color);
+        background: transparent;
+        border: none;
+    }
+    
+    nav a.active::after {
+        display: block !important; /* Восстанавливаем подчеркивание */
+        width: 100% !important;
+        height: 2px;
+        background: var(--accent-pink);
+        bottom: 0;
+    }
+    
+    /* Профиль пользователя */
+    .user-wrapper {
+        order: 2;
+        margin-left: auto; /* Прижимаем к правому краю */
+        flex-shrink: 0;
+        padding: 5px 8px;
+        background: transparent;
+        border-radius: 8px;
+        min-width: 50px; /* Минимальная ширина для аватара */
+    }
+    
+    .user-wrapper span {
+        display: none; /* Скрываем имя пользователя */
+    }
+    
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+    }
 }
 
 @media (max-width: 480px) {
@@ -758,38 +774,6 @@ h1:after {
   }
 }
 
-@media (max-width: 768px) {
-  .period-controls {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-  
-  .period-title {
-    min-width: auto;
-    order: -1;
-    margin-bottom: 10px;
-  }
-  
-  .period-nav {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .side-charts {
-    grid-template-columns: 1fr;
-  }
-  
-  .mood-legend {
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
-  }
-}
 
 @media (max-width: 480px) {
   .main-chart {

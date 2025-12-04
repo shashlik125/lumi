@@ -492,19 +492,23 @@ h1 {
         font-size: 14px;
         white-space: nowrap; /* Не переносить текст */
         flex-shrink: 0;
-        border-radius: 20px;
-        background: rgba(255, 255, 255, 0.2);
-        border: 1px solid rgba(38, 70, 83, 0.1);
+        border-radius: 0;
+        background: transparent;
+        border: none;
     }
     
     nav a.active {
         color: var(--primary-color);
-        background: rgba(255, 112, 236, 0.1);
-        border: 1px solid var(--accent-pink);
+        background: transparent;
+        border: none;
     }
     
     nav a.active::after {
-        display: none !important; /* Убираем подчеркивание для мобильных */
+        display: block !important; /* Восстанавливаем подчеркивание */
+        width: 100% !important;
+        height: 2px;
+        background: var(--accent-pink);
+        bottom: 0;
     }
     
     /* Профиль пользователя */
@@ -512,9 +516,9 @@ h1 {
         order: 2;
         margin-left: auto; /* Прижимаем к правому краю */
         flex-shrink: 0;
-        padding: 5px;
-        background: rgba(255, 255, 255, 0.3);
-        border-radius: 20px;
+        padding: 5px 8px;
+        background: transparent;
+        border-radius: 8px;
         min-width: 50px; /* Минимальная ширина для аватара */
     }
     

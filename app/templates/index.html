@@ -178,24 +178,38 @@ nav a {
 
 /* Эллипс внизу - ТОЛЬКО для десктопа */
 .bottom-ellipse {
-  position: absolute;
+  position: fixed; /* Изменяем на fixed */
   bottom: 0;
   left: 0;
   width: 100%;
   z-index: -1;
   opacity: 0.7;
   pointer-events: none;
-  height: auto; 
+  height: 250px;
+  display: flex;
+  align-items: flex-end;
 }
 
 .bottom-ellipse img {
   width: 100%;
   height: auto;
-  position: relative;
-  bottom: 0; /* Поднял выше */
-  left: 0;
-  transform: scale(1.2); /* Уменьшил масштаб */
+  min-height: 200px;
+  object-fit: cover;
+  object-position: bottom;
+  transform: scale(1.2);
   transform-origin: center bottom;
+}
+
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  z-index: 1; /* Добавить это */
 }
 
 @keyframes float {
@@ -210,7 +224,7 @@ nav a {
   align-items: center;
   gap: 40px;
   margin: 0 auto;
-  padding: 0 0 20px; /* Уменьшил нижний padding */
+  padding: 0 0 60px; /* Увеличить отступ снизу */
   position: relative;
   z-index: 10;
   flex: 1;
@@ -286,6 +300,45 @@ h1 {
 @keyframes fadeIn {
   from {opacity: 0; transform: translateY(20px);}
   to {opacity: 1; transform: translateY(0);}
+}
+
+/* Для корректного отображения на всех устройствах */
+html, body {
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* Убедитесь, что основной контент имеет достаточный отступ снизу */
+.main-content {
+  margin-bottom: 100px; /* Отступ для эллипса */
+  z-index: 1; /* Контент выше эллипса */
+}
+
+/* Обновленный медиа-запрос для мобильных */
+@media (max-width: 992px) {
+  .bottom-ellipse {
+    height: 150px; /* Меньшая высота на планшетах */
+  }
+  
+  .main-content {
+    margin-bottom: 70px;
+  }
+}
+
+@media (max-width: 768px) {
+  .bottom-ellipse {
+    height: 100px;
+    display: block; /* Возвращаем на мобильных если нужно */
+  }
+  
+  .bottom-ellipse img {
+    bottom: -30px;
+    transform: scale(1.1);
+  }
+  
+  .main-content {
+    margin-bottom: 50px;
+  }
 }
 
 /* Адаптивность */
@@ -565,7 +618,8 @@ h1 {
 </div>
 
 <!-- Эллипс в самом низу страницы - ТОЛЬКО для десктопа -->
-<div class="bottom-ellipse">
-  <img src="{{ url_for('static', filename='images/Ellipse 746.png') }}" alt="Background ellipse" />
+  <div class="bottom-ellipse">
+    <img src="{{ url_for('static', filename='images/Ellipse 746.png') }}" alt="Background ellipse" />
+  </div>
 </div>
 {% endblock %}

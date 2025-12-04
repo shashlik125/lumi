@@ -4,27 +4,24 @@
 
 {% block extra_css %}
 <style>
-
+/* Базовые стили остаются теми же */
 * {
   font-family: 'Montserrat', sans-serif !important;
-}
-
-* {
   box-sizing: border-box;
 }
+
 body {
   margin: 0;
   font-family: 'Montserrat', sans-serif;
   background: linear-gradient(to right, #60F4E3 0%, #FFEFFD 50%, #FF70EC 100%);
   color: #264653;
   min-height: 100vh;
-  padding-top: 80px;
-  font-size: 18px;
+  padding-top: 70px; /* Уменьшили для мобильных */
+  font-size: 16px; /* Уменьшили базовый размер шрифта */
   max-width: 100%;
   overflow-x: hidden;
 }
 
-/* Стили хедера из dashboard */
 :root {
   --primary-color: #264653;
   --accent-gradient: linear-gradient(to right, #60F4E3, #FFEFFD, #FF70EC);
@@ -41,9 +38,10 @@ body {
   --white: #ffffff;
 }
 
+/* ========== МОБИЛЬНЫЙ ХЕДЕР ========== */
 header {
   background: white;
-  padding: 20px 5%;
+  padding: 12px 15px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -53,27 +51,30 @@ header {
   right: 0;
   z-index: 1000;
   box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  min-height: 80px;
+  min-height: 70px;
+  max-width: 100vw;
+  overflow-x: auto; /* Горизонтальная прокрутка */
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
   
-  /* Добавляем градиент прямо к фону хедера */
-  background: linear-gradient(to bottom, 
-    white 0%, 
-    white 70%,
-    rgba(255,255,255,0.9) 80%, 
-    rgba(255,255,255,0.7) 90%,
-    rgba(255,255,255,0.4) 95%,
-    rgba(255,255,255,0) 100%);
+  /* Убираем стандартный скроллбар */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
 }
 
-.logo {
-  font-size: 28px;
-  font-weight: 700;
-  color: #264653;
+/* Скрываем скроллбар в Chrome/Safari */
+header::-webkit-scrollbar {
+  display: none;
+  height: 0;
 }
 
+/* Компактный навигационный контейнер */
 nav {
   display: flex;
-  gap: 20px;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 0 5px;
 }
 
 nav a {
@@ -81,16 +82,24 @@ nav a {
   color: #264653;
   font-weight: 600;
   position: relative;
-  padding: 10px 15px;
+  padding: 8px 10px;
+  font-size: 14px;
+  white-space: nowrap;
+  border-radius: 8px;
   transition: var(--transition);
-  font-size: 16px;
+}
+
+nav a.active {
+  background: rgba(96, 244, 227, 0.1);
+  color: #264653;
 }
 
 nav a::after {
   content: '';
   position: absolute;
   bottom: 0;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 0;
   height: 2px;
   background: var(--accent-pink);
@@ -99,27 +108,32 @@ nav a::after {
 
 nav a:hover::after,
 nav a:focus::after {
-  width: 100%;
+  width: 80%;
 }
 
-nav a.active::after {
-  width: 100% !important;
+/* Скрываем логотип на мобильных */
+.logo {
+  display: none;
 }
 
+/* Компактный блок пользователя */
 .user {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
-  position: relative;
-  padding: 5px 10px;
+  position: sticky;
+  right: 0;
+  background: white;
+  padding: 6px 10px;
   border-radius: 8px;
-  transition: var(--transition);
+  margin-left: auto;
+  flex-shrink: 0;
+  z-index: 1001;
 }
 
-.user:hover,
-.user:focus {
-  background: rgba(255, 255, 255, 0.3);
+.user span {
+  display: none; /* Скрываем имя на мобильных */
 }
 
 .user-avatar {
@@ -130,19 +144,20 @@ nav a.active::after {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+/* Выпадающее меню для мобильных */
 .dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
+  position: fixed;
+  top: 70px;
+  right: 15px;
+  left: 15px;
   background: var(--card-bg);
   border-radius: 12px;
   box-shadow: var(--shadow);
   display: none;
   flex-direction: column;
-  min-width: 160px;
-  overflow: hidden;
   z-index: 101;
-  margin-top: 10px;
+  max-width: 200px;
+  margin-left: auto;
 }
 
 .dropdown.show {
@@ -156,35 +171,56 @@ nav a.active::after {
 }
 
 .dropdown a {
-  padding: 12px 16px;
+  padding: 14px 16px;
   text-decoration: none;
   color: var(--text-color);
   font-weight: 500;
   transition: var(--transition);
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown a:last-child {
+  border-bottom: none;
 }
 
 .dropdown a:hover,
 .dropdown a:focus {
-  background: #f2f2f2;
+  background: #f8f9fa;
 }
 
-/* Остальные стили для index.html */
+/* ========== МОБИЛЬНАЯ ВЕРСИЯ КОНТЕНТА ========== */
 .images-container {
   position: relative;
   width: 100%;
-  max-width: 1100px;
-  margin: 50px auto 30px;
+  max-width: 100%;
+  margin: 30px auto 20px;
   display: flex;
   justify-content: center;
   height: auto;
   min-height: 0;
+  overflow: hidden;
 }
 
+/* Упрощаем эмодзи для мобильных */
 .emoji-image {
-  max-width: 100%;
+  max-width: 120px;
   height: auto;
   filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
   animation: float 3s ease-in-out infinite;
+}
+
+/* Оставляем только основные эмодзи для мобильных */
+.emoji-container.second-emoji,
+.emoji-container.third-emoji,
+.emoji-container.fourth-emoji,
+.emoji-container.fifth-emoji,
+.emoji-container.sixth-emoji,
+.emoji-container.eighth-emoji,
+.emoji-container.ninth-emoji,
+.emoji-container.tenth-emoji,
+.emoji-container.eleventh-emoji,
+.emoji-container.twelfth-emoji {
+  display: none;
 }
 
 .header-image-wrapper {
@@ -192,158 +228,79 @@ nav a.active::after {
   justify-content: center;
   width: 100%;
   position: relative;
-  top: 100px;
+  top: 60px;
 }
 
 .header-image {
-  width: 200px;
+  width: 160px;
   height: auto;
   position: relative;
   z-index: 5;
   max-width: 100%;
 }
 
-.emoji-container {
-  max-width: 100%;
-}
-
-.emoji-container.second-emoji {
-  position: absolute;
-  top: 200px;
-  left: -10%;
-  z-index: 9;
-}
-
-.emoji-container.second-emoji .emoji-image {
-  max-width: 230px;
-  animation: float 3.5s ease-in-out infinite;
-  animation-delay: 0.5s;
-}
-
-.emoji-container.third-emoji {
-  position: absolute;
-  top: 370px;
-  right: -100px;
-  z-index: 8;
-}
-
-.emoji-container.fourth-emoji {
-  position: absolute;
-  top: 150px;
-  left: 25%;
-  z-index: 7;
-}
-
-.emoji-container.fifth-emoji {
-  position: absolute;
-  top: 40px;
-  left: 80%;
-  z-index: 6;
-}
-
-.emoji-container.sixth-emoji {
-  position: absolute;
-  top: 250px;
-  left: 100%;
-  z-index: 7;
-}
-
-.emoji-container.eighth-emoji {
-  position: absolute;
-  top: 480px;
-  left: -15%;
-  z-index: 8;
-}
-
-.emoji-container.ninth-emoji {
-  position: absolute;
-  top: 635px;
-  left: -40%;
-  z-index: 9;
-}
-
-.emoji-container.tenth-emoji {
-  position: absolute;
-  top: 100px;
-  left: -50%;
-  z-index: 12;
-}
-
-.emoji-container.eleventh-emoji {
-  position: absolute;
-  top: 70px;
-  right: -300px; /* 30px от правого края */
-  z-index: 11;
-}
-
-.emoji-container.twelfth-emoji {
-  position: absolute;
-  top: 635px;
-  right: -170px; /* 50px от правого края */
-  z-index: 90;
-  
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-
 .main-content {
-  max-width: 1200px;
+  max-width: 100%;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 80px;
+  gap: 40px;
   margin: 0 auto;
-  margin-top: 200px;
-  margin-bottom: 100px;
-  padding: 0 20px;
+  margin-top: 140px;
+  margin-bottom: 60px;
+  padding: 0 15px;
   box-sizing: border-box;
 }
 
 .welcome-text {
   max-width: 100%;
-  padding: 50px 60px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.75) 100%);
+  padding: 30px 25px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.85) 100%);
   box-shadow: 0 8px 24px rgba(0,0,0,0.12);
   text-align: center;
   animation: fadeIn 1.2s ease;
   box-sizing: border-box;
+  backdrop-filter: blur(5px);
 }
 
 h1 {
-  font-weight: 700;
-  font-size: 64px;
-  margin: 0 0 24px;
-  line-height: 1.1;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 900;
+  font-size: 28px;
+  color: #000000;
+  margin: 0 0 20px;
+  line-height: 1.2;
+  white-space: normal; /* Разрешаем перенос */
+  text-align: center;
 }
 
 .welcome-text p {
-  font-size: 22px;
-  line-height: 1.6;
-  margin: 0 auto 30px;
-  max-width: 600px;
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 0 auto 25px;
+  max-width: 100%;
+  color: #333;
 }
 
 .actions {
   display: flex;
-  justify-content: center;
-  gap: 20px;
+  flex-direction: column;
+  gap: 12px;
   margin-top: 20px;
 }
 
 .btn {
   display: inline-block;
-  padding: 14px 28px;
-  border-radius: 14px;
-  font-size: 18px;
+  padding: 14px 24px;
+  border-radius: 12px;
+  font-size: 16px;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.3s ease;
   box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  text-align: center;
 }
 
 .btn.primary {
@@ -367,252 +324,252 @@ h1 {
 }
 
 .features {
-  margin-top: 120px;
+  margin-top: 40px;
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* Фиксированные 3 колонки */
-  gap: 30px; /* Увеличиваем расстояние */
-  max-width: 1300px; /* Увеличиваем максимальную ширину */
+  grid-template-columns: 1fr;
+  gap: 20px;
+  max-width: 100%;
   width: 100%;
 }
 
 .card {
-  background: rgba(255,255,255,0.9);
-  padding: 50px 40px;
-  border-radius: 18px;
+  background: rgba(255,255,255,0.95);
+  padding: 25px 20px;
+  border-radius: 16px;
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   text-align: center;
   transition: transform 0.3s, box-shadow 0.3s;
-  min-height: 250px;
+  min-height: auto;
   display: flex;
   flex-direction: column;
   justify-content: center;
   position: relative;
-  top: -80px;
-  min-width: 0; /* Предотвращает съезжание */
+  top: 0;
 }
 
 .card h3 {
-  font-size: 24px; /* Немного меньше для одной строки */
-  margin-bottom: 20px;
+  font-size: 20px;
+  margin-bottom: 12px;
   color: #000000;
-  white-space: nowrap; /* Запрещает перенос текста */
+  white-space: normal;
+  line-height: 1.3;
 }
 
 .card p {
-  font-size: 18px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.5;
   color: #000000;
+  margin: 0;
 }
 
-
-@keyframes fadeIn {
-  from {opacity: 0; transform: translateY(20px);}
-  to {opacity: 1; transform: translateY(0);}
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
-
-/* Измени стили для h1 */
-h1 {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 900;
-  font-size: 42px;
-  color: #000000;
-  margin: 0 0 24px;
-  line-height: 1.1;
-  white-space: nowrap;
+/* Индикатор прокрутки хедера (опционально) */
+.scroll-indicator {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  opacity: 0.5;
+  z-index: 1002;
+  pointer-events: none;
 }
 
-
-@media (max-width: 1200px) {
-  .emoji-image {
-    max-width: 250px;
-  }
-  
-  .features {
-    grid-template-columns: repeat(3, 1fr); /* Оставляем 3 колонки */
-    max-width: 1100px;
-  }
+.scroll-indicator svg {
+  width: 100%;
+  height: 100%;
+  fill: #264653;
 }
 
-@media (max-width: 1024px) {
-  .main-content {
-    margin-top: 500px;
-  }
-  
-  .emoji-image {
-    max-width: 200px;
-  }
-  
-  .features {
-    grid-template-columns: repeat(2, 1fr); /* 2 колонки на планшетах */
-    max-width: 800px;
-    gap: 25px;
-  }
-}
-
-@media (max-width: 768px) {
+/* ========== МЕДИА-ЗАПРОСЫ ТОЛЬКО ДЛЯ МОБИЛЬНЫХ ========== */
+@media (min-width: 769px) {
+  /* Скрываем мобильную версию на десктопе */
   header {
-    padding: 15px;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  nav {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 10px 15px;
-  }
-  
-  .user {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-  }
-  
-  .main-content {
-    margin-top: 400px;
-    gap: 50px;
-    padding: 0 15px;
-  }
-  
-  .welcome-text {
-    padding: 30px 40px;
-  }
-  
-  h1 {
-    font-size: 42px;
-  }
-  
-  .welcome-text p {
-    font-size: 18px;
-  }
-  
-  .btn {
-    font-size: 16px;
-    padding: 12px 20px;
-  }
-  
-  .features {
-    grid-template-columns: 1fr; /* 1 колонка на мобильных */
-    max-width: 500px;
-    gap: 20px;
-  }
-  
-  .card h3 {
-    font-size: 22px; /* Уменьшаем заголовки на мобильных */
-    white-space: normal; /* Разрешаем перенос на мобильных */
-  }
-  
-  .emoji-image {
-    max-width: 150px;
-  }
-}
-
-@media (max-width: 480px) {
-  body {
-    padding-top: 70px;
-  }
-  
-  .user span {
     display: none;
   }
   
   .main-content {
-    margin-top: 300px;
-    gap: 30px;
-    padding: 0 10px;
+    margin-top: 200px;
   }
   
   .welcome-text {
-    padding: 20px 25px;
+    padding: 50px 60px;
   }
   
   h1 {
-    font-size: 32px;
+    font-size: 64px;
   }
   
   .welcome-text p {
-    font-size: 16px;
-  }
-  
-  .actions {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .btn {
-    width: 100%;
-  }
-  
-  .features {
-    margin-top: 30px;
-  }
-  
-  .card {
-    padding: 20px 15px;
-    min-height: 200px; /* Уменьшаем высоту на мобильных */
-  }
-  
-  .card h3 {
-    font-size: 20px;
-  }
-  
-  .card p {
-    font-size: 16px;
-  }
-  
-  .emoji-image {
-    max-width: 120px;
+    font-size: 22px;
   }
 }
 
-@media (max-width: 360px) {
-  .main-content {
-    margin-top: 250px;
+@media (max-width: 768px) {
+  /* Все стили уже оптимизированы для мобильных */
+}
+
+@media (max-width: 480px) {
+  body {
+    padding-top: 60px;
+  }
+  
+  header {
+    padding: 10px 12px;
+    min-height: 60px;
   }
   
   nav a {
-    font-size: 14px;
-    padding: 8px 12px;
+    font-size: 13px;
+    padding: 6px 8px;
   }
   
-  .logo {
+  .user {
+    padding: 5px 8px;
+  }
+  
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .dropdown {
+    top: 60px;
+    right: 12px;
+    left: 12px;
+  }
+  
+  .emoji-image {
+    max-width: 100px;
+  }
+  
+  .header-image {
+    width: 140px;
+  }
+  
+  .main-content {
+    margin-top: 120px;
+    gap: 30px;
+    padding: 0 12px;
+  }
+  
+  .welcome-text {
+    padding: 25px 20px;
+  }
+  
+  h1 {
     font-size: 24px;
   }
   
   .card {
-    padding: 15px 12px;
-    min-height: 180px;
+    padding: 20px 15px;
+  }
+  
+  .card h3 {
+    font-size: 18px;
+  }
+  
+  .card p {
+    font-size: 14px;
   }
 }
 
+@media (max-width: 360px) {
+  nav a {
+    font-size: 12px;
+    padding: 6px 6px;
+  }
+  
+  .btn {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+  
+  .header-image {
+    width: 120px;
+  }
+  
+  .emoji-image {
+    max-width: 90px;
+  }
+}
+
+/* Стиль для активной прокрутки хедера */
+header.scrolling {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+}
 </style>
 {% endblock %}
 
 {% block content %}
-<header>
+<!-- Мобильный хедер -->
+<header id="mobile-header">
+  <!-- Индикатор прокрутки (опционально) -->
+  <div class="scroll-indicator">
+    <svg viewBox="0 0 24 24">
+      <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"/>
+    </svg>
+  </div>
+  
+  <nav>
+    <a href="{{ url_for('main.chart') }}" 
+       class="{% if request.endpoint == 'main.chart' %}active{% endif %}">
+      Настроение
+    </a>
+    <a href="{{ url_for('main.dashboard') }}" 
+       class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+      Главная
+    </a>
+    <a href="{{ url_for('main.calendar') }}" 
+       class="{% if request.endpoint == 'main.calendar' %}active{% endif %}">
+      Календарь
+    </a>
+    <a href="{{ url_for('main.cycle_diary') }}" 
+       class="{% if request.endpoint == 'main.cycle_diary' %}active{% endif %}">
+      Дневник цикла
+    </a>
+  </nav>
+  
+  <div class="user" tabindex="0" aria-haspopup="true" aria-expanded="false">
+    {% if current_user.avatar_path %}
+        <img src="{{ url_for('static', filename=current_user.avatar_path) }}" alt="Меню" class="user-avatar">
+    {% else %}
+        <img src="https://ui-avatars.com/api/?name={{ current_user.first_name or 'Пользователь' }}&background=60F4E3&color=264653" alt="Меню" class="user-avatar">
+    {% endif %}
+    <div class="dropdown" id="userMenu">
+        <a href="{{ url_for('main.profile') }}">Профиль</a>
+        <a href="{{ url_for('auth.logout') }}">Выйти</a>
+    </div>
+  </div>
+</header>
+
+<!-- Десктопный хедер (скрыт на мобильных) -->
+<header id="desktop-header" style="display: none;">
   <div class="logo">Lumi</div>
   <nav>
-  <a href="{{ url_for('main.chart') }}" 
-     class="{% if request.endpoint == 'main.chart' %}active{% endif %}">
-    Настроение
-  </a>
-  <a href="{{ url_for('main.dashboard') }}" 
-     class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">
-    Главная
-  </a>
-  <a href="{{ url_for('main.calendar') }}" 
-     class="{% if request.endpoint == 'main.calendar' %}active{% endif %}">
-    Календарь
-  </a>
-  <a href="{{ url_for('main.cycle_diary') }}" 
-     class="{% if request.endpoint == 'main.cycle_diary' %}active{% endif %}">
-    Дневник цикла
-  </a>
-</nav>
+    <a href="{{ url_for('main.chart') }}" 
+       class="{% if request.endpoint == 'main.chart' %}active{% endif %}">
+      Настроение
+    </a>
+    <a href="{{ url_for('main.dashboard') }}" 
+       class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">
+      Главная
+    </a>
+    <a href="{{ url_for('main.calendar') }}" 
+       class="{% if request.endpoint == 'main.calendar' %}active{% endif %}">
+      Календарь
+    </a>
+    <a href="{{ url_for('main.cycle_diary') }}" 
+       class="{% if request.endpoint == 'main.cycle_diary' %}active{% endif %}">
+      Дневник цикла
+    </a>
+  </nav>
   <div class="user" tabindex="0" aria-haspopup="true" aria-expanded="false">
     <span id="username">
         {% if current_user.is_authenticated %}
@@ -626,7 +583,7 @@ h1 {
     {% else %}
         <img src="https://ui-avatars.com/api/?name={{ current_user.first_name or 'Пользователь' }}&background=60F4E3&color=264653" alt="Аватар" class="user-avatar">
     {% endif %}
-    <div class="dropdown" id="userMenu">
+    <div class="dropdown" id="desktopUserMenu">
         <a href="{{ url_for('main.profile') }}">Профиль</a>
         <a href="{{ url_for('auth.logout') }}">Выйти</a>
     </div>
@@ -636,36 +593,6 @@ h1 {
 <div class="images-container">
   <div class="emoji-container">
     <img src="{{ url_for('static', filename='images/😜.png') }}" alt="Emoji" class="emoji-image" />
-  </div>
-  <div class="emoji-container second-emoji">
-    <img src="{{ url_for('static', filename='images/😳.png') }}" alt="Emoji 2" class="emoji-image" />
-  </div>
-  <div class="emoji-container third-emoji">
-    <img src="{{ url_for('static', filename='images/1.png') }}" alt="Emoji 3" class="emoji-image" />
-  </div>
-  <div class="emoji-container fourth-emoji">
-    <img src="{{ url_for('static', filename='images/😰.png') }}" alt="Emoji 4" class="emoji-image" />
-  </div>
-  <div class="emoji-container fifth-emoji">
-    <img src="{{ url_for('static', filename='images/😡.png') }}" alt="Emoji 5" class="emoji-image" />
-  </div>
-  <div class="emoji-container sixth-emoji">
-    <img src="{{ url_for('static', filename='images/😚.png') }}" alt="Emoji 6" class="emoji-image" />
-  </div>
-  <div class="emoji-container eighth-emoji">
-    <img src="{{ url_for('static', filename='images/😍.png') }}" alt="Emoji 8" class="emoji-image" />
-  </div>
-  <div class="emoji-container ninth-emoji">
-    <img src="{{ url_for('static', filename='images/😈.png') }}" alt="Emoji 9" class="emoji-image" />
-  </div>
-  <div class="emoji-container tenth-emoji">
-    <img src="{{ url_for('static', filename='images/🤯.png') }}" alt="Emoji 10" class="emoji-image" />
-  </div>
-  <div class="emoji-container eleventh-emoji">
-    <img src="{{ url_for('static', filename='images/🤯 copy.png') }}" alt="Emoji 11" class="emoji-image" />
-  </div>
-  <div class="emoji-container twelfth-emoji">
-    <img src="{{ url_for('static', filename='images/😈 copy.png') }}" alt="Emoji 12" class="emoji-image" />
   </div>
   <div class="header-image-wrapper">
     <img src="{{ url_for('static', filename='images/Mask group.png') }}" alt="Lumi" class="header-image" />
@@ -705,31 +632,97 @@ h1 {
 
 {% block extra_js %}
 <script>
-// JavaScript для выпадающего меню пользователя
 document.addEventListener('DOMContentLoaded', function() {
-    initEventListeners();
+    // Показываем соответствующий хедер в зависимости от устройства
+    if (window.innerWidth < 769) {
+        document.getElementById('mobile-header').style.display = 'flex';
+        document.getElementById('desktop-header').style.display = 'none';
+        initMobileHeader();
+    } else {
+        document.getElementById('mobile-header').style.display = 'none';
+        document.getElementById('desktop-header').style.display = 'flex';
+        initDesktopHeader();
+    }
+    
+    // Обработчик ресайза окна
+    window.addEventListener('resize', function() {
+        if (window.innerWidth < 769) {
+            document.getElementById('mobile-header').style.display = 'flex';
+            document.getElementById('desktop-header').style.display = 'none';
+            initMobileHeader();
+        } else {
+            document.getElementById('mobile-header').style.display = 'none';
+            document.getElementById('desktop-header').style.display = 'flex';
+            initDesktopHeader();
+        }
+    });
 });
 
-function initEventListeners() {
-    const userElement = document.querySelector('.user');
+function initMobileHeader() {
+    const userElement = document.querySelector('#mobile-header .user');
     if (userElement) {
-        userElement.addEventListener('click', toggleMenu);
+        userElement.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('userMenu');
+            if (menu) {
+                menu.classList.toggle('show');
+            }
+        });
+    }
+    
+    // Закрытие меню при клике вне его
+    document.addEventListener('click', function(e) {
+        const menu = document.getElementById('userMenu');
+        const user = document.querySelector('#mobile-header .user');
+        if (menu && menu.classList.contains('show') && user && !user.contains(e.target)) {
+            menu.classList.remove('show');
+        }
+    });
+    
+    // Индикатор прокрутки хедера
+    const header = document.getElementById('mobile-header');
+    if (header) {
+        header.addEventListener('scroll', function() {
+            if (header.scrollLeft > 10) {
+                header.classList.add('scrolling');
+            } else {
+                header.classList.remove('scrolling');
+            }
+        });
+        
+        // Авто-скролл к активному элементу
+        const activeLink = header.querySelector('nav a.active');
+        if (activeLink && header.scrollWidth > header.clientWidth) {
+            setTimeout(() => {
+                activeLink.scrollIntoView({
+                    behavior: 'smooth',
+                    inline: 'center',
+                    block: 'nearest'
+                });
+            }, 100);
+        }
+    }
+}
+
+function initDesktopHeader() {
+    const userElement = document.querySelector('#desktop-header .user');
+    if (userElement) {
+        userElement.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('desktopUserMenu');
+            if (menu) {
+                menu.classList.toggle('show');
+            }
+        });
     }
     
     document.addEventListener('click', function(e) {
-        const menu = document.getElementById('userMenu');
-        const user = document.querySelector('.user');
+        const menu = document.getElementById('desktopUserMenu');
+        const user = document.querySelector('#desktop-header .user');
         if (menu && menu.classList.contains('show') && user && !user.contains(e.target)) {
-            toggleMenu();
+            menu.classList.remove('show');
         }
     });
-}
-
-function toggleMenu() {
-    const menu = document.getElementById('userMenu');
-    if (menu) {
-        menu.classList.toggle('show');
-    }
 }
 
 // Глобальная функция для уведомлений

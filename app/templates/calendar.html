@@ -1105,7 +1105,7 @@ if (calendar && monthYear) {
     }
 
 
-        // Основная функция отрисовки календаря
+    // Основная функция отрисовки календаря (правильная версия)
     function renderCalendar() {
         calendar.innerHTML = "";
         const year = currentDate.getFullYear();
@@ -1119,32 +1119,17 @@ if (calendar && monthYear) {
         const lastDay = new Date(year, month + 1, 0);
         const daysInMonth = lastDay.getDate();
         
-        // Определяем день недели для 1-го числа месяца
-        // 0 = воскресенье, 1 = понедельник, ..., 6 = суббота
         let startDay = firstDay.getDay();
-        // Преобразуем воскресенье (0) в 7 для удобства расчета
         if (startDay === 0) startDay = 7;
-        
-        console.log(`Первый день месяца: день недели ${startDay} (1=Пн, 7=Вс)`);
-        console.log(`Дней в месяце: ${daysInMonth}`);
 
-        // Добавляем дни предыдущего месяца
         const prevMonthDays = new Date(year, month, 0).getDate();
-        console.log(`Дней в предыдущем месяце: ${prevMonthDays}`);
-        
-        // Сколько дней предыдущего месяца нужно показать
-        const prevMonthDaysToShow = startDay - 1;
-        console.log(`Нужно показать дней предыдущего месяца: ${prevMonthDaysToShow}`);
-        
-        for (let i = prevMonthDaysToShow; i > 0; i--) {
-            const dayNumber = prevMonthDays - i + 1;
-            const day = createDayElement(dayNumber, "other-month", true);
+        for (let i = startDay - 1; i > 0; i--) {
+            const day = createDayElement(prevMonthDays - i + 1, "other-month", true);
             calendar.appendChild(day);
         }
 
         const today = new Date();
 
-        // Добавляем дни текущего месяца
         for (let i = 1; i <= daysInMonth; i++) {
             const dateKey = formatISO(year, month + 1, i);
             const day = createDayElement(i, "", false);
@@ -1181,26 +1166,15 @@ if (calendar && monthYear) {
             calendar.appendChild(day);
         }
 
-        // Считаем сколько дней уже добавлено
-        const daysAdded = prevMonthDaysToShow + daysInMonth;
-        console.log(`Уже добавлено дней: ${daysAdded}`);
-        
-        // Сколько дней следующего месяца нужно добавить, чтобы получить ровно 42 ячейки (6 недель)
-        const nextMonthDaysToShow = 42 - daysAdded;
-        console.log(`Нужно добавить дней следующего месяца: ${nextMonthDaysToShow}`);
-        
-        // Добавляем дни следующего месяца
-        if (nextMonthDaysToShow > 0) {
-            for (let i = 1; i <= nextMonthDaysToShow; i++) {
+        const totalCells = 42;
+        const filledCells = startDay - 1 + daysInMonth;
+
+        if (filledCells < totalCells) {
+            for (let i = 1; i <= totalCells - filledCells; i++) {
                 const day = createDayElement(i, "other-month", true);
                 calendar.appendChild(day);
             }
         }
-        
-        // Проверяем сколько ячеек получилось
-        console.log(`Всего ячеек в календаре: ${calendar.children.length}`);
-        
-        updateStats();
     }
    
     

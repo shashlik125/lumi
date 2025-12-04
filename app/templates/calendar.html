@@ -1123,8 +1123,8 @@ if (calendar && monthYear) {
 
         // Добавляем дни предыдущего месяца
         const prevMonthDays = new Date(year, month, 0).getDate();
-        for (let i = startDay - 1; i > 0; i--) {
-            const day = createDayElement(prevMonthDays - i + 1, "other-month", true);
+        for (let i = startDay - 2; i >= 0; i--) {
+            const day = createDayElement(prevMonthDays - i, "other-month", true);
             calendar.appendChild(day);
         }
 
@@ -1167,16 +1167,16 @@ if (calendar && monthYear) {
             calendar.appendChild(day);
         }
 
-        // ОПРЕДЕЛЯЕМ СКОЛЬКО ДНЕЙ ДОБАВИТЬ ИЗ СЛЕДУЮЩЕГО МЕСЯЦА
-        // Всего ячеек в календаре
-        const totalCells = 42;
-        // Уже добавленные ячейки (предыдущий месяц + текущий месяц)
-        const filledCells = (startDay - 1) + daysInMonth;
+        // Определяем, сколько дней следующего месяца добавить
+        // Уже добавленные дни: дни предыдущего месяца + дни текущего месяца
+        const daysAdded = (startDay - 1) + daysInMonth;
         
-        // Добавляем дни следующего месяца только если нужно
-        if (filledCells < totalCells) {
-            // Добавляем ровно столько дней, чтобы получилось ровно 42 ячейки (6 недель)
-            for (let i = 1; i <= (totalCells - filledCells); i++) {
+        // Добавляем дни следующего месяца, чтобы получилось ровно 42 ячейки
+        // 42 ячейки = 6 недель по 7 дней
+        const nextMonthDaysNeeded = 42 - daysAdded;
+        
+        if (nextMonthDaysNeeded > 0) {
+            for (let i = 1; i <= nextMonthDaysNeeded; i++) {
                 const day = createDayElement(i, "other-month", true);
                 calendar.appendChild(day);
             }
@@ -1184,7 +1184,7 @@ if (calendar && monthYear) {
         
         updateStats();
     } 
-
+    
     function changeMonth(step) {
         currentDate.setMonth(currentDate.getMonth() + step);
         renderCalendar();

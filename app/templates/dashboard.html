@@ -411,7 +411,91 @@ h1 {
 }
 
 @media (max-width: 768px) {
-  /* Все стили уже оптимизированы для мобильных */
+  /* ========== МОБИЛЬНАЯ АДАПТИВНОСТЬ - ТОЛЬКО ЗДЕСЬ МЕНЯЕМ ========== */
+
+@media (max-width: 768px) {
+    /* Компактный хедер для планшетов и телефонов */
+    body {
+        padding-top: 60px; /* Уменьшили отступ */
+    }
+    
+    header {
+        padding: 10px 15px;
+        min-height: 60px; /* Уменьшили высоту */
+        flex-wrap: nowrap; /* Одна строка */
+        overflow-x: auto; /* Горизонтальная прокрутка если не помещается */
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
+        gap: 15px;
+        justify-content: flex-start; /* Выравнивание по левому краю */
+    }
+    
+    /* УБИРАЕМ ЛОГОТИП LUMI */
+    .logo {
+        display: none !important; /* Полностью скрываем логотип */
+    }
+    
+    /* Навигация - горизонтальная прокрутка */
+    nav {
+        order: 1;
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0; /* Не сжимается */
+        margin: 0;
+        padding: 0;
+    }
+    
+    nav a {
+        padding: 8px 12px;
+        font-size: 14px;
+        white-space: nowrap; /* Не переносить текст */
+        flex-shrink: 0;
+        border-radius: 20px;
+    }
+    
+    nav a.active {
+      color: var(--dark);
+    }
+    
+    nav a.active::after {
+    display: block !important; /* Восстанавливаем подчеркивание */
+    width: 100% !important;
+    height: 2px;
+    background: var(--accent-pink);
+    bottom: 0;
+    }
+    
+    /* Профиль пользователя */
+    .user {
+        order: 2;
+        margin-left: auto; /* Прижимаем к правому краю */
+        flex-shrink: 0;
+        padding: 5px;
+    }
+    
+    .user span {
+        display: none; /* Скрываем имя пользователя */
+    }
+    
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+    }
+    
+    /* Остальные стили для мобильных */
+    .images-container {
+        margin-top: 10px;
+    }
+    
+    .header-image {
+        width: 140px;
+    }
+    
+    .main-content {
+        margin-top: 100px;
+        padding: 0 12px;
+    }
+}
 }
 
 @media (max-width: 480px) {

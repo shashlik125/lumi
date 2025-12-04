@@ -943,40 +943,6 @@ h1:after {
     }
 }
 
-/* Поддержка тёмной темы на iOS */
-@media (prefers-color-scheme: dark) {
-    body {
-        background: linear-gradient(to right, #264653 0%, #3a5364 50%, #4a6170 100%);
-    }
-    
-    .calendar-container,
-    .stat-card,
-    .mood-legend {
-        background: #2c3e50;
-        color: #ecf0f1;
-    }
-    
-    .weekdays {
-        background: rgba(96, 244, 227, 0.15);
-        color: #bdc3c7;
-    }
-    
-    .calendar-day {
-        background: #34495e;
-        color: #ecf0f1;
-    }
-    
-    .other-month {
-        background: rgba(52, 73, 94, 0.5);
-        color: #7f8c8d;
-    }
-    
-    .current-day {
-        background: #60F4E3;
-        color: #2c3e50;
-    }
-}
-
 /* Оптимизация для Retina-дисплеев */
 @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
     .calendar-day,

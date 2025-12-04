@@ -606,200 +606,265 @@ h1:after {
   }
 }
 
+
+/* АДАПТИВНОСТЬ - ОСНОВНОЙ КОНТЕНТ */
 @media (max-width: 768px) {
-    /* Компактный хедер для планшетов и телефонов */
+    /* Основной контент */
     body {
-        padding-top: 60px; /* Уменьшили отступ */
+        font-size: 16px;
     }
     
-    header {
-        padding: 10px 15px;
-        min-height: 60px; /* Уменьшили высоту */
-        flex-wrap: nowrap; /* Одна строка */
-        overflow-x: auto; /* Горизонтальная прокрутка если не помещается */
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
+    .container {
+        padding: 0 15px;
+    }
+    
+    main { 
+        padding: 20px 0; 
+    }
+    
+    .page-header {
+        margin-bottom: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    h1 {
+        font-size: 24px;
+        padding-bottom: 8px;
+    }
+    
+    h1:after {
+        width: 50px;
+        height: 3px;
+    }
+    
+    .controls-container {
+        padding: 15px;
+        border-radius: 18px;
+        margin-bottom: 20px;
+    }
+    
+    .period-controls {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
         gap: 15px;
-        justify-content: flex-start; /* Выравнивание по левому краю */
-        scrollbar-width: none; /* Скрываем скроллбар для Firefox */
-        -ms-overflow-style: none; /* Скрываем скроллбар для IE/Edge */
+        margin-bottom: 20px;
     }
     
-    /* Скрываем скроллбар для Webkit браузеров */
-    header::-webkit-scrollbar {
-        display: none;
+    .period-title {
+        min-width: auto;
+        font-size: 16px;
+        order: -1;
+        margin-bottom: 10px;
     }
     
-    /* УБИРАЕМ ЛОГОТИП LUMI */
-    .logo {
-        display: none !important; /* Полностью скрываем логотип */
+    .period-nav {
+        width: 100%;
+        justify-content: center;
     }
     
-    /* Навигация - горизонтальная прокрутка */
-    nav {
-        order: 1;
-        display: flex;
+    .view-controls {
+        flex-wrap: wrap;
+        justify-content: center;
         gap: 8px;
-        flex-shrink: 0; /* Не сжимается */
-        margin: 0;
-        padding: 0;
     }
     
-    nav a {
+    .btn {
         padding: 8px 12px;
+        font-size: 13px;
+        min-width: 60px;
+    }
+    
+    /* Диаграммы */
+    .charts-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .main-chart {
+        height: 300px;
+        padding: 20px;
+        min-height: 300px;
+    }
+    
+    .side-charts {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+    
+    .side-chart {
+        height: 180px;
+        padding: 15px;
+        min-height: 180px;
+    }
+    
+    .chart-title {
+        font-size: 15px;
+        margin-bottom: 10px;
+    }
+    
+    /* Легенда настроений */
+    .mood-legend {
+        padding: 12px;
+        border-radius: 16px;
+        gap: 12px;
+        margin-top: 15px;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .legend-item {
+        font-size: 13px;
+        padding: 6px 10px;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .legend-color {
+        width: 12px;
+        height: 12px;
+    }
+    
+    /* Статистика */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .stat-card {
+        padding: 15px;
+        border-radius: 16px;
+    }
+    
+    .stat-title {
         font-size: 14px;
-        white-space: nowrap; /* Не переносить текст */
-        flex-shrink: 0;
-        border-radius: 0;
-        background: transparent;
-        border: none;
+        margin-bottom: 8px;
     }
     
-    nav a.active {
-        color: var(--primary-color);
-        background: transparent;
-        border: none;
+    .stat-value {
+        font-size: 24px;
     }
     
-    nav a.active::after {
-        display: block !important; /* Восстанавливаем подчеркивание */
-        width: 100% !important;
-        height: 2px;
-        background: var(--accent-pink);
-        bottom: 0;
+    .stat-change {
+        font-size: 12px;
     }
     
-    /* Профиль пользователя */
-    .user-wrapper {
-        order: 2;
-        margin-left: auto; /* Прижимаем к правому краю */
-        flex-shrink: 0;
-        padding: 5px 8px;
-        background: transparent;
-        border-radius: 8px;
-        min-width: 50px; /* Минимальная ширина для аватара */
+    /* Инсайты */
+    .insights {
+        padding: 20px;
+        border-radius: 16px;
+        margin-top: 20px;
     }
     
-    .user-wrapper span {
-        display: none; /* Скрываем имя пользователя */
+    .insights-title {
+        font-size: 18px;
+        margin-bottom: 12px;
     }
     
-    .user-avatar {
+    .insight-item {
+        padding: 12px;
+        margin-bottom: 12px;
+    }
+    
+    .insight-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
+    
+    .insight-text {
+        font-size: 14px;
+    }
+    
+    .no-data i {
+        font-size: 36px;
+        margin-bottom: 10px;
+    }
+    
+    .no-data p {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+    
+    .loading-spinner {
         width: 32px;
         height: 32px;
     }
+    
+    /* Уведомления на мобильных */
+    .toast {
+        top: 70px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        text-align: center;
+        font-size: 13px;
+    }
 }
 
 @media (max-width: 480px) {
-  .logo {
-    font-size: 20px;
-  }
-  
-  nav {
-    gap: 5px;
-  }
-  
-  nav a {
-    padding: 4px 6px;
-    font-size: 12px;
-  }
-  
-  .side-charts {
-    grid-template-columns: 1fr;
-  }
-  
-  .main-chart {
-    height: 300px;
-    padding: 15px;
-  }
-  
-  .side-chart {
-    height: 200px;
-    padding: 15px;
-  }
-  
-  .view-controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .btn {
-    justify-content: center;
-  }
-  
-  .period-nav {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .mood-legend {
-    flex-direction: column;
-    gap: 10px;
-    align-items: center;
-  }
+    .side-charts {
+        grid-template-columns: 1fr;
+    }
+    
+    .side-chart {
+        height: 160px;
+        min-height: 160px;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .view-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .period-nav {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .period-nav .btn {
+        flex: 1;
+        min-width: 80px;
+    }
 }
 
 @media (max-width: 360px) {
-  .logo {
-    font-size: 18px;
-  }
-  
-  nav a {
-    font-size: 11px;
-    padding: 3px 5px;
-  }
+    .main-chart {
+        height: 250px;
+        padding: 15px;
+        min-height: 250px;
+    }
+    
+    .side-chart {
+        height: 140px;
+        padding: 12px;
+        min-height: 140px;
+    }
+    
+    .chart-title {
+        font-size: 14px;
+    }
+    
+    .btn {
+        padding: 6px 10px;
+        font-size: 12px;
+    }
 }
 
-/* АДАПТИВНОСТЬ - ОСНОВНОЙ КОНТЕНТ */
-@media (max-width: 968px) {
-  .charts-container {
-    grid-template-columns: 1fr;
-  }
-  
-  .main-chart {
-    height: 350px;
-  }
-  
-  .side-charts {
-    grid-template-columns: repeat(2, 1fr);
-    display: grid;
-  }
-  
-  .side-chart {
-    height: 250px;
-  }
-}
-
-
-@media (max-width: 480px) {
-  .main-chart {
-    height: 300px;
-    padding: 15px;
-  }
-  
-  .side-chart {
-    height: 200px;
-    padding: 15px;
-  }
-  
-  .view-controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .btn {
-    justify-content: center;
-  }
-  
-  .period-nav {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-}
 </style>
 {% endblock %}
 

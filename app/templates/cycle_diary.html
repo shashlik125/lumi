@@ -670,49 +670,556 @@ nav a.active::after {
             100% { transform: rotate(360deg); }
         }
 
-        @media (max-width: 768px) {
-            .calendar-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
-            }
-            
-            .calendar-controls {
-                width: 100%;
-                justify-content: space-between;
-            }
-            
-            .symptoms-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .cycle-stats {
-                grid-template-columns: 1fr;
-            }
-        }
+        /* МОБИЛЬНАЯ АДАПТИВНОСТЬ ДЛЯ ДНЕВНИКА ЦИКЛА */
 
-        @media (max-width: 480px) {
-            header {
-                flex-direction: column;
-                gap: 15px;
-                padding: 15px;
-            }
-            
-            nav {
-                flex-direction: column;
-                gap: 10px;
-            }
-            
-            .symptoms-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .legend {
-                flex-direction: column;
-                gap: 10px;
-                align-items: center;
-            }
-        }
+@media (max-width: 1024px) {
+    /* Планшеты и маленькие ноутбуки */
+    main {
+        padding: 25px 15px;
+    }
+    
+    .tracker-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .charts-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Компактный хедер для планшетов и телефонов */
+    body {
+        padding-top: 60px; /* Уменьшили отступ */
+    }
+    
+    header {
+        padding: 10px 15px;
+        min-height: 60px; /* Уменьшили высоту */
+        flex-wrap: nowrap; /* Одна строка */
+        overflow-x: auto; /* Горизонтальная прокрутка если не помещается */
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
+        gap: 15px;
+        justify-content: flex-start; /* Выравнивание по левому краю */
+    }
+    
+    /* УБИРАЕМ ЛОГОТИП LUMI */
+    .logo {
+        display: none !important; /* Полностью скрываем логотип */
+    }
+    
+    /* Навигация - горизонтальная прокрутка */
+    nav {
+        order: 1;
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0; /* Не сжимается */
+        margin: 0;
+        padding: 0;
+    }
+    
+    nav a {
+        padding: 8px 12px;
+        font-size: 14px;
+        white-space: nowrap; /* Не переносить текст */
+        flex-shrink: 0;
+        background: rgba(96, 244, 227, 0.1);
+        border-radius: 20px;
+    }
+    
+    nav a.active {
+        background: var(--primary);
+        color: white;
+    }
+    
+    nav a.active::after {
+        display: none; /* Убираем подчеркивание на мобильных */
+    }
+    
+    /* Профиль пользователя */
+    .user {
+        order: 2;
+        margin-left: auto; /* Прижимаем к правому краю */
+        flex-shrink: 0;
+        padding: 5px;
+    }
+    
+    .user span {
+        display: none; /* Скрываем имя пользователя */
+    }
+    
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+    }
+    
+    /* Основной контент */
+    main {
+        padding: 20px 12px;
+    }
+    
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    h1 {
+        font-size: 24px;
+        padding-bottom: 8px;
+    }
+    
+    h1:after {
+        left: 50%;
+        transform: translateX(-50%);
+        width: 50px;
+    }
+    
+    /* Статистика цикла */
+    .cycle-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+    
+    .stat-card {
+        padding: 15px;
+        border-radius: 14px;
+    }
+    
+    .stat-title {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+    
+    .stat-value {
+        font-size: 22px;
+    }
+    
+    .stat-change {
+        font-size: 13px;
+    }
+    
+    /* Календарь цикла */
+    .cycle-calendar-container {
+        padding: 20px;
+        border-radius: 14px;
+        margin-bottom: 25px;
+    }
+    
+    .calendar-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .calendar-title {
+        font-size: 18px;
+    }
+    
+    .calendar-controls {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .today-btn {
+        padding: 6px 12px;
+        font-size: 14px;
+    }
+    
+    .calendar-btn {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .weekdays {
+        padding: 8px 0;
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+    
+    .weekday {
+        padding: 8px 2px;
+        font-size: 13px;
+    }
+    
+    .calendar-grid {
+        gap: 6px;
+    }
+    
+    .calendar-day {
+        min-height: 45px;
+        border-radius: 10px;
+        padding: 4px;
+    }
+    
+    .day-number {
+        font-size: 14px;
+        margin-bottom: 3px;
+    }
+    
+    .cycle-phase-dot {
+        width: 6px;
+        height: 6px;
+    }
+    
+    /* Форма отслеживания */
+    .tracker-form {
+        padding: 20px;
+        border-radius: 14px;
+    }
+    
+    .mood-integration {
+        padding: 20px;
+        border-radius: 14px;
+    }
+    
+    .section-title {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+    
+    .symptoms-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+    
+    .symptom-checkbox {
+        padding: 8px;
+        font-size: 13px;
+    }
+    
+    .form-input, .form-select, .form-textarea {
+        padding: 10px 12px;
+        font-size: 14px;
+        border-radius: 10px;
+    }
+    
+    .mood-display {
+        padding: 12px;
+    }
+    
+    .mood-value {
+        font-size: 28px;
+    }
+    
+    .mood-emoji {
+        font-size: 40px;
+    }
+    
+    .btn {
+        padding: 10px 20px;
+        font-size: 14px;
+        border-radius: 10px;
+    }
+    
+    /* Аналитика */
+    .analytics-container {
+        padding: 20px;
+        border-radius: 14px;
+        margin-bottom: 25px;
+    }
+    
+    .chart-container {
+        height: 250px;
+        padding: 15px;
+    }
+    
+    .chart-title {
+        font-size: 15px;
+        margin-bottom: 12px;
+    }
+    
+    /* Легенда */
+    .legend {
+        padding: 15px;
+        border-radius: 14px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+    }
+    
+    .legend-item {
+        font-size: 12px;
+        padding: 6px 10px;
+        flex-shrink: 0;
+    }
+    
+    .legend-color {
+        width: 12px;
+        height: 12px;
+    }
+    
+    /* Уведомления */
+    .toast {
+        top: 70px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        text-align: center;
+        font-size: 13px;
+        padding: 12px 16px;
+    }
+    
+    /* Убираем hover-эффекты для тач-устройств */
+    .calendar-day:hover,
+    .stat-card:hover,
+    .symptom-checkbox:hover,
+    .btn:hover {
+        transform: none;
+        box-shadow: none;
+        border-color: transparent;
+    }
+    
+    .stat-card:hover {
+        border-color: transparent;
+    }
+}
+
+@media (max-width: 480px) {
+    /* Еще более компактный для маленьких телефонов */
+    body {
+        padding-top: 55px;
+    }
+    
+    header {
+        padding: 8px 12px;
+        min-height: 55px;
+        gap: 10px;
+    }
+    
+    nav {
+        gap: 6px;
+    }
+    
+    nav a {
+        padding: 6px 10px;
+        font-size: 13px;
+    }
+    
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+    }
+    
+    main {
+        padding: 15px 10px;
+    }
+    
+    h1 {
+        font-size: 22px;
+        text-align: center;
+        width: 100%;
+    }
+    
+    /* Статистика */
+    .cycle-stats {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+    
+    .stat-card {
+        padding: 12px;
+    }
+    
+    .stat-title {
+        font-size: 13px;
+    }
+    
+    .stat-value {
+        font-size: 20px;
+    }
+    
+    /* Календарь */
+    .cycle-calendar-container {
+        padding: 15px;
+        border-radius: 12px;
+    }
+    
+    .calendar-title {
+        font-size: 16px;
+    }
+    
+    .today-btn {
+        padding: 5px 10px;
+        font-size: 13px;
+    }
+    
+    .calendar-btn {
+        width: 32px;
+        height: 32px;
+    }
+    
+    .calendar-btn i {
+        font-size: 12px;
+    }
+    
+    .weekday {
+        padding: 6px 1px;
+        font-size: 12px;
+    }
+    
+    .calendar-grid {
+        gap: 4px;
+    }
+    
+    .calendar-day {
+        min-height: 40px;
+        border-radius: 8px;
+        padding: 3px;
+    }
+    
+    .day-number {
+        font-size: 13px;
+    }
+    
+    /* Форма */
+    .tracker-form,
+    .mood-integration {
+        padding: 15px;
+    }
+    
+    .symptoms-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .section-title {
+        font-size: 15px;
+    }
+    
+    .form-input, .form-select, .form-textarea {
+        padding: 8px 10px;
+        font-size: 13px;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+    
+    /* Аналитика */
+    .analytics-container {
+        padding: 15px;
+    }
+    
+    .chart-container {
+        height: 220px;
+        padding: 12px;
+    }
+    
+    /* Легенда */
+    .legend {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        padding: 12px;
+    }
+    
+    .legend-item {
+        width: 100%;
+        justify-content: center;
+        padding: 8px;
+    }
+}
+
+@media (max-width: 360px) {
+    /* Очень маленькие телефоны */
+    .calendar-day {
+        min-height: 35px;
+    }
+    
+    .day-number {
+        font-size: 12px;
+    }
+    
+    .stat-value {
+        font-size: 18px;
+    }
+    
+    .mood-value {
+        font-size: 24px;
+    }
+    
+    .mood-emoji {
+        font-size: 36px;
+    }
+}
+
+/* Ландшафтная ориентация */
+@media (max-height: 500px) and (orientation: landscape) {
+    header {
+        padding: 6px 10px;
+        min-height: 50px;
+    }
+    
+    nav a {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+    
+    .user-avatar {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .cycle-stats {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .calendar-day {
+        min-height: 35px;
+    }
+    
+    .chart-container {
+        height: 200px;
+    }
+}
+
+/* Тач-таргеты для удобства на мобильных */
+@media (hover: none) {
+    .calendar-day,
+    .calendar-btn,
+    .today-btn,
+    nav a,
+    .symptom-checkbox,
+    .btn {
+        min-height: 44px; /* Минимальный размер для удобного тапа */
+    }
+    
+    .calendar-day:active,
+    .calendar-btn:active,
+    .today-btn:active,
+    .symptom-checkbox:active,
+    .btn:active {
+        transform: scale(0.95);
+        opacity: 0.8;
+        transition: transform 0.1s ease;
+    }
+    
+    .calendar-day {
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+    }
+}
+
+/* Поддержка Retina-дисплеев */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .calendar-day,
+    .stat-card,
+    .tracker-form,
+    .mood-integration,
+    .analytics-container,
+    .legend {
+        border-width: 1.5px;
+    }
+}
+
     </style>
 {% endblock %}
 

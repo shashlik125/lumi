@@ -174,13 +174,14 @@ nav a.active::after {
 .images-container {
   position: relative;
   width: 100%;
-  height: 320px; /* Минимальная высота */
-  margin: 80px auto 30px; /* Минимальные отступы */
+  max-width: 1100px;
+  margin: 50px auto 30px;
   display: flex;
-  flex-direction: column;
-  justify-content: center; /* Центрируем по вертикали */
-  align-items: center;
+  justify-content: center;
+  height: auto;
+  min-height: 0;
 }
+
 
 /* Основной смайлик */
 .main-emoji-container {
@@ -191,7 +192,7 @@ nav a.active::after {
 }
 
 .emoji-image {
-  max-width: 250px !important;
+  max-width: 100%;
   height: auto;
   filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
   animation: float 3s ease-in-out infinite;
@@ -203,15 +204,15 @@ nav a.active::after {
   justify-content: center;
   width: 100%;
   position: relative;
-  z-index: 10;
-  margin-top: 5px; /* Минимальный отступ */
+  top: 100px;
 }
 
 .header-image {
-  width: 200px !important;
+  width: 200px;
   height: auto;
   position: relative;
-  z-index: 10;
+  z-index: 5;
+  max-width: 100%;
 }
 
 /* Остальные эмодзи (фон) */
@@ -221,79 +222,74 @@ nav a.active::after {
 
 .emoji-container.second-emoji {
   position: absolute;
-  top: 40px;
-  left: 5%;
+  top: 200px;
+  left: -10%;
   z-index: 9;
-}
-
-.emoji-container.second-emoji .emoji-image {
-  max-width: 180px;
-  animation: float 3.5s ease-in-out infinite;
-  animation-delay: 0.5s;
 }
 
 .emoji-container.third-emoji {
   position: absolute;
-  top: 200px;
-  right: 5%;
+  top: 370px;
+  right: -100px;
   z-index: 8;
 }
 
 .emoji-container.fourth-emoji {
   position: absolute;
-  top: 60px;
-  left: 20%;
+  top: 150px;
+  left: 25%;
   z-index: 7;
 }
 
 .emoji-container.fifth-emoji {
   position: absolute;
-  top: 20px;
-  left: 75%;
+  top: 40px;
+  left: 80%;
   z-index: 6;
 }
 
 .emoji-container.sixth-emoji {
   position: absolute;
-  top: 180px;
-  left: 85%;
+  top: 250px;
+  left: 100%;
   z-index: 7;
 }
 
 .emoji-container.eighth-emoji {
   position: absolute;
-  top: 220px;
-  left: 10%;
+  top: 480px;
+  left: -15%;
   z-index: 8;
 }
 
 .emoji-container.ninth-emoji {
   position: absolute;
-  top: 240px;
-  left: 15%;
+  top: 635px;
+  left: -40%;
   z-index: 9;
 }
 
 .emoji-container.tenth-emoji {
   position: absolute;
-  top: 40px;
-  left: 10%;
+  top: 100px;
+  left: -50%;
   z-index: 12;
 }
 
 .emoji-container.eleventh-emoji {
   position: absolute;
-  top: 80px;
-  right: 10%;
+  top: 70px;
+  right: -300px;
   z-index: 11;
 }
 
 .emoji-container.twelfth-emoji {
   position: absolute;
-  top: 220px;
-  right: 15%;
+  top: 635px;
+  right: -170px;
   z-index: 90;
 }
+
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -302,15 +298,17 @@ nav a.active::after {
 
 /* Основной контент */
 .main-content {
+  max-width: 1200px;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 40px;
-  margin: 0 auto 60px;
-  padding: 0 0 20px;
-  position: relative;
-  z-index: 10;
+  gap: 80px;
+  margin: 0 auto;
+  margin-top: 200px;
+  margin-bottom: 100px;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 
 .welcome-text {

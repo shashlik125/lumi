@@ -606,20 +606,16 @@ h1:after {
   }
 }
 
-
-/* АДАПТИВНОСТЬ - ОСНОВНОЙ КОНТЕНТ */
+/* АДАПТИВНОСТЬ - МОБИЛЬНАЯ ВЕРСИЯ (ТОЛЬКО КОНТЕНТ) */
 @media (max-width: 768px) {
     /* Основной контент */
-    body {
-        font-size: 16px;
-    }
-    
     .container {
         padding: 0 15px;
     }
     
     main { 
         padding: 20px 0; 
+        min-height: calc(100vh - 100px);
     }
     
     .page-header {
@@ -864,6 +860,8 @@ h1:after {
         font-size: 12px;
     }
 }
+
+
 
 </style>
 {% endblock %}

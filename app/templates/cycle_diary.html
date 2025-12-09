@@ -462,6 +462,7 @@ body {
         grid-template-columns: 1fr;
         gap: 20px;
     }
+    
 }
 
 @media (max-width: 768px) {
@@ -716,6 +717,28 @@ body {
     .stat-card:hover {
         border-color: transparent;
     }
+
+       .chart-container {
+        height: 200px !important;
+        padding: 10px;
+    }
+    
+    /* Корректировка подписей на графиках */
+    #symptomsChart {
+        overflow-x: auto;
+    }
+    
+    /* Делаем подписи короче */
+    .chart-title {
+        font-size: 14px !important;
+        text-align: center;
+    }
+    
+    /* Исправляем наклонные подписи */
+    #moodPhaseChart + .chartjs-render-monitor,
+    #symptomsChart + .chartjs-render-monitor {
+        max-width: 100% !important;
+    }
 }
 
 @media (max-width: 480px) {
@@ -842,6 +865,26 @@ body {
         justify-content: center;
         padding: 8px;
     }
+
+     .chart-container {
+        height: 180px !important;
+    }
+    
+    /* Убираем наклонные подписи на очень маленьких экранах */
+    .chartjs-size-monitor,
+    .chartjs-render-monitor {
+        max-width: 100%;
+        overflow: hidden;
+    }
+    
+    /* Укорачиваем слишком длинные заголовки */
+    .chart-title {
+        font-size: 13px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
 }
 
 @media (max-width: 360px) {
@@ -883,7 +926,33 @@ body {
     }
 }
 
-    </style>
+   
+   /* ОГРАНИЧЕНИЯ ДЛЯ ГРАФИКОВ (ДОБАВЬ ЭТО В КОНЕЦ ФАЙЛА) */
+.analytics-container {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.charts-grid {
+    min-height: 0; /* Важно для ограничения роста */
+}
+
+.chart-container {
+    height: 250px !important;
+    min-height: 250px;
+    max-height: 250px;
+}
+
+#moodPhaseChart, #symptomsChart {
+    height: 250px !important;
+    width: 100% !important;
+    max-height: 250px !important;
+}
+
+
+
+
+</style>
 {% endblock %}
 
 
@@ -1021,37 +1090,6 @@ body {
         </div>
     </div>
 </div>
-        <!-- Легенда -->
-        <div class="legend">
-            <div class="legend-item">
-                <div class="legend-color" style="background: var(--menstruation);"></div>
-                <span>Менструация</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: var(--follicular);"></div>
-                <span>Фолликулярная фаза</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: var(--ovulation);"></div>
-                <span>Овуляция</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: var(--luteal);"></div>
-                <span>Лютеиновая фаза</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: var(--pms);"></div>
-                <span>ПМС</span>
-            </div>
-            <div class="legend-item">
-                <div style="width: 16px; height: 16px; border: 2px dashed var(--ovulation); border-radius: 50%;"></div>
-                <span>Фертильное окно</span>
-            </div>
-        </div>
-    </main>
-
-    <div class="toast" id="toast"></div>
-
 {% endblock %}
 {% block extra_js %}
 <script>
@@ -1489,6 +1527,37 @@ async function saveCycleEntry() {
             });
             document.getElementById('flowLevel').value = '';
             document.getElementById('cycleNotes').value = '';
+            
+            // ДОБАВЬ ЭТО ДЛЯ ОБНОВЛЕНИЯ АНАЛИТИКИ:
+            setTimeout(async () => {
+                try {
+                    // Перезагружаем данные для графиков
+                    await Promise.all([
+                        loadMoodData(),
+                        loadCycleStats(),
+                        loadCyclePredictions(),
+                        loadTodayMood()
+                    ]);
+                    
+                    // Обновляем графики аналитики
+                    if (typeof updateChartsWithRealData === 'function') {
+                        updateChartsWithRealData();
+                    }
+                    
+                    // Также обновляем статистику на странице
+                    if (typeof updateStatsDisplay === 'function') {
+                        const statsResponse = await fetch(CYCLE_STATS_API);
+                        if (statsResponse.ok) {
+                            const stats = await statsResponse.json();
+                            updateStatsDisplay(stats);
+                        }
+                    }
+                    
+                } catch (updateError) {
+                    console.error('Ошибка обновления аналитики:', updateError);
+                }
+            }, 300);
+            
         } else {
             const errorData = await response.json();
             throw new Error(errorData.error || 'Ошибка сохранения');

@@ -739,29 +739,43 @@ function showToast(message, type = 'success') {
     }, 3000);
 }
 
-
 // Функция загрузки данных настроения
 async function loadMoodData() {
     try {
+        console.log('📡 Запрос настроений с API:', API_BASE);
         const response = await fetch(API_BASE);
+        
+        console.log('📡 Ответ сервера:', response.status);
+        
         if (response.ok) {
             let allMoods = await response.json();
+            console.log('✅ Получено настроений:', allMoods.length);
             
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             
             moods = allMoods.filter(entry => {
                 const entryDate = new Date(entry.date + 'T00:00:00');
-                return entryDate <= today;
+                const isPastOrToday = entryDate <= today;
+                
+                if (!isPastOrToday) {
+                    console.log('⏩ Пропущено будущее настроение:', entry.date);
+                }
+                
+                return isPastOrToday;
             });
+            
+            console.log('✅ Актуальных настроений:', moods.length);
+            console.log('📋 Примеры настроений:', moods.slice(0, 3));
             
             return true;
         } else {
+            console.error('❌ Ошибка загрузки:', response.status);
             moods = [];
             return false;
         }
     } catch (error) {
-        console.error('Ошибка загрузки настроений:', error);
+        console.error('❌ Ошибка загрузки настроений:', error);
         moods = [];
         return false;
     }
@@ -796,227 +810,241 @@ async function cleanupFutureEntries() {
 const calendar = document.getElementById("calendar");
 const monthYear = document.getElementById("monthYear");
 
-if (calendar && monthYear) {
+function formatISO(year, month, day) {
+    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
 
-    function formatISO(year, month, day) {
-        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+function parseDateISO(str) {
+    const [y, m, d] = str.split("-").map(Number);
+    return new Date(y, m - 1, d);
+}
+
+function createDayElement(dayNumber, className, isOtherMonth) {
+    const dayElement = document.createElement("div");
+    dayElement.classList.add("calendar-day");
+
+    if (className) dayElement.classList.add(className);
+
+    const numberElement = document.createElement("div");
+    numberElement.classList.add("day-number");
+    numberElement.textContent = dayNumber;
+
+    dayElement.appendChild(numberElement);
+
+    if (isOtherMonth) {
+        dayElement.style.cursor = 'default';
+        dayElement.style.pointerEvents = 'none';
     }
 
-    function parseDateISO(str) {
-        const [y, m, d] = str.split("-").map(Number);
-        return new Date(y, m - 1, d);
-    }
+    return dayElement;
+}
 
-    function createDayElement(dayNumber, className, isOtherMonth) {
-        const dayElement = document.createElement("div");
-        dayElement.classList.add("calendar-day");
-
-        if (className) dayElement.classList.add(className);
-
-        const numberElement = document.createElement("div");
-        numberElement.classList.add("day-number");
-        numberElement.textContent = dayNumber;
-
-        dayElement.appendChild(numberElement);
-
-        if (isOtherMonth) {
-            dayElement.style.cursor = 'default';
-            dayElement.style.pointerEvents = 'none';
-        }
-
-        return dayElement;
-    }
-
-    function openDayDetail(dateKey, event) {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+function openDayDetail(dateKey, event) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const selectedDate = new Date(dateKey + 'T00:00:00');
+    
+    if (selectedDate > today) {
+        showToast('❌ Дата в будущем', 'error');
         
-        const selectedDate = new Date(dateKey + 'T00:00:00');
-        
-        if (selectedDate > today) {
-            showToast('❌ Дата в будущем', 'error');
-            
-            const dayElement = event.target.closest('.calendar-day');
-            if (dayElement && !dayElement.classList.contains('other-month')) {
-                dayElement.style.animation = 'shake 0.5s';
-                setTimeout(() => {
-                    dayElement.style.animation = '';
-                }, 500);
-            }
-            
-            return;
+        const dayElement = event.target.closest('.calendar-day');
+        if (dayElement && !dayElement.classList.contains('other-month')) {
+            dayElement.style.animation = 'shake 0.5s';
+            setTimeout(() => {
+                dayElement.style.animation = '';
+            }, 500);
         }
         
-        window.location.href = `/calendar/day/${dateKey}`;
+        return;
+    }
+    
+    window.location.href = `/calendar/day/${dateKey}`;
+}
+
+// Основная функция отрисовки календаря
+function renderCalendar() {
+    if (!calendar) return;
+    
+    calendar.innerHTML = "";
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+
+    monthYear.textContent = currentDate.toLocaleString("ru-RU", { 
+        month: "long", year: "numeric" 
+    });
+
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    
+    let startDay = firstDay.getDay();
+    if (startDay === 0) startDay = 7;
+
+    const prevMonthDays = new Date(year, month, 0).getDate();
+    for (let i = startDay - 1; i > 0; i--) {
+        const day = createDayElement(prevMonthDays - i + 1, "other-month", true);
+        calendar.appendChild(day);
     }
 
+    const today = new Date();
 
-    // Основная функция отрисовки календаря (правильная версия)
-    function renderCalendar() {
-        calendar.innerHTML = "";
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
+    for (let i = 1; i <= daysInMonth; i++) {
+        const dateKey = formatISO(year, month + 1, i);
+        const day = createDayElement(i, "", false);
 
-        monthYear.textContent = currentDate.toLocaleString("ru-RU", { 
-            month: "long", year: "numeric" 
+        const isToday = today.getDate() === i && 
+                today.getMonth() === month && 
+                today.getFullYear() === year;
+        if (isToday) {
+            day.classList.add("current-day");
+            
+            const todayDot = document.createElement("div");
+            todayDot.className = "today-dot";
+            todayDot.title = "Сегодня";
+            day.appendChild(todayDot);
+        }
+
+        const dayMoods = moods.filter(entry => entry.date === dateKey);
+        if (dayMoods.length > 0) {
+            const avgMood = dayMoods.reduce((s, m) => s + m.mood, 0) / dayMoods.length;
+
+            if (avgMood >= 7) day.classList.add("mood-good");
+            else if (avgMood >= 4) day.classList.add("mood-neutral");
+            else day.classList.add("mood-bad");
+
+            const indicator = document.createElement("div");
+            indicator.classList.add("mood-indicator");
+            day.appendChild(indicator);
+        }
+
+        day.addEventListener('click', function(event) {
+            openDayDetail(dateKey, event);
         });
 
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const daysInMonth = lastDay.getDate();
+        calendar.appendChild(day);
+    }
+
+    const totalCells = 35;
+    const filledCells = startDay - 1 + daysInMonth;
+
+    if (filledCells < totalCells) {
+        for (let i = 1; i <= totalCells - filledCells; i++) {
+            const day = createDayElement(i, "other-month", true);
+            calendar.appendChild(day);
+        }
+    }
+}
+
+function changeMonth(step) {
+    currentDate.setMonth(currentDate.getMonth() + step);
+    renderCalendar();
+    updateStats();
+}
+
+function goToToday() {
+    currentDate = new Date();
+    renderCalendar();
+    updateStats();
+}
+
+async function updateStats() {
+    try {
+        console.log('📊 Обновление статистики...');
+        console.log('📅 Текущий месяц:', currentDate.getMonth() + 1, currentDate.getFullYear());
+        console.log('🎭 Всего настроений:', moods.length);
         
-        let startDay = firstDay.getDay();
-        if (startDay === 0) startDay = 7;
-
-        const prevMonthDays = new Date(year, month, 0).getDate();
-        for (let i = startDay - 1; i > 0; i--) {
-            const day = createDayElement(prevMonthDays - i + 1, "other-month", true);
-            calendar.appendChild(day);
-        }
-
-        const today = new Date();
-
-        for (let i = 1; i <= daysInMonth; i++) {
-            const dateKey = formatISO(year, month + 1, i);
-            const day = createDayElement(i, "", false);
-
-            const isToday = today.getDate() === i && 
-                    today.getMonth() === month && 
-                    today.getFullYear() === year;
-            if (isToday) {
-                day.classList.add("current-day");
-                
-                const todayDot = document.createElement("div");
-                todayDot.className = "today-dot";
-                todayDot.title = "Сегодня";
-                day.appendChild(todayDot);
+        // Фильтруем настроения за текущий месяц
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        // Получаем настроения за текущий месяц
+        const monthlyMoods = moods.filter(entry => {
+            const entryDate = new Date(entry.date + 'T00:00:00');
+            return entryDate.getFullYear() === year && 
+                   entryDate.getMonth() === month;
+        });
+        
+        console.log('🎭 Настроений в этом месяце:', monthlyMoods.length);
+        
+        // Рассчитываем статистику
+        let goodDaysCount = 0;
+        let totalMood = 0;
+        const filledDates = new Set();
+        
+        monthlyMoods.forEach(entry => {
+            filledDates.add(entry.date);
+            totalMood += entry.mood;
+            
+            if (entry.mood >= 7) {
+                goodDaysCount++;
             }
-
-            const dayMoods = moods.filter(entry => entry.date === dateKey);
-            if (dayMoods.length > 0) {
-                const avgMood = dayMoods.reduce((s, m) => s + m.mood, 0) / dayMoods.length;
-
-                if (avgMood >= 7) day.classList.add("mood-good");
-                else if (avgMood >= 4) day.classList.add("mood-neutral");
-                else day.classList.add("mood-bad");
-
-                const indicator = document.createElement("div");
-                indicator.classList.add("mood-indicator");
-                day.appendChild(indicator);
-            }
-
-            day.addEventListener('click', function(event) {
-                openDayDetail(dateKey, event);
-            });
-
-            calendar.appendChild(day);
-        }
-
-        const totalCells = 35;
-        const filledCells = startDay - 1 + daysInMonth;
-
-        if (filledCells < totalCells) {
-            for (let i = 1; i <= totalCells - filledCells; i++) {
-                const day = createDayElement(i, "other-month", true);
-                calendar.appendChild(day);
-            }
-        }
+        });
+        
+        const filledDaysCount = filledDates.size;
+        const avgMoodValue = filledDaysCount > 0 ? (totalMood / filledDaysCount).toFixed(1) : "0.0";
+        
+        console.log('📈 Статистика:', {
+            хорошихДней: goodDaysCount,
+            среднееНастроение: avgMoodValue,
+            заполненныхДней: filledDaysCount
+        });
+        
+        // Обновляем DOM
+        const goodDaysElement = document.getElementById("goodDays");
+        const avgMoodElement = document.getElementById("avgMood");
+        const filledDaysElement = document.getElementById("filledDays");
+        
+        if (goodDaysElement) goodDaysElement.textContent = goodDaysCount;
+        if (avgMoodElement) avgMoodElement.textContent = avgMoodValue;
+        if (filledDaysElement) filledDaysElement.textContent = `${filledDaysCount}/${daysInMonth}`;
+        
+    } catch (error) {
+        console.error('❌ Ошибка обновления статистики:', error);
+        
+        // Устанавливаем значения по умолчанию при ошибке
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        const goodDaysElement = document.getElementById("goodDays");
+        const avgMoodElement = document.getElementById("avgMood");
+        const filledDaysElement = document.getElementById("filledDays");
+        
+        if (goodDaysElement) goodDaysElement.textContent = "0";
+        if (avgMoodElement) avgMoodElement.textContent = "0.0";
+        if (filledDaysElement) filledDaysElement.textContent = `0/${daysInMonth}`;
     }
-   
-    
-    function changeMonth(step) {
-        currentDate.setMonth(currentDate.getMonth() + step);
-        renderCalendar();
-    }
+}
 
-    function goToToday() {
-        currentDate = new Date();
-        renderCalendar();
-    }
-
-    async function updateStats() {
-        try {
-            const response = await fetch(STATS_API);
-            if (!response.ok) return;
-
-            const stats = await response.json();
-
-            const goodDaysElement = document.getElementById("goodDays");
-            const avgMoodElement = document.getElementById("avgMood");
-            const filledDaysElement = document.getElementById("filledDays");
-
-            if (avgMoodElement) avgMoodElement.textContent = stats.avg_mood || "0.0";
-
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-            const goodDays = new Set(
-                moods
-                    .filter(entry => {
-                        const d = parseDateISO(entry.date);
-                        return (
-                            d.getFullYear() === year &&
-                            d.getMonth() === month &&
-                            entry.mood >= 7
-                        );
-                    })
-                    .map(entry => entry.date)
-            ).size;
-
-            if (goodDaysElement) goodDaysElement.textContent = goodDays;
-
-            const filledDays = new Set(
-                moods
-                    .filter(entry => {
-                        const d = parseDateISO(entry.date);
-                        return d.getFullYear() === year && d.getMonth() === month;
-                    })
-                    .map(entry => entry.date)
-            ).size;
-
-            if (filledDaysElement) filledDaysElement.textContent = `${filledDays}/${daysInMonth}`;
-
-        } catch (error) {
-            console.error('Ошибка статистики:', error);
-            
-            const goodDaysElement = document.getElementById("goodDays");
-            const avgMoodElement = document.getElementById("avgMood");
-            const filledDaysElement = document.getElementById("filledDays");
-            
-            if (goodDaysElement) goodDaysElement.textContent = "0";
-            if (avgMoodElement) avgMoodElement.textContent = "0.0";
-            
-            const year = currentDate.getFullYear();
-            const month = currentDate.getMonth();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-            
-            if (filledDaysElement) filledDaysElement.textContent = `0/${daysInMonth}`;
-        }
-    }
-
-    // Инициализация при загрузке страницы
-    document.addEventListener('DOMContentLoaded', async function() {
-
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        console.log('🚀 Инициализация страницы календаря...');
         
         // Загружаем данные
-        await loadMoodData();
+        const loaded = await loadMoodData();
+        console.log('✅ Настроения загружены:', moods.length, 'записей');
         
         // Отрисовываем календарь
         renderCalendar();
         
+        // Обновляем статистику
+        updateStats();
+        
         // Очищаем будущие записи в фоне
         cleanupFutureEntries();
-    });
-
-} else {
-    console.error("Не найдены элементы календаря");
-}
+    } catch (error) {
+        console.error('❌ Ошибка инициализации:', error);
+    }
+});
 
 // Делаем функции глобальными для использования в HTML
 window.changeMonth = changeMonth;
 window.goToToday = goToToday;
 window.showToast = showToast;
+window.renderCalendar = renderCalendar;
+window.updateStats = updateStats;
 </script>
-
 {% endblock %}

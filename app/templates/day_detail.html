@@ -39,47 +39,53 @@ body {
   min-height: 100vh;
 }
 
-header { 
+header {
   background: rgba(255, 255, 255, 0.95);
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  padding: 15px 25px; 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   backdrop-filter: blur(10px);
+  flex-wrap: nowrap;
+  min-height: 60px;
 }
 
-.logo { 
-  font-weight: 700; 
-  font-size: 24px; 
+.logo {
+  font-weight: 700;
+  font-size: 20px;
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .user-info {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-weight: 500;
   color: var(--dark);
+  flex-shrink: 0;
 }
-
 .user-avatar {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--white);
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+
 nav {
   display: flex;
-  gap: 15px;
+  gap: 10px;
   align-items: center;
+  flex-shrink: 1;
+  min-width: 0;
 }
-
 .nav-link {
   color: var(--dark);
   text-decoration: none;
@@ -87,10 +93,14 @@ nav {
   display: flex;
   align-items: center;
   gap: 5px;
-  padding: 8px 12px;
+  padding: 6px 10px;
   border-radius: 8px;
   transition: var(--transition);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
 }
+
 
 .nav-link:hover {
   background: rgba(96, 244, 227, 0.1);
@@ -533,116 +543,124 @@ main {
   background: var(--danger);
 }
 
+.user-name {
+  font-size: 14px;
+}
+
+
 @media (max-width: 768px) {
-  main {
-    padding: 20px 15px;
+  header {
+    padding: 8px 12px;
+    min-height: 56px;
   }
   
-  .mood-section, .add-mood-section, .positive-things, .hourly-mood-section {
-    padding: 12px 15px;
+  .logo {
+    font-size: 18px;
   }
   
-  .mood-value {
-    font-size: 28px;
+  .nav-link {
+    padding: 5px 8px;
+    font-size: 13px;
   }
   
-  .mood-emoji {
-    font-size: 26px;
+  .user-name {
+    display: none; /* Скрываем имя пользователя */
   }
   
-  .hours-grid {
-    grid-template-columns: repeat(4, 1fr);
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+  }
+   .day-title {
+    font-size: 20px; /* Уменьшаем с 24px до 20px */
   }
   
-  .hour-item {
-    min-height: 65px;
-    padding: 6px 3px;
+  .day-header {
+    padding: 15px; /* Уменьшаем отступы */
+  }
+}
+
+
+@media (max-width: 480px) {
+  header {
+    padding: 6px 10px;
+    min-height: 52px;
   }
   
-  .hour-time {
-    font-size: 10px;
+  .logo {
+    font-size: 16px;
   }
   
-  .hour-mood {
+  .nav-link {
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+  
+  .nav-link i {
     font-size: 14px;
   }
   
-  .time-note {
-    font-size: 8px;
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+  }
+  .day-title {
+    font-size: 18px; /* Еще меньше на маленьких экранах */
+  }
+  
+  .day-header {
+    padding: 12px;
   }
 }
 
-@media (max-width: 480px) {
-  .hours-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  
-  header {
-    flex-direction: column;
-    gap: 15px;
-    padding: 15px;
-  }
-  
-  nav {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .form-actions {
-    flex-direction: column;
-  }
-  
-  .btn {
-    width: 100%;
-    justify-content: center;
-  }
-  
-  .input-group {
-    flex-direction: column;
-  }
-  
-  .positive-input {
-    width: 100%;
-  }
-}
 
 @media (max-width: 360px) {
-  .hours-grid {
-    grid-template-columns: repeat(2, 1fr);
+   .day-title {
+    font-size: 16px; /* Минимальный размер */
+  }
+  .logo {
+    font-size: 15px;
   }
   
-  .hour-item {
-    min-height: 60px;
+  .nav-link {
+    padding: 4px;
+  }
+  
+  .user-avatar {
+    width: 26px;
+    height: 26px;
   }
 }
+
+
+
+
     </style>
-</head>
-<body>
 <header>
   <div class="logo">
     <span>Lumi</span>
   </div>
   <nav>
     <a href="{{ url_for('main.calendar') }}" class="nav-link">
-      <i class="fas fa-arrow-left"></i> Назад к календарю
+      <i class="fas fa-arrow-left"></i> 
+      <span class="nav-text">Назад к календарю</span>
     </a>
     <div class="user-info">
-    <span id="username">
+      <span class="user-name" id="username">
         {% if current_user.is_authenticated %}
-            {{ current_user.first_name or current_user.username }}
+          {{ current_user.first_name or current_user.username }}
         {% else %}
-            Пользователь
+          Пользователь
         {% endif %}
-    </span>
-    {% if current_user.avatar_path %}
+      </span>
+      {% if current_user.avatar_path %}
         <img src="{{ url_for('static', filename=current_user.avatar_path) }}" alt="Аватар" class="user-avatar">
-    {% else %}
-        <img src="https://ui-avatars.com/api/?name={{ current_user.first_name or 'Пользователь' }}&background=60F4E3&color=264653" alt="Аватар" class="user-avatar">
-    {% endif %}
+      {% else %}
+        <img src="https://ui-avatars.com/api/?name={{ current_user.first_name or 'Пользователь' }}&background=60F4E3&color=264653&size=64" alt="Аватар" class="user-avatar">
+      {% endif %}
     </div>
   </nav>
 </header>
-
 <main>
   <div class="day-header">
     <h2 class="day-title" id="dayTitle">Загрузка...</h2>

@@ -19,7 +19,7 @@
       width: 100%;
       height: 100%;
       font-family: 'Montserrat', sans-serif;
-      overflow-x: hidden;
+      overflow-x: visible;
     }
 
     body {
@@ -34,7 +34,7 @@
       --white: #ffffff;
     }
 
-    /* ===== HEADER ===== */
+    /* ===== HEADER (DESKTOP untouched) ===== */
     header {
       background: #fff;
       padding: 20px 5%;
@@ -131,7 +131,7 @@
       background: #f7f7f7;
     }
 
-    /* ===== MOBILE ===== */
+    /* ===== MOBILE FIXED ===== */
     @media (max-width: 768px) {
       body {
         padding-top: 60px;
@@ -140,13 +140,14 @@
       header {
         height: 60px;
         padding: 10px 15px;
-        overflow: visible;
+        overflow: visible; /* НЕ ДАЕМ header прокручиваться */
       }
 
       .logo {
         display: none;
       }
 
+      /* Скролл ТОЛЬКО у меню */
       nav {
         display: flex;
         gap: 8px;
@@ -168,6 +169,7 @@
       }
 
       .user {
+        flex-shrink: 0;
         margin-left: 8px;
       }
 
@@ -176,24 +178,13 @@
       }
 
       .dropdown {
-        position: fixed;
+        position: fixed;   /* ВАЖНО: теперь не обрезается */
         top: 65px;
         right: 10px;
         min-width: 160px;
         z-index: 999999;
       }
     }
-
-    /* ===== HIDE HEADER ON HOME ( / ) ===== */
-    {% if request.path == '/' %}
-    header {
-      display: none !important;
-    }
-
-    body {
-      padding-top: 0 !important;
-    }
-    {% endif %}
   </style>
 
   {% block extra_css %}{% endblock %}
@@ -201,7 +192,6 @@
 
 <body>
 
-{% if request.path != '/' %}
 <header>
   <div class="logo">Lumi</div>
 
@@ -229,7 +219,6 @@
     </div>
   </div>
 </header>
-{% endif %}
 
 {% block content %}{% endblock %}
 

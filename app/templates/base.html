@@ -1,102 +1,247 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>{% block title %}Lumi{% endblock %}</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        /* RESET для всех страниц */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        html, body {
-            width: 100%;
-            height: 100%;
-            font-family: 'Montserrat', sans-serif;
-            overflow-x: hidden; /* Важно для мобильных */
-        }
-        
-        /* Только базовые утилиты - без конфликтующих стилей */
-        .hidden {
-            display: none !important;
-        }
-        
-        .text-center {
-            text-align: center;
-        }
-        
-        /* Уведомления */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: white;
-            z-index: 9999;
-            opacity: 0;
-            transform: translateY(-20px);
-            transition: opacity 0.3s, transform 0.3s;
-        }
-        
-        .toast.show {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        
-        .toast.success {
-            background: #4CAF50;
-        }
-        
-        .toast.error {
-            background: #f44336;
-        }
-    </style>
-    {% block extra_css %}{% endblock %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>{% block title %}Lumi{% endblock %}</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: visible;
+    }
+
+    body {
+      padding-top: 80px;
+    }
+
+    :root {
+      --primary-color: #264653;
+      --accent-pink: #FF70EC;
+      --card-bg: #ffffff;
+      --text-color: #264653;
+      --white: #ffffff;
+    }
+
+    /* ===== HEADER (DESKTOP untouched) ===== */
+    header {
+      background: #fff;
+      padding: 20px 5%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 10000;
+      height: 80px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      overflow: visible;
+    }
+
+    .logo {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+
+    nav {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    nav a {
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      padding: 10px 15px;
+      position: relative;
+      white-space: nowrap;
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 4px;
+      height: 1px;
+      width: 0;
+      background: var(--accent-pink);
+      transition: .2s ease;
+    }
+
+    nav a.active::after {
+      width: 100%;
+    }
+
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .user-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    /* ===== DROPDOWN ===== */
+    .dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      background: white;
+      border-radius: 12px;
+      min-width: 180px;
+      display: none;
+      flex-direction: column;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      z-index: 99999;
+    }
+
+    .dropdown.show {
+      display: flex;
+    }
+
+    .dropdown a {
+      padding: 14px 18px;
+      text-decoration: none;
+      color: var(--text-color);
+      font-weight: 500;
+    }
+
+    .dropdown a:hover {
+      background: #f7f7f7;
+    }
+
+    /* ===== MOBILE FIXED ===== */
+    @media (max-width: 768px) {
+      body {
+        padding-top: 60px;
+      }
+
+      header {
+        height: 60px;
+        padding: 10px 15px;
+        overflow: visible; /* НЕ ДАЕМ header прокручиваться */
+      }
+
+      .logo {
+        display: none;
+      }
+
+      /* Скролл ТОЛЬКО у меню */
+      nav {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        flex: 1;
+      }
+
+      nav::-webkit-scrollbar {
+        display: none;
+      }
+
+      nav a {
+        padding: 8px 12px;
+        font-size: 14px;
+        flex-shrink: 0;
+      }
+
+      .user {
+        flex-shrink: 0;
+        margin-left: 8px;
+      }
+
+      .user span {
+        display: none;
+      }
+
+      .dropdown {
+        position: fixed;   /* ВАЖНО: теперь не обрезается */
+        top: 65px;
+        right: 10px;
+        min-width: 160px;
+        z-index: 999999;
+      }
+    }
+  </style>
+
+  {% block extra_css %}{% endblock %}
 </head>
+
 <body>
-    {% block content %}{% endblock %}
-    
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        function showToast(message, type = 'success') {
-            const existingToasts = document.querySelectorAll('.toast');
-            existingToasts.forEach(toast => toast.remove());
-            
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            
-            document.body.appendChild(toast);
-            
-            setTimeout(() => toast.classList.add('show'), 10);
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
 
-        window.addEventListener('error', function(e) {
-            console.error('Global error:', e.error);
-            showToast('Произошла ошибка', 'error');
-        });
+<header>
+  <div class="logo">Lumi</div>
 
-        window.showToast = showToast;
-        
-        // Мобильные хелперы
-        function isMobile() {
-            return window.innerWidth <= 768;
-        }
-        
-        function isTouchDevice() {
-            return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-        }
-    </script>
-    {% block extra_js %}{% endblock %}
+  <nav>
+    <a href="{{ url_for('main.chart') }}" class="{% if request.endpoint == 'main.chart' %}active{% endif %}">Настроение</a>
+    <a href="{{ url_for('main.dashboard') }}" class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">Главная</a>
+    <a href="{{ url_for('main.calendar') }}" class="{% if request.endpoint == 'main.calendar' %}active{% endif %}">Календарь</a>
+    <a href="{{ url_for('main.cycle_diary') }}" class="{% if request.endpoint == 'main.cycle_diary' %}active{% endif %}">Дневник цикла</a>
+  </nav>
+
+  <div class="user" id="userBtn">
+    <span>
+      {% if current_user.is_authenticated %}
+        {{ current_user.first_name or current_user.username }}
+      {% else %}
+        Пользователь
+      {% endif %}
+    </span>
+
+    <img src="{% if current_user.avatar_path %}{{ url_for('static', filename=current_user.avatar_path) }}{% else %}https://ui-avatars.com/api/?name={{ current_user.first_name or 'Пользователь' }}{% endif %}" class="user-avatar">
+
+    <div class="dropdown" id="userMenu">
+      <a href="{{ url_for('main.profile') }}">Профиль</a>
+      <a href="{{ url_for('auth.logout') }}">Выйти</a>
+    </div>
+  </div>
+</header>
+
+{% block content %}{% endblock %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const user = document.getElementById('userBtn');
+  const menu = document.getElementById('userMenu');
+
+  if (!user || !menu) return;
+
+  user.addEventListener('click', function(e) {
+    e.stopPropagation();
+    menu.classList.toggle('show');
+  });
+
+  document.addEventListener('click', function(e) {
+    if (!user.contains(e.target)) {
+      menu.classList.remove('show');
+    }
+  });
+});
+</script>
+
+{% block extra_js %}{% endblock %}
 </body>
 </html>

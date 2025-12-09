@@ -323,16 +323,6 @@ h1 {
   transform: translateY(-2px);
 }
 
-.btn.secondary {
-  background: #60F4E3;
-  color: #264653;
-}
-
-.btn.secondary:hover {
-  background: #48cbbd;
-  transform: translateY(-2px);
-}
-
 .login-footer {
   text-align: center;
   margin-top: 30px;
@@ -341,14 +331,14 @@ h1 {
 }
 
 .login-footer a {
-  color: #FF70EC;
+  color:  #60F4E3;
   text-decoration: none;
   font-weight: 600;
   transition: all 0.3s ease;
 }
 
 .login-footer a:hover {
-  color: #60F4E3;
+  color: #FF70EC;
 }
 
 /* Flash сообщения - ИСПРАВЛЕНИЕ ПРОБЛЕМЫ 3 */
@@ -581,7 +571,6 @@ h1 {
       
       <div class="actions">
         <button type="submit" class="btn primary">Войти в аккаунт</button>
-        <a href="{{ url_for('auth.register') }}" class="btn secondary">Создать аккаунт</a>
       </div>
     </form>
     

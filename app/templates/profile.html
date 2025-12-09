@@ -544,7 +544,7 @@ h2:after {
   <div class="logo">Lumi</div>
   <nav>
     <a href="{{ url_for('main.dashboard') }}" class="nav-link">
-      <i class="fas fa-arrow-left"></i> На главную
+       <i class="bi bi-arrow-left" style="margin-right: 8px;"></i> На главную
     </a>
     <div class="user-info">
       <span id="username">
@@ -583,15 +583,15 @@ h2:after {
                  class="avatar">
           {% endif %}
           <div class="avatar-actions">
-            <button class="avatar-btn" onclick="document.getElementById('avatarUpload').click()" title="Загрузить аватар">
-              <i class="fas fa-camera"></i>
-            </button>
-            {% if current_user.avatar_path %}
-            <button class="avatar-btn delete" onclick="deleteAvatar()" title="Удалить аватар">
-              <i class="fas fa-trash"></i>
-            </button>
-            {% endif %}
-          </div>
+  <button class="avatar-btn" onclick="document.getElementById('avatarUpload').click()" title="Загрузить аватар">
+    <i class="bi bi-camera-fill"></i>
+  </button>
+  {% if current_user.avatar_path %}
+  <button class="avatar-btn delete" onclick="deleteAvatar()" title="Удалить аватар">
+    <i class="bi bi-trash-fill"></i>
+  </button>
+  {% endif %}
+</div>
           <input type="file" id="avatarUpload" accept="image/*">
         </div>
         
@@ -628,13 +628,13 @@ h2:after {
         
         <div class="form-actions">
           <button type="button" class="btn btn-primary" id="saveBtn">
-            <i class="fas fa-save"></i> Сохранить изменения
+            <i class="bi bi-save" style="margin-right: 8px;"></i> Сохранить изменения
           </button>
           <button type="button" class="btn btn-secondary" id="cancelBtn">
-            <i class="fas fa-times"></i> Отменить
+            <i class="bi bi-x-lg" style="margin-right: 8px;"></i> Отменить
           </button>
           <a href="{{ url_for('main.export_data') }}" class="btn btn-secondary" id="exportBtn">
-            <i class="fas fa-download"></i> Экспорт данных
+            <i class="bi bi-download" style="margin-right: 8px;"></i> Экспорт данных
           </a>
         </div>
       </form>
@@ -668,11 +668,11 @@ h2:after {
       <h3 style="margin-bottom: 25px; font-size: 24px; color: #000000; text-align: center;">Управление аккаунтом</h3>
       <div class="account-actions">
         <button type="button" class="btn btn-secondary" onclick="openPasswordModal()">
-          <i class="fas fa-key"></i> Сменить пароль
-        </button>
-        <button type="button" class="btn btn-danger" onclick="deleteAccount()">
-          <i class="fas fa-trash"></i> Удалить аккаунт
-        </button>
+    <i class="bi bi-key" style="margin-right: 8px;"></i> Сменить пароль
+</button>
+<button type="button" class="btn btn-danger" onclick="deleteAccount()">
+    <i class="bi bi-trash3" style="margin-right: 8px;"></i> Удалить аккаунт
+</button>
       </div>
     </div>
   </div>
@@ -700,11 +700,11 @@ h2:after {
       </div>
       <div class="form-actions">
         <button type="button" class="btn btn-primary" onclick="changePassword()">
-          <i class="fas fa-key"></i> Сменить пароль
-        </button>
-        <button type="button" class="btn btn-secondary" onclick="closePasswordModal()">
-          <i class="fas fa-times"></i> Отмена
-        </button>
+    <i class="bi bi-key" style="margin-right: 8px;"></i> Сменить пароль
+</button>
+<button type="button" class="btn btn-secondary" onclick="closePasswordModal()">
+    <i class="bi bi-x-lg" style="margin-right: 8px;"></i> Отмена
+</button>
       </div>
     </form>
   </div>

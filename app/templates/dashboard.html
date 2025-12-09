@@ -23,150 +23,6 @@ body {
   overflow-x: hidden;
 }
 
-/* Стили хедера из dashboard */
-:root {
-  --primary-color: #264653;
-  --accent-gradient: linear-gradient(to right, #60F4E3, #FFEFFD, #FF70EC);
-  --accent-teal: #60F4E3;
-  --accent-pink: #FF70EC;
-  --background-light: #f8f9fa;
-  --card-bg: #ffffff;
-  --text-color: #264653;
-  --text-muted: #6c757d;
-  --border-radius: 20px;
-  --shadow: 0 6px 16px rgba(0,0,0,0.1);
-  --transition: all 0.3s ease;
-  --danger: #F44336;
-  --white: #ffffff;
-}
-
-header {
-  background: white;
-  padding: 20px 5%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  min-height: 80px;
-  
-  /* Добавляем градиент прямо к фону хедера */
-  background: linear-gradient(to bottom, 
-    white 0%, 
-    white 70%,
-    rgba(255,255,255,0.9) 80%, 
-    rgba(255,255,255,0.7) 90%,
-    rgba(255,255,255,0.4) 95%,
-    rgba(255,255,255,0) 100%);
-}
-
-.logo {
-  font-size: 28px;
-  font-weight: 700;
-  color: #264653;
-}
-
-nav {
-  display: flex;
-  gap: 20px;
-}
-
-nav a {
-  text-decoration: none;
-  color: #264653;
-  font-weight: 600;
-  position: relative;
-  padding: 10px 15px;
-  transition: var(--transition);
-  font-size: 16px;
-}
-
-nav a::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: var(--accent-pink);
-  transition: var(--transition);
-}
-
-nav a:hover::after,
-nav a:focus::after {
-  width: 100%;
-}
-
-nav a.active::after {
-  width: 100% !important;
-}
-
-.user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  position: relative;
-  padding: 5px 10px;
-  border-radius: 8px;
-  transition: var(--transition);
-}
-
-.user:hover,
-.user:focus {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 2px solid var(--white);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: var(--card-bg);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  display: none;
-  flex-direction: column;
-  min-width: 160px;
-  overflow: hidden;
-  z-index: 101;
-  margin-top: 10px;
-}
-
-.dropdown.show {
-  display: flex;
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.dropdown a {
-  padding: 12px 16px;
-  text-decoration: none;
-  color: var(--text-color);
-  font-weight: 500;
-  transition: var(--transition);
-}
-
-.dropdown a:hover,
-.dropdown a:focus {
-  background: #f2f2f2;
-}
-
 /* Остальные стили для index.html */
 .images-container {
   position: relative;
@@ -408,18 +264,6 @@ h1 {
   to {opacity: 1; transform: translateY(0);}
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
-
-/* Измени стили для h1 */
-h1 {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 900;
-  font-size: 42px;
-  color: #000000;
-  margin: 0 0 24px;
-  line-height: 1.1;
-  white-space: nowrap;
-}
 
 @media (max-width: 1200px) {
   .emoji-image {
@@ -454,38 +298,11 @@ h1 {
         padding-top: 60px; /* Уменьшили отступ */
     }
     
-    header {
-        padding: 10px 15px;
-        min-height: 60px; /* Уменьшили высоту */
-        flex-wrap: nowrap; /* Одна строка */
-        overflow-x: auto; /* Горизонтальная прокрутка если не помещается */
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
-        gap: 15px;
-        justify-content: flex-start; /* Выравнивание по левому краю */
-        scrollbar-width: none; /* Скрываем скроллбар для Firefox */
-        -ms-overflow-style: none; /* Скрываем скроллбар для IE/Edge */
-    }
-    
     /* Скрываем скроллбар для Webkit браузеров */
     header::-webkit-scrollbar {
         display: none;
     }
-    
-    /* УБИРАЕМ ЛОГОТИП LUMI */
-    .logo {
-        display: none !important; /* Полностью скрываем логотип */
-    }
-    
-    /* Навигация - горизонтальная прокрутка */
-    nav {
-        order: 1;
-        display: flex;
-        gap: 8px;
-        flex-shrink: 0; /* Не сжимается */
-        margin: 0;
-        padding: 0;
-    }
+  
     
     nav a {
         padding: 8px 12px;
@@ -509,17 +326,6 @@ h1 {
         height: 2px;
         background: var(--accent-pink);
         bottom: 0;
-    }
-    
-    /* Профиль пользователя */
-    .user {
-        order: 2;
-        margin-left: auto; /* Прижимаем к правому краю */
-        flex-shrink: 0;
-        padding: 5px 8px;
-        background: transparent;
-        border-radius: 8px;
-        min-width: 50px; /* Минимальная ширина для аватара */
     }
     
     .user span {
@@ -648,15 +454,6 @@ h1 {
         line-height: 1.5 !important;
     }
     
-    /* Выпадающее меню */
-    .dropdown {
-        position: fixed !important;
-        top: 60px !important;
-        right: 15px !important;
-        left: auto !important;
-        width: 160px !important;
-        border-radius: 12px !important;
-    }
     
     .dropdown a {
         padding: 14px 16px !important;
@@ -782,46 +579,6 @@ h1 {
 {% endblock %}
 
 {% block content %}
-<header>
-  <div class="logo">Lumi</div>
-  <nav>
-  <a href="{{ url_for('main.chart') }}" 
-     class="{% if request.endpoint == 'main.chart' %}active{% endif %}">
-    Настроение
-  </a>
-  <a href="{{ url_for('main.dashboard') }}" 
-     class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">
-    Главная
-  </a>
-  <a href="{{ url_for('main.calendar') }}" 
-     class="{% if request.endpoint == 'main.calendar' %}active{% endif %}">
-    Календарь
-  </a>
-  <a href="{{ url_for('main.cycle_diary') }}" 
-     class="{% if request.endpoint == 'main.cycle_diary' %}active{% endif %}">
-    Дневник цикла
-  </a>
-</nav>
-  <div class="user" tabindex="0" aria-haspopup="true" aria-expanded="false">
-    <span id="username">
-        {% if current_user.is_authenticated %}
-            {{ current_user.first_name or current_user.username }}
-        {% else %}
-            Пользователь
-        {% endif %}
-    </span>
-    {% if current_user.avatar_path %}
-        <img src="{{ url_for('static', filename=current_user.avatar_path) }}" alt="Аватар" class="user-avatar">
-    {% else %}
-        <img src="https://ui-avatars.com/api/?name={{ current_user.first_name or 'Пользователь' }}&background=60F4E3&color=264653" alt="Аватар" class="user-avatar">
-    {% endif %}
-    <div class="dropdown" id="userMenu">
-        <a href="{{ url_for('main.profile') }}">Профиль</a>
-        <a href="{{ url_for('auth.logout') }}">Выйти</a>
-    </div>
-  </div>
-</header>
-
 <div class="images-container">
   <div class="emoji-container">
     <img src="{{ url_for('static', filename='images/😜.png') }}" alt="Emoji" class="emoji-image" />
@@ -894,10 +651,6 @@ h1 {
 
 {% block extra_js %}
 <script>
-// JavaScript для выпадающего меню пользователя
-document.addEventListener('DOMContentLoaded', function() {
-    initEventListeners();
-});
 
 function initEventListeners() {
     const userElement = document.querySelector('.user');
@@ -912,13 +665,6 @@ function initEventListeners() {
             toggleMenu();
         }
     });
-}
-
-function toggleMenu() {
-    const menu = document.getElementById('userMenu');
-    if (menu) {
-        menu.classList.toggle('show');
-    }
 }
 
 // Глобальная функция для уведомлений

@@ -4,8 +4,6 @@
 
 {% block extra_css %}
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
-
 :root {
   --primary-color: #264653;
   --accent-gradient: linear-gradient(to right, #60F4E3, #FFEFFD, #FF70EC);
@@ -52,134 +50,6 @@ body {
   overflow-x: hidden;
   position: relative;
   padding-top: 80px; /* Отступ для фиксированного хедера */
-}
-
-/* ХЕДЕР - БЕРЁМ ИЗ ДЕСКТОПНОЙ ВЕРСИИ (ПЕРВОГО ФАЙЛА) */
-header {
-  background: white;
-  padding: 20px 5%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  min-height: 80px;
-  
-  /* Добавляем градиент прямо к фону хедера */
-  background: linear-gradient(to bottom, 
-    white 0%, 
-    white 70%,
-    rgba(255,255,255,0.9) 80%, 
-    rgba(255,255,255,0.7) 90%,
-    rgba(255,255,255,0.4) 95%,
-    rgba(255,255,255,0) 100%);
-}
-
-.logo {
-  font-size: 28px;
-  font-weight: 700;
-  color: #264653;
-}
-
-nav {
-  display: flex;
-  gap: 20px;
-}
-
-nav a {
-  text-decoration: none;
-  color: #264653;
-  font-weight: 600;
-  position: relative;
-  padding: 10px 15px;
-  transition: var(--transition);
-  font-size: 16px;
-}
-
-nav a::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: var(--accent-pink);
-  transition: var(--transition);
-}
-
-nav a:hover::after,
-nav a:focus::after {
-  width: 100%;
-}
-
-nav a.active::after {
-  width: 100% !important;
-}
-
-.user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  position: relative;
-  padding: 5px 10px;
-  border-radius: 8px;
-  transition: var(--transition);
-}
-
-.user:hover,
-.user:focus {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-.user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 2px solid var(--white);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: var(--card-bg);
-  border-radius: 12px;
-  box-shadow: var(--shadow);
-  display: none;
-  flex-direction: column;
-  min-width: 160px;
-  overflow: hidden;
-  z-index: 101;
-  margin-top: 10px;
-}
-
-.dropdown.show {
-  display: flex;
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.dropdown a {
-  padding: 12px 16px;
-  text-decoration: none;
-  color: var(--text-color);
-  font-weight: 500;
-  transition: var(--transition);
-}
-
-.dropdown a:hover,
-.dropdown a:focus {
-  background: #f2f2f2;
 }
 
 /* КОНТЕЙНЕР ДЛЯ ВСЕГО КОНТЕНТА */
@@ -609,27 +479,9 @@ h1:after {
         padding-top: 60px; /* Уменьшили отступ */
     }
     
-    header {
-        padding: 10px 15px;
-        min-height: 60px; /* Уменьшили высоту */
-        flex-wrap: nowrap; /* Одна строка */
-        overflow-x: auto; /* Горизонтальная прокрутка если не помещается */
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
-        gap: 15px;
-        justify-content: flex-start; /* Выравнивание по левому краю */
-        scrollbar-width: none; /* Скрываем скроллбар для Firefox */
-        -ms-overflow-style: none; /* Скрываем скроллбар для IE/Edge */
-    }
-    
     /* Скрываем скроллбар для Webkit браузеров */
     header::-webkit-scrollbar {
         display: none;
-    }
-    
-    /* УБИРАЕМ ЛОГОТИП LUMI */
-    .logo {
-        display: none !important; /* Полностью скрываем логотип */
     }
     
     /* Навигация - горизонтальная прокрутка */
@@ -664,17 +516,6 @@ h1:after {
         height: 2px;
         background: var(--accent-pink);
         bottom: 0;
-    }
-    
-    /* Профиль пользователя */
-    .user {
-        order: 2;
-        margin-left: auto; /* Прижимаем к правому краю */
-        flex-shrink: 0;
-        padding: 5px 8px;
-        background: transparent;
-        border-radius: 8px;
-        min-width: 50px; /* Минимальная ширина для аватара */
     }
     
     .user span {
@@ -881,6 +722,20 @@ h1:after {
         text-align: center;
         font-size: 13px;
     }
+    header {
+    display: flex !important;
+    justify-content: space-between !important;
+}
+
+.user {
+    margin-left: auto !important;
+    order: 3 !important;
+}
+
+nav {
+    order: 2 !important;
+}
+
 }
 
 @media (max-width: 480px) {
@@ -944,47 +799,6 @@ h1:after {
 {% endblock %}
 
 {% block content %}
-<!-- ХЕДЕР ТОЧНО КАК В ПЕРВОМ ФАЙЛЕ -->
-<header>
-  <div class="logo">Lumi</div>
-  <nav>
-    <a href="{{ url_for('main.chart') }}" 
-       class="{% if request.endpoint == 'main.chart' %}active{% endif %}">
-      Настроение
-    </a>
-    <a href="{{ url_for('main.dashboard') }}" 
-       class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">
-      Главная
-    </a>
-    <a href="{{ url_for('main.calendar') }}" 
-       class="{% if request.endpoint == 'main.calendar' %}active{% endif %}">
-      Календарь
-    </a>
-    <a href="{{ url_for('main.cycle_diary') }}" 
-       class="{% if request.endpoint == 'main.cycle_diary' %}active{% endif %}">
-      Дневник цикла
-    </a>
-  </nav>
-  <div class="user" tabindex="0" aria-haspopup="true" aria-expanded="false">
-    <span id="username">
-        {% if current_user.is_authenticated %}
-            {{ current_user.first_name or current_user.username }}
-        {% else %}
-            Пользователь
-        {% endif %}
-    </span>
-    {% if current_user.avatar_path %}
-        <img src="{{ url_for('static', filename=current_user.avatar_path) }}" alt="Аватар" class="user-avatar">
-    {% else %}
-        <img src="https://ui-avatars.com/api/?name={{ current_user.first_name or 'Пользователь' }}&background=60F4E3&color=264653" alt="Аватар" class="user-avatar">
-    {% endif %}
-    <div class="dropdown" id="userMenu">
-        <a href="{{ url_for('main.profile') }}">Профиль</a>
-        <a href="{{ url_for('auth.logout') }}">Выйти</a>
-    </div>
-  </div>
-</header>
-
 <div class="container">
   <main>
     <div class="page-header">
@@ -1147,63 +961,6 @@ h1:after {
 {% endblock %}
 
 {% block extra_js %}
-<!-- JavaScript для выпадающего меню пользователя - ТОЧНО КАК В ПЕРВОМ ФАЙЛЕ -->
-<script>
-// JavaScript для выпадающего меню пользователя
-document.addEventListener('DOMContentLoaded', function() {
-    initEventListeners();
-});
-
-function initEventListeners() {
-    const userElement = document.querySelector('.user');
-    if (userElement) {
-        userElement.addEventListener('click', toggleMenu);
-    }
-    
-    document.addEventListener('click', function(e) {
-        const menu = document.getElementById('userMenu');
-        const user = document.querySelector('.user');
-        if (menu && menu.classList.contains('show') && user && !user.contains(e.target)) {
-            toggleMenu();
-        }
-    });
-}
-
-function toggleMenu() {
-    const menu = document.getElementById('userMenu');
-    if (menu) {
-        menu.classList.toggle('show');
-    }
-}
-
-// Глобальная функция для уведомлений
-function showToast(message, type = 'success') {
-    // Remove existing toasts
-    const existingToasts = document.querySelectorAll('.toast');
-    existingToasts.forEach(toast => toast.remove());
-    
-    // Create new toast
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    
-    document.body.appendChild(toast);
-    
-    // Animate in
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 10);
-    
-    // Remove after 3 seconds
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
-}
-
-window.showToast = showToast;
-</script>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 const API_BASE = "{{ url_for('main.mood_entries') }}";

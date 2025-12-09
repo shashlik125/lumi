@@ -44,133 +44,6 @@ body {
     padding-top: 80px; /* Важно добавить отступ для фиксированного хедера */
 }
 
-/* ХЕДЕР КАК В INDEX.HTML */
-header {
-    background: white;
-    padding: 20px 5%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    min-height: 80px;
-    
-    background: linear-gradient(to bottom, 
-        white 0%, 
-        white 70%,
-        rgba(255,255,255,0.9) 80%, 
-        rgba(255,255,255,0.7) 90%,
-        rgba(255,255,255,0.4) 95%,
-        rgba(255,255,255,0) 100%);
-}
-
-.logo {
-    font-size: 28px;
-    font-weight: 700;
-    color: #264653;
-}
-
-nav {
-    display: flex;
-    gap: 20px;
-}
-
-nav a {
-    text-decoration: none;
-    color: #264653;
-    font-weight: 600;
-    position: relative;
-    padding: 10px 15px;
-    transition: var(--transition);
-    font-size: 16px;
-}
-
-nav a::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: var(--accent-pink);
-  transition: var(--transition);
-}
-
-nav a:hover::after {
-  width: 100%;
-}
-
-nav a.active::after {
-  width: 100% !important;
-}
-
-.user {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    cursor: pointer;
-    position: relative;
-    padding: 5px 10px;
-    border-radius: 8px;
-    transition: var(--transition);
-}
-
-.user:hover,
-.user:focus {
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.user-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: 2px solid var(--white);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.dropdown {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: var(--card-bg);
-    border-radius: 12px;
-    box-shadow: var(--shadow);
-    display: none;
-    flex-direction: column;
-    min-width: 160px;
-    overflow: hidden;
-    z-index: 101;
-    margin-top: 10px;
-}
-
-.dropdown.show {
-    display: flex;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.dropdown a {
-    padding: 12px 16px;
-    text-decoration: none;
-    color: var(--text-color);
-    font-weight: 500;
-    transition: var(--transition);
-}
-
-.dropdown a:hover,
-.dropdown a:focus {
-    background: #f2f2f2;
-}
-
-        
          main {
             padding: 30px 20px;
             max-width: 1200px;
@@ -573,116 +446,6 @@ nav a.active::after {
             margin-top: 20px;
         }
 
-        @media (max-width: 768px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .chart-container {
-            background: var(--light);
-            border-radius: 12px;
-            padding: 20px;
-            height: 300px;
-            position: relative;
-        }
-
-        .chart-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            text-align: center;
-            color: var(--dark);
-        }
-
-        /* Легенда */
-        .legend {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-            background: var(--white);
-            padding: 15px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            padding: 8px 12px;
-            border-radius: 20px;
-            background: var(--light);
-        }
-
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-        }
-
-        /* Уведомления */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--success);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            z-index: 1000;
-            font-weight: 600;
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-        }
-
-        .toast.show {
-            transform: translateX(0);
-        }
-
-        .toast.error {
-            background: var(--danger);
-        }
-
-        .loading {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            color: var(--gray);
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid var(--light);
-            border-top: 4px solid var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        
-/* Стили для "нет данных" */
-.no-data {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    color: var(--gray);
-    text-align: center;
-    padding: 20px;
-}
-/* МОБИЛЬНАЯ АДАПТИВНОСТЬ ДЛЯ ДНЕВНИКА ЦИКЛА */
 
 @media (max-width: 1024px) {
     /* Планшеты и маленькие ноутбуки */
@@ -707,76 +470,17 @@ nav a.active::after {
         padding-top: 60px; /* Уменьшили отступ */
     }
     
-    header {
-        padding: 10px 15px;
-        min-height: 60px; /* Уменьшили высоту */
-        flex-wrap: nowrap; /* Одна строка */
-        overflow-x: auto; /* Горизонтальная прокрутка если не помещается */
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
-        gap: 15px;
-        justify-content: flex-start; /* Выравнивание по левому краю */
-    }
-    
-    /* УБИРАЕМ ЛОГОТИП LUMI */
-    .logo {
-        display: none !important; /* Полностью скрываем логотип */
-    }
-    
-    /* Навигация - горизонтальная прокрутка */
-    nav {
-        order: 1;
-        display: flex;
-        gap: 8px;
-        flex-shrink: 0; /* Не сжимается */
-        margin: 0;
-        padding: 0;
-    }
-    
-    nav a {
-        padding: 8px 12px;
-        font-size: 14px;
-        white-space: nowrap; /* Не переносить текст */
-        flex-shrink: 0;
-        border-radius: 20px;
-        position: relative;
-    }
     
     nav a.active {
         color: var(--dark);
     }
     
-    /* ПОДЧЕРКИВАНИЕ АКТИВНОЙ СТРАНИЦЫ КАК НА ДЕСКТОПЕ */
-    nav a::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 0;
-        height: 2px;
-        background: var(--accent-pink); /* Розовая линия как на десктопе */
-        transition: all 0.3s ease;
-        border-radius: 1px;
-    }
-    
-    nav a.active::after {
-        width: 100% !important; /* Полное подчеркивание для активной страницы */
-        background: var(--accent-pink); /* Тот же розовый цвет */
-    }
-    
+
     /* При наведении (если устройство поддерживает hover) */
     @media (hover: hover) {
         nav a:hover::after {
             width: 100%;
         }
-    }
-    
-    /* Профиль пользователя */
-    .user {
-        order: 2;
-        margin-left: auto; /* Прижимаем к правому краю */
-        flex-shrink: 0;
-        padding: 5px;
     }
     
     .user span {
@@ -1014,35 +718,12 @@ nav a.active::after {
     }
 }
 
-/* Остальные медиа-запросы без изменений... */
-/* Остальные медиа-запросы остаются без изменений */
-
 @media (max-width: 480px) {
     /* Еще более компактный для маленьких телефонов */
     body {
         padding-top: 55px;
     }
-    
-    header {
-        padding: 8px 12px;
-        min-height: 55px;
-        gap: 10px;
-    }
-    
-    nav {
-        gap: 6px;
-    }
-    
-    nav a {
-        padding: 6px 10px;
-        font-size: 13px;
-    }
-    
-    .user-avatar {
-        width: 32px;
-        height: 32px;
-    }
-    
+
     main {
         padding: 15px 10px;
     }
@@ -1188,20 +869,6 @@ nav a.active::after {
 
 /* Ландшафтная ориентация */
 @media (max-height: 500px) and (orientation: landscape) {
-    header {
-        padding: 6px 10px;
-        min-height: 50px;
-    }
-    
-    nav a {
-        padding: 4px 8px;
-        font-size: 12px;
-    }
-    
-    .user-avatar {
-        width: 30px;
-        height: 30px;
-    }
     
     .cycle-stats {
         grid-template-columns: repeat(4, 1fr);
@@ -1216,91 +883,11 @@ nav a.active::after {
     }
 }
 
-/* Тач-таргеты для удобства на мобильных */
-@media (hover: none) {
-    .calendar-day,
-    .calendar-btn,
-    .today-btn,
-    nav a,
-    .symptom-checkbox,
-    .btn {
-        min-height: 44px; /* Минимальный размер для удобного тапа */
-    }
-    
-    .calendar-day:active,
-    .calendar-btn:active,
-    .today-btn:active,
-    .symptom-checkbox:active,
-    .btn:active {
-        transform: scale(0.95);
-        opacity: 0.8;
-        transition: transform 0.1s ease;
-    }
-    
-    .calendar-day {
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
-    }
-}
-
-/* Поддержка Retina-дисплеев */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
-    .calendar-day,
-    .stat-card,
-    .tracker-form,
-    .mood-integration,
-    .analytics-container,
-    .legend {
-        border-width: 1.5px;
-    }
-}
-
     </style>
 {% endblock %}
 
 
 {% block content %}
-</head>
-<body>
-    <header>
-    <div class="logo">Lumi</div>
-    <nav>
-  <a href="{{ url_for('main.chart') }}" 
-     class="{% if request.endpoint == 'main.chart' %}active{% endif %}">
-    Настроение
-  </a>
-  <a href="{{ url_for('main.dashboard') }}" 
-     class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">
-    Главная
-  </a>
-  <a href="{{ url_for('main.calendar') }}" 
-     class="{% if request.endpoint == 'main.calendar' %}active{% endif %}">
-    Календарь
-  </a>
-  <a href="{{ url_for('main.cycle_diary') }}" 
-     class="{% if request.endpoint == 'main.cycle_diary' %}active{% endif %}">
-    Дневник цикла
-  </a>
-</nav>
-    <div class="user" tabindex="0" aria-haspopup="true" aria-expanded="false">
-        <span id="username">
-            {% if current_user.is_authenticated %}
-                {{ current_user.first_name or current_user.username }}
-            {% else %}
-                Пользователь
-            {% endif %}
-        </span>
-        {% if current_user.avatar_path %}
-            <img src="{{ url_for('static', filename=current_user.avatar_path) }}" alt="Аватар" class="user-avatar">
-        {% else %}
-            <img src="https://ui-avatars.com/api/?name={{ current_user.first_name or 'Пользователь' }}&background=60F4E3&color=264653" alt="Аватар" class="user-avatar">
-        {% endif %}
-        <div class="dropdown" id="userMenu">
-            <a href="{{ url_for('main.profile') }}">Профиль</a>
-            <a href="{{ url_for('auth.logout') }}">Выйти</a>
-        </div>
-    </div>
-</header>
 
     <main>
         <div class="page-header">
@@ -1468,32 +1055,6 @@ nav a.active::after {
 {% endblock %}
 {% block extra_js %}
 <script>
-// JavaScript для выпадающего меню пользователя
-document.addEventListener('DOMContentLoaded', function() {
-    initEventListeners();
-});
-
-function initEventListeners() {
-    const userElement = document.querySelector('.user');
-    if (userElement) {
-        userElement.addEventListener('click', toggleMenu);
-    }
-    
-    document.addEventListener('click', function(e) {
-        const menu = document.getElementById('userMenu');
-        const user = document.querySelector('.user');
-        if (menu && menu.classList.contains('show') && user && !user.contains(e.target)) {
-            toggleMenu();
-        }
-    });
-}
-
-function toggleMenu() {
-    const menu = document.getElementById('userMenu');
-    if (menu) {
-        menu.classList.toggle('show');
-    }
-}
 
 // Глобальная функция для уведомлений (уже есть, но добавим для совместимости)
 window.showToast = showToast || function(message, type = 'success') {

@@ -349,16 +349,6 @@ h1 {
   transform: translateY(-2px);
 }
 
-.btn.secondary {
-  background: #60F4E3;
-  color: #264653;
-}
-
-.btn.secondary:hover {
-  background: #48cbbd;
-  transform: translateY(-2px);
-}
-
 .register-footer {
   text-align: center;
   margin-top: 30px;
@@ -367,14 +357,14 @@ h1 {
 }
 
 .register-footer a {
-  color: #FF70EC;
+  color:#60F4E3 ;
   text-decoration: none;
   font-weight: 600;
   transition: all 0.3s ease;
 }
 
 .register-footer a:hover {
-  color: #60F4E3;
+  color:#FF70EC ;
 }
 
 .flash-messages {
@@ -619,7 +609,6 @@ h1 {
       
       <div class="actions">
         <button type="submit" class="btn primary">Создать аккаунт</button>
-        <a href="{{ url_for('auth.login') }}" class="btn secondary">Уже есть аккаунт</a>
       </div>
     </form>
     

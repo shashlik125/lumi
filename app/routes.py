@@ -950,4 +950,3 @@ def cycle_predictions(conn):
     except Error as e:
         print(f"Database error in cycle_predictions: {e}")
         return jsonify({'error': str(e)}), 500
-         

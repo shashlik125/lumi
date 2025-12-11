@@ -779,6 +779,31 @@ body {
     flex-shrink: 0;
 }
 
+/* Стиль для отображения выбранной даты */
+.selected-date-display {
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Подсветка выбранного дня в календаре */
+.calendar-day.selected {
+    border: 3px solid var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(96, 244, 227, 0.3) !important;
+    transform: scale(1.05);
+    z-index: 1;
+}
+
+
 @media (max-width: 1024px) {
     /* Планшеты и маленькие ноутбуки */
     main {
@@ -1479,6 +1504,9 @@ let cycleData = [];
 let moodData = [];
 let moodPhaseChart = null;
 let symptomsChart = null;
+let currentSelectedDate = null; // Выбранная дата для редактирования
+let isEditMode = false; // Режим редактирования (true = редактируем выбранную дату)
+
 
 // Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', function() {
@@ -1710,14 +1738,22 @@ function renderCalendar() {
                 day.appendChild(tooltip);
             }
         }
-
-        // При клике на день открываем детали
+ // При клике на день открываем детали
         day.addEventListener('click', function() {
+            // Убираем выделение с предыдущего выбранного дня
+            document.querySelectorAll('.calendar-day.selected').forEach(day => {
+                day.classList.remove('selected');
+            });
+            
+            // Добавляем выделение текущему дню
+            day.classList.add('selected');
+            
+            // Открываем детали дня для редактирования
             openDayDetail(dateStr);
         });
 
-        calendar.appendChild(day);
-    }
+        calendar.appendChild(day); // ДОБАВЬТЕ ЭТУ СТРОЧКУ!
+    } // Закрывающая скобка цикла for
 
     // Дни следующего месяца
     const totalCells = 35;
@@ -1731,7 +1767,6 @@ function renderCalendar() {
     
     console.log('✅ Календарь отрисован');
 }
-
 // Создание элемента дня
 function createDayElement(dayNumber, className, isOtherMonth) {
     const dayElement = document.createElement('div');
@@ -1893,27 +1928,48 @@ function getMoodEmoji(moodValue) {
 
 // Сохранение записи цикла
 async function saveCycleEntry() {
+    // Определяем дату
+    let dateStr;
+    if (currentSelectedDate && isEditMode) {
+        dateStr = currentSelectedDate;
+    } else {
+        dateStr = formatDate(new Date());
+    }
+    
+    // Проверяем, что дата не в будущем
+    const selected = new Date(dateStr);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    if (selected > today) {
+        showToast('Нельзя создать запись в будущем', 'error');
+        return;
+    }
+    
+    // Получаем данные из формы
     const selectedSymptoms = Array.from(document.querySelectorAll('input[name="symptoms"]:checked'))
         .map(input => input.value);
     const flowLevel = document.getElementById('flowLevel').value;
     const notes = document.getElementById('cycleNotes').value.trim();
-
+    
+    // Убираем дубликаты симптомов
+    const uniqueSymptoms = [...new Set(selectedSymptoms)];
+    
     // Сохраняем даже если только заметки
-    if (!selectedSymptoms.length && !flowLevel && !notes) {
+    if (!uniqueSymptoms.length && !flowLevel && !notes) {
         showToast('Заполните хотя бы одно поле', 'error');
         return;
     }
 
     try {
-        const today = formatDate(new Date());
         const response = await fetch(CYCLE_API, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                date: today,
-                symptoms: selectedSymptoms,
+                date: dateStr,
+                symptoms: uniqueSymptoms,
                 flow_intensity: flowLevel,
                 notes: notes
             })
@@ -1921,48 +1977,27 @@ async function saveCycleEntry() {
 
         if (response.ok) {
             const result = await response.json();
-            showToast('Запись сохранена!', 'success');
+            
+            if (isEditMode) {
+                showToast(`Запись за ${formatDateDisplay(dateStr)} обновлена!`, 'success');
+            } else {
+                showToast('Запись сохранена!', 'success');
+            }
             
             // Обновляем данные и перерисовываем календарь
             await loadCycleData();
             renderCalendar();
             
-            // Очищаем форму
-            document.querySelectorAll('input[name="symptoms"]:checked').forEach(checkbox => {
-                checkbox.checked = false;
-            });
-            document.getElementById('flowLevel').value = '';
-            document.getElementById('cycleNotes').value = '';
+            // Если это была запись не за сегодня, сбрасываем режим редактирования
+            if (isEditMode) {
+                clearSelectedDate();
+            } else {
+                // Очищаем форму
+                clearForm();
+            }
             
-            // ДОБАВЬ ЭТО ДЛЯ ОБНОВЛЕНИЯ АНАЛИТИКИ:
-            setTimeout(async () => {
-                try {
-                    // Перезагружаем данные для графиков
-                    await Promise.all([
-                        loadMoodData(),
-                        loadCycleStats(),
-                        loadCyclePredictions(),
-                        loadTodayMood()
-                    ]);
-                    
-                    // Обновляем графики аналитики
-                    if (typeof updateChartsWithRealData === 'function') {
-                        updateChartsWithRealData();
-                    }
-                    
-                    // Также обновляем статистику на странице
-                    if (typeof updateStatsDisplay === 'function') {
-                        const statsResponse = await fetch(CYCLE_STATS_API);
-                        if (statsResponse.ok) {
-                            const stats = await statsResponse.json();
-                            updateStatsDisplay(stats);
-                        }
-                    }
-                    
-                } catch (updateError) {
-                    console.error('Ошибка обновления аналитики:', updateError);
-                }
-            }, 300);
+            // Обновляем аналитику
+            await updateAnalytics();
             
         } else {
             const errorData = await response.json();
@@ -1971,6 +2006,91 @@ async function saveCycleEntry() {
     } catch (error) {
         console.error('Ошибка:', error);
         showToast('Ошибка сохранения записи: ' + error.message, 'error');
+    }
+}
+
+// Проверка существующей записи за сегодня
+async function checkExistingEntry(date) {
+    try {
+        const response = await fetch(`${CYCLE_API}/${date}`);
+        if (response.ok) {
+            return await response.json();
+        }
+        return null;
+    } catch (error) {
+        console.error('Ошибка проверки записи:', error);
+        return null;
+    }
+}
+
+// Обновление существующей записи
+async function updateCycleEntry(date, symptoms, flowLevel, notes, existingEntry) {
+    try {
+        // Объединяем симптомы из существующей и новой записи, убираем дубликаты
+        const allSymptoms = [...new Set([...(existingEntry.symptoms || []), ...symptoms])];
+        
+        const response = await fetch(`${CYCLE_API}/${date}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                symptoms: allSymptoms,
+                flow_intensity: flowLevel || existingEntry.flow_intensity,
+                notes: notes || existingEntry.notes
+            })
+        });
+
+        if (response.ok) {
+            showToast('Запись обновлена!', 'success');
+            await loadCycleData();
+            renderCalendar();
+            clearForm();
+            await updateAnalytics();
+        } else {
+            throw new Error('Ошибка обновления записи');
+        }
+    } catch (error) {
+        console.error('Ошибка обновления:', error);
+        showToast('Ошибка обновления записи', 'error');
+    }
+}
+
+// Очистка формы
+function clearForm() {
+    // Снимаем все галочки симптомов
+    document.querySelectorAll('input[name="symptoms"]:checked').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    // Сбрасываем выделения
+    document.getElementById('flowLevel').value = '';
+    
+    // Очищаем заметки
+    document.getElementById('cycleNotes').value = '';
+}
+
+// Обновление аналитики
+async function updateAnalytics() {
+    try {
+        await Promise.all([
+            loadMoodData(),
+            loadCycleStats(),
+            loadCyclePredictions(),
+            loadTodayMood()
+        ]);
+        
+        if (typeof updateChartsWithRealData === 'function') {
+            updateChartsWithRealData();
+        }
+        
+        const statsResponse = await fetch(CYCLE_STATS_API);
+        if (statsResponse.ok) {
+            const stats = await statsResponse.json();
+            updateStatsDisplay(stats);
+        }
+    } catch (updateError) {
+        console.error('Ошибка обновления аналитики:', updateError);
     }
 }
 
@@ -2294,9 +2414,142 @@ function calculateRealSymptomFrequency() {
     };
 }
 
-// Функции для отметки менструации
+// Открытие деталей дня с возможностью редактирования
+async function openDayDetail(dateStr) {
+    console.log('📅 Открываем детали дня для редактирования:', dateStr);
+    
+    currentSelectedDate = dateStr;
+    isEditMode = true;
+    
+    // Загружаем существующие данные для этой даты
+    const existingEntry = await loadDayEntry(dateStr);
+    
+    // Заполняем форму данными
+    fillFormWithData(dateStr, existingEntry);
+    
+    // Прокручиваем к форме
+    document.querySelector('.tracker-form').scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+    });
+    
+    // Показываем сообщение
+    showToast(`Редактирование дня ${formatDateDisplay(dateStr)}`, 'info');
+}
+
+// Форматирование даты для отображения
+function formatDateDisplay(dateStr) {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('ru-RU', { 
+        day: 'numeric', 
+        month: 'long',
+        year: 'numeric' 
+    });
+}
+
+// Загрузка записи дня
+async function loadDayEntry(dateStr) {
+    try {
+        const response = await fetch(`${CYCLE_API}?date=${dateStr}`);
+        if (response.ok) {
+            const entries = await response.json();
+            return entries.length > 0 ? entries[0] : null;
+        }
+        return null;
+    } catch (error) {
+        console.error('Ошибка загрузки записи:', error);
+        return null;
+    }
+}
+
+// Заполнение формы данными
+function fillFormWithData(dateStr, entry) {
+    // Устанавливаем заголовок формы
+    const formTitle = document.querySelector('.tracker-form h3');
+    if (formTitle) {
+        formTitle.innerHTML = `<i class="fas fa-edit"></i> Редактирование ${formatDateDisplay(dateStr)}`;
+    }
+    
+    // Добавляем отображение текущей даты над формой
+    const dateDisplay = document.createElement('div');
+    dateDisplay.className = 'selected-date-display';
+    dateDisplay.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--accent); padding: 12px 15px; border-radius: 10px; margin-bottom: 20px; border: 2px solid var(--primary);">
+            <span style="font-weight: 600; color: var(--dark);">
+                <i class="fas fa-calendar-day"></i> ${formatDateDisplay(dateStr)}
+            </span>
+            <button onclick="clearSelectedDate()" style="background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px;">
+                <i class="fas fa-times"></i> Сбросить
+            </button>
+        </div>
+    `;
+    
+    // Удаляем старый отображение даты если есть
+    const oldDisplay = document.querySelector('.selected-date-display');
+    if (oldDisplay) oldDisplay.remove();
+    
+    // Вставляем отображение даты перед формой
+    const form = document.querySelector('.tracker-form');
+    if (form) {
+        form.insertBefore(dateDisplay, form.firstChild);
+    }
+    
+    // Сбрасываем форму
+    clearForm();
+    
+    // Заполняем форму данными если они есть
+    if (entry) {
+        // Симптомы
+        if (entry.symptoms && Array.isArray(entry.symptoms)) {
+            entry.symptoms.forEach(symptom => {
+                const checkbox = Array.from(document.querySelectorAll('input[name="symptoms"]'))
+                    .find(cb => cb.value === symptom);
+                if (checkbox) checkbox.checked = true;
+            });
+        }
+        
+        // Выделения
+        const flowSelect = document.getElementById('flowLevel');
+        if (flowSelect && entry.flow_intensity) {
+            flowSelect.value = entry.flow_intensity;
+        }
+        
+        // Заметки
+        const notesTextarea = document.getElementById('cycleNotes');
+        if (notesTextarea && entry.notes) {
+            notesTextarea.value = entry.notes;
+        }
+    }
+}
+
+// Сброс выбранной даты
+function clearSelectedDate() {
+    currentSelectedDate = null;
+    isEditMode = false;
+    
+    // Удаляем отображение даты
+    const dateDisplay = document.querySelector('.selected-date-display');
+    if (dateDisplay) dateDisplay.remove();
+    
+    // Восстанавливаем заголовок
+    const formTitle = document.querySelector('.tracker-form h3');
+    if (formTitle) {
+        formTitle.innerHTML = `<i class="fas fa-edit"></i> Отметить сегодня`;
+    }
+    
+    // Очищаем форму
+    clearForm();
+    
+    showToast('Выбрана сегодняшняя дата', 'info');
+}
+
+// Функции для быстрой отметки менструации
 async function markMenstruationStart() {
-    const today = formatDate(new Date());
+    if (!currentSelectedDate) {
+        showToast('Сначала выберите день в календаре', 'error');
+        return;
+    }
+    
     const symptoms = ['Спазмы', 'Боль в спине', 'Усталость'];
     
     try {
@@ -2306,7 +2559,7 @@ async function markMenstruationStart() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                date: today,
+                date: currentSelectedDate,
                 symptoms: symptoms,
                 flow_intensity: 'heavy',
                 notes: 'Начало менструации'
@@ -2314,15 +2567,101 @@ async function markMenstruationStart() {
         });
 
         if (response.ok) {
-            showToast('Менструация отмечена!', 'success');
+            showToast(`Менструация отмечена на ${formatDateDisplay(currentSelectedDate)}!`, 'success');
             await loadCycleData();
             renderCalendar();
             updateSymptomsLegend();
             
-            // Обновляем аналитику
+            // Автоматически заполняем форму
             setTimeout(() => {
-                updateChartsWithRealData();
-            }, 500);
+                fillFormWithData(currentSelectedDate, {
+                    symptoms: symptoms,
+                    flow_intensity: 'heavy',
+                    notes: 'Начало менструации'
+                });
+            }, 300);
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('Ошибка сохранения', 'error');
+    }
+}
+
+async function markMenstruationLight() {
+    if (!currentSelectedDate) {
+        showToast('Сначала выберите день в календаре', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(CYCLE_API, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                date: currentSelectedDate,
+                symptoms: [],
+                flow_intensity: 'light',
+                notes: 'Слабые выделения'
+            })
+        });
+
+        if (response.ok) {
+            showToast(`Слабые выделения отмечены на ${formatDateDisplay(currentSelectedDate)}`, 'success');
+            await loadCycleData();
+            renderCalendar();
+            updateSymptomsLegend();
+            
+            // Автоматически заполняем форму
+            setTimeout(() => {
+                fillFormWithData(currentSelectedDate, {
+                    symptoms: [],
+                    flow_intensity: 'light',
+                    notes: 'Слабые выделения'
+                });
+            }, 300);
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('Ошибка сохранения', 'error');
+    }
+}
+
+async function markMenstruationEnd() {
+    if (!currentSelectedDate) {
+        showToast('Сначала выберите день в календаре', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(CYCLE_API, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                date: currentSelectedDate,
+                symptoms: [],
+                flow_intensity: 'none',
+                notes: 'Завершение менструации'
+            })
+        });
+
+        if (response.ok) {
+            showToast(`Завершение менструации отмечено на ${formatDateDisplay(currentSelectedDate)}`, 'success');
+            await loadCycleData();
+            renderCalendar();
+            updateSymptomsLegend();
+            
+            // Автоматически заполняем форму
+            setTimeout(() => {
+                fillFormWithData(currentSelectedDate, {
+                    symptoms: [],
+                    flow_intensity: 'none',
+                    notes: 'Завершение менструации'
+                });
+            }, 300);
         }
     } catch (error) {
         console.error('Ошибка:', error);
@@ -2359,34 +2698,6 @@ async function markMenstruationLight() {
     }
 }
 
-async function markMenstruationEnd() {
-    const today = formatDate(new Date());
-    
-    try {
-        const response = await fetch(CYCLE_API, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                date: today,
-                symptoms: [],
-                flow_intensity: 'none',
-                notes: 'Завершение менструации'
-            })
-        });
-
-        if (response.ok) {
-            showToast('Завершение менструации отмечено', 'success');
-            await loadCycleData();
-            renderCalendar();
-            updateSymptomsLegend();
-        }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        showToast('Ошибка сохранения', 'error');
-    }
-}
 
 // Инициализация графиков
 function initCharts() {

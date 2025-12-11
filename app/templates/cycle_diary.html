@@ -1740,16 +1740,22 @@ function renderCalendar() {
         }
  // При клике на день открываем детали
         day.addEventListener('click', function() {
-            // Убираем выделение с предыдущего выбранного дня
-            document.querySelectorAll('.calendar-day.selected').forEach(day => {
-                day.classList.remove('selected');
-            });
-            
-            // Добавляем выделение текущему дню
-            day.classList.add('selected');
-            
-            // Открываем детали дня для редактирования
-            openDayDetail(dateStr);
+         // Проверяем, что дата не в будущем
+    if (!isValidDateForEntry(dateStr)) {
+        showToast('Нельзя редактировать будущие дни', 'error');
+        return;
+    }
+    
+    // Убираем выделение с предыдущего выбранного дня
+    document.querySelectorAll('.calendar-day.selected').forEach(day => {
+        day.classList.remove('selected');
+    });
+    
+    // Добавляем выделение текущему дню
+    day.classList.add('selected');
+    
+    // Открываем детали дня для редактирования
+    openDayDetail(dateStr);
         });
 
         calendar.appendChild(day); // ДОБАВЬТЕ ЭТУ СТРОЧКУ!
@@ -1860,6 +1866,25 @@ function changeMonth(step) {
 function goToToday() {
     currentDate = new Date();
     renderCalendar();
+    
+    // Сбрасываем выбранную дату
+    currentSelectedDate = null;
+    isEditMode = false;
+    
+    // Удаляем отображение выбранной даты если есть
+    const dateDisplay = document.querySelector('.selected-date-display');
+    if (dateDisplay) dateDisplay.remove();
+    
+    // Восстанавливаем заголовок формы
+    const formTitle = document.querySelector('.tracker-form h3');
+    if (formTitle) {
+        formTitle.innerHTML = `<i class="fas fa-edit"></i> Отметить сегодня`;
+    }
+    
+    // Очищаем форму
+    clearForm();
+    
+    showToast('Перешли к текущему месяцу', 'info');
 }
 
 // Обновление отображения статистики
@@ -2415,7 +2440,14 @@ function calculateRealSymptomFrequency() {
 }
 
 // Открытие деталей дня с возможностью редактирования
+// Открытие деталей дня с возможностью редактирования
 async function openDayDetail(dateStr) {
+    // Проверяем, что дата не в будущем
+    if (!isValidDateForEntry(dateStr)) {
+        showToast('Нельзя редактировать будущие дни', 'error');
+        return;
+    }
+    
     console.log('📅 Открываем детали дня для редактирования:', dateStr);
     
     currentSelectedDate = dateStr;
@@ -2445,6 +2477,23 @@ function formatDateDisplay(dateStr) {
         month: 'long',
         year: 'numeric' 
     });
+}
+
+// Проверка, что дата не в будущем
+function isValidDateForEntry(dateStr) {
+    try {
+        const selectedDate = new Date(dateStr);
+        const today = new Date();
+        
+        // Сбрасываем время для корректного сравнения только дат
+        selectedDate.setHours(0, 0, 0, 0);
+        today.setHours(0, 0, 0, 0);
+        
+        return selectedDate <= today;
+    } catch (error) {
+        console.error('Ошибка проверки даты:', error);
+        return false;
+    }
 }
 
 // Загрузка записи дня
@@ -2549,6 +2598,11 @@ async function markMenstruationStart() {
         showToast('Сначала выберите день в календаре', 'error');
         return;
     }
+     // Проверяем, что дата не в будущем
+    if (!isValidDateForEntry(currentSelectedDate)) {
+        showToast('Нельзя отметить менструацию в будущем', 'error');
+        return;
+    }
     
     const symptoms = ['Спазмы', 'Боль в спине', 'Усталость'];
     
@@ -2592,6 +2646,11 @@ async function markMenstruationLight() {
         showToast('Сначала выберите день в календаре', 'error');
         return;
     }
+    // Проверяем, что дата не в будущем
+    if (!isValidDateForEntry(currentSelectedDate)) {
+        showToast('Нельзя отметить менструацию в будущем', 'error');
+        return;
+    }
     
     try {
         const response = await fetch(CYCLE_API, {
@@ -2631,6 +2690,11 @@ async function markMenstruationLight() {
 async function markMenstruationEnd() {
     if (!currentSelectedDate) {
         showToast('Сначала выберите день в календаре', 'error');
+        return;
+    }
+    // Проверяем, что дата не в будущем
+    if (!isValidDateForEntry(currentSelectedDate)) {
+        showToast('Нельзя отметить менструацию в будущем', 'error');
         return;
     }
     

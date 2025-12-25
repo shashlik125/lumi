@@ -202,8 +202,7 @@
     <a href="{{ url_for('main.dashboard') }}" class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">Главная</a>
     <a href="{{ url_for('main.calendar') }}" class="{% if request.endpoint == 'main.calendar' %}active{% endif %}">Календарь</a>
 
-    {% if current_user.is_authenticated and current_user.gender == 'female' %}
-    <a href="{{ url_for('main.cycle_diary') }}" 
+     {% if current_user.is_authenticated %}
        class="{% if request.endpoint == 'main.cycle_diary' %}active{% endif %}">
        Дневник цикла
     </a>

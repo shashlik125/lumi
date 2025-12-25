@@ -211,6 +211,15 @@
     
   </nav>
 
+  <!-- ОТЛАДКА - УБРАТЬ ПОСЛЕ -->
+<div style="position: fixed; top: 100px; right: 10px; background: yellow; padding: 10px; z-index: 9999; font-size: 12px;">
+    <strong>DEBUG:</strong><br>
+    User: {{ current_user.username }}<br>
+    Gender: "{{ current_user.gender }}"<br>
+    Is female: {{ 'YES' if current_user.gender == 'female' else 'NO' }}<br>
+    Gender type: {{ current_user.gender.__class__.__name__ }}
+</div>
+
   <div class="user" id="userBtn">
     <span>
       {% if current_user.is_authenticated %}

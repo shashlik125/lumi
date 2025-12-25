@@ -1,4 +1,17 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumi</title>
 
+    <!-- ВСТАВЬТЕ ЭТИ 2 СТРОКИ СЮДА ↓ -->
+    <link rel="icon" href="/static/favicon.ico?v=999" type="image/x-icon">
+    <link rel="shortcut icon" href="/static/favicon.ico?v=999">
+
+    <!-- Далее идёт ваш CSS -->
+</head>
+<body>
 
 {% block extra_css %}
 <style>
@@ -386,31 +399,31 @@ h1 {
   display: block;
   width: 100%;
 }
-  
+
   .welcome-text {
     text-align: center;
   }
-  
+
   .welcome-text p {
     font-size: 18px;
   }
-  
+
   .btn {
     font-size: 16px;
     padding: 12px 20px;
   }
-  
+
   .form-options {
     flex-direction: column;
     gap: 15px;
     align-items: flex-start;
   }
-  
+
   /* Адаптация смайликов для мобильных */
   .background-emojis {
     display: none; /* Скрываем на мобильных для лучшей производительности */
   }
-  
+
   /* ПРОБЛЕМА 1: исправляем навигацию для мобильных */
   header {
     flex-direction: row; /* Оставляем в строке */
@@ -418,19 +431,19 @@ h1 {
     align-items: center;
     padding: 15px 0 !important;
   }
-  
+
   nav {
     display: flex;
     gap: 10px; /* Уменьшаем отступ на мобильных */
     flex-wrap: nowrap; /* Запрещаем перенос на новую строку */
   }
-  
+
   nav a {
     padding: 8px 12px;
     font-size: 14px; /* Чуть уменьшаем шрифт на мобильных */
     white-space: nowrap; /* Запрещаем перенос текста */
   }
-  
+
   .logo {
     font-size: 24px; /* Уменьшаем логотип на мобильных */
   }
@@ -440,36 +453,36 @@ h1 {
   .welcome-text {
     padding: 20px 25px;
   }
-  
+
   h1 {
   font-size: 24px;
   text-align: center;
   white-space: nowrap;
 }
-  
+
   .welcome-text p {
     font-size: 16px;
   }
-  
+
   .actions {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .btn {
     width: 100%;
   }
-  
+
   /* Дополнительные правки для очень маленьких экранов */
   nav a {
     padding: 6px 8px;
     font-size: 13px;
   }
-  
+
   .logo {
     font-size: 22px;
   }
-  
+
   /* Если все еще не помещается, скрываем "Главная" на очень маленьких экранах */
   @media (max-width: 360px) {
     nav a:first-child {
@@ -532,14 +545,14 @@ h1 {
     <p>
       Войдите в ваш аккаунт Lumi чтобы продолжить отслеживать ваше настроение
     </p>
-    
-    
+
+
     <form method="POST" class="login-form">
       <div class="form-group">
         <label for="username">Логин</label>
         <input type="text" id="username" name="username" class="form-input" placeholder="Введите ваш логин" required>
       </div>
-      
+
 <div class="form-group">
   <label for="password">Пароль</label>
   <div class="password-wrapper">
@@ -556,12 +569,12 @@ h1 {
         </label>
         <a href="#" class="forgot-password">Забыли пароль?</a>
       </div>
-      
+
       <div class="actions">
         <button type="submit" class="btn primary">Войти в аккаунт</button>
       </div>
     </form>
-    
+
     <div class="login-footer">
       <p>Нет аккаунта? <a href="{{ url_for('auth.register') }}">Зарегистрируйтесь</a></p>
     </div>
@@ -575,17 +588,17 @@ document.addEventListener('DOMContentLoaded', function() {
   // Функция показа/скрытия пароля
   const togglePassword = document.querySelector('.toggle-password');
   const passwordInput = document.querySelector('.password-input');
-  
+
   if (togglePassword && passwordInput) {
     togglePassword.addEventListener('click', function() {
       const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
       passwordInput.setAttribute('type', type);
-      
+
       // Меняем иконку
       this.textContent = type === 'password' ? '👁️' : '🙈';
     });
   }
-  
+
   // Автофокус на поле логина
   const usernameInput = document.getElementById('username');
   if (usernameInput) {

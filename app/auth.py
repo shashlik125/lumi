@@ -12,7 +12,6 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        # Используем правильный вызов метода
         user = User.get_by_username(username)
         if user and user.check_password(password):
             login_user(user)
@@ -31,6 +30,7 @@ def register():
         username = request.form.get('username')
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
+        gender = request.form.get('gender')  # Получаем пол из формы
 
         if password != confirm_password:
             flash('Пароли не совпадают', 'error')
@@ -43,13 +43,27 @@ def register():
         if len(username) < 3:
             flash('Логин должен содержать не менее 3 символов', 'error')
             return render_template('register.html')
+        
+        # Проверяем, что пол был выбран
+        if gender not in ['male', 'female']:
+            flash('Пожалуйста, выберите ваш пол', 'error')
+            return render_template('register.html')
 
         existing_user = User.get_by_username(username)
         if existing_user:
             flash('Пользователь с таким логином уже существует', 'error')
             return render_template('register.html')
 
-        user = User.create(username, password, first_name, last_name)
+        # Создаем пользователя с передачей пола
+        # Используем именованные аргументы для надежности
+        user = User.create(
+            username=username,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            gender=gender
+        )
+        
         if user:
             login_user(user)
             flash('Регистрация прошла успешно!', 'success')

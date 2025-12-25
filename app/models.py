@@ -3,7 +3,7 @@ from app import get_db, close_db, bcrypt
 from mysql.connector import Error
 
 class User(UserMixin):
-    def __init__(self, id, username, email, password, first_name=None, last_name=None, avatar_path=None):
+    def __init__(self, id, username, email, password, first_name=None, last_name=None, avatar_path=None, gender=None):  # Добавьте gender в параметры
         self.id = id
         self.username = username
         self.email = email
@@ -11,6 +11,7 @@ class User(UserMixin):
         self.first_name = first_name
         self.last_name = last_name
         self.avatar_path = avatar_path
+        self.gender = gender  # Исправлено: убрано self.gender = gender из строки выше
     
     @staticmethod
     def get_by_id(user_id):
@@ -32,7 +33,8 @@ class User(UserMixin):
                     password=user_data['password'],
                     first_name=user_data.get('first_name'),
                     last_name=user_data.get('last_name'),
-                    avatar_path=user_data.get('avatar_path')
+                    avatar_path=user_data.get('avatar_path'),
+                    gender=user_data.get('gender')  # Добавлена запятая
                 )
             return None
         except Error as e:
@@ -61,9 +63,10 @@ class User(UserMixin):
                     password=user_data['password'],
                     first_name=user_data.get('first_name'),
                     last_name=user_data.get('last_name'),
-                    avatar_path=user_data.get('avatar_path')
+                    avatar_path=user_data.get('avatar_path'),
+                    gender=user_data.get('gender')  # Добавлена запятая
                 )
-            return None  # Этот return должен быть внутри блока if, но вне try-except
+            return None
         except Error as e:
             print(f"Database error in get_by_username: {e}")
             return None
@@ -71,7 +74,7 @@ class User(UserMixin):
             close_db(conn)
     
     @staticmethod
-    def create(username, password, first_name=None, last_name=None, email=None):
+    def create(username, password, first_name=None, last_name=None, email=None, gender=None):
         conn = get_db()
         if conn is None:
             return None
@@ -80,15 +83,26 @@ class User(UserMixin):
             hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
             cursor = conn.cursor()
             
+            # Исправлен SQL запрос - добавлен gender
             cursor.execute(
-                "INSERT INTO users (username, password, first_name, last_name, email) VALUES (%s, %s, %s, %s, %s)",
-                (username, hashed_password, first_name, last_name, email)
+                "INSERT INTO users (username, password, first_name, last_name, email, gender) VALUES (%s, %s, %s, %s, %s, %s)",  # Добавлено gender
+                (username, hashed_password, first_name, last_name, email, gender)  # Добавлено gender
             )
             
             user_id = cursor.lastrowid
+            conn.commit()
             cursor.close()
             
-            return User(user_id, username, email, hashed_password, first_name, last_name)
+            return User(
+                id=user_id, 
+                username=username, 
+                email=email, 
+                password=hashed_password, 
+                first_name=first_name, 
+                last_name=last_name,
+                avatar_path=None,
+                gender=gender  # Добавлено
+            )
         except Error as e:
             print(f"Database error in create: {e}")
             return None

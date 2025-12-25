@@ -707,7 +707,7 @@ def delete_avatar():
         return jsonify({'error': str(e)}), 500
     finally:
         close_db(conn)
-# Маршрут для страницы дневника цикла
+
 # Маршрут для страницы дневника цикла
 @main.route('/cycle-diary')
 @login_required

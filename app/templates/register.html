@@ -1,4 +1,17 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumi</title>
 
+    <!-- ВСТАВЬТЕ ЭТИ 2 СТРОКИ СЮДА ↓ -->
+    <link rel="icon" href="/static/favicon.ico?v=999" type="image/x-icon">
+    <link rel="shortcut icon" href="/static/favicon.ico?v=999">
+
+    <!-- Далее идёт ваш CSS -->
+</head>
+<body>
 
 {% block extra_css %}
 <style>
@@ -436,24 +449,24 @@ h1 {
     padding: 30px 40px;
     text-align: center;
   }
-  
+
   .welcome-text p {
     font-size: 18px;
   }
-  
+
   .btn {
     font-size: 16px;
     padding: 12px 20px;
   }
-  
+
   .form-row {
     grid-template-columns: 1fr;
   }
-  
+
   .features-preview {
     padding: 20px;
   }
-  
+
   /* Адаптация смайликов для мобильных */
   .background-emojis {
     display: none; /* Скрываем на мобильных для лучшей производительности */
@@ -464,26 +477,26 @@ h1 {
   .welcome-text {
     padding: 20px 25px;
   }
-  
+
   h1 {
     font-size: 24px;
     text-align: nowrap;
     white-space: nowrap;
   }
-  
+
   .welcome-text {
   text-align: center;
 }
-  
+
   .actions {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .btn {
     width: 100%;
   }
-  
+
   .features-preview {
     padding: 15px;
   }
@@ -492,7 +505,6 @@ h1 {
 {% endblock %}
 
 {% block content %}
-<!-- Фоновые смайлики -->
 <div class="background-emojis">
   <div class="emoji-container">
     <img src="{{ url_for('static', filename='images/😜.png') }}" alt="Emoji" class="emoji-image" />
@@ -543,7 +555,7 @@ h1 {
     <p>
       Создайте аккаунт Lumi и начните отслеживать ваше настроение уже сегодня
     </p>
-    
+
     <form method="POST" class="register-form">
       <div class="form-row">
         <div class="form-group">
@@ -555,12 +567,27 @@ h1 {
           <input type="text" id="last_name" name="last_name" class="form-input" placeholder="Ваша фамилия">
         </div>
       </div>
-      
+
+      <!-- Добавьте этот блок после form-row с именем/фамилией -->
+<div class="form-group full-width">
+    <label>Пол</label>
+    <div style="display: flex; gap: 30px; margin-top: 5px;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="radio" name="gender" value="female" required>
+            <span>Женский</span>
+        </label>
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            <input type="radio" name="gender" value="male">
+            <span>Мужской</span>
+        </label>
+    </div>
+</div>
+
       <div class="form-group">
         <label for="username">Логин</label>
         <input type="text" id="username" name="username" class="form-input" placeholder="Придумайте логин" required>
       </div>
-      
+
       <!-- Для основного пароля -->
 <div class="form-group">
   <label for="password">Пароль</label>
@@ -593,12 +620,12 @@ h1 {
           Я соглашаюсь с <a href="#">условиями использования</a> и <a href="#">политикой конфиденциальности</a>
         </label>
       </div>
-      
+
       <div class="actions">
         <button type="submit" class="btn primary">Создать аккаунт</button>
       </div>
     </form>
-    
+
     <div class="features-preview">
       <h3>Что вас ждет в Lumi:</h3>
       <div class="feature-item">
@@ -614,7 +641,7 @@ h1 {
         <span>Персональные рекомендации</span>
       </div>
     </div>
-    
+
     <div class="register-footer">
       <p>Уже зарегистрированы? <a href="{{ url_for('auth.login') }}">Войдите в аккаунт</a></p>
     </div>
@@ -625,18 +652,18 @@ h1 {
 document.addEventListener('DOMContentLoaded', function() {
   const passwordInput = document.getElementById('password');
   const strengthFill = document.getElementById('strengthFill');
-  
+
   if (passwordInput && strengthFill) {
     passwordInput.addEventListener('input', function() {
       const password = this.value;
       let strength = 0;
-      
+
       if (password.length >= 6) strength += 1;
       if (password.length >= 8) strength += 1;
       if (/[A-Z]/.test(password)) strength += 1;
       if (/[0-9]/.test(password)) strength += 1;
       if (/[^A-Za-z0-9]/.test(password)) strength += 1;
-      
+
       strengthFill.className = 'strength-fill';
       if (strength <= 2) {
         strengthFill.classList.add('strength-weak');
@@ -654,11 +681,11 @@ document.querySelectorAll('.toggle-password').forEach(button => {
   button.addEventListener('click', function() {
     const targetId = this.getAttribute('data-target');
     const passwordField = document.getElementById(targetId);
-    
+
     if (passwordField) {
       const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
       passwordField.setAttribute('type', type);
-      
+
       // Меняем иконку
       this.textContent = type === 'password' ? '👁️' : '🙈';
     }

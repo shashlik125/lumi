@@ -7,8 +7,9 @@
 
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}?v=3" type="image/x-icon">
-  
+  <link rel="icon" href="/static/favicon.ico?v=999" type="image/x-icon">
+  <link rel="shortcut icon" href="/static/favicon.ico?v=999">
+
   <style>
     * {
       margin: 0;
@@ -200,7 +201,14 @@
     <a href="{{ url_for('main.chart') }}" class="{% if request.endpoint == 'main.chart' %}active{% endif %}">Статистика</a>
     <a href="{{ url_for('main.dashboard') }}" class="{% if request.endpoint == 'main.dashboard' %}active{% endif %}">Главная</a>
     <a href="{{ url_for('main.calendar') }}" class="{% if request.endpoint == 'main.calendar' %}active{% endif %}">Календарь</a>
-    <a href="{{ url_for('main.cycle_diary') }}" class="{% if request.endpoint == 'main.cycle_diary' %}active{% endif %}">Дневник цикла</a>
+
+    {% if current_user.is_authenticated and current_user.gender == 'female' %}
+    <a href="{{ url_for('main.cycle_diary') }}" 
+       class="{% if request.endpoint == 'main.cycle_diary' %}active{% endif %}">
+       Дневник цикла
+    </a>
+    {% endif %}
+    
   </nav>
 
   <div class="user" id="userBtn">

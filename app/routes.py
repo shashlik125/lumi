@@ -8,6 +8,7 @@ from flask_login import login_required, current_user
 from app import get_db, close_db
 from mysql.connector import Error
 from functools import wraps
+from flask import Blueprint, render_template, request, jsonify, send_file, current_app, flash, redirect, url_for
 
 # Сначала определяем blueprint
 main = Blueprint('main', __name__)
@@ -712,6 +713,11 @@ def delete_avatar():
 @main.route('/cycle-diary')
 @login_required
 def cycle_diary():
+    # Проверка пола
+    if current_user.gender != 'female':
+        flash('Эта страница доступна только для пользователей женского пола', 'error')
+        return redirect(url_for('main.dashboard'))
+    
     return render_template('cycle_diary.html')
 
 # API маршруты для менструального цикла

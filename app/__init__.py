@@ -15,10 +15,10 @@ def get_db():
     """Получение нового соединения с базой данных"""
     try:
         conn = mysql.connector.connect(
-            host=os.getenv('DB_HOST', 'localhost'),
-            user=os.getenv('DB_USER', 'root'),
-            password=os.getenv('DB_PASSWORD', ''),
-            database=os.getenv('DB_NAME', 'lumi'),
+            host='shashlik125.mysql.pythonanywhere-services.com',  # твой хост
+            user='shashlik125',  # твой пользователь
+            password='kakashki1234',  # ⚠️ ВСТАВЬ ПАРОЛЬ!
+            database='shashlik125$default',  # твоя БД
             autocommit=True
         )
         return conn

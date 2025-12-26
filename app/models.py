@@ -11,8 +11,8 @@ class User(UserMixin):
         self.first_name = first_name
         self.last_name = last_name
         self.avatar_path = avatar_path
-        self.gender = gender  # Исправлено: убрано self.gender = gender из строки выше
-    
+        self.gender = gender  
+
     @staticmethod
     def get_by_id(user_id):
         conn = get_db()

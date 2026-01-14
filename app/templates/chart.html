@@ -1317,25 +1317,28 @@ function updateDistributionChart() {
     });
 }
 
-function updateTimeChart() {
-    const currentData = getCurrentPeriodData();
-    const timeDistribution = Array(24).fill(0);
-    const timeCount = Array(24).fill(0);
+async function updateTimeChart() {
+    const noDataElement = document.getElementById('timeChartNoData');
 
-    currentData.forEach(entry => {
+    if (currentView !== 'day') {
+        // Для всех периодов кроме дня показываем сообщение
+        noDataElement.style.display = 'flex';
+        if (timeChart) timeChart.destroy();
+        return;
+    }
+
+    const dateStr = formatDate(currentDate);
+    const dayData = await loadHourlyData(dateStr); // Берем почасовые данные только для дня
+
+    // Подготовка массивов для 24 часов
+    const averages = Array(24).fill(null);
+    dayData.forEach(entry => {
         if (entry.hour !== undefined && entry.hour !== null) {
-            timeDistribution[entry.hour] += entry.mood;
-            timeCount[entry.hour]++;
+            averages[entry.hour] = entry.mood;
         }
     });
 
-    const averages = timeDistribution.map((sum, i) => 
-        timeCount[i] > 0 ? sum / timeCount[i] : null
-    );
-
-    const noDataElement = document.getElementById('timeChartNoData');
-    const hasData = averages.some(avg => avg !== null);
-
+    const hasData = averages.some(val => val !== null);
     if (!hasData) {
         noDataElement.style.display = 'flex';
         if (timeChart) timeChart.destroy();
@@ -1347,16 +1350,13 @@ function updateTimeChart() {
     if (timeChart) timeChart.destroy();
 
     const ctx = document.getElementById('timeChart').getContext('2d');
-    
     timeChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: Array.from({length: 24}, (_, i) => i),
+            labels: Array.from({length: 24}, (_, i) => i), // 0-23 часа
             datasets: [{
                 data: averages,
-                backgroundColor: averages.map(avg => 
-                    avg ? getMoodColor(getMoodCategory(avg)) : chartColors.grid
-                ),
+                backgroundColor: averages.map(avg => avg !== null ? getMoodColor(getMoodCategory(avg)) : chartColors.grid),
                 borderWidth: 0,
                 borderRadius: 4
             }]
@@ -1373,19 +1373,15 @@ function updateTimeChart() {
                 x: {
                     ticks: {
                         callback: function(value) {
-                            return value === 0 || value === 6 || value === 12 || value === 18 || value === 23 ? value : '';
+                            return [0, 6, 12, 18, 23].includes(value) ? value : '';
                         },
                         maxRotation: 0
                     },
-                    grid: {
-                        display: false
-                    }
+                    grid: { display: false }
                 }
             },
             plugins: {
-                legend: {
-                    display: false
-                },
+                legend: { display: false },
                 tooltip: {
                     callbacks: {
                         title: function(context) {
@@ -1401,6 +1397,7 @@ function updateTimeChart() {
         }
     });
 }
+
 
 function getCurrentPeriodData() {
     if (currentView === "day") {

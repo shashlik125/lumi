@@ -272,7 +272,7 @@ h2:after {
 .form-input {
   padding: 16px 20px; 
   border: 2px solid #e9ecef; 
-  border-radius: 12px; 
+  border-radius: 25px; 
   font-size: 16px;
   font-family: 'Montserrat', sans-serif;
   transition: all 0.3s ease;
@@ -608,29 +608,32 @@ h2:after {
             <input type="text" id="first_name" name="first_name" 
                    value="{{ current_user.first_name or '' }}" 
                    placeholder="Введите ваше имя">
-                   <div class="form-group">
-                    <label for="gender">Пол</label>
-                    <select id="gender" name="gender" class="form-input">
-                      <option value="">Не выбран</option>
-                      <option value="female" {% if current_user.gender == 'female' %}selected{% endif %}>Женский</option>
-                      <option value="male" {% if current_user.gender == 'male' %}selected{% endif %}>Мужской</option>
-                    </select>
-                  </div>
-                </div>
+                   
+          <div class="form-input">
+            <label for="gender">Пол</label>
+            <select id="gender" name="gender" class="form-input">
+              <option value="">Не выбран</option>
+              <option value="female" {% if current_user.gender == 'female' %}selected{% endif %}>Женский</option>
+              <option value="male" {% if current_user.gender == 'male' %}selected{% endif %}>Мужской</option>
+            </select>
+          </div>
+        </div>
                 
                 <div class="form-group">
             <label for="last_name">Фамилия</label>
             <input type="text" id="last_name" name="last_name" 
                    value="{{ current_user.last_name or '' }}" 
                    placeholder="Введите вашу фамилию">
+                   class="form-input">
           </div>
           
           <div class="form-group">
             <label for="username">Логин</label>
             <input type="text" id="username" name="username" 
-                   value="{{ current_user.username }}" 
-                   placeholder="Логин" readonly
-                   style="background: #f8f9fa; color: #6c757d;">
+            value="{{ current_user.username }}" 
+            placeholder="Логин" readonly
+            class="form-input" >
+
           </div>
         </div>
         

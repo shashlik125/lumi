@@ -71,7 +71,8 @@ def create_app():
                     password=user_data['password'],
                     first_name=user_data.get('first_name'),
                     last_name=user_data.get('last_name'),
-                    avatar_path=user_data.get('avatar_path')
+                    avatar_path=user_data.get('avatar_path'),
+                      gender=user_data.get('gender')
                 )
             return None
         except Error as e:

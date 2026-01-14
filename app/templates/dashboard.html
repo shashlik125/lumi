@@ -230,6 +230,19 @@ h1 {
   width: 100%;
 }
 
+.features .card:nth-child(1) {
+  animation-delay: 0.3s;
+}
+
+.features .card:nth-child(2) {
+  animation-delay: 0.6s;
+}
+
+.features .card:nth-child(3) {
+  animation-delay: 0.9s;
+}
+
+
 .card {
   background: rgba(255,255,255,0.9);
   padding: 50px 40px;
@@ -244,6 +257,9 @@ h1 {
   position: relative;
   top: -80px;
   min-width: 0; /* Предотвращает съезжание */
+  opacity: 0; /* изначально скрыты */
+  transform: translateY(20px);
+  animation: fadeInUp 1s ease forwards; /* forwards чтобы осталась на месте */
 }
 
 .card h3 {

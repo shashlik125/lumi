@@ -299,23 +299,35 @@ def update_profile(conn):
         data = request.get_json()
         if not data:
             return jsonify({'error': 'No data provided'}), 400
-            
+
         first_name = data.get('first_name', '').strip()
         last_name = data.get('last_name', '').strip()
-        
+        gender = data.get('gender')
+
+        # Валидация пола
+        if gender not in (None, '', 'male', 'female'):
+            return jsonify({'error': 'Некорректное значение пола'}), 400
+
         cursor = conn.cursor()
         cursor.execute(
-            "UPDATE users SET first_name = %s, last_name = %s WHERE id = %s",
-            (first_name, last_name, current_user.id)
+            """
+            UPDATE users 
+            SET first_name = %s,
+                last_name = %s,
+                gender = %s
+            WHERE id = %s
+            """,
+            (first_name, last_name, gender, current_user.id)
         )
         conn.commit()
         cursor.close()
-        
+
         return jsonify({'message': 'Профиль успешно обновлен'})
-        
+
     except Error as e:
         print(f"Database error in update_profile: {e}")
         return jsonify({'error': str(e)}), 500
+
 
 @main.route('/api/change_password', methods=['POST'])
 @login_required

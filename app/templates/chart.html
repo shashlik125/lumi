@@ -1354,7 +1354,7 @@ async function updateTimeChart() {
     timeChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
-            labels: ['Хорошее', 'Нейтральное', 'Плохое'],
+            labels: ['','',''], // убираем подписи
             datasets: [{
                 data: [distribution.good, distribution.neutral, distribution.bad],
                 backgroundColor: ['#60F4E3', '#FF70EC', '#F44336'],
@@ -1367,16 +1367,13 @@ async function updateTimeChart() {
             maintainAspectRatio: false,
             cutout: '60%',
             plugins: {
-                legend: {
-                    display: true,
-                    position: 'bottom'
-                },
+                legend: { display: false }, // убрали легенду
                 tooltip: {
                     callbacks: {
                         label: function(context) {
                             const value = context.raw;
                             const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                            return `${context.label}: ${percent}% (${value} записей)`;
+                            return `${percent}% (${value} записей)`;
                         }
                     }
                 }

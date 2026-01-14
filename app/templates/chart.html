@@ -1330,7 +1330,7 @@ async function updateTimeChart() {
     const dateStr = formatDate(currentDate);
     const dayData = await loadHourlyData(dateStr); // Берем почасовые данные только для дня
 
-    // Подготовка массивов для 24 часов
+    // Подготовка массива для 24 часов
     const averages = Array(24).fill(null);
     dayData.forEach(entry => {
         if (entry.hour !== undefined && entry.hour !== null) {
@@ -1350,36 +1350,30 @@ async function updateTimeChart() {
     if (timeChart) timeChart.destroy();
 
     const ctx = document.getElementById('timeChart').getContext('2d');
+
+    // Подбираем цвета градиентом от плохого к хорошему настроению
+    const barColors = averages.map(val => {
+        if (val === null) return chartColors.grid;
+        if (val >= 7) return '#60F4E3';      // Хорошее
+        if (val >= 4) return '#FF70EC';      // Нейтральное
+        return '#F44336';                     // Плохое
+    });
+
     timeChart = new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: Array.from({length: 24}, (_, i) => i), // 0-23 часа
+            labels: Array.from({length: 24}, (_, i) => i), // Часы 0-23
             datasets: [{
+                label: 'Настроение по часам',
                 data: averages,
-                backgroundColor: averages.map(avg => avg !== null ? getMoodColor(getMoodCategory(avg)) : chartColors.grid),
+                backgroundColor: barColors,
+                borderRadius: 8,
                 borderWidth: 0,
-                borderRadius: 4
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            scales: {
-                y: {
-                    display: false,
-                    min: 1,
-                    max: 10
-                },
-                x: {
-                    ticks: {
-                        callback: function(value) {
-                            return [0, 6, 12, 18, 23].includes(value) ? value : '';
-                        },
-                        maxRotation: 0
-                    },
-                    grid: { display: false }
-                }
-            },
             plugins: {
                 legend: { display: false },
                 tooltip: {
@@ -1389,7 +1383,29 @@ async function updateTimeChart() {
                         },
                         label: function(context) {
                             const value = context.raw;
-                            return value ? `Среднее настроение: ${value.toFixed(1)}` : 'Нет данных';
+                            if (value === null) return 'Нет данных';
+                            const categories = { good: 'Хорошее', neutral: 'Нейтральное', bad: 'Плохое' };
+                            return `Настроение: ${value.toFixed(1)} (${categories[getMoodCategory(value)]})`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    min: 1,
+                    max: 10,
+                    ticks: {
+                        stepSize: 1
+                    },
+                    grid: {
+                        color: 'rgba(0,0,0,0.05)'
+                    }
+                },
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        callback: function(value) {
+                            return [0, 6, 12, 18, 23].includes(value) ? value : '';
                         }
                     }
                 }
@@ -1397,6 +1413,7 @@ async function updateTimeChart() {
         }
     });
 }
+
 
 
 function getCurrentPeriodData() {

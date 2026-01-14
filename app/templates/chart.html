@@ -1321,25 +1321,16 @@ async function updateTimeChart() {
     const noDataElement = document.getElementById('timeChartNoData');
 
     if (currentView !== 'day') {
-        // Для всех периодов кроме дня показываем сообщение
+        // Показываем только для дня
         noDataElement.style.display = 'flex';
         if (timeChart) timeChart.destroy();
         return;
     }
 
     const dateStr = formatDate(currentDate);
-    const dayData = await loadHourlyData(dateStr); // Берем почасовые данные только для дня
+    const dayData = await loadHourlyData(dateStr);
 
-    // Подготовка массива для 24 часов
-    const averages = Array(24).fill(null);
-    dayData.forEach(entry => {
-        if (entry.hour !== undefined && entry.hour !== null) {
-            averages[entry.hour] = entry.mood;
-        }
-    });
-
-    const hasData = averages.some(val => val !== null);
-    if (!hasData) {
+    if (!dayData || dayData.length === 0) {
         noDataElement.style.display = 'flex';
         if (timeChart) timeChart.destroy();
         return;
@@ -1349,63 +1340,43 @@ async function updateTimeChart() {
 
     if (timeChart) timeChart.destroy();
 
-    const ctx = document.getElementById('timeChart').getContext('2d');
-
-    // Подбираем цвета градиентом от плохого к хорошему настроению
-    const barColors = averages.map(val => {
-        if (val === null) return chartColors.grid;
-        if (val >= 7) return '#60F4E3';      // Хорошее
-        if (val >= 4) return '#FF70EC';      // Нейтральное
-        return '#F44336';                     // Плохое
+    // Считаем количество настроений по категориям
+    const distribution = { good: 0, neutral: 0, bad: 0 };
+    dayData.forEach(entry => {
+        const cat = getMoodCategory(entry.mood);
+        distribution[cat]++;
     });
 
+    const total = dayData.length;
+
+    const ctx = document.getElementById('timeChart').getContext('2d');
+
     timeChart = new Chart(ctx, {
-        type: 'bar',
+        type: 'doughnut',
         data: {
-            labels: Array.from({length: 24}, (_, i) => i), // Часы 0-23
+            labels: ['Хорошее', 'Нейтральное', 'Плохое'],
             datasets: [{
-                label: 'Настроение по часам',
-                data: averages,
-                backgroundColor: barColors,
-                borderRadius: 8,
-                borderWidth: 0,
+                data: [distribution.good, distribution.neutral, distribution.bad],
+                backgroundColor: ['#60F4E3', '#FF70EC', '#F44336'],
+                borderColor: '#fff',
+                borderWidth: 2
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            cutout: '60%',
             plugins: {
-                legend: { display: false },
+                legend: {
+                    display: true,
+                    position: 'bottom'
+                },
                 tooltip: {
                     callbacks: {
-                        title: function(context) {
-                            return `${context[0].label}:00`;
-                        },
                         label: function(context) {
                             const value = context.raw;
-                            if (value === null) return 'Нет данных';
-                            const categories = { good: 'Хорошее', neutral: 'Нейтральное', bad: 'Плохое' };
-                            return `Настроение: ${value.toFixed(1)} (${categories[getMoodCategory(value)]})`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                y: {
-                    min: 1,
-                    max: 10,
-                    ticks: {
-                        stepSize: 1
-                    },
-                    grid: {
-                        color: 'rgba(0,0,0,0.05)'
-                    }
-                },
-                x: {
-                    grid: { display: false },
-                    ticks: {
-                        callback: function(value) {
-                            return [0, 6, 12, 18, 23].includes(value) ? value : '';
+                            const percent = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                            return `${context.label}: ${percent}% (${value} записей)`;
                         }
                     }
                 }

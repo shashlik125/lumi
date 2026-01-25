@@ -2545,30 +2545,6 @@ function fillFormWithData(dateStr, entry) {
         formTitle.innerHTML = `<i class="fas fa-edit"></i>  ${formatDateDisplay(dateStr)}`;
     }
     
-    // Добавляем отображение текущей даты над формой
-    const dateDisplay = document.createElement('div');
-    dateDisplay.className = 'selected-date-display';
-    dateDisplay.innerHTML = `
-        <div style="display: flex; align-items: center; justify-content: space-between; background: var(--accent); padding: 12px 15px; border-radius: 10px; margin-bottom: 20px; border: 2px solid var(--primary);">
-            <span style="font-weight: 600; color: var(--dark);">
-                <i class="fas fa-calendar-day"></i> ${formatDateDisplay(dateStr)}
-            </span>
-            <button onclick="clearSelectedDate()" style="background: none; border: none; color: var(--danger); cursor: pointer; font-size: 14px;">
-                <i class="fas fa-times"></i> Сбросить
-            </button>
-        </div>
-    `;
-    
-    // Удаляем старый отображение даты если есть
-    const oldDisplay = document.querySelector('.selected-date-display');
-    if (oldDisplay) oldDisplay.remove();
-    
-    // Вставляем отображение даты перед формой
-    const form = document.querySelector('.tracker-form');
-    if (form) {
-        form.insertBefore(dateDisplay, form.firstChild);
-    }
-    
     // Сбрасываем форму
     clearForm();
     

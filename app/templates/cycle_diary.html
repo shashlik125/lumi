@@ -1367,7 +1367,7 @@ body {
         <div class="form-section">
             <div class="quick-menstruation">
                 <button type="button" class="btn btn-menstruation" onclick="markMenstruationStart()">
-                    <i class="fas fa-plus-circle"></i> Начались месячные сегодня
+                    <i class="fas fa-plus-circle"></i> Отметить менструацию
                 </button>
                 <button type="button" class="btn btn-menstruation-end" onclick="markMenstruationEnd()">
                     <i class="fas fa-minus-circle"></i> Завершились
@@ -2621,15 +2621,18 @@ function resetToToday() {
     console.log('✅ Сброс выполнен');
 }
 
-// Функции для быстрой отметки менструации
 async function markMenstruationStart() {
-    if (!currentSelectedDate) {
-        showToast('Сначала выберите день в календаре', 'error');
-        return;
+    let targetDate;
+    
+    // Если есть выбранная дата - используем её, иначе - сегодня
+    if (currentSelectedDate) {
+        targetDate = currentSelectedDate;
+    } else {
+        targetDate = formatDate(new Date());
     }
 
     // Проверяем, что дата не в будущем
-    if (!isValidDateForEntry(currentSelectedDate)) {
+    if (!isValidDateForEntry(targetDate)) {
         showToast('Нельзя отметить менструацию в будущем', 'error');
         return;
     }
@@ -2641,18 +2644,24 @@ async function markMenstruationStart() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                date: currentSelectedDate,
+                date: targetDate,
+                flow_intensity: 'medium',
                 notes: 'Начало менструации'
             })
         });
 
         if (response.ok) {
-            showToast(`Менструация отмечена на ${formatDateDisplay(currentSelectedDate)}!`, 'success');
+            showToast(`Менструация отмечена на ${formatDateDisplay(targetDate)}!`, 'success');
+            
+            // ✅ Обновляем данные
             await loadCycleData();
             renderCalendar();
-
-            // ❌ БОЛЬШЕ НЕТ автозаполнения симптомов
-            clearForm();
+            
+            // ❌ НЕ сбрасываем выбранную дату, если она была выбрана
+            // Это позволяет пользователю продолжить редактирование
+            if (!currentSelectedDate) {
+                clearForm();
+            }
         }
     } catch (error) {
         console.error('Ошибка:', error);
@@ -2660,13 +2669,25 @@ async function markMenstruationStart() {
     }
 }
 
+// Функция получения целевой даты (выбранная или сегодня)
+function getTargetDate() {
+    if (currentSelectedDate && isEditMode) {
+        return currentSelectedDate;
+    } else {
+        return formatDate(new Date());
+    }
+}
+
 async function markMenstruationEnd() {
-    if (!currentSelectedDate) {
+    const targetDate = getTargetDate();
+    
+    if (!targetDate) {
         showToast('Сначала выберите день в календаре', 'error');
         return;
     }
+    
     // Проверяем, что дата не в будущем
-    if (!isValidDateForEntry(currentSelectedDate)) {
+    if (!isValidDateForEntry(targetDate)) {
         showToast('Нельзя отметить менструацию в будущем', 'error');
         return;
     }
@@ -2678,7 +2699,7 @@ async function markMenstruationEnd() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                date: currentSelectedDate,
+                date: targetDate,
                 symptoms: [],
                 flow_intensity: 'none',
                 notes: 'Завершение менструации'
@@ -2686,14 +2707,14 @@ async function markMenstruationEnd() {
         });
 
         if (response.ok) {
-            showToast(`Завершение менструации отмечено на ${formatDateDisplay(currentSelectedDate)}`, 'success');
+            showToast(`Завершение менструации отмечено на ${formatDateDisplay(targetDate)}`, 'success');
             await loadCycleData();
             renderCalendar();
             updateSymptomsLegend();
             
             // Автоматически заполняем форму
             setTimeout(() => {
-                fillFormWithData(currentSelectedDate, {
+                fillFormWithData(targetDate, {
                     symptoms: [],
                     flow_intensity: 'none',
                     notes: 'Завершение менструации'

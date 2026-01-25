@@ -2496,7 +2496,7 @@ function fillFormWithData(dateStr, entry) {
     // Устанавливаем заголовок формы
     const formTitle = document.querySelector('.tracker-form h3');
     if (formTitle) {
-        formTitle.innerHTML = `<i class="fas fa-edit"></i> Редактирование ${formatDateDisplay(dateStr)}`;
+        formTitle.innerHTML = `<i class="fas fa-edit"></i>  ${formatDateDisplay(dateStr)}`;
     }
     
     // Добавляем отображение текущей даты над формой
@@ -2553,25 +2553,57 @@ function fillFormWithData(dateStr, entry) {
 
 // Сброс выбранной даты
 function clearSelectedDate() {
+    // Проверяем, есть ли запись для этой даты
+    const existingEntry = cycleData.find(entry => entry.date === currentSelectedDate);
+    
+    if (existingEntry) {
+        // Если есть запись - спрашиваем, что сделать
+        if (confirm(`У вас есть запись за ${formatDateDisplay(currentSelectedDate)}. Что вы хотите сделать?\n\nНажмите ОК чтобы УДАЛИТЬ запись\nНажмите ОТМЕНА чтобы просто ОЧИСТИТЬ форму`)) {
+            // Пользователь хочет удалить запись
+            deleteCycleEntry();
+        } else {
+            // Пользователь хочет только очистить форму
+            resetToToday();
+        }
+    } else {
+        // Если записи нет - просто сбрасываем к сегодняшней дате
+        resetToToday();
+    }
+}
+
+// Функция сброса к сегодняшней дате (без удаления записи)
+function resetToToday() {
+    console.log('🔄 Сбрасываем выбранную дату...');
+    
+    // Сброс глобальных переменных
     currentSelectedDate = null;
     isEditMode = false;
     
     // Удаляем отображение даты
     const dateDisplay = document.querySelector('.selected-date-display');
-    if (dateDisplay) dateDisplay.remove();
+    if (dateDisplay) {
+        dateDisplay.remove();
+        console.log('🗑️ Удален отображение даты');
+    }
     
-    // Восстанавливаем заголовок
+    // Восстанавливаем заголовок формы
     const formTitle = document.querySelector('.tracker-form h3');
     if (formTitle) {
         formTitle.innerHTML = `<i class="fas fa-edit"></i> Отметить сегодня`;
+        console.log('📝 Восстановлен заголовок');
     }
+    
+    // Снимаем выделение с календаря
+    document.querySelectorAll('.calendar-day.selected').forEach(day => {
+        day.classList.remove('selected');
+    });
     
     // Очищаем форму
     clearForm();
     
     showToast('Выбрана сегодняшняя дата', 'info');
+    console.log('✅ Сброс выполнен');
 }
-
 
 // Функции для быстрой отметки менструации
 async function markMenstruationStart() {
@@ -2658,7 +2690,53 @@ async function markMenstruationEnd() {
     }
 }
 
+// Функция для удаления записи
+async function deleteCycleEntry() {
+    if (!currentSelectedDate) {
+        showToast('Сначала выберите день в календаре', 'error');
+        return;
+    }
 
+    // Проверяем, что есть что удалять
+    const existingEntry = cycleData.find(entry => entry.date === currentSelectedDate);
+    if (!existingEntry) {
+        showToast('Для этой даты нет записи', 'info');
+        return;
+    }
+
+    // Подтверждение удаления
+    if (!confirm(`Удалить запись за ${formatDateDisplay(currentSelectedDate)}?`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`${CYCLE_API}/${currentSelectedDate}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+
+        if (response.ok) {
+            showToast(`Запись за ${formatDateDisplay(currentSelectedDate)} удалена!`, 'success');
+            
+            // Обновляем данные
+            await loadCycleData();
+            renderCalendar();
+            
+            // Сбрасываем выбранную дату
+            clearSelectedDate();
+            
+            // Обновляем аналитику
+            await updateAnalytics();
+        } else {
+            throw new Error('Ошибка удаления записи');
+        }
+    } catch (error) {
+        console.error('Ошибка удаления:', error);
+        showToast('Ошибка удаления записи', 'error');
+    }
+}
 
 
 // Инициализация графиков

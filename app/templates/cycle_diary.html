@@ -1365,7 +1365,6 @@ body {
         
         <!-- КНОПКИ МЕНСТРУАЦИИ -->
         <div class="form-section">
-            <div class="section-title"><i class="fas fa-droplet"></i> Быстрая отметка менструации</div>
             <div class="quick-menstruation">
                 <button type="button" class="btn btn-menstruation" onclick="markMenstruationStart()">
                     <i class="fas fa-plus-circle"></i> Начались месячные сегодня
@@ -1391,7 +1390,7 @@ body {
         </div>
 
         <button class="btn btn-primary" onclick="saveCycleEntry()">
-            <i class="fas fa-save"></i> Сохранить запись
+            <i class="fas fa-save"></i> Сохранить
         </button>
     </div>
 
@@ -2575,6 +2574,9 @@ function clearSelectedDate() {
 function resetToToday() {
     console.log('🔄 Сбрасываем выбранную дату...');
     
+    // Запоминаем старую дату для очистки выделения
+    const oldDate = currentSelectedDate;
+    
     // Сброс глобальных переменных
     currentSelectedDate = null;
     isEditMode = false;
@@ -2593,13 +2595,27 @@ function resetToToday() {
         console.log('📝 Восстановлен заголовок');
     }
     
-    // Снимаем выделение с календаря
+    // ✅ Снимаем выделение с календаря (и со старой даты тоже)
     document.querySelectorAll('.calendar-day.selected').forEach(day => {
         day.classList.remove('selected');
     });
     
     // Очищаем форму
     clearForm();
+    
+    // ✅ Если нужно, можно перерисовать только выбранный день
+    if (oldDate) {
+        const date = new Date(oldDate);
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        
+        // Если старая дата в текущем месяце - перерисовываем ее день
+        if (date.getFullYear() === year && date.getMonth() === month) {
+            setTimeout(() => {
+                renderCalendar(); // Полная перерисовка
+            }, 100);
+        }
+    }
     
     showToast('Выбрана сегодняшняя дата', 'info');
     console.log('✅ Сброс выполнен');
@@ -2710,6 +2726,9 @@ async function deleteCycleEntry() {
     }
 
     try {
+        // 🔧 ВАЖНО: URL должен соответствовать Flask маршруту
+        console.log('🔗 Отправляю DELETE запрос на:', `${CYCLE_API}/${currentSelectedDate}`);
+        
         const response = await fetch(`${CYCLE_API}/${currentSelectedDate}`, {
             method: 'DELETE',
             headers: {
@@ -2717,28 +2736,42 @@ async function deleteCycleEntry() {
             }
         });
 
-        if (response.ok) {
+        // Проверяем не только статус, но и тело ответа
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
             showToast(`Запись за ${formatDateDisplay(currentSelectedDate)} удалена!`, 'success');
             
-            // Обновляем данные
-            await loadCycleData();
+            // ✅ ВАЖНО: Удаляем запись из ЛОКАЛЬНОГО массива cycleData
+            const index = cycleData.findIndex(entry => entry.date === currentSelectedDate);
+            if (index > -1) {
+                cycleData.splice(index, 1);
+                console.log(`🗑️ Удалена запись из cycleData: ${currentSelectedDate}`);
+                console.log('📊 Теперь в cycleData записей:', cycleData.length);
+            }
+            
+            // ✅ Перерисовываем календарь с обновленными данными
             renderCalendar();
             
-            // Сбрасываем выбранную дату
-            clearSelectedDate();
+            // ✅ Сбрасываем выбранную дату
+            resetToToday();
             
-            // Обновляем аналитику
-            await updateAnalytics();
+            // ✅ Обновляем легенду симптомов
+            updateSymptomsLegend();
+            
+            // ✅ Обновляем аналитику
+            updateChartsWithRealData();
+            
         } else {
-            throw new Error('Ошибка удаления записи');
+            // Если response.ok, но нет success в теле ответа
+            const errorMsg = result.error || 'Ошибка удаления записи';
+            throw new Error(errorMsg);
         }
     } catch (error) {
         console.error('Ошибка удаления:', error);
-        showToast('Ошибка удаления записи', 'error');
+        showToast('Ошибка удаления записи: ' + error.message, 'error');
     }
 }
-
-
 // Инициализация графиков
 function initCharts() {
     // Ждем загрузки всех данных

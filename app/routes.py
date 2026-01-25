@@ -814,19 +814,25 @@ def cycle_entries(conn):
             print(f"Database error in cycle_entries POST: {e}")
             return jsonify({'error': str(e)}), 500
 
-@main.route('/api/cycle_entries/<int:entry_id>', methods=['DELETE'])
+@main.route('/api/cycle_entries/<date>', methods=['DELETE'])
 @login_required
 @with_db_connection
-def delete_cycle_entry(conn, entry_id):
+def delete_cycle_entry(conn, date):
     try:
+        print(f"🗑️ DELETE request for date: {date}, user_id: {current_user.id}")
+        
         cursor = conn.cursor()
         cursor.execute(
-            "DELETE FROM cycle_entries WHERE id = %s AND user_id = %s",
-            (entry_id, current_user.id)
+            "DELETE FROM cycle_entries WHERE date = %s AND user_id = %s",
+            (date, current_user.id)
         )
+        affected_rows = cursor.rowcount
         conn.commit()
         cursor.close()
-        return jsonify({'success': True})
+        
+        print(f"✅ Deleted {affected_rows} rows for date {date}")
+        return jsonify({'success': True, 'deleted': affected_rows})
+        
     except Error as e:
         print(f"Database error in delete_cycle_entry: {e}")
         return jsonify({'error': str(e)}), 500

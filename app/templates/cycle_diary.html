@@ -2085,16 +2085,12 @@ h1:after {
     const existingEntry = cycleData.find(entry => entry.date === dateStr);
 
     try {
-        // Определяем, есть ли менструация
-        const hasMenstruation = existingEntry ? 
-            (existingEntry.flow_intensity && existingEntry.flow_intensity !== 'none') : 
-            false;
-        
-        const flowIntensity = hasMenstruation ? 'medium' : 'none';
-
         // Если есть существующая запись - обновляем её
         if (existingEntry) {
-            // Сохраняем старые симптомы + добавляем новые
+            // СОХРАНЯЕМ менструацию из существующей записи
+            const flowIntensity = existingEntry.flow_intensity || 'none';
+            
+            // Объединяем симптомы: старые + новые из формы
             const existingSymptoms = existingEntry.symptoms || [];
             const newSymptoms = selectedSymptoms || [];
             const allSymptoms = [...new Set([...existingSymptoms, ...newSymptoms])];
@@ -2104,7 +2100,7 @@ h1:after {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     symptoms: allSymptoms,
-                    flow_intensity: flowIntensity, // Сохраняем статус менструации
+                    flow_intensity: flowIntensity, // Важно: сохраняем существующую менструацию!
                     notes: notes || existingEntry.notes
                 })
             });
@@ -2118,7 +2114,7 @@ h1:after {
                 throw new Error('Ошибка обновления записи');
             }
         } else {
-            // Если записи нет - создаем новую
+            // Если записи нет - создаем новую (без менструации по умолчанию)
             if (!selectedSymptoms.length && !notes) {
                 showToast('Заполните хотя бы одно поле', 'error');
                 return;
@@ -2130,7 +2126,7 @@ h1:after {
                 body: JSON.stringify({
                     date: dateStr,
                     symptoms: selectedSymptoms,
-                    flow_intensity: 'none', // По умолчанию нет менструации
+                    flow_intensity: 'none', // Новая запись без менструации
                     notes: notes
                 })
             });
@@ -2689,14 +2685,14 @@ h1:after {
 
     try {
         if (existingEntry) {
-            // Обновляем существующую запись - ТОЛЬКО добавляем менструацию
+            // Обновляем существующую запись - НЕ трогаем симптомы!
             const response = await fetch(`${CYCLE_API}/${targetDate}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     symptoms: existingEntry.symptoms || [], // Сохраняем ВСЕ симптомы
                     flow_intensity: 'medium', // Добавляем менструацию
-                    notes: existingEntry.notes || existingEntry.notes
+                    notes: existingEntry.notes || 'Менструация'
                 })
             });
 

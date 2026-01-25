@@ -1370,9 +1370,6 @@ body {
                 <button type="button" class="btn btn-menstruation" onclick="markMenstruationStart()">
                     <i class="fas fa-plus-circle"></i> Начались месячные сегодня
                 </button>
-                <button type="button" class="btn btn-menstruation-light" onclick="markMenstruationLight()">
-                    <i class="fas fa-plus"></i> Слабые выделения
-                </button>
                 <button type="button" class="btn btn-menstruation-end" onclick="markMenstruationEnd()">
                     <i class="fas fa-minus-circle"></i> Завершились
                 </button>
@@ -2575,20 +2572,20 @@ function clearSelectedDate() {
     showToast('Выбрана сегодняшняя дата', 'info');
 }
 
+
 // Функции для быстрой отметки менструации
 async function markMenstruationStart() {
     if (!currentSelectedDate) {
         showToast('Сначала выберите день в календаре', 'error');
         return;
     }
-     // Проверяем, что дата не в будущем
+
+    // Проверяем, что дата не в будущем
     if (!isValidDateForEntry(currentSelectedDate)) {
         showToast('Нельзя отметить менструацию в будущем', 'error');
         return;
     }
-    
-    const symptoms = ['Спазмы', 'Боль в спине', 'Усталость'];
-    
+
     try {
         const response = await fetch(CYCLE_API, {
             method: 'POST',
@@ -2597,8 +2594,6 @@ async function markMenstruationStart() {
             },
             body: JSON.stringify({
                 date: currentSelectedDate,
-                symptoms: symptoms,
-                flow_intensity: 'heavy',
                 notes: 'Начало менструации'
             })
         });
@@ -2607,62 +2602,9 @@ async function markMenstruationStart() {
             showToast(`Менструация отмечена на ${formatDateDisplay(currentSelectedDate)}!`, 'success');
             await loadCycleData();
             renderCalendar();
-            updateSymptomsLegend();
-            
-            // Автоматически заполняем форму
-            setTimeout(() => {
-                fillFormWithData(currentSelectedDate, {
-                    symptoms: symptoms,
-                    flow_intensity: 'heavy',
-                    notes: 'Начало менструации'
-                });
-            }, 300);
-        }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        showToast('Ошибка сохранения', 'error');
-    }
-}
 
-async function markMenstruationLight() {
-    if (!currentSelectedDate) {
-        showToast('Сначала выберите день в календаре', 'error');
-        return;
-    }
-    // Проверяем, что дата не в будущем
-    if (!isValidDateForEntry(currentSelectedDate)) {
-        showToast('Нельзя отметить менструацию в будущем', 'error');
-        return;
-    }
-    
-    try {
-        const response = await fetch(CYCLE_API, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                date: currentSelectedDate,
-                symptoms: [],
-                flow_intensity: 'light',
-                notes: 'Слабые выделения'
-            })
-        });
-
-        if (response.ok) {
-            showToast(`Слабые выделения отмечены на ${formatDateDisplay(currentSelectedDate)}`, 'success');
-            await loadCycleData();
-            renderCalendar();
-            updateSymptomsLegend();
-            
-            // Автоматически заполняем форму
-            setTimeout(() => {
-                fillFormWithData(currentSelectedDate, {
-                    symptoms: [],
-                    flow_intensity: 'light',
-                    notes: 'Слабые выделения'
-                });
-            }, 300);
+            // ❌ БОЛЬШЕ НЕТ автозаполнения симптомов
+            clearForm();
         }
     } catch (error) {
         console.error('Ошибка:', error);
@@ -2716,34 +2658,7 @@ async function markMenstruationEnd() {
     }
 }
 
-async function markMenstruationLight() {
-    const today = formatDate(new Date());
-    
-    try {
-        const response = await fetch(CYCLE_API, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                date: today,
-                symptoms: [],
-                flow_intensity: 'light',
-                notes: 'Слабые выделения'
-            })
-        });
 
-        if (response.ok) {
-            showToast('Слабые выделения отмечены', 'success');
-            await loadCycleData();
-            renderCalendar();
-            updateSymptomsLegend();
-        }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        showToast('Ошибка сохранения', 'error');
-    }
-}
 
 
 // Инициализация графиков

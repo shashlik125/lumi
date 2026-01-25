@@ -299,6 +299,38 @@ body {
             margin-bottom: 30px;
         }
 
+/* Кнопка Сбросить */
+.btn-reset {
+    background: linear-gradient(135deg, #FF70EC, #FFB6F1) !important;
+    color: white !important;
+    border: 2px solid #FF70EC !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-reset:hover {
+    background: linear-gradient(135deg, #FF70EC, #FF8ECF) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(255, 112, 236, 0.3) !important;
+}
+
+.btn-reset:active {
+    transform: translateY(0);
+}
+
+/* Контейнер кнопок */
+.form-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+@media (max-width: 768px) {
+    .form-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
         @media (max-width: 968px) {
             .tracker-container {
                 grid-template-columns: 1fr;
@@ -1369,9 +1401,6 @@ body {
                 <button type="button" class="btn btn-menstruation" onclick="markMenstruationStart()">
                     <i class="fas fa-plus-circle"></i> Отметить менструацию
                 </button>
-                <button type="button" class="btn btn-menstruation-end" onclick="markMenstruationEnd()">
-                    <i class="fas fa-minus-circle"></i> Завершились
-                </button>
             </div>
         </div>
 
@@ -1389,10 +1418,14 @@ body {
             <textarea id="cycleNotes" class="form-textarea" placeholder="Как вы себя чувствуете? Что заметили?"></textarea>
         </div>
 
-        <button class="btn btn-primary" onclick="saveCycleEntry()">
-            <i class="fas fa-save"></i> Сохранить
-        </button>
-    </div>
+       <div class="form-buttons" style="display: flex; gap: 15px; margin-top: 25px;">
+    <button class="btn btn-primary" onclick="saveCycleEntry()" style="flex: 1;">
+        <i class="fas fa-save"></i> Сохранить запись
+    </button>
+    <button class="btn btn-reset" onclick="clearSelectedDate()" style="flex: 1;">
+        <i class="fas fa-times"></i> Сбросить
+    </button>
+</div>
 
     <div class="mood-integration">
         <h3 class="section-title"><i class="fas fa-chart-line"></i> Настроение сегодня</h3>

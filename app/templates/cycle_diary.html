@@ -305,23 +305,36 @@ body {
             margin-bottom: 30px;
         }
 
-/* Кнопка Сбросить */
-.btn-reset {
+/* Кнопка Удалить - розовая */
+.btn-delete {
+    background: var(--secondary) !important;
+    color: white !important;
+    border: 2px solid var(--secondary) !important;
+    transition: all 0.3s ease !important;
+}
+
+/* При наведении Удалить становится голубой */
+.btn-delete:hover {
     background: var(--primary) !important;
+    border-color: var(--primary) !important;
     color: var(--dark) !important;
-    border: 2px solid var(--primary) !important;
-}
-
-
-.btn-reset:hover {
-    background: linear-gradient(135deg, #FF70EC, #FF8ECF) !important;
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(255, 112, 236, 0.3) !important;
+    box-shadow: 0 6px 12px rgba(96, 244, 227, 0.3) !important;
 }
 
-.btn-reset:active {
+
+.btn-primary:active,
+.btn-delete:active {
     transform: translateY(0);
 }
+
+/* Делаем кнопки одинаковой ширины */
+.form-buttons .btn {
+    flex: 1;
+    min-width: 0;
+}
+
+
 
 /* Контейнер кнопок */
 .form-buttons {
@@ -463,15 +476,22 @@ body {
             justify-content: center;
         }
 
-        .btn-primary {
-            background: var(--primary);
-            color: var(--dark);
-        }
+      /* Кнопка Сохранить - голубая */
+.btn-primary {
+    background: var(--primary) !important;
+    color: var(--dark) !important;
+    border: 2px solid var(--primary) !important;
+    transition: all 0.3s ease !important;
+}
 
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
+/* При наведении Сохранить становится розовой */
+.btn-primary:hover {
+    background: var(--secondary) !important;
+    border-color: var(--secondary) !important;
+    color: white !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(255, 112, 236, 0.3) !important;
+}
 
         /* Аналитика */
         .analytics-container {
@@ -1435,7 +1455,7 @@ body {
                     <i class="fas fa-save"></i> Сохранить запись
                 </button>
                 <button class="btn btn-reset" onclick="clearSelectedDate()">
-                    <i class="fas fa-times"></i> Сбросить
+                    <i class="fas fa-times"></i> Удалить
                 </button>
             </div>
         </div>
@@ -2594,23 +2614,23 @@ function fillFormWithData(dateStr, entry) {
     }
 }
 
-// Сброс выбранной даты
+// Функция Удалить
 function clearSelectedDate() {
+    if (!currentSelectedDate) {
+        showToast('Сначала выберите день в календаре', 'error');
+        return;
+    }
+
     // Проверяем, есть ли запись для этой даты
     const existingEntry = cycleData.find(entry => entry.date === currentSelectedDate);
     
     if (existingEntry) {
-        // Если есть запись - спрашиваем, что сделать
-        if (confirm(`У вас есть запись за ${formatDateDisplay(currentSelectedDate)}. Что вы хотите сделать?\n\nНажмите ОК чтобы УДАЛИТЬ запись\nНажмите ОТМЕНА чтобы просто ОЧИСТИТЬ форму`)) {
-            // Пользователь хочет удалить запись
-            deleteCycleEntry();
-        } else {
-            // Пользователь хочет только очистить форму
-            resetToToday();
-        }
+        // Если есть запись - удаляем
+        deleteCycleEntry();
     } else {
-        // Если записи нет - просто сбрасываем к сегодняшней дате
+        // Если записи нет - просто сбрасываем форму
         resetToToday();
+        showToast('Форма очищена', 'info');
     }
 }
 

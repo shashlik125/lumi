@@ -1358,61 +1358,60 @@ body {
         </div>
     </div>
 
-    <!-- ФОРМА ОТСЛЕЖИВАНИЯ - ЭТОГО БЛОКА У ВАС НЕТ! ДОБАВЬТЕ ЕГО -->
-    <div class="tracker-container">
-        <div class="tracker-form">
-            <h3 class="section-title"><i class="fas fa-edit"></i> Отметить сегодня</h3>
-            
-            <!-- КНОПКИ МЕНСТРУАЦИИ -->
-            <div class="form-section">
-                <div class="section-title"><i class="fas fa-droplet"></i> Быстрая отметка менструации</div>
-                <div class="quick-menstruation">
-                    <button type="button" class="btn btn-menstruation" onclick="markMenstruationStart()">
-                        <i class="fas fa-plus-circle"></i> Начались месячные сегодня
-                    </button>
-                    <button type="button" class="btn btn-menstruation-light" onclick="markMenstruationLight()">
-                        <i class="fas fa-plus"></i> Слабые выделения
-                    </button>
-                    <button type="button" class="btn btn-menstruation-end" onclick="markMenstruationEnd()">
-                        <i class="fas fa-minus-circle"></i> Завершились
-                    </button>
-                </div>
+    <!-- ФОРМА ОТСЛЕЖИВАНИЯ -->
+<div class="tracker-container">
+    <div class="tracker-form">
+        <h3 class="section-title"><i class="fas fa-edit"></i> Отметить сегодня</h3>
+        
+        <!-- КНОПКИ МЕНСТРУАЦИИ -->
+        <div class="form-section">
+            <div class="section-title"><i class="fas fa-droplet"></i> Быстрая отметка менструации</div>
+            <div class="quick-menstruation">
+                <button type="button" class="btn btn-menstruation" onclick="markMenstruationStart()">
+                    <i class="fas fa-plus-circle"></i> Начались месячные сегодня
+                </button>
+                <button type="button" class="btn btn-menstruation-light" onclick="markMenstruationLight()">
+                    <i class="fas fa-plus"></i> Слабые выделения
+                </button>
+                <button type="button" class="btn btn-menstruation-end" onclick="markMenstruationEnd()">
+                    <i class="fas fa-minus-circle"></i> Завершились
+                </button>
             </div>
-
-            <div class="form-section">
-                <div class="section-title"><i class="fas fa-tint"></i> Выделения</div>
-                <select id="flowLevel" class="form-select">
-                    <option value="">Выберите интенсивность...</option>
-                    <option value="none">Нет выделений</option>
-                    <option value="light">Слабые</option>
-                    <option value="medium">Умеренные</option>
-                    <option value="heavy">Обильные</option>
-                </select>
-            </div>
-
-            <div class="form-section">
-                <div class="section-title"><i class="fas fa-sticky-note"></i> Заметки</div>
-                <textarea id="cycleNotes" class="form-textarea" placeholder="Как вы себя чувствуете? Что заметили?"></textarea>
-            </div>
-
-            <button class="btn btn-primary" onclick="saveCycleEntry()">
-                <i class="fas fa-save"></i> Сохранить запись
-            </button>
         </div>
 
-        <div class="mood-integration">
-            <h3 class="section-title"><i class="fas fa-chart-line"></i> Настроение сегодня</h3>
-            <div class="mood-display" id="todayMood">
-                <div class="loading" id="moodLoading">
-                    <div class="loading-spinner"></div>
-                </div>
+        <!-- ✅ ВОТ ОН — БЛОК С СИМПТОМАМИ -->
+        <div class="form-section">
+            <div class="section-title">
+                <i class="fas fa-notes-medical"></i> Симптомы
             </div>
-            <button class="btn btn-primary" onclick="goToMoodTracker()">
-                <i class="fas fa-edit"></i> Отметить настроение
-            </button>
+            <div class="symptoms-grid" id="symptomsGrid"></div>
         </div>
+
+        <!-- ЗАМЕТКИ -->
+        <div class="form-section">
+            <div class="section-title"><i class="fas fa-sticky-note"></i> Заметки</div>
+            <textarea id="cycleNotes" class="form-textarea" placeholder="Как вы себя чувствуете? Что заметили?"></textarea>
+        </div>
+
+        <button class="btn btn-primary" onclick="saveCycleEntry()">
+            <i class="fas fa-save"></i> Сохранить запись
+        </button>
     </div>
-    <!-- КОНЕЦ ФОРМЫ ОТСЛЕЖИВАНИЯ -->
+
+    <div class="mood-integration">
+        <h3 class="section-title"><i class="fas fa-chart-line"></i> Настроение сегодня</h3>
+        <div class="mood-display" id="todayMood">
+            <div class="loading" id="moodLoading">
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+        <button class="btn btn-primary" onclick="goToMoodTracker()">
+            <i class="fas fa-edit"></i> Отметить настроение
+        </button>
+    </div>
+</div>
+<!-- КОНЕЦ ФОРМЫ ОТСЛЕЖИВАНИЯ -->
+
 
     <!-- Аналитика -->
     <div class="analytics-container">

@@ -4,537 +4,399 @@
 
 {% block extra_css %}
 <style>
-
+/* ==========================================================================
+   Глобальные стили и переменные
+   ========================================================================== */
 * {
-  font-family: 'Montserrat', sans-serif !important;
-}
-
-
-:root {
---primary: #60F4E3;
---primary-dark: #48cbbd;
---secondary: #FF70EC;
---accent: #FFEFFD;
---dark: #264653;
---light: #f8f9fa;
---white: #ffffff;
---gray: #6c757d;
---success: #4CAF50;
---warning: #FFC107;
---danger: #F44336;
---border-radius: 16px;
---shadow: 0 6px 16px rgba(0,0,0,0.1);
---accent-pink: #FF70EC;
-            
---menstruation: #FF6B6B;
---follicular: #60F4E3;
---ovulation: #FF70EC;
---luteal: #FFD166;
---pms: #B8B3E9;
-}
-
-       
-        * {
+    font-family: 'Montserrat', sans-serif !important;
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Montserrat', sans-serif;
 }
 
+:root {
+    /* Основные цвета */
+    --primary: #60F4E3;
+    --primary-dark: #48cbbd;
+    --secondary: #FF70EC;
+    --accent: #FFEFFD;
+    --dark: #264653;
+    --light: #f8f9fa;
+    --white: #ffffff;
+    --gray: #6c757d;
+    --success: #4CAF50;
+    --warning: #FFC107;
+    --danger: #F44336;
+    
+    /* Фазы цикла */
+    --menstruation: #FF6B6B;
+    --follicular: #60F4E3;
+    --ovulation: #FF70EC;
+    --luteal: #FFD166;
+    --pms: #B8B3E9;
+    
+    /* Общие стили */
+    --border-radius: 16px;
+    --shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================================================
+   Основной лейаут
+   ========================================================================== */
 body {
     margin: 0;
     background: linear-gradient(to right, #60F4E3 0%, #FFEFFD 50%, #FF70EC 100%);
     color: var(--dark);
     line-height: 1.6;
     min-height: 100vh;
-    padding-top: 80px; /* Важно добавить отступ для фиксированного хедера */
+    padding-top: 80px; /* Для фиксированного хедера */
 }
 
-         main {
-            padding: 30px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        h1 {
-            font-size: 28px;
-            color: var(--dark);
-            position: relative;
-            padding-bottom: 10px;
-            font-weight: 700;
-        }
-
-        h1:after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 60px;
-            height: 4px;
-            background: linear-gradient(to right, var(--primary), var(--secondary));
-            border-radius: 2px;
-        }
-
-        /* Статистика цикла */
-        .cycle-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: var(--white);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 20px;
-            text-align: center;
-            transition: var(--transition);
-            border: 2px solid transparent;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--primary);
-        }
-
-        .stat-title {
-            font-size: 16px;
-            color: var(--gray);
-            margin-bottom: 10px;
-            font-weight: 600;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--primary);
-        }
-
-        .stat-change {
-            font-size: 14px;
-            margin-top: 5px;
-            color: var(--gray);
-        }
-
-        /* Календарь цикла */
-        .cycle-calendar-container {
-            background: var(--white);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 25px;
-            margin-bottom: 30px;
-        }
-
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .calendar-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: var(--dark);
-        }
-
-        .calendar-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .calendar-btn {
-            background: var(--primary);
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-weight: bold;
-            transition: var(--transition);
-            color: var(--dark);
-        }
-
-        .calendar-btn:hover {
-            background: var(--primary-dark);
-            transform: scale(1.1);
-        }
-
-        .today-btn {
-            padding: 8px 16px;
-            background: var(--white);
-            border: 2px solid var(--primary);
-            border-radius: 20px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            color: var(--dark);
-        }
-
-        .today-btn:hover {
-            background: var(--primary);
-            transform: translateY(-2px);
-        }
-
-        .weekdays {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            text-align: center;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: var(--gray);
-            background: rgba(96, 244, 227, 0.1);
-            border-radius: 10px;
-            padding: 10px 0;
-        }
-
-        .weekday {
-            padding: 10px;
-        }
-
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-        }
-
-        .calendar-day {
-            aspect-ratio: 1/1;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            background: var(--light);
-            transition: var(--transition);
-            position: relative;
-            padding: 5px;
-            border: 2px solid transparent;
-            font-weight: 600;
-        }
-
-        .calendar-day:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            border-color: var(--primary);
-        }
-
-        .day-number {
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-
-        .cycle-phase-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            margin: 1px 0;
-        }
-
-        .symptoms-dots {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2px;
-            justify-content: center;
-            margin-top: 3px;
-        }
-
-        /* Фазы цикла */
-        .menstruation {
-            background: linear-gradient(135deg, var(--menstruation), #FFA8A8);
-            color: white;
-        }
-
-        .follicular {
-            background: linear-gradient(135deg, var(--follicular), #A8F0E9);
-        }
-
-        .ovulation {
-            background: linear-gradient(135deg, var(--ovulation), #FFB6F1);
-            color: white;
-        }
-
-        .luteal {
-            background: linear-gradient(135deg, var(--luteal), #FFE8B2);
-        }
-
-        .pms-phase {
-            background: linear-gradient(135deg, var(--pms), #D8D5F2);
-        }
-
-        .fertile-window {
-            border: 2px dashed var(--ovulation);
-        }
-
-        .predicted {
-            border: 2px dotted var(--gray);
-            opacity: 0.7;
-        }
-
-        .current-day {
-            background: var(--accent);
-            border: 2px solid var(--primary);
-            box-shadow: 0 2px 8px rgba(96, 244, 227, 0.3);
-        }
-
-        .other-month {
-            background: rgba(248, 248, 248, 0.5);
-            color: #ccc;
-        }
-
-        /* Форма отслеживания */
-        .tracker-container {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-
-/* Кнопка Удалить - розовая */
-.btn-delete {
-    background: var(--secondary) !important;
-    color: white !important;
-    border: 2px solid var(--secondary) !important;
-    transition: all 0.3s ease !important;
+main {
+    padding: 30px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-/* При наведении Удалить становится голубой */
-.btn-delete:hover {
-    background: var(--primary) !important;
-    border-color: var(--primary) !important;
-    color: var(--dark) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(96, 244, 227, 0.3) !important;
-}
-
-
-.btn-primary:active,
-.btn-delete:active {
-    transform: translateY(0);
-}
-
-/* Делаем кнопки одинаковой ширины */
-.form-buttons .btn {
-    flex: 1;
-    min-width: 0;
-}
-
-
-
-/* Контейнер кнопок */
-.form-buttons {
+.page-header {
     display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
     gap: 15px;
-    margin-top: 25px;
 }
 
-
-        .tracker-form {
-            background: var(--white);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 25px;
-        }
-
-        .form-section {
-            margin-bottom: 25px;
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: var(--dark);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .symptoms-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .symptom-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px;
-            background: rgba(96, 244, 227, 0.1);
-            border-radius: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 14px;
-        }
-
-        .symptom-checkbox:hover {
-            background: rgba(96, 244, 227, 0.2);
-        }
-
-        .symptom-checkbox input {
-            margin: 0;
-        }
-
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 12px 15px;
-            border: 2px solid #e9ecef;
-            border-radius: 12px;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 14px;
-            transition: var(--transition);
-            background: white;
-        }
-
-        .form-input:focus, .form-select:focus, .form-textarea:focus {
-            border-color: var(--primary);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(96, 244, 227, 0.2);
-        }
-
-        .form-textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .mood-integration {
-            background: var(--accent);
-            border-radius: var(--border-radius);
-            padding: 20px;
-            border: 2px solid var(--primary);
-        }
-
-        .mood-display {
-            text-align: center;
-            padding: 15px;
-        }
-
-        .mood-value {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: var(--primary);
-        }
-
-        .mood-emoji {
-            font-size: 48px;
-            margin-bottom: 10px;
-        }
-
-        .mood-note {
-            font-size: 14px;
-            color: var(--gray);
-            margin-top: 10px;
-        }
-
-        .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            width: 100%;
-            justify-content: center;
-        }
-
-      /* Кнопка Сохранить - голубая */
-.btn-primary {
-    background: var(--primary) !important;
-    color: var(--dark) !important;
-    border: 2px solid var(--primary) !important;
-    transition: all 0.3s ease !important;
+h1 {
+    font-size: 28px;
+    color: var(--dark);
+    position: relative;
+    padding-bottom: 10px;
+    font-weight: 700;
 }
 
-/* При наведении Сохранить становится розовой */
-.btn-primary:hover {
-    background: var(--secondary) !important;
-    border-color: var(--secondary) !important;
-    color: white !important;
+h1:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    border-radius: 2px;
+}
+
+/* ==========================================================================
+   Статистика цикла
+   ========================================================================== */
+.cycle-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    text-align: center;
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.stat-title {
+    font-size: 16px;
+    color: var(--gray);
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.stat-change {
+    font-size: 14px;
+    margin-top: 5px;
+    color: var(--gray);
+}
+
+/* ==========================================================================
+   Календарь цикла
+   ========================================================================== */
+.cycle-calendar-container {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.calendar-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.calendar-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.calendar-btn {
+    background: var(--primary);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-weight: bold;
+    transition: var(--transition);
+    color: var(--dark);
+}
+
+.calendar-btn:hover {
+    background: var(--primary-dark);
+    transform: scale(1.1);
+}
+
+.today-btn {
+    padding: 8px 16px;
+    background: var(--white);
+    border: 2px solid var(--primary);
+    border-radius: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    color: var(--dark);
+}
+
+.today-btn:hover {
+    background: var(--primary);
     transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(255, 112, 236, 0.3) !important;
 }
 
-        /* Аналитика */
-        .analytics-container {
-            background: var(--white);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 25px;
-            margin-bottom: 30px;
-        }
-
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-top: 20px;
-        }
-
-
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+.weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: var(--gray);
+    background: rgba(96, 244, 227, 0.1);
+    border-radius: 10px;
+    padding: 10px 0;
 }
 
+.weekday {
+    padding: 10px;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+/* ==========================================================================
+   Дни календаря - ИСПРАВЛЕННЫЙ ВАРИАНТ
+   ========================================================================== */
+.calendar-day {
+    aspect-ratio: 1/1;
+    min-height: 85px;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    cursor: pointer;
+    background: var(--light);
+    transition: var(--transition);
+    position: relative;
+    padding: 8px 5px 5px 5px;
+    border: 2px solid transparent;
+    font-weight: 600;
+    overflow: visible !important;
+}
+
+.calendar-day:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary);
+}
+
+.day-number {
+    font-size: 18px;
+    margin-bottom: 5px;
+    position: relative;
+    z-index: 2;
+}
+
+.cycle-phase-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin: 1px 0;
+}
+
+/* ==========================================================================
+   Фазы цикла (цвета)
+   ========================================================================== */
+.menstruation {
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.95), rgba(255, 168, 168, 0.95)) !important;
+    color: white !important;
+}
+
+.calendar-day.menstruation .day-number {
+    color: white !important;
+    font-weight: bold;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.menstruation-indicator {
+    position: absolute !important;
+    top: 5px !important;
+    right: 5px !important;
+    font-size: 14px !important;
+    z-index: 5 !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.follicular {
+    background: linear-gradient(135deg, var(--follicular), #A8F0E9);
+}
+
+.ovulation {
+    background: linear-gradient(135deg, var(--ovulation), #FFB6F1);
+    color: white;
+}
+
+.luteal {
+    background: linear-gradient(135deg, var(--luteal), #FFE8B2);
+}
+
+.pms-phase {
+    background: linear-gradient(135deg, var(--pms), #D8D5F2);
+}
+
+.fertile-window {
+    border: 2px dashed var(--ovulation);
+}
+
+.predicted {
+    border: 2px dotted var(--gray);
+    opacity: 0.7;
+}
+
+.current-day {
+    background: var(--accent);
+    border: 2px solid var(--primary);
+    box-shadow: 0 2px 8px rgba(96, 244, 227, 0.3);
+}
+
+.other-month {
+    background: rgba(248, 248, 248, 0.5);
+    color: #ccc;
+    cursor: default;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+/* ==========================================================================
+   Симптомы в календаре - КЛЮЧЕВЫЕ ИСПРАВЛЕНИЯ
+   ========================================================================== */
+.symptoms-dots-compact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    justify-content: center;
+    align-content: center;
+    padding: 2px;
+    margin-top: 8px;
+    min-height: 20px;
+    position: relative;
+    z-index: 3 !important;
+}
+
+.calendar-day.menstruation .symptoms-dots-compact {
+    margin-top: 25px !important;
+    z-index: 4 !important;
+}
+
+.symptom-dot-compact {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+
+.calendar-day.menstruation .symptom-dot-compact {
+    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.3), 0 0 2px rgba(255, 255, 255, 0.8) !important;
+}
+
+.symptom-dot-compact:hover {
+    transform: scale(1.5);
+    z-index: 10;
+}
+
+/* Тултипы симптомов */
 .symptoms-tooltip {
     display: none;
     position: absolute;
-    bottom: calc(100% + 10px); /* Располагаем над элементом */
+    bottom: calc(100% + 10px);
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(0, 0, 0, 0.95);
     color: white;
     padding: 10px 14px;
     border-radius: 10px;
     font-size: 12px;
-    white-space: normal; /* Разрешаем перенос строк */
+    white-space: normal;
     max-width: 200px;
     width: max-content;
     z-index: 1000;
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
     line-height: 1.4;
     word-wrap: break-word;
     text-align: center;
     backdrop-filter: blur(5px);
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Стрелка тултипа (исправлена - теперь вниз) */
 .symptoms-tooltip::after {
     content: '';
     position: absolute;
-    top: 100%; /* Стрелка внизу тултипа */
+    top: 100%;
     left: 50%;
     transform: translateX(-50%);
     border-width: 6px;
     border-style: solid;
-    border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
+    border-color: rgba(0, 0, 0, 0.95) transparent transparent transparent;
 }
 
-/* Если симптомов много, показываем список */
 .symptoms-tooltip.has-many-items {
     text-align: left;
     max-height: 150px;
@@ -547,7 +409,7 @@ body {
     align-items: center;
     gap: 8px;
     padding: 4px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .symptoms-tooltip.has-many-items .symptom-item:last-child {
@@ -565,48 +427,150 @@ body {
     flex-grow: 1;
 }
 
-/* Альтернативный вариант - компактное отображение симптомов */
-.symptoms-dots-compact {
+/* ==========================================================================
+   Форма отслеживания
+   ========================================================================== */
+.tracker-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.tracker-form {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 25px;
+}
+
+.form-section {
+    margin-bottom: 25px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--dark);
     display: flex;
-    flex-wrap: wrap;
-    gap: 3px;
+    align-items: center;
+    gap: 10px;
+}
+
+.symptoms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.symptom-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    background: rgba(96, 244, 227, 0.1);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 14px;
+}
+
+.symptom-checkbox:hover {
+    background: rgba(96, 244, 227, 0.2);
+}
+
+.symptom-checkbox input {
+    margin: 0;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    transition: var(--transition);
+    background: white;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(96, 244, 227, 0.2);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* ==========================================================================
+   Кнопки
+   ========================================================================== */
+.btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    width: 100%;
     justify-content: center;
-    align-content: center;
-    min-height: 20px;
-    padding: 2px;
 }
 
-.symptom-dot-compact {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
-    flex-shrink: 0;
+.btn-primary {
+    background: var(--primary) !important;
+    color: var(--dark) !important;
+    border: 2px solid var(--primary) !important;
 }
 
-.symptom-dot-compact:hover {
-    transform: scale(1.3);
-    transition: transform 0.2s;
-}
-
-/* Дни с активной менструацией */
-.calendar-day.menstruation-active {
-    background: linear-gradient(135deg, var(--menstruation), #FF8E8E) !important;
+.btn-primary:hover {
+    background: var(--secondary) !important;
+    border-color: var(--secondary) !important;
     color: white !important;
-    font-weight: bold;
-    position: relative;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(255, 112, 236, 0.3) !important;
 }
 
-.calendar-day.menstruation-active::before {
-    content: '';
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 6px;
-    height: 6px;
-    background: #FF0000;
-    border-radius: 50%;
-    border: 1px solid white;
-    box-shadow: 0 0 3px rgba(255,0,0,0.5);
+.btn-delete {
+    background: var(--secondary) !important;
+    color: white !important;
+    border: 2px solid var(--secondary) !important;
+}
+
+.btn-delete:hover {
+    background: var(--primary) !important;
+    border-color: var(--primary) !important;
+    color: var(--dark) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(96, 244, 227, 0.3) !important;
+}
+
+.btn-primary:active,
+.btn-delete:active {
+    transform: translateY(0);
+}
+
+.form-buttons {
+    display: flex;
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.form-buttons .btn {
+    flex: 1;
+    min-width: 0;
 }
 
 /* Кнопки менструации */
@@ -621,53 +585,113 @@ body {
     background: linear-gradient(135deg, var(--menstruation), #FF8E8E) !important;
     color: white !important;
     border: 2px solid var(--menstruation) !important;
-    transition: all 0.3s ease !important;
 }
 
 .btn-menstruation-light {
     background: linear-gradient(135deg, #FFB8B8, #FFD6D6) !important;
     color: var(--dark) !important;
     border: 2px solid #FFB8B8 !important;
-    transition: all 0.3s ease !important;
 }
 
 .btn-menstruation-end {
     background: linear-gradient(135deg, var(--primary), #A8F0E9) !important;
     color: var(--dark) !important;
     border: 2px solid var(--primary) !important;
-    transition: all 0.3s ease !important;
 }
 
-.btn-menstruation:hover {
+.btn-menstruation:hover,
+.btn-menstruation-light:hover,
+.btn-menstruation-end:hover {
     transform: translateY(-3px) !important;
     box-shadow: 0 6px 12px rgba(255, 107, 107, 0.3) !important;
 }
 
-.btn-menstruation-light:hover {
-    transform: translateY(-3px) !important;
-    box-shadow: 0 6px 12px rgba(255, 184, 184, 0.3) !important;
+/* ==========================================================================
+   Интеграция настроения
+   ========================================================================== */
+.mood-integration {
+    background: var(--accent);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    border: 2px solid var(--primary);
 }
 
-.btn-menstruation-end:hover {
-    transform: translateY(-3px) !important;
-    box-shadow: 0 6px 12px rgba(96, 244, 227, 0.3) !important;
+.mood-display {
+    text-align: center;
+    padding: 15px;
 }
 
-/* Исправление для дней менструации */
-.calendar-day.menstruation {
-    background: linear-gradient(135deg, var(--menstruation), #FF8E8E) !important;
-    color: white !important;
-    font-weight: bold;
+.mood-value {
+    font-size: 32px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--primary);
 }
 
-.calendar-day.menstruation-active {
-    background: linear-gradient(135deg, var(--menstruation), #FF6B6B) !important;
-    color: white !important;
-    font-weight: bold;
-    border: 2px solid #FF0000 !important;
+.mood-emoji {
+    font-size: 48px;
+    margin-bottom: 10px;
 }
 
-/* Легенда симптомов - ОСНОВНЫЕ СТИЛИ */
+.mood-note {
+    font-size: 14px;
+    color: var(--gray);
+    margin-top: 10px;
+}
+
+/* ==========================================================================
+   Аналитика и графики
+   ========================================================================== */
+.analytics-container {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 25px;
+    margin-bottom: 30px;
+}
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+    margin-top: 20px;
+}
+
+#symptomsChartContainer {
+    position: relative;
+    height: 300px;
+    width: 100%;
+    min-height: 300px;
+}
+
+#symptomsChart {
+    width: 100% !important;
+    height: 300px !important;
+}
+
+.chart-container {
+    position: relative;
+    background: var(--white);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: var(--dark);
+    text-align: center;
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   Легенда симптомов
+   ========================================================================== */
 .symptoms-legend {
     background: var(--white);
     border-radius: var(--border-radius);
@@ -744,7 +768,7 @@ body {
     border-radius: 50%;
     flex-shrink: 0;
     border: 2px solid white;
-    box-shadow: 0 0 4px rgba(0,0,0,0.2);
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
 }
 
 .legend-name {
@@ -761,6 +785,9 @@ body {
     font-size: 15px;
 }
 
+/* ==========================================================================
+   Утилиты и состояния
+   ========================================================================== */
 .loading {
     display: flex;
     justify-content: center;
@@ -778,7 +805,9 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .no-data {
@@ -792,40 +821,6 @@ body {
     padding: 20px;
 }
 
-/* Улучшение для графиков */
-#symptomsChartContainer {
-    position: relative;
-    height: 300px; /* Немного увеличим высоту */
-    width: 100%;
-    min-height: 300px;
-}
-
-#symptomsChart {
-    width: 100% !important;
-    height: 300px !important;
-}
-
-.chart-container {
-    position: relative;
-    background: var(--white);
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    height: 300px; /* Увеличиваем высоту */
-    display: flex;
-    flex-direction: column;
-}
-
-.chart-title {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 15px;
-    color: var(--dark);
-    text-align: center;
-    flex-shrink: 0;
-}
-
-/* Стиль для отображения выбранной даты */
 .selected-date-display {
     animation: slideDown 0.3s ease;
 }
@@ -841,7 +836,7 @@ body {
     }
 }
 
-/* Подсветка выбранного дня в календаре */
+/* Выделенный день */
 .calendar-day.selected {
     border: 3px solid var(--primary) !important;
     box-shadow: 0 0 0 3px rgba(96, 244, 227, 0.3) !important;
@@ -849,494 +844,507 @@ body {
     z-index: 1;
 }
 
-
-@media (max-width: 1024px) {
-    /* Планшеты и маленькие ноутбуки */
-    main {
-        padding: 25px 15px;
-    }
-    
-    .tracker-container {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    
-    .charts-grid {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    
+.calendar-day.menstruation.selected {
+    box-shadow: 0 0 0 3px rgba(96, 244, 227, 0.5), 
+                0 6px 20px rgba(255, 107, 107, 0.4) !important;
 }
 
-@media (max-width: 768px) {
-    /* Компактный хедер для планшетов и телефонов */
-    body {
-        padding-top: 60px; /* Уменьшили отступ */
-    }
-    
-    
-    nav a.active {
-        color: var(--dark);
-    }
-    
+    @media (max-width: 1024px) {
 
-    /* При наведении (если устройство поддерживает hover) */
-    @media (hover: hover) {
-        nav a:hover::after {
+        /* Планшеты и маленькие ноутбуки */
+        main {
+            padding: 25px 15px;
+        }
+
+        .tracker-container {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .charts-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+    }
+
+    @media (max-width: 768px) {
+
+        /* Компактный хедер для планшетов и телефонов */
+        body {
+            padding-top: 60px;
+            /* Уменьшили отступ */
+        }
+
+
+        nav a.active {
+            color: var(--dark);
+        }
+
+
+        /* При наведении (если устройство поддерживает hover) */
+        @media (hover: hover) {
+            nav a:hover::after {
+                width: 100%;
+            }
+        }
+
+        .user span {
+            display: none;
+            /* Скрываем имя пользователя */
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+        }
+
+        /* Основной контент */
+        main {
+            padding: 20px 12px;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            padding-bottom: 8px;
+        }
+
+        h1:after {
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+        }
+
+        /* Статистика цикла */
+        .cycle-stats {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            padding: 15px;
+            border-radius: 14px;
+        }
+
+        .stat-title {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+        }
+
+        .stat-change {
+            font-size: 13px;
+        }
+
+        /* Календарь цикла */
+        .cycle-calendar-container {
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+        }
+
+        .calendar-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .calendar-title {
+            font-size: 18px;
+        }
+
+        .calendar-controls {
             width: 100%;
+            justify-content: space-between;
+        }
+
+        .today-btn {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        .calendar-btn {
+            width: 36px;
+            height: 36px;
+        }
+
+        .weekdays {
+            padding: 8px 0;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .weekday {
+            padding: 8px 2px;
+            font-size: 13px;
+        }
+
+        .calendar-grid {
+            gap: 6px;
+        }
+
+        .calendar-day {
+            min-height: 45px;
+            border-radius: 10px;
+            padding: 4px;
+        }
+
+        .day-number {
+            font-size: 14px;
+            margin-bottom: 3px;
+        }
+
+        .cycle-phase-dot {
+            width: 6px;
+            height: 6px;
+        }
+
+        /* Форма отслеживания */
+        .tracker-form {
+            padding: 20px;
+            border-radius: 14px;
+        }
+
+        .mood-integration {
+            padding: 20px;
+            border-radius: 14px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .symptoms-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .symptom-checkbox {
+            padding: 8px;
+            font-size: 13px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 10px 12px;
+            font-size: 14px;
+            border-radius: 10px;
+        }
+
+        .mood-display {
+            padding: 12px;
+        }
+
+        .mood-value {
+            font-size: 28px;
+        }
+
+        .mood-emoji {
+            font-size: 40px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 10px;
+        }
+
+        /* Аналитика */
+        .analytics-container {
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+        }
+
+        .chart-container {
+            height: 250px;
+            padding: 15px;
+        }
+
+        .chart-title {
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+
+        /* Уведомления */
+        .toast {
+            top: 70px;
+            right: 10px;
+            left: 10px;
+            max-width: none;
+            text-align: center;
+            font-size: 13px;
+            padding: 12px 16px;
+        }
+
+        /* Убираем hover-эффекты для тач-устройств */
+        .calendar-day:hover,
+        .stat-card:hover,
+        .symptom-checkbox:hover,
+        .btn:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: transparent;
+        }
+
+        .stat-card:hover {
+            border-color: transparent;
+        }
+
+        .chart-container {
+            height: 200px !important;
+            padding: 10px;
+        }
+
+        /* Корректировка подписей на графиках */
+        #symptomsChart {
+            overflow-x: auto;
+        }
+
+        /* Делаем подписи короче */
+        .chart-title {
+            font-size: 14px !important;
+            text-align: center;
+        }
+
+        /* Исправляем наклонные подписи */
+        #moodPhaseChart+.chartjs-render-monitor,
+        #symptomsChart+.chartjs-render-monitor {
+            max-width: 100% !important;
+        }
+
+        .legend-content {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        #symptomsChartContainer {
+            height: 280px;
+        }
+
+        #symptomsChart {
+            height: 250px !important;
+        }
+
+        .chart-container {
+            height: 280px;
+            padding: 15px;
         }
     }
-    
-    .user span {
-        display: none; /* Скрываем имя пользователя */
+
+
+    @media (max-width: 480px) {
+
+        /* Еще более компактный для маленьких телефонов */
+        body {
+            padding-top: 55px;
+        }
+
+        main {
+            padding: 15px 10px;
+        }
+
+        h1 {
+            font-size: 22px;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Статистика */
+        .cycle-stats {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .stat-card {
+            padding: 12px;
+        }
+
+        .stat-title {
+            font-size: 13px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+        }
+
+        /* Календарь */
+        .cycle-calendar-container {
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .calendar-title {
+            font-size: 16px;
+        }
+
+        .today-btn {
+            padding: 5px 10px;
+            font-size: 13px;
+        }
+
+        .calendar-btn {
+            width: 32px;
+            height: 32px;
+        }
+
+        .calendar-btn i {
+            font-size: 12px;
+        }
+
+        .weekday {
+            padding: 6px 1px;
+            font-size: 12px;
+        }
+
+        .calendar-grid {
+            gap: 4px;
+        }
+
+        .calendar-day {
+            min-height: 40px;
+            border-radius: 8px;
+            padding: 3px;
+        }
+
+        .day-number {
+            font-size: 13px;
+        }
+
+        /* Форма */
+        .tracker-form,
+        .mood-integration {
+            padding: 15px;
+        }
+
+        .symptoms-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .section-title {
+            font-size: 15px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        /* Аналитика */
+        .analytics-container {
+            padding: 15px;
+        }
+
+        .chart-container {
+            height: 220px;
+            padding: 12px;
+        }
+
+        .chart-container {
+            height: 180px !important;
+        }
+
+        /* Убираем наклонные подписи на очень маленьких экранах */
+        .chartjs-size-monitor,
+        .chartjs-render-monitor {
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        /* Укорачиваем слишком длинные заголовки */
+        .chart-title {
+            font-size: 13px !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
     }
-    
-    .user-avatar {
-        width: 36px;
-        height: 36px;
+
+    @media (max-width: 360px) {
+
+        /* Очень маленькие телефоны */
+        .calendar-day {
+            min-height: 35px;
+        }
+
+        .day-number {
+            font-size: 12px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+        }
+
+        .mood-value {
+            font-size: 24px;
+        }
+
+        .mood-emoji {
+            font-size: 36px;
+        }
     }
-    
-    /* Основной контент */
-    main {
-        padding: 20px 12px;
+
+    /* Ландшафтная ориентация */
+    @media (max-height: 500px) and (orientation: landscape) {
+
+        .cycle-stats {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .calendar-day {
+            min-height: 35px;
+        }
+
+        .chart-container {
+            height: 200px;
+        }
     }
-    
-    .page-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-        margin-bottom: 20px;
-    }
-    
-    h1 {
-        font-size: 24px;
-        padding-bottom: 8px;
-    }
-    
-    h1:after {
-        left: 50%;
-        transform: translateX(-50%);
-        width: 50px;
-    }
-    
-    /* Статистика цикла */
-    .cycle-stats {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
-        margin-bottom: 25px;
-    }
-    
-    .stat-card {
-        padding: 15px;
-        border-radius: 14px;
-    }
-    
-    .stat-title {
-        font-size: 14px;
-        margin-bottom: 8px;
-    }
-    
-    .stat-value {
-        font-size: 22px;
-    }
-    
-    .stat-change {
-        font-size: 13px;
-    }
-    
-    /* Календарь цикла */
-    .cycle-calendar-container {
-        padding: 20px;
-        border-radius: 14px;
-        margin-bottom: 25px;
-    }
-    
-    .calendar-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-        margin-bottom: 15px;
-    }
-    
-    .calendar-title {
-        font-size: 18px;
-    }
-    
-    .calendar-controls {
-        width: 100%;
-        justify-content: space-between;
-    }
-    
-    .today-btn {
-        padding: 6px 12px;
-        font-size: 14px;
-    }
-    
-    .calendar-btn {
-        width: 36px;
-        height: 36px;
-    }
-    
-    .weekdays {
-        padding: 8px 0;
-        font-size: 14px;
-        margin-bottom: 8px;
-    }
-    
-    .weekday {
-        padding: 8px 2px;
-        font-size: 13px;
-    }
-    
-    .calendar-grid {
-        gap: 6px;
-    }
-    
-    .calendar-day {
-        min-height: 45px;
-        border-radius: 10px;
-        padding: 4px;
-    }
-    
-    .day-number {
-        font-size: 14px;
-        margin-bottom: 3px;
-    }
-    
-    .cycle-phase-dot {
-        width: 6px;
-        height: 6px;
-    }
-    
-    /* Форма отслеживания */
-    .tracker-form {
-        padding: 20px;
-        border-radius: 14px;
-    }
-    
-    .mood-integration {
-        padding: 20px;
-        border-radius: 14px;
-    }
-    
-    .section-title {
-        font-size: 16px;
-        margin-bottom: 12px;
-    }
-    
-    .symptoms-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-    }
-    
-    .symptom-checkbox {
-        padding: 8px;
-        font-size: 13px;
-    }
-    
-    .form-input, .form-select, .form-textarea {
-        padding: 10px 12px;
-        font-size: 14px;
-        border-radius: 10px;
-    }
-    
-    .mood-display {
-        padding: 12px;
-    }
-    
-    .mood-value {
-        font-size: 28px;
-    }
-    
-    .mood-emoji {
-        font-size: 40px;
-    }
-    
-    .btn {
-        padding: 10px 20px;
-        font-size: 14px;
-        border-radius: 10px;
-    }
-    
-    /* Аналитика */
+
+
+    /* ОГРАНИЧЕНИЯ ДЛЯ ГРАФИКОВ (ДОБАВЬ ЭТО В КОНЕЦ ФАЙЛА) */
     .analytics-container {
-        padding: 20px;
-        border-radius: 14px;
-        margin-bottom: 25px;
+        max-height: 500px;
+        overflow-y: auto;
     }
-    
+
+    .charts-grid {
+        min-height: 0;
+        /* Важно для ограничения роста */
+    }
+
     .chart-container {
-        height: 250px;
-        padding: 15px;
-    }
-    
-    .chart-title {
-        font-size: 15px;
-        margin-bottom: 12px;
-    }
-    
-    /* Уведомления */
-    .toast {
-        top: 70px;
-        right: 10px;
-        left: 10px;
-        max-width: none;
-        text-align: center;
-        font-size: 13px;
-        padding: 12px 16px;
-    }
-    
-    /* Убираем hover-эффекты для тач-устройств */
-    .calendar-day:hover,
-    .stat-card:hover,
-    .symptom-checkbox:hover,
-    .btn:hover {
-        transform: none;
-        box-shadow: none;
-        border-color: transparent;
-    }
-    
-    .stat-card:hover {
-        border-color: transparent;
+        height: 250px !important;
+        min-height: 250px;
+        max-height: 250px;
     }
 
-       .chart-container {
-        height: 200px !important;
-        padding: 10px;
-    }
-    
-    /* Корректировка подписей на графиках */
-    #symptomsChart {
-        overflow-x: auto;
-    }
-    
-    /* Делаем подписи короче */
-    .chart-title {
-        font-size: 14px !important;
-        text-align: center;
-    }
-    
-    /* Исправляем наклонные подписи */
-    #moodPhaseChart + .chartjs-render-monitor,
-    #symptomsChart + .chartjs-render-monitor {
-        max-width: 100% !important;
-    }
-      .legend-content {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-     #symptomsChartContainer {
-        height: 280px;
-    }
-    
+    #moodPhaseChart,
     #symptomsChart {
         height: 250px !important;
+        width: 100% !important;
+        max-height: 250px !important;
     }
-    
-    .chart-container {
-        height: 280px;
-        padding: 15px;
-    }
-}
-
-
-@media (max-width: 480px) {
-    /* Еще более компактный для маленьких телефонов */
-    body {
-        padding-top: 55px;
-    }
-
-    main {
-        padding: 15px 10px;
-    }
-    
-    h1 {
-        font-size: 22px;
-        text-align: center;
-        width: 100%;
-    }
-    
-    /* Статистика */
-    .cycle-stats {
-        grid-template-columns: 1fr;
-        gap: 12px;
-    }
-    
-    .stat-card {
-        padding: 12px;
-    }
-    
-    .stat-title {
-        font-size: 13px;
-    }
-    
-    .stat-value {
-        font-size: 20px;
-    }
-    
-    /* Календарь */
-    .cycle-calendar-container {
-        padding: 15px;
-        border-radius: 12px;
-    }
-    
-    .calendar-title {
-        font-size: 16px;
-    }
-    
-    .today-btn {
-        padding: 5px 10px;
-        font-size: 13px;
-    }
-    
-    .calendar-btn {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .calendar-btn i {
-        font-size: 12px;
-    }
-    
-    .weekday {
-        padding: 6px 1px;
-        font-size: 12px;
-    }
-    
-    .calendar-grid {
-        gap: 4px;
-    }
-    
-    .calendar-day {
-        min-height: 40px;
-        border-radius: 8px;
-        padding: 3px;
-    }
-    
-    .day-number {
-        font-size: 13px;
-    }
-    
-    /* Форма */
-    .tracker-form,
-    .mood-integration {
-        padding: 15px;
-    }
-    
-    .symptoms-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .section-title {
-        font-size: 15px;
-    }
-    
-    .form-input, .form-select, .form-textarea {
-        padding: 8px 10px;
-        font-size: 13px;
-    }
-    
-    .btn {
-        padding: 8px 16px;
-        font-size: 13px;
-    }
-    
-    /* Аналитика */
-    .analytics-container {
-        padding: 15px;
-    }
-    
-    .chart-container {
-        height: 220px;
-        padding: 12px;
-    }
-    
-     .chart-container {
-        height: 180px !important;
-    }
-    
-    /* Убираем наклонные подписи на очень маленьких экранах */
-    .chartjs-size-monitor,
-    .chartjs-render-monitor {
-        max-width: 100%;
-        overflow: hidden;
-    }
-    
-    /* Укорачиваем слишком длинные заголовки */
-    .chart-title {
-        font-size: 13px !important;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-}
-
-@media (max-width: 360px) {
-    /* Очень маленькие телефоны */
-    .calendar-day {
-        min-height: 35px;
-    }
-    
-    .day-number {
-        font-size: 12px;
-    }
-    
-    .stat-value {
-        font-size: 18px;
-    }
-    
-    .mood-value {
-        font-size: 24px;
-    }
-    
-    .mood-emoji {
-        font-size: 36px;
-    }
-}
-
-/* Ландшафтная ориентация */
-@media (max-height: 500px) and (orientation: landscape) {
-    
-    .cycle-stats {
-        grid-template-columns: repeat(4, 1fr);
-    }
-    
-    .calendar-day {
-        min-height: 35px;
-    }
-    
-    .chart-container {
-        height: 200px;
-    }
-}
-
-   
-   /* ОГРАНИЧЕНИЯ ДЛЯ ГРАФИКОВ (ДОБАВЬ ЭТО В КОНЕЦ ФАЙЛА) */
-.analytics-container {
-    max-height: 500px;
-    overflow-y: auto;
-}
-
-.charts-grid {
-    min-height: 0; /* Важно для ограничения роста */
-}
-
-.chart-container {
-    height: 250px !important;
-    min-height: 250px;
-    max-height: 250px;
-}
-
-#moodPhaseChart, #symptomsChart {
-    height: 250px !important;
-    width: 100% !important;
-    max-height: 250px !important;
-}
-
-
-
-
 </style>
 {% endblock %}
 
@@ -1408,7 +1416,7 @@ body {
     <div class="tracker-container">
         <div class="tracker-form">
             <h3 class="section-title"><i class="fas fa-edit"></i> Отметить сегодня</h3>
-            
+
             <!-- КНОПКИ МЕНСТРУАЦИИ -->
             <div class="form-section">
                 <div class="quick-menstruation">
@@ -1429,7 +1437,8 @@ body {
             <!-- ЗАМЕТКИ -->
             <div class="form-section">
                 <div class="section-title"><i class="fas fa-sticky-note"></i> Заметки</div>
-                <textarea id="cycleNotes" class="form-textarea" placeholder="Как вы себя чувствуете? Что заметили?"></textarea>
+                <textarea id="cycleNotes" class="form-textarea"
+                    placeholder="Как вы себя чувствуете? Что заметили?"></textarea>
             </div>
 
             <!-- КНОПКИ ДЕЙСТВИЙ -->
@@ -1438,8 +1447,8 @@ body {
                     <i class="fas fa-save"></i> Сохранить запись
                 </button>
                 <button class="btn btn-delete" onclick="clearSelectedDate()">
-    <i class="fas fa-trash"></i> Удалить
-</button>
+                    <i class="fas fa-trash"></i> Удалить
+                </button>
             </div>
         </div>
 
@@ -1500,1339 +1509,1396 @@ body {
 {% block extra_js %}
 <script>
 
-// Глобальная функция для уведомлений (уже есть, но добавим для совместимости)
-window.showToast = showToast || function(message, type = 'success') {
-    let toast = document.getElementById('toast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'toast';
-        document.body.appendChild(toast);
-    }
-    
-    toast.textContent = message;
-    toast.className = `toast ${type === 'error' ? 'error' : ''} show`;
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
+    // Глобальная функция для уведомлений (уже есть, но добавим для совместимости)
+    window.showToast = showToast || function (message, type = 'success') {
+        let toast = document.getElementById('toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'toast';
+            document.body.appendChild(toast);
+        }
+
+        toast.textContent = message;
+        toast.className = `toast ${type === 'error' ? 'error' : ''} show`;
+
         setTimeout(() => {
-            if (toast.parentNode) {
-                document.body.removeChild(toast);
-            }
-        }, 300);
-    }, 3000);
-};
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    document.body.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+    };
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-// Константы API
-const CYCLE_API = "/api/cycle_entries";
-const MOOD_API = "/api/mood_entries";
-const TODAY_MOOD_API = "/api/today_mood";
-const CYCLE_STATS_API = "/api/cycle_stats";
-const CYCLE_PREDICTIONS_API = "/api/cycle_predictions";
+    // Константы API
+    const CYCLE_API = "/api/cycle_entries";
+    const MOOD_API = "/api/mood_entries";
+    const TODAY_MOOD_API = "/api/today_mood";
+    const CYCLE_STATS_API = "/api/cycle_stats";
+    const CYCLE_PREDICTIONS_API = "/api/cycle_predictions";
 
-// Глобальные переменные
-let currentDate = new Date();
-let cycleData = [];
-let moodData = [];
-let moodPhaseChart = null;
-let symptomsChart = null;
-let currentSelectedDate = null; // Выбранная дата для редактирования
-let isEditMode = false; // Режим редактирования (true = редактируем выбранную дату)
-let selectedAnalyticsMonth = null;
-let selectedAnalyticsYear = null;
+    // Глобальные переменные
+    let currentDate = new Date();
+    let cycleData = [];
+    let moodData = [];
+    let moodPhaseChart = null;
+    let symptomsChart = null;
+    let currentSelectedDate = null; // Выбранная дата для редактирования
+    let isEditMode = false; // Режим редактирования (true = редактируем выбранную дату)
+    let selectedAnalyticsMonth = null;
+    let selectedAnalyticsYear = null;
 
 
 
-// Инициализация при загрузке
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Инициализация дневника цикла...');
-    initSymptomsGrid();
-    loadInitialData();
-});
+    // Инициализация при загрузке
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('🚀 Инициализация дневника цикла...');
+        initSymptomsGrid();
+        loadInitialData();
+    });
 
-// Загрузка начальных данных
-async function loadInitialData() {
-    try {
-        // Загружаем только данные цикла для календаря
-        await loadCycleData();
-        renderCalendar();
-        
-        // Остальное загружаем фоном
-        Promise.allSettled([
-            loadMoodData(),
-            loadCycleStats(),
-            loadCyclePredictions(),
-            loadTodayMood()
-        ]);
-    } catch (error) {
-        console.error('Ошибка загрузки данных:', error);
-        showToast('Ошибка загрузки данных', 'error');
-    }
-}
+    // Загрузка начальных данных
+    async function loadInitialData() {
+        try {
+            // Загружаем только данные цикла для календаря
+            await loadCycleData();
+            renderCalendar();
 
-// Загрузка данных цикла
-async function loadCycleData() {
-    try {
-        const response = await fetch(CYCLE_API);
-        console.log('🔍 Запрос к CYCLE_API:', CYCLE_API, 'Статус:', response.status);
-        
-        if (response.ok) {
-            cycleData = await response.json();
-            console.log('✅ Данные цикла загружены:', cycleData.length, 'записей');
-        } else {
-            console.error('❌ Ошибка загрузки данных цикла:', response.status);
+            // Остальное загружаем фоном
+            Promise.allSettled([
+                loadMoodData(),
+                loadCycleStats(),
+                loadCyclePredictions(),
+                loadTodayMood()
+            ]);
+        } catch (error) {
+            console.error('Ошибка загрузки данных:', error);
+            showToast('Ошибка загрузки данных', 'error');
         }
-    } catch (error) {
-        console.error('Сетевая ошибка загрузки данных цикла:', error);
     }
-}
 
-// Загрузка данных настроения
-async function loadMoodData() {
-    try {
-        const response = await fetch(MOOD_API);
-        if (response.ok) {
-            moodData = await response.json();
-            console.log('✅ Данные настроения загружены');
+    // Загрузка данных цикла
+    async function loadCycleData() {
+        try {
+            const response = await fetch(CYCLE_API);
+            console.log('🔍 Запрос к CYCLE_API:', CYCLE_API, 'Статус:', response.status);
+
+            if (response.ok) {
+                cycleData = await response.json();
+                console.log('✅ Данные цикла загружены:', cycleData.length, 'записей');
+            } else {
+                console.error('❌ Ошибка загрузки данных цикла:', response.status);
+            }
+        } catch (error) {
+            console.error('Сетевая ошибка загрузки данных цикла:', error);
         }
-    } catch (error) {
-        console.error('Ошибка загрузки данных настроения:', error);
     }
-}
 
-// Загрузка статистики цикла
-async function loadCycleStats() {
-    try {
-        const response = await fetch(CYCLE_STATS_API);
-        if (response.ok) {
-            const stats = await response.json();
-            updateStatsDisplay(stats);
+    // Загрузка данных настроения
+    async function loadMoodData() {
+        try {
+            const response = await fetch(MOOD_API);
+            if (response.ok) {
+                moodData = await response.json();
+                console.log('✅ Данные настроения загружены');
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки данных настроения:', error);
         }
-    } catch (error) {
-        console.error('Ошибка загрузки статистики цикла:', error);
     }
-}
 
-// Загрузка прогнозов цикла
-async function loadCyclePredictions() {
-    try {
-        const response = await fetch(CYCLE_PREDICTIONS_API);
-        if (response.ok) {
-            const predictions = await response.json();
-            updatePredictionsDisplay(predictions);
-        } else {
+    // Загрузка статистики цикла
+    async function loadCycleStats() {
+        try {
+            const response = await fetch(CYCLE_STATS_API);
+            if (response.ok) {
+                const stats = await response.json();
+                updateStatsDisplay(stats);
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки статистики цикла:', error);
+        }
+    }
+
+    // Загрузка прогнозов цикла
+    async function loadCyclePredictions() {
+        try {
+            const response = await fetch(CYCLE_PREDICTIONS_API);
+            if (response.ok) {
+                const predictions = await response.json();
+                updatePredictionsDisplay(predictions);
+            } else {
+                document.getElementById('nextPeriod').textContent = 'неизвестно';
+                document.getElementById('fertileWindow').textContent = 'неизвестно';
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки прогнозов цикла:', error);
             document.getElementById('nextPeriod').textContent = 'неизвестно';
             document.getElementById('fertileWindow').textContent = 'неизвестно';
         }
-    } catch (error) {
-        console.error('Ошибка загрузки прогнозов цикла:', error);
-        document.getElementById('nextPeriod').textContent = 'неизвестно';
-        document.getElementById('fertileWindow').textContent = 'неизвестно';
     }
-}
 
-// Загрузка сегодняшнего настроения
-async function loadTodayMood() {
-    try {
-        const response = await fetch(TODAY_MOOD_API);
-        if (response.ok) {
-            const todayMood = await response.json();
-            updateTodayMoodDisplay(todayMood);
+    // Загрузка сегодняшнего настроения
+    async function loadTodayMood() {
+        try {
+            const response = await fetch(TODAY_MOOD_API);
+            if (response.ok) {
+                const todayMood = await response.json();
+                updateTodayMoodDisplay(todayMood);
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки сегодняшнего настроения:', error);
+            updateTodayMoodDisplay(null);
         }
-    } catch (error) {
-        console.error('Ошибка загрузки сегодняшнего настроения:', error);
-        updateTodayMoodDisplay(null);
     }
-}
 
-// Инициализация сетки симптомов
-function initSymptomsGrid() {
-    const symptomsGrid = document.getElementById('symptomsGrid');
-    if (!symptomsGrid) return;
-    
-    const defaultSymptoms = [
-        'Головная боль', 'Спазмы', 'Усталость', 'Набухание груди',
-        'Перепады настроения', 'Тревожность', 'Вздутие', 'Акне',
-        'Тяга к сладкому', 'Бессонница', 'Тошнота', 'Боль в спине'
-    ];
+    // Инициализация сетки симптомов
+    function initSymptomsGrid() {
+        const symptomsGrid = document.getElementById('symptomsGrid');
+        if (!symptomsGrid) return;
 
-    symptomsGrid.innerHTML = defaultSymptoms.map(symptom => `
+        const defaultSymptoms = [
+            'Головная боль', 'Спазмы', 'Усталость', 'Набухание груди',
+            'Перепады настроения', 'Тревожность', 'Вздутие', 'Акне',
+            'Тяга к сладкому', 'Бессонница', 'Тошнота', 'Боль в спине'
+        ];
+
+        symptomsGrid.innerHTML = defaultSymptoms.map(symptom => `
         <label class="symptom-checkbox">
             <input type="checkbox" name="symptoms" value="${symptom}">
             ${symptom}
         </label>
     `).join('');
-}
-
-// Рендер календаря
-function renderCalendar() {
-    const calendar = document.getElementById('calendar');
-    const monthYear = document.getElementById('monthYear');
-    
-    if (!calendar || !monthYear) {
-        console.error('❌ Не найдены элементы календаря');
-        return;
     }
 
-    // Обновляем заголовок
-    const monthNames = [
-        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-    ];
-    monthYear.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+    // Рендер календаря
+    function renderCalendar() {
+        const calendar = document.getElementById('calendar');
+        const monthYear = document.getElementById('monthYear');
 
-    // Очищаем календарь
-    calendar.innerHTML = '';
-
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-
-    // Первый день месяца
-    const firstDay = new Date(year, month, 1);
-    // Последний день месяца
-    const lastDay = new Date(year, month + 1, 0);
-    // Дней в месяце
-    const daysInMonth = lastDay.getDate();
-    
-    // День недели первого дня (1 = Понедельник, 7 = Воскресенье)
-    let startDay = firstDay.getDay();
-    if (startDay === 0) startDay = 7;
-
-    // Дни предыдущего месяца
-    const prevMonthDays = new Date(year, month, 0).getDate();
-    for (let i = startDay - 1; i > 0; i--) {
-        const day = createDayElement(prevMonthDays - i + 1, 'other-month', true);
-        calendar.appendChild(day);
-    }
-
-    // Дни текущего месяца
-    const today = new Date();
-    for (let i = 1; i <= daysInMonth; i++) {
-        const date = new Date(year, month, i);
-        const dateStr = formatDate(date);
-        const day = createDayElement(i, '', false);
-
-        // Отмечаем сегодняшний день
-        if (today.getDate() === i && today.getMonth() === month && today.getFullYear() === year) {
-            day.classList.add('current-day');
+        if (!calendar || !monthYear) {
+            console.error('❌ Не найдены элементы календаря');
+            return;
         }
 
-        // Находим запись о цикле для этой даты
-        const cycleEntry = cycleData.find(entry => entry && entry.date === dateStr);
+        // Обновляем заголовок
+        const monthNames = [
+            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+        ];
+        monthYear.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
 
-        // КРАСНЫЙ для дней менструации (если есть запись с flow_intensity)
-        if (cycleEntry) {
-            // Если есть выделения (не 'none') - красный фон
-            if (cycleEntry.flow_intensity && cycleEntry.flow_intensity !== 'none') {
-                day.classList.add('menstruation');
-            }
-            
-            // Добавляем индикатор симптомов - ПОКАЗЫВАЕМ ВСЕ СИМПТОМЫ!
-            const symptoms = cycleEntry.symptoms || [];
-            if (symptoms.length > 0) {
-                const symptomsContainer = document.createElement('div');
-                symptomsContainer.className = 'symptoms-dots-compact';
-                
-                // Отображаем все симптомы как разноцветные точки
-                symptoms.forEach(symptom => {
-                    const dot = document.createElement('div');
-                    dot.className = 'symptom-dot-compact';
-                    dot.style.background = getSymptomColor(symptom);
-                    dot.title = symptom; // Подсказка при наведении
-                    symptomsContainer.appendChild(dot);
-                });
-                
-                day.appendChild(symptomsContainer);
-                
-                // Добавляем тултип со всеми симптомами
-                const tooltip = document.createElement('div');
-                tooltip.className = 'symptoms-tooltip';
-                
-                if (symptoms.length > 5) {
-                    tooltip.classList.add('has-many-items');
-                    symptoms.forEach(symptom => {
-                        const symptomItem = document.createElement('div');
-                        symptomItem.className = 'symptom-item';
-                        
-                        const colorDot = document.createElement('div');
-                        colorDot.className = 'symptom-color';
-                        colorDot.style.background = getSymptomColor(symptom);
-                        
-                        const nameSpan = document.createElement('span');
-                        nameSpan.className = 'symptom-name';
-                        nameSpan.textContent = symptom;
-                        
-                        symptomItem.appendChild(colorDot);
-                        symptomItem.appendChild(nameSpan);
-                        tooltip.appendChild(symptomItem);
-                    });
-                } else {
-                    tooltip.textContent = symptoms.join(', ');
-                }
-                
-                day.appendChild(tooltip);
-            }
-        }
- // При клике на день открываем детали
-        day.addEventListener('click', function() {
-         // Проверяем, что дата не в будущем
-    if (!isValidDateForEntry(dateStr)) {
-        showToast('Нельзя редактировать будущие дни', 'error');
-        return;
-    }
-    
-    // Убираем выделение с предыдущего выбранного дня
-    document.querySelectorAll('.calendar-day.selected').forEach(day => {
-        day.classList.remove('selected');
-    });
-    
-    // Добавляем выделение текущему дню
-    day.classList.add('selected');
-    
-    // Открываем детали дня для редактирования
-    openDayDetail(dateStr);
-        });
+        // Очищаем календарь
+        calendar.innerHTML = '';
 
-        calendar.appendChild(day); // ДОБАВЬТЕ ЭТУ СТРОЧКУ!
-    } // Закрывающая скобка цикла for
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
 
-    // Дни следующего месяца
-    const totalCells = 35;
-    const filledCells = startDay - 1 + daysInMonth;
-    if (filledCells < totalCells) {
-        for (let i = 1; i <= totalCells - filledCells; i++) {
-            const day = createDayElement(i, 'other-month', true);
+        // Первый день месяца
+        const firstDay = new Date(year, month, 1);
+        // Последний день месяца
+        const lastDay = new Date(year, month + 1, 0);
+        // Дней в месяце
+        const daysInMonth = lastDay.getDate();
+
+        // День недели первого дня (1 = Понедельник, 7 = Воскресенье)
+        let startDay = firstDay.getDay();
+        if (startDay === 0) startDay = 7;
+
+        // Дни предыдущего месяца
+        const prevMonthDays = new Date(year, month, 0).getDate();
+        for (let i = startDay - 1; i > 0; i--) {
+            const day = createDayElement(prevMonthDays - i + 1, 'other-month', true);
             calendar.appendChild(day);
         }
-    }
-    
-    console.log('✅ Календарь отрисован');
-}
-// Создание элемента дня
-function createDayElement(dayNumber, className, isOtherMonth) {
-    const dayElement = document.createElement('div');
-    dayElement.className = 'calendar-day';
-    
-    if (className) {
-        dayElement.classList.add(className);
-    }
 
-    const numberElement = document.createElement('div');
-    numberElement.className = 'day-number';
-    numberElement.textContent = dayNumber;
-
-    dayElement.appendChild(numberElement);
-
-    if (isOtherMonth) {
-        dayElement.style.cursor = 'default';
-        dayElement.style.pointerEvents = 'none';
-        dayElement.style.opacity = '0.5';
-    }
-
-    return dayElement;
-}
-
-// Получение симптомов для даты
-function getSymptomsForDate(dateStr) {
-    if (!dateStr || !cycleData || !Array.isArray(cycleData)) return [];
-    
-    const entry = cycleData.find(entry => entry && entry.date === dateStr);
-    return entry ? (entry.symptoms || []) : [];
-}
-
-// Цвет для симптома
-function getSymptomColor(symptom) {
-    const colorMap = {
-        'Головная боль': '#FF6B6B',
-        'Спазмы': '#FF70EC',
-        'Усталость': '#60F4E3',
-        'Набухание груди': '#FFD166',
-        'Перепады настроения': '#B8B3E9',
-        'Тревожность': '#FFA502',
-        'Вздутие': '#2ed573',
-        'Акне': '#ff4757',
-        'Тяга к сладкому': '#ff9ff3',
-        'Бессонница': '#54a0ff',
-        'Тошнота': '#00d2d3',
-        'Боль в спине': '#f368e0',
-        'Раздражительность': '#ff9f43',
-        'Повышенный аппетит': '#ee5253',
-        'Плаксивость': '#0abde3',
-        'Отеки': '#10ac84',
-        'Головокружение': '#5f27cd',
-        'Сонливость': '#8395a7'
-    };
-    
-    // Если симптом не в списке, генерируем цвет на основе хеша
-    if (!colorMap[symptom]) {
-        // Генерируем детерминированный цвет на основе названия симптома
-        let hash = 0;
-        for (let i = 0; i < symptom.length; i++) {
-            hash = symptom.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        
-        const colors = [
-            '#FF6B6B', '#FF70EC', '#60F4E3', '#FFD166', '#B8B3E9',
-            '#FFA502', '#2ed573', '#ff4757', '#ff9ff3', '#54a0ff',
-            '#00d2d3', '#f368e0', '#ff9f43', '#ee5253', '#0abde3',
-            '#10ac84', '#5f27cd', '#8395a7', '#ff9f43', '#ee5253'
-        ];
-        
-        const index = Math.abs(hash) % colors.length;
-        colorMap[symptom] = colors[index];
-    }
-    
-    return colorMap[symptom];
-}
-// Форматирование даты
-function formatDate(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-}
-
-// Навигация по месяцам
-function changeMonth(step) {
-    currentDate.setMonth(currentDate.getMonth() + step);
-    renderCalendar();
-}
-
-function goToToday() {
-    currentDate = new Date();
-    renderCalendar();
-    
-    // Сбрасываем выбранную дату
-    currentSelectedDate = null;
-    isEditMode = false;
-    
-    // Удаляем отображение выбранной даты если есть
-    const dateDisplay = document.querySelector('.selected-date-display');
-    if (dateDisplay) dateDisplay.remove();
-    
-    // Восстанавливаем заголовок формы
-    const formTitle = document.querySelector('.tracker-form h3');
-    if (formTitle) {
-        formTitle.innerHTML = `<i class="fas fa-edit"></i> Отметить сегодня`;
-    }
-    
-    // Очищаем форму
-    clearForm();
-    
-    showToast('Перешли к текущему месяцу', 'info');
-}
-
-// Обновление отображения статистики
-function updateStatsDisplay(stats) {
-    if (stats && stats.avg_mood) {
-        document.getElementById('avgMoodCycle').textContent = `${parseFloat(stats.avg_mood).toFixed(1)}/10`;
-    }
-    if (stats && stats.total_entries) {
-        document.getElementById('cycleLength').textContent = `${stats.total_entries} записей`;
-    }
-}
-
-// Обновление отображения прогнозов
-function updatePredictionsDisplay(predictions) {
-    if (!predictions || predictions.error) return;
-
-    if (predictions.next_period) {
-        const nextPeriod = new Date(predictions.next_period);
+        // Дни текущего месяца
         const today = new Date();
-        const daysDiff = Math.ceil((nextPeriod - today) / (1000 * 60 * 60 * 24));
-        if (daysDiff > 0) {
-            document.getElementById('nextPeriod').textContent = `через ${daysDiff} дней`;
-        } else if (daysDiff === 0) {
-            document.getElementById('nextPeriod').textContent = 'сегодня';
-        } else {
-            document.getElementById('nextPeriod').textContent = `${Math.abs(daysDiff)} дней назад`;
+        for (let i = 1; i <= daysInMonth; i++) {
+            const date = new Date(year, month, i);
+            const dateStr = formatDate(date);
+            const day = createDayElement(i, '', false);
+
+            // Отмечаем сегодняшний день
+            if (today.getDate() === i && today.getMonth() === month && today.getFullYear() === year) {
+                day.classList.add('current-day');
+            }
+
+            // Находим запись о цикле для этой даты
+            const cycleEntry = cycleData.find(entry => entry && entry.date === dateStr);
+
+            if (cycleEntry) {
+                // ОТДЕЛЬНО проверяем менструацию и симптомы
+
+                // 1. Менструация
+                const hasMenstruation = cycleEntry.flow_intensity &&
+                    cycleEntry.flow_intensity !== 'none' &&
+                    cycleEntry.flow_intensity !== '';
+
+                // 2. Симптомы
+                const symptoms = cycleEntry.symptoms || [];
+                const hasSymptoms = symptoms.length > 0;
+
+                // Если есть менструация - добавляем класс
+                if (hasMenstruation) {
+                    day.classList.add('menstruation');
+
+                    // Также добавляем индикатор в текст
+                    const menstruationIndicator = document.createElement('div');
+                    menstruationIndicator.className = 'menstruation-indicator';
+                    menstruationIndicator.textContent = '🩸';
+                    menstruationIndicator.style.cssText = `
+                    position: absolute;
+                    top: 2px;
+                    right: 2px;
+                    font-size: 10px;
+                    z-index: 3;
+                `;
+                    day.appendChild(menstruationIndicator);
+                }
+
+                // Если есть симптомы - отображаем их (даже если есть менструация)
+                if (hasSymptoms) {
+                    const symptomsContainer = document.createElement('div');
+                    symptomsContainer.className = 'symptoms-dots-compact';
+                    symptomsContainer.style.cssText = `
+                    position: relative;
+                    z-index: ${hasMenstruation ? '2' : '1'};
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 1px;
+                    margin-top: ${hasMenstruation ? '15px' : '3px'};
+                    justify-content: center;
+                `;
+
+                    // Ограничиваем количество отображаемых точек, если их много
+                    const maxDots = hasMenstruation ? 6 : 8; // При менструации показываем меньше точек
+
+                    // Отображаем все симптомы как разноцветные точки
+                    symptoms.slice(0, maxDots).forEach(symptom => {
+                        const dot = document.createElement('div');
+                        dot.className = 'symptom-dot-compact';
+                        dot.style.cssText = `
+                        width: 4px;
+                        height: 4px;
+                        border-radius: 50%;
+                        background: ${getSymptomColor(symptom)};
+                        ${hasMenstruation ? 'box-shadow: 0 0 2px white;' : ''}
+                    `;
+                        dot.title = symptom; // Подсказка при наведении
+                        symptomsContainer.appendChild(dot);
+                    });
+
+                    // Если симптомов больше, чем отображаем - добавляем индикатор
+                    if (symptoms.length > maxDots) {
+                        const moreIndicator = document.createElement('div');
+                        moreIndicator.className = 'more-symptoms';
+                        moreIndicator.textContent = `+${symptoms.length - maxDots}`;
+                        moreIndicator.style.cssText = `
+                        font-size: 8px;
+                        color: ${hasMenstruation ? 'white' : '#666'};
+                        margin-left: 1px;
+                        font-weight: bold;
+                    `;
+                        moreIndicator.title = `Еще ${symptoms.length - maxDots} симптомов`;
+                        symptomsContainer.appendChild(moreIndicator);
+                    }
+
+                    day.appendChild(symptomsContainer);
+
+                    // Добавляем тултип со всеми симптомами
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'symptoms-tooltip';
+
+                    if (symptoms.length > 5) {
+                        tooltip.classList.add('has-many-items');
+                        symptoms.forEach(symptom => {
+                            const symptomItem = document.createElement('div');
+                            symptomItem.className = 'symptom-item';
+
+                            const colorDot = document.createElement('div');
+                            colorDot.className = 'symptom-color';
+                            colorDot.style.background = getSymptomColor(symptom);
+
+                            const nameSpan = document.createElement('span');
+                            nameSpan.className = 'symptom-name';
+                            nameSpan.textContent = symptom;
+
+                            symptomItem.appendChild(colorDot);
+                            symptomItem.appendChild(nameSpan);
+                            tooltip.appendChild(symptomItem);
+                        });
+                    } else {
+                        tooltip.textContent = symptoms.join(', ');
+                    }
+
+                    day.appendChild(tooltip);
+                }
+            }
+
+            // При клике на день открываем детали
+            day.addEventListener('click', function () {
+                // Проверяем, что дата не в будущем
+                if (!isValidDateForEntry(dateStr)) {
+                    showToast('Нельзя редактировать будущие дни', 'error');
+                    return;
+                }
+
+                // Убираем выделение с предыдущего выбранного дня
+                document.querySelectorAll('.calendar-day.selected').forEach(day => {
+                    day.classList.remove('selected');
+                });
+
+                // Добавляем выделение текущему дню
+                day.classList.add('selected');
+
+                // Открываем детали дня для редактирования
+                openDayDetail(dateStr);
+            });
+
+            calendar.appendChild(day);
+        }
+
+        // Дни следующего месяца
+        const totalCells = 35;
+        const filledCells = startDay - 1 + daysInMonth;
+        if (filledCells < totalCells) {
+            for (let i = 1; i <= totalCells - filledCells; i++) {
+                const day = createDayElement(i, 'other-month', true);
+                calendar.appendChild(day);
+            }
+        }
+
+        console.log('✅ Календарь отрисован');
+    }
+
+    // Создание элемента дня
+    function createDayElement(dayNumber, className, isOtherMonth) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+
+        if (className) {
+            dayElement.classList.add(className);
+        }
+
+        const numberElement = document.createElement('div');
+        numberElement.className = 'day-number';
+        numberElement.textContent = dayNumber;
+
+        dayElement.appendChild(numberElement);
+
+        if (isOtherMonth) {
+            dayElement.style.cursor = 'default';
+            dayElement.style.pointerEvents = 'none';
+            dayElement.style.opacity = '0.5';
+        }
+
+        return dayElement;
+    }
+
+    // Получение симптомов для даты
+    function getSymptomsForDate(dateStr) {
+        if (!dateStr || !cycleData || !Array.isArray(cycleData)) return [];
+
+        const entry = cycleData.find(entry => entry && entry.date === dateStr);
+        return entry ? (entry.symptoms || []) : [];
+    }
+
+    // Цвет для симптома
+    function getSymptomColor(symptom) {
+        const colorMap = {
+            'Головная боль': '#FF6B6B',
+            'Спазмы': '#FF70EC',
+            'Усталость': '#60F4E3',
+            'Набухание груди': '#FFD166',
+            'Перепады настроения': '#B8B3E9',
+            'Тревожность': '#FFA502',
+            'Вздутие': '#2ed573',
+            'Акне': '#ff4757',
+            'Тяга к сладкому': '#ff9ff3',
+            'Бессонница': '#54a0ff',
+            'Тошнота': '#00d2d3',
+            'Боль в спине': '#f368e0',
+            'Раздражительность': '#ff9f43',
+            'Повышенный аппетит': '#ee5253',
+            'Плаксивость': '#0abde3',
+            'Отеки': '#10ac84',
+            'Головокружение': '#5f27cd',
+            'Сонливость': '#8395a7'
+        };
+
+        // Если симптом не в списке, генерируем цвет на основе хеша
+        if (!colorMap[symptom]) {
+            // Генерируем детерминированный цвет на основе названия симптома
+            let hash = 0;
+            for (let i = 0; i < symptom.length; i++) {
+                hash = symptom.charCodeAt(i) + ((hash << 5) - hash);
+            }
+
+            const colors = [
+                '#FF6B6B', '#FF70EC', '#60F4E3', '#FFD166', '#B8B3E9',
+                '#FFA502', '#2ed573', '#ff4757', '#ff9ff3', '#54a0ff',
+                '#00d2d3', '#f368e0', '#ff9f43', '#ee5253', '#0abde3',
+                '#10ac84', '#5f27cd', '#8395a7', '#ff9f43', '#ee5253'
+            ];
+
+            const index = Math.abs(hash) % colors.length;
+            colorMap[symptom] = colors[index];
+        }
+
+        return colorMap[symptom];
+    }
+    // Форматирование даты
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    // Навигация по месяцам
+    function changeMonth(step) {
+        currentDate.setMonth(currentDate.getMonth() + step);
+        renderCalendar();
+    }
+
+    function goToToday() {
+        currentDate = new Date();
+        renderCalendar();
+
+        // Сбрасываем выбранную дату
+        currentSelectedDate = null;
+        isEditMode = false;
+
+        // Удаляем отображение выбранной даты если есть
+        const dateDisplay = document.querySelector('.selected-date-display');
+        if (dateDisplay) dateDisplay.remove();
+
+        // Восстанавливаем заголовок формы
+        const formTitle = document.querySelector('.tracker-form h3');
+        if (formTitle) {
+            formTitle.innerHTML = `<i class="fas fa-edit"></i> Отметить сегодня`;
+        }
+
+        // Очищаем форму
+        clearForm();
+
+        showToast('Перешли к текущему месяцу', 'info');
+    }
+
+    // Обновление отображения статистики
+    function updateStatsDisplay(stats) {
+        if (stats && stats.avg_mood) {
+            document.getElementById('avgMoodCycle').textContent = `${parseFloat(stats.avg_mood).toFixed(1)}/10`;
+        }
+        if (stats && stats.total_entries) {
+            document.getElementById('cycleLength').textContent = `${stats.total_entries} записей`;
         }
     }
 
-    if (predictions.current_cycle_day) {
-        document.getElementById('cycleLength').textContent = `${predictions.current_cycle_day} день`;
-    }
-}
+    // Обновление отображения прогнозов
+    function updatePredictionsDisplay(predictions) {
+        if (!predictions || predictions.error) return;
 
-// Обновление отображения сегодняшнего настроения
-function updateTodayMoodDisplay(moodData) {
-    const moodDisplay = document.getElementById('todayMood');
-    const moodLoading = document.getElementById('moodLoading');
-    
-    if (moodLoading) {
-        moodLoading.style.display = 'none';
+        if (predictions.next_period) {
+            const nextPeriod = new Date(predictions.next_period);
+            const today = new Date();
+            const daysDiff = Math.ceil((nextPeriod - today) / (1000 * 60 * 60 * 24));
+            if (daysDiff > 0) {
+                document.getElementById('nextPeriod').textContent = `через ${daysDiff} дней`;
+            } else if (daysDiff === 0) {
+                document.getElementById('nextPeriod').textContent = 'сегодня';
+            } else {
+                document.getElementById('nextPeriod').textContent = `${Math.abs(daysDiff)} дней назад`;
+            }
+        }
+
+        if (predictions.current_cycle_day) {
+            document.getElementById('cycleLength').textContent = `${predictions.current_cycle_day} день`;
+        }
     }
-    
-    if (moodData && moodData.mood !== undefined && moodData.mood !== null) {
-        const emoji = getMoodEmoji(moodData.mood);
-        moodDisplay.innerHTML = `
+
+    // Обновление отображения сегодняшнего настроения
+    function updateTodayMoodDisplay(moodData) {
+        const moodDisplay = document.getElementById('todayMood');
+        const moodLoading = document.getElementById('moodLoading');
+
+        if (moodLoading) {
+            moodLoading.style.display = 'none';
+        }
+
+        if (moodData && moodData.mood !== undefined && moodData.mood !== null) {
+            const emoji = getMoodEmoji(moodData.mood);
+            moodDisplay.innerHTML = `
             <div class="mood-value">${moodData.mood}/10</div>
             <div class="mood-emoji">${emoji}</div>
             <div class="mood-note">${moodData.note || 'Без заметки'}</div>
         `;
-    } else {
-        moodDisplay.innerHTML = `
+        } else {
+            moodDisplay.innerHTML = `
             <div class="mood-value">-/-</div>
             <div class="mood-emoji">😐</div>
             <div class="mood-note">Настроение не отмечено</div>
         `;
-    }
-}
-
-function getMoodEmoji(moodValue) {
-    if (moodValue >= 8) return '😊';
-    if (moodValue >= 5) return '😐';
-    if (moodValue >= 3) return '😕';
-    return '😞';
-}
-
-async function saveCycleEntry() {
-    // Определяем дату
-    let dateStr;
-    if (currentSelectedDate && isEditMode) {
-        dateStr = currentSelectedDate;
-    } else {
-        dateStr = formatDate(new Date());
+        }
     }
 
-    // Проверяем, что дата не в будущем
-    const selected = new Date(dateStr);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    if (selected > today) {
-        showToast('Нельзя создать запись в будущем', 'error');
-        return;
+    function getMoodEmoji(moodValue) {
+        if (moodValue >= 8) return '😊';
+        if (moodValue >= 5) return '😐';
+        if (moodValue >= 3) return '😕';
+        return '😞';
     }
 
-    // Получаем выбранные симптомы
-    const selectedSymptoms = Array.from(
-        document.querySelectorAll('input[name="symptoms"]:checked')
-    ).map(cb => cb.value);
-
-    // Получаем заметки
-    const notes = document.getElementById('cycleNotes').value.trim();
-
-    // Убираем дубликаты на всякий случай
-    const uniqueSymptoms = [...new Set(selectedSymptoms)];
-
-    // Получаем существующую запись
-    const existingEntry = cycleData.find(entry => entry.date === dateStr);
-
-    try {
-        // Если есть существующая запись - обновляем её
-        if (existingEntry) {
-            // Объединяем симптомы (старые + новые)
-            const existingSymptoms = existingEntry.symptoms || [];
-            const allSymptoms = [...new Set([...existingSymptoms, ...uniqueSymptoms])];
-            
-            // Сохраняем flow_intensity из старой записи
-            const flowIntensity = existingEntry.flow_intensity || 'none';
-            
-            const response = await fetch(`${CYCLE_API}/${dateStr}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    symptoms: allSymptoms,
-                    flow_intensity: flowIntensity, // Сохраняем менструацию!
-                    notes: notes || existingEntry.notes
-                })
-            });
-
-            if (response.ok) {
-                showToast('Запись обновлена!', 'success');
-                await loadCycleData();
-                renderCalendar();
-                await updateAnalytics();
-            } else {
-                throw new Error('Ошибка обновления записи');
-            }
+    async function saveCycleEntry() {
+        // Определяем дату
+        let dateStr;
+        if (currentSelectedDate && isEditMode) {
+            dateStr = currentSelectedDate;
         } else {
-            // Если записи нет - создаем новую
-            if (!uniqueSymptoms.length && !notes) {
-                showToast('Заполните хотя бы одно поле', 'error');
-                return;
-            }
+            dateStr = formatDate(new Date());
+        }
 
-            const response = await fetch(CYCLE_API, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    date: dateStr,
-                    symptoms: uniqueSymptoms,
-                    flow_intensity: 'none', // По умолчанию нет менструации
-                    notes: notes
-                })
-            });
+        // Проверяем, что дата не в будущем
+        const selected = new Date(dateStr);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
 
-            if (response.ok) {
-                showToast('Запись сохранена!', 'success');
-                await loadCycleData();
-                renderCalendar();
-                clearForm();
-                await updateAnalytics();
+        if (selected > today) {
+            showToast('Нельзя создать запись в будущем', 'error');
+            return;
+        }
+
+        // Получаем выбранные симптомы
+        const selectedSymptoms = Array.from(
+            document.querySelectorAll('input[name="symptoms"]:checked')
+        ).map(cb => cb.value);
+
+        // Получаем заметки
+        const notes = document.getElementById('cycleNotes').value.trim();
+
+        // Убираем дубликаты на всякий случай
+        const uniqueSymptoms = [...new Set(selectedSymptoms)];
+
+        // Получаем существующую запись
+        const existingEntry = cycleData.find(entry => entry.date === dateStr);
+
+        try {
+            // Если есть существующая запись - обновляем её
+            if (existingEntry) {
+                // Объединяем симптомы (старые + новые)
+                const existingSymptoms = existingEntry.symptoms || [];
+                const allSymptoms = [...new Set([...existingSymptoms, ...uniqueSymptoms])];
+
+                // Сохраняем flow_intensity из старой записи
+                const flowIntensity = existingEntry.flow_intensity || 'none';
+
+                const response = await fetch(`${CYCLE_API}/${dateStr}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        symptoms: allSymptoms,
+                        flow_intensity: flowIntensity, // Сохраняем менструацию!
+                        notes: notes || existingEntry.notes
+                    })
+                });
+
+                if (response.ok) {
+                    showToast('Запись обновлена!', 'success');
+                    await loadCycleData();
+                    renderCalendar();
+                    await updateAnalytics();
+                } else {
+                    throw new Error('Ошибка обновления записи');
+                }
             } else {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Ошибка сохранения');
+                // Если записи нет - создаем новую
+                if (!uniqueSymptoms.length && !notes) {
+                    showToast('Заполните хотя бы одно поле', 'error');
+                    return;
+                }
+
+                const response = await fetch(CYCLE_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        date: dateStr,
+                        symptoms: uniqueSymptoms,
+                        flow_intensity: 'none', // По умолчанию нет менструации
+                        notes: notes
+                    })
+                });
+
+                if (response.ok) {
+                    showToast('Запись сохранена!', 'success');
+                    await loadCycleData();
+                    renderCalendar();
+                    clearForm();
+                    await updateAnalytics();
+                } else {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Ошибка сохранения');
+                }
             }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showToast('Ошибка сохранения записи: ' + error.message, 'error');
         }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        showToast('Ошибка сохранения записи: ' + error.message, 'error');
     }
-}
 
-// Очистка формы
-function clearForm() {
-    // Снимаем все галочки симптомов
-    document.querySelectorAll('input[name="symptoms"]:checked').forEach(checkbox => {
-        checkbox.checked = false;
-    });
-    
-    // Сбрасываем выделения
-    document.getElementById('flowLevel').value = '';
-    
-    // Очищаем заметки
-    document.getElementById('cycleNotes').value = '';
-}
+    // Очистка формы
+    function clearForm() {
+        // Снимаем все галочки симптомов
+        document.querySelectorAll('input[name="symptoms"]:checked').forEach(checkbox => {
+            checkbox.checked = false;
+        });
 
-// Обновление аналитики
-async function updateAnalytics() {
-    try {
-        await Promise.all([
-            loadMoodData(),
-            loadCycleStats(),
-            loadCyclePredictions(),
-            loadTodayMood()
-        ]);
-        
-        if (typeof updateChartsWithRealData === 'function') {
-            updateChartsWithRealData();
-        }
-        
-        const statsResponse = await fetch(CYCLE_STATS_API);
-        if (statsResponse.ok) {
-            const stats = await statsResponse.json();
-            updateStatsDisplay(stats);
-        }
-    } catch (updateError) {
-        console.error('Ошибка обновления аналитики:', updateError);
+        // Сбрасываем выделения
+        document.getElementById('flowLevel').value = '';
+
+        // Очищаем заметки
+        document.getElementById('cycleNotes').value = '';
     }
-}
 
-// Переход к трекеру настроения
-function goToMoodTracker() {
-    window.location.href = "/calendar";
-}
+    // Обновление аналитики
+    async function updateAnalytics() {
+        try {
+            await Promise.all([
+                loadMoodData(),
+                loadCycleStats(),
+                loadCyclePredictions(),
+                loadTodayMood()
+            ]);
 
-// Открытие деталей дня
-function openDayDetail(dateStr) {
-    // Показываем всплывашку с датой
-    showToast(`День ${dateStr}`, 'info');
-    const d = new Date(dateStr);
-    selectedAnalyticsMonth = d.getMonth(); // 0-11
-    selectedAnalyticsYear = d.getFullYear();
-
-    updateChartsWithRealData();
-}
-
-// Утилиты
-function showToast(message, type = 'success') {
-    let toast = document.getElementById('toast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'toast';
-        document.body.appendChild(toast);
-    }
-    
-    toast.textContent = message;
-    toast.className = `toast ${type === 'error' ? 'error' : ''} show`;
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => {
-            if (toast.parentNode) {
-                document.body.removeChild(toast);
+            if (typeof updateChartsWithRealData === 'function') {
+                updateChartsWithRealData();
             }
-        }, 300);
-    }, 3000);
-}
 
-// Простое логирование загрузки
-console.log('📅 Инициализация дневника цикла...');
+            const statsResponse = await fetch(CYCLE_STATS_API);
+            if (statsResponse.ok) {
+                const stats = await statsResponse.json();
+                updateStatsDisplay(stats);
+            }
+        } catch (updateError) {
+            console.error('Ошибка обновления аналитики:', updateError);
+        }
+    }
 
+    // Переход к трекеру настроения
+    function goToMoodTracker() {
+        window.location.href = "/calendar";
+    }
 
-function initCharts() {
-    // Ждем загрузки всех данных
-    setTimeout(() => {
+    // Открытие деталей дня
+    function openDayDetail(dateStr) {
+        // Показываем всплывашку с датой
+        showToast(`День ${dateStr}`, 'info');
+        const d = new Date(dateStr);
+        selectedAnalyticsMonth = d.getMonth(); // 0-11
+        selectedAnalyticsYear = d.getFullYear();
+
         updateChartsWithRealData();
-    }, 500);
-}
+    }
 
-function updateChartsWithRealData() {
-    
-    let filteredCycleData = cycleData;
-
-if (selectedAnalyticsMonth !== null && selectedAnalyticsYear !== null) {
-    filteredCycleData = cycleData.filter(entry => {
-        const d = new Date(entry.date);
-        return (
-            d.getMonth() === selectedAnalyticsMonth &&
-            d.getFullYear() === selectedAnalyticsYear
-        );
-    });
-}
-
-    
-    // Скрываем "нет данных" если они есть
-    const noMoodData = document.getElementById('noMoodData');
-    const noSymptomsData = document.getElementById('noSymptomsData');
-    
-    // График настроения по фазам
-    const moodChartData = calculateRealMoodByPhase();
-    const moodCtx = document.getElementById('moodPhaseChart');
-    
-    if (moodCtx && moodChartData.hasData) {
-        if (noMoodData) noMoodData.style.display = 'none';
-        
-        // Уничтожаем предыдущий график если он есть
-        if (moodPhaseChart) {
-            moodPhaseChart.destroy();
+    // Утилиты
+    function showToast(message, type = 'success') {
+        let toast = document.getElementById('toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'toast';
+            document.body.appendChild(toast);
         }
-        
-        moodPhaseChart = new Chart(moodCtx.getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: moodChartData.labels,
-                datasets: [{
-                    label: 'Среднее настроение',
-                    data: moodChartData.values,
-                    borderColor: 'rgb(96, 244, 227)',
-                    backgroundColor: 'rgba(96, 244, 227, 0.1)',
-                    tension: 0.3,
-                    fill: true,
-                    borderWidth: 3,
-                    pointBackgroundColor: 'rgb(96, 244, 227)',
-                    pointRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `Настроение: ${context.raw}/10`;
+
+        toast.textContent = message;
+        toast.className = `toast ${type === 'error' ? 'error' : ''} show`;
+
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    document.body.removeChild(toast);
+                }
+            }, 300);
+        }, 3000);
+    }
+
+    // Простое логирование загрузки
+    console.log('📅 Инициализация дневника цикла...');
+
+
+    function initCharts() {
+        // Ждем загрузки всех данных
+        setTimeout(() => {
+            updateChartsWithRealData();
+        }, 500);
+    }
+
+    function updateChartsWithRealData() {
+
+        let filteredCycleData = cycleData;
+
+        if (selectedAnalyticsMonth !== null && selectedAnalyticsYear !== null) {
+            filteredCycleData = cycleData.filter(entry => {
+                const d = new Date(entry.date);
+                return (
+                    d.getMonth() === selectedAnalyticsMonth &&
+                    d.getFullYear() === selectedAnalyticsYear
+                );
+            });
+        }
+
+
+        // Скрываем "нет данных" если они есть
+        const noMoodData = document.getElementById('noMoodData');
+        const noSymptomsData = document.getElementById('noSymptomsData');
+
+        // График настроения по фазам
+        const moodChartData = calculateRealMoodByPhase();
+        const moodCtx = document.getElementById('moodPhaseChart');
+
+        if (moodCtx && moodChartData.hasData) {
+            if (noMoodData) noMoodData.style.display = 'none';
+
+            // Уничтожаем предыдущий график если он есть
+            if (moodPhaseChart) {
+                moodPhaseChart.destroy();
+            }
+
+            moodPhaseChart = new Chart(moodCtx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: moodChartData.labels,
+                    datasets: [{
+                        label: 'Среднее настроение',
+                        data: moodChartData.values,
+                        borderColor: 'rgb(96, 244, 227)',
+                        backgroundColor: 'rgba(96, 244, 227, 0.1)',
+                        tension: 0.3,
+                        fill: true,
+                        borderWidth: 3,
+                        pointBackgroundColor: 'rgb(96, 244, 227)',
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return `Настроение: ${context.raw}/10`;
+                                }
                             }
                         }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 10,
-                        min: 0,
-                        title: {
-                            display: true,
-                            text: 'Настроение (0-10)'
-                        },
-                        ticks: {
-                            stepSize: 1
-                        }
                     },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Фаза цикла'
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            min: 0,
+                            title: {
+                                display: true,
+                                text: 'Настроение (0-10)'
+                            },
+                            ticks: {
+                                stepSize: 1
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Фаза цикла'
+                            }
                         }
                     }
                 }
-            }
-        });
-    } else {
-        if (noMoodData) noMoodData.style.display = 'flex';
-    }
-    
-    // График распределения симптомов - АДАПТИВНЫЙ БЕЗ ПРОКРУТКИ
-    const symptomsData = calculateRealSymptomFrequency(filteredCycleData);
-    const symptomsCtx = document.getElementById('symptomsChart');
-    
-    if (symptomsCtx && symptomsData.hasData) {
-        if (noSymptomsData) noSymptomsData.style.display = 'none';
-        
-        // Уничтожаем предыдущий график если он есть
-        if (symptomsChart) {
-            symptomsChart.destroy();
+            });
+        } else {
+            if (noMoodData) noMoodData.style.display = 'flex';
         }
-        
-        // Автоматически рассчитываем размер шрифта и поворот подписей
-        const symptomsCount = symptomsData.labels.length;
-        const fontSize = Math.max(10, Math.min(14, 14 - (symptomsCount - 5) * 0.5));
-        const rotation = symptomsCount > 8 ? 45 : 0;
-        
-        symptomsChart = new Chart(symptomsCtx.getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: symptomsData.labels,
-                datasets: [{
-                    label: 'Частота симптомов',
-                    data: symptomsData.values,
-                    backgroundColor: symptomsData.colors,
-                    borderColor: symptomsData.borderColors,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.label}: ${context.raw} раз`;
-                            }
-                        }
-                    }
+
+        // График распределения симптомов - АДАПТИВНЫЙ БЕЗ ПРОКРУТКИ
+        const symptomsData = calculateRealSymptomFrequency(filteredCycleData);
+        const symptomsCtx = document.getElementById('symptomsChart');
+
+        if (symptomsCtx && symptomsData.hasData) {
+            if (noSymptomsData) noSymptomsData.style.display = 'none';
+
+            // Уничтожаем предыдущий график если он есть
+            if (symptomsChart) {
+                symptomsChart.destroy();
+            }
+
+            // Автоматически рассчитываем размер шрифта и поворот подписей
+            const symptomsCount = symptomsData.labels.length;
+            const fontSize = Math.max(10, Math.min(14, 14 - (symptomsCount - 5) * 0.5));
+            const rotation = symptomsCount > 8 ? 45 : 0;
+
+            symptomsChart = new Chart(symptomsCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: symptomsData.labels,
+                    datasets: [{
+                        label: 'Частота симптомов',
+                        data: symptomsData.values,
+                        backgroundColor: symptomsData.colors,
+                        borderColor: symptomsData.borderColors,
+                        borderWidth: 1
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Количество записей'
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
                         },
-                        ticks: {
-                            precision: 0
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            autoSkip: false,
-                            maxRotation: rotation,
-                            minRotation: rotation,
-                            font: {
-                                size: fontSize
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return `${context.label}: ${context.raw} раз`;
+                                }
                             }
                         }
-                    }
-                },
-                layout: {
-                    padding: {
-                        left: 10,
-                        right: 10,
-                        top: 10,
-                        bottom: symptomsCount > 10 ? 50 : 30
-                    }
-                },
-                // Оптимизация для большого количества столбцов
-                barPercentage: symptomsCount > 15 ? 0.8 : 0.9,
-                categoryPercentage: symptomsCount > 15 ? 0.7 : 0.8
-            }
-        });
-    } else {
-        if (noSymptomsData) noSymptomsData.style.display = 'flex';
-    }
-}
-
-// Функция расчета реальных данных настроения по фазам
-function calculateRealMoodByPhase() {
-    if (!moodData || moodData.length === 0) {
-        return { hasData: false };
-    }
-    
-    // Группируем настроения по фазам (для демо - фазы определены по дню цикла)
-    const phaseMoods = {
-        follicular: [],
-        ovulation: [],
-        luteal: [],
-        menstruation: []
-    };
-    
-    // Простая логика: день цикла 1-7 = менструация, 8-13 = фолликулярная, 
-    // 14 = овуляция, 15-28 = лютеиновая
-    moodData.forEach(entry => {
-        if (entry.date && entry.mood !== undefined) {
-            const date = new Date(entry.date);
-            const dayOfMonth = date.getDate();
-            
-            if (dayOfMonth <= 7) {
-                phaseMoods.menstruation.push(entry.mood);
-            } else if (dayOfMonth <= 13) {
-                phaseMoods.follicular.push(entry.mood);
-            } else if (dayOfMonth === 14) {
-                phaseMoods.ovulation.push(entry.mood);
-            } else {
-                phaseMoods.luteal.push(entry.mood);
-            }
-        }
-    });
-    
-    // Рассчитываем средние значения
-    const calculateAverage = (arr) => {
-        if (arr.length === 0) return null;
-        const sum = arr.reduce((a, b) => a + b, 0);
-        return parseFloat((sum / arr.length).toFixed(1));
-    };
-    
-    const follicularAvg = calculateAverage(phaseMoods.follicular);
-    const ovulationAvg = calculateAverage(phaseMoods.ovulation);
-    const lutealAvg = calculateAverage(phaseMoods.luteal);
-    const menstruationAvg = calculateAverage(phaseMoods.menstruation);
-    
-    // Проверяем, есть ли хотя бы одна фаза с данными
-    const hasValidData = [follicularAvg, ovulationAvg, lutealAvg, menstruationAvg]
-        .some(avg => avg !== null);
-    
-    if (!hasValidData) {
-        return { hasData: false };
-    }
-    
-    return {
-        hasData: true,
-        labels: ['Фолликулярная', 'Овуляция', 'Лютеиновая', 'Менструация'],
-        values: [
-            follicularAvg || 0,
-            ovulationAvg || 0,
-            lutealAvg || 0,
-            menstruationAvg || 0
-        ]
-    };
-}
-
-function calculateRealSymptomFrequency(data) {
-    if (!data || data.length === 0) {
-        return { hasData: false };
-    }
-
-    const symptomCounts = {};
-
-    data.forEach(entry => {
-        (entry.symptoms || []).forEach(symptom => {
-            symptomCounts[symptom] = (symptomCounts[symptom] || 0) + 1;
-        });
-    });
-
-    const labels = Object.keys(symptomCounts);
-    const values = Object.values(symptomCounts);
-
-    if (labels.length === 0) {
-        return { hasData: false };
-    }
-
-    return {
-        hasData: true,
-        labels: labels,
-        values: values,
-        colors: labels.map(getSymptomColor),
-        borderColors: labels.map(getSymptomColor)
-    };
-}
-
-
-// Открытие деталей дня с возможностью редактирования
-async function openDayDetail(dateStr) {
-    // Проверяем, что дата не в будущем
-    if (!isValidDateForEntry(dateStr)) {
-        showToast('Нельзя редактировать будущие дни', 'error');
-        return;
-    }
-    
-    console.log('📅 Открываем детали дня для редактирования:', dateStr);
-    
-    currentSelectedDate = dateStr;
-    isEditMode = true;
-    
-    // Загружаем существующие данные для этой даты
-    const existingEntry = await loadDayEntry(dateStr);
-    
-    // Заполняем форму данными
-    fillFormWithData(dateStr, existingEntry);
-    
-    // Прокручиваем к форме
-    document.querySelector('.tracker-form').scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'start' 
-    });
-    
-    // Показываем сообщение
-    showToast(`Редактирование дня ${formatDateDisplay(dateStr)}`, 'info');
-}
-
-// Форматирование даты для отображения
-function formatDateDisplay(dateStr) {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('ru-RU', { 
-        day: 'numeric', 
-        month: 'long',
-        year: 'numeric' 
-    });
-}
-
-// Проверка, что дата не в будущем
-function isValidDateForEntry(dateStr) {
-    try {
-        const selectedDate = new Date(dateStr);
-        const today = new Date();
-        
-        // Сбрасываем время для корректного сравнения только дат
-        selectedDate.setHours(0, 0, 0, 0);
-        today.setHours(0, 0, 0, 0);
-        
-        return selectedDate <= today;
-    } catch (error) {
-        console.error('Ошибка проверки даты:', error);
-        return false;
-    }
-}
-
-// Загрузка записи дня
-async function loadDayEntry(dateStr) {
-    try {
-        const response = await fetch(`${CYCLE_API}?date=${dateStr}`);
-        if (response.ok) {
-            const entries = await response.json();
-            return entries.length > 0 ? entries[0] : null;
-        }
-        return null;
-    } catch (error) {
-        console.error('Ошибка загрузки записи:', error);
-        return null;
-    }
-}
-
-// Заполнение формы данными
-function fillFormWithData(dateStr, entry) {
-    // Устанавливаем заголовок формы
-    const formTitle = document.querySelector('.tracker-form h3');
-    if (formTitle) {
-        formTitle.innerHTML = `<i class="fas fa-edit"></i>  ${formatDateDisplay(dateStr)}`;
-    }
-    
-    // Сбрасываем форму
-    clearForm();
-    
-    // Заполняем форму данными если они есть
-    if (entry) {
-        // Симптомы
-        if (entry.symptoms && Array.isArray(entry.symptoms)) {
-            entry.symptoms.forEach(symptom => {
-                const checkbox = Array.from(document.querySelectorAll('input[name="symptoms"]'))
-                    .find(cb => cb.value === symptom);
-                if (checkbox) checkbox.checked = true;
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Количество записей'
+                            },
+                            ticks: {
+                                precision: 0
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                autoSkip: false,
+                                maxRotation: rotation,
+                                minRotation: rotation,
+                                font: {
+                                    size: fontSize
+                                }
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            left: 10,
+                            right: 10,
+                            top: 10,
+                            bottom: symptomsCount > 10 ? 50 : 30
+                        }
+                    },
+                    // Оптимизация для большого количества столбцов
+                    barPercentage: symptomsCount > 15 ? 0.8 : 0.9,
+                    categoryPercentage: symptomsCount > 15 ? 0.7 : 0.8
+                }
             });
-        }
-        
-        // Выделения
-        const flowSelect = document.getElementById('flowLevel');
-        if (flowSelect && entry.flow_intensity) {
-            flowSelect.value = entry.flow_intensity;
-        }
-        
-        // Заметки
-        const notesTextarea = document.getElementById('cycleNotes');
-        if (notesTextarea && entry.notes) {
-            notesTextarea.value = entry.notes;
+        } else {
+            if (noSymptomsData) noSymptomsData.style.display = 'flex';
         }
     }
-}
 
-// Функция Удалить
-function clearSelectedDate() {
-    if (!currentSelectedDate) {
-        showToast('Сначала выберите день в календаре', 'error');
-        return;
+    // Функция расчета реальных данных настроения по фазам
+    function calculateRealMoodByPhase() {
+        if (!moodData || moodData.length === 0) {
+            return { hasData: false };
+        }
+
+        // Группируем настроения по фазам (для демо - фазы определены по дню цикла)
+        const phaseMoods = {
+            follicular: [],
+            ovulation: [],
+            luteal: [],
+            menstruation: []
+        };
+
+        // Простая логика: день цикла 1-7 = менструация, 8-13 = фолликулярная, 
+        // 14 = овуляция, 15-28 = лютеиновая
+        moodData.forEach(entry => {
+            if (entry.date && entry.mood !== undefined) {
+                const date = new Date(entry.date);
+                const dayOfMonth = date.getDate();
+
+                if (dayOfMonth <= 7) {
+                    phaseMoods.menstruation.push(entry.mood);
+                } else if (dayOfMonth <= 13) {
+                    phaseMoods.follicular.push(entry.mood);
+                } else if (dayOfMonth === 14) {
+                    phaseMoods.ovulation.push(entry.mood);
+                } else {
+                    phaseMoods.luteal.push(entry.mood);
+                }
+            }
+        });
+
+        // Рассчитываем средние значения
+        const calculateAverage = (arr) => {
+            if (arr.length === 0) return null;
+            const sum = arr.reduce((a, b) => a + b, 0);
+            return parseFloat((sum / arr.length).toFixed(1));
+        };
+
+        const follicularAvg = calculateAverage(phaseMoods.follicular);
+        const ovulationAvg = calculateAverage(phaseMoods.ovulation);
+        const lutealAvg = calculateAverage(phaseMoods.luteal);
+        const menstruationAvg = calculateAverage(phaseMoods.menstruation);
+
+        // Проверяем, есть ли хотя бы одна фаза с данными
+        const hasValidData = [follicularAvg, ovulationAvg, lutealAvg, menstruationAvg]
+            .some(avg => avg !== null);
+
+        if (!hasValidData) {
+            return { hasData: false };
+        }
+
+        return {
+            hasData: true,
+            labels: ['Фолликулярная', 'Овуляция', 'Лютеиновая', 'Менструация'],
+            values: [
+                follicularAvg || 0,
+                ovulationAvg || 0,
+                lutealAvg || 0,
+                menstruationAvg || 0
+            ]
+        };
     }
 
-    // Проверяем, есть ли запись для этой даты
-    const existingEntry = cycleData.find(entry => entry.date === currentSelectedDate);
-    
-    if (existingEntry) {
-        // Если есть запись - удаляем
-        deleteCycleEntry();
-    } else {
-        // Если записи нет - просто сбрасываем форму
-        resetToToday();
-        showToast('Форма очищена', 'info');
-    }
-}
+    function calculateRealSymptomFrequency(data) {
+        if (!data || data.length === 0) {
+            return { hasData: false };
+        }
 
-// Функция сброса к сегодняшней дате
-function resetToToday() {
-    console.log('🔄 Сбрасываем выбранную дату...');
-    
-    // Сброс глобальных переменных
-    currentSelectedDate = null;
-    isEditMode = false;
-    
-    // ✅ Убираем отображение даты если осталось
-    const dateDisplay = document.querySelector('.selected-date-display');
-    if (dateDisplay) {
-        dateDisplay.remove();
-        console.log('🗑️ Удален отображение даты');
-    }
-    
-    // Восстанавливаем заголовок формы
-    const formTitle = document.querySelector('.tracker-form h3');
-    if (formTitle) {
-        formTitle.innerHTML = `<i class="fas fa-edit"></i> Отметить сегодня`;
-        console.log('📝 Восстановлен заголовок');
-    }
-    
-    // Снимаем выделение с календаря
-    document.querySelectorAll('.calendar-day.selected').forEach(day => {
-        day.classList.remove('selected');
-    });
-    
-    // Очищаем форму
-    clearForm();
-    
-    showToast('Выбрана сегодняшняя дата', 'info');
-    console.log('✅ Сброс выполнен');
-}
+        const symptomCounts = {};
 
-async function markMenstruationStart() {
-    let targetDate;
-    
-    // Если есть выбранная дата - используем её, иначе - сегодня
-    if (currentSelectedDate) {
-        targetDate = currentSelectedDate;
-    } else {
-        targetDate = formatDate(new Date());
+        data.forEach(entry => {
+            (entry.symptoms || []).forEach(symptom => {
+                symptomCounts[symptom] = (symptomCounts[symptom] || 0) + 1;
+            });
+        });
+
+        const labels = Object.keys(symptomCounts);
+        const values = Object.values(symptomCounts);
+
+        if (labels.length === 0) {
+            return { hasData: false };
+        }
+
+        return {
+            hasData: true,
+            labels: labels,
+            values: values,
+            colors: labels.map(getSymptomColor),
+            borderColors: labels.map(getSymptomColor)
+        };
     }
 
-    // Проверяем, что дата не в будущем
-    if (!isValidDateForEntry(targetDate)) {
-        showToast('Нельзя отметить менструацию в будущем', 'error');
-        return;
+
+    // Открытие деталей дня с возможностью редактирования
+    async function openDayDetail(dateStr) {
+        // Проверяем, что дата не в будущем
+        if (!isValidDateForEntry(dateStr)) {
+            showToast('Нельзя редактировать будущие дни', 'error');
+            return;
+        }
+
+        console.log('📅 Открываем детали дня для редактирования:', dateStr);
+
+        currentSelectedDate = dateStr;
+        isEditMode = true;
+
+        // Загружаем существующие данные для этой даты
+        const existingEntry = await loadDayEntry(dateStr);
+
+        // Заполняем форму данными
+        fillFormWithData(dateStr, existingEntry);
+
+        // Прокручиваем к форме
+        document.querySelector('.tracker-form').scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+
+        // Показываем сообщение
+        showToast(`Редактирование дня ${formatDateDisplay(dateStr)}`, 'info');
     }
 
-    // Получаем существующую запись
-    const existingEntry = cycleData.find(entry => entry.date === targetDate);
+    // Форматирование даты для отображения
+    function formatDateDisplay(dateStr) {
+        const date = new Date(dateStr);
+        return date.toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+    }
 
-    try {
+    // Проверка, что дата не в будущем
+    function isValidDateForEntry(dateStr) {
+        try {
+            const selectedDate = new Date(dateStr);
+            const today = new Date();
+
+            // Сбрасываем время для корректного сравнения только дат
+            selectedDate.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+
+            return selectedDate <= today;
+        } catch (error) {
+            console.error('Ошибка проверки даты:', error);
+            return false;
+        }
+    }
+
+    // Загрузка записи дня
+    async function loadDayEntry(dateStr) {
+        try {
+            const response = await fetch(`${CYCLE_API}?date=${dateStr}`);
+            if (response.ok) {
+                const entries = await response.json();
+                return entries.length > 0 ? entries[0] : null;
+            }
+            return null;
+        } catch (error) {
+            console.error('Ошибка загрузки записи:', error);
+            return null;
+        }
+    }
+
+    // Заполнение формы данными
+    function fillFormWithData(dateStr, entry) {
+        // Устанавливаем заголовок формы
+        const formTitle = document.querySelector('.tracker-form h3');
+        if (formTitle) {
+            formTitle.innerHTML = `<i class="fas fa-edit"></i>  ${formatDateDisplay(dateStr)}`;
+        }
+
+        // Сбрасываем форму
+        clearForm();
+
+        // Заполняем форму данными если они есть
+        if (entry) {
+            // Симптомы
+            if (entry.symptoms && Array.isArray(entry.symptoms)) {
+                entry.symptoms.forEach(symptom => {
+                    const checkbox = Array.from(document.querySelectorAll('input[name="symptoms"]'))
+                        .find(cb => cb.value === symptom);
+                    if (checkbox) checkbox.checked = true;
+                });
+            }
+
+            // Выделения
+            const flowSelect = document.getElementById('flowLevel');
+            if (flowSelect && entry.flow_intensity) {
+                flowSelect.value = entry.flow_intensity;
+            }
+
+            // Заметки
+            const notesTextarea = document.getElementById('cycleNotes');
+            if (notesTextarea && entry.notes) {
+                notesTextarea.value = entry.notes;
+            }
+        }
+    }
+
+    // Функция Удалить
+    function clearSelectedDate() {
+        if (!currentSelectedDate) {
+            showToast('Сначала выберите день в календаре', 'error');
+            return;
+        }
+
+        // Проверяем, есть ли запись для этой даты
+        const existingEntry = cycleData.find(entry => entry.date === currentSelectedDate);
+
         if (existingEntry) {
-            // Обновляем существующую запись
-            const response = await fetch(`${CYCLE_API}/${targetDate}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    symptoms: existingEntry.symptoms || [], // Сохраняем симптомы!
-                    flow_intensity: 'medium', // Устанавливаем менструацию
-                    notes: existingEntry.notes || 'Начало менструации'
-                })
-            });
-
-            if (response.ok) {
-                showToast(`Менструация отмечена на ${formatDateDisplay(targetDate)}!`, 'success');
-                await loadCycleData();
-                renderCalendar();
-            }
+            // Если есть запись - удаляем
+            deleteCycleEntry();
         } else {
-            // Создаем новую запись
-            const response = await fetch(CYCLE_API, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    date: targetDate,
-                    symptoms: [],
-                    flow_intensity: 'medium',
-                    notes: 'Начало менструации'
-                })
+            // Если записи нет - просто сбрасываем форму
+            resetToToday();
+            showToast('Форма очищена', 'info');
+        }
+    }
+
+    // Функция сброса к сегодняшней дате
+    function resetToToday() {
+        console.log('🔄 Сбрасываем выбранную дату...');
+
+        // Сброс глобальных переменных
+        currentSelectedDate = null;
+        isEditMode = false;
+
+        // ✅ Убираем отображение даты если осталось
+        const dateDisplay = document.querySelector('.selected-date-display');
+        if (dateDisplay) {
+            dateDisplay.remove();
+            console.log('🗑️ Удален отображение даты');
+        }
+
+        // Восстанавливаем заголовок формы
+        const formTitle = document.querySelector('.tracker-form h3');
+        if (formTitle) {
+            formTitle.innerHTML = `<i class="fas fa-edit"></i> Отметить сегодня`;
+            console.log('📝 Восстановлен заголовок');
+        }
+
+        // Снимаем выделение с календаря
+        document.querySelectorAll('.calendar-day.selected').forEach(day => {
+            day.classList.remove('selected');
+        });
+
+        // Очищаем форму
+        clearForm();
+
+        showToast('Выбрана сегодняшняя дата', 'info');
+        console.log('✅ Сброс выполнен');
+    }
+
+    async function markMenstruationStart() {
+        let targetDate;
+
+        // Если есть выбранная дата - используем её, иначе - сегодня
+        if (currentSelectedDate) {
+            targetDate = currentSelectedDate;
+        } else {
+            targetDate = formatDate(new Date());
+        }
+
+        // Проверяем, что дата не в будущем
+        if (!isValidDateForEntry(targetDate)) {
+            showToast('Нельзя отметить менструацию в будущем', 'error');
+            return;
+        }
+
+        // Получаем существующую запись
+        const existingEntry = cycleData.find(entry => entry.date === targetDate);
+
+        try {
+            if (existingEntry) {
+                // Обновляем существующую запись
+                const response = await fetch(`${CYCLE_API}/${targetDate}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        symptoms: existingEntry.symptoms || [], // Сохраняем симптомы!
+                        flow_intensity: 'medium', // Устанавливаем менструацию
+                        notes: existingEntry.notes || 'Начало менструации'
+                    })
+                });
+
+                if (response.ok) {
+                    showToast(`Менструация отмечена на ${formatDateDisplay(targetDate)}!`, 'success');
+                    await loadCycleData();
+                    renderCalendar();
+                }
+            } else {
+                // Создаем новую запись
+                const response = await fetch(CYCLE_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        date: targetDate,
+                        symptoms: [],
+                        flow_intensity: 'medium',
+                        notes: 'Начало менструации'
+                    })
+                });
+
+                if (response.ok) {
+                    showToast(`Менструация отмечена на ${formatDateDisplay(targetDate)}!`, 'success');
+                    await loadCycleData();
+                    renderCalendar();
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showToast('Ошибка сохранения', 'error');
+        }
+    }
+
+    // Функция для удаления записи
+    async function deleteCycleEntry() {
+        if (!currentSelectedDate) {
+            showToast('Сначала выберите день в календаре', 'error');
+            return;
+        }
+
+        // Проверяем, что есть что удалять
+        const existingEntry = cycleData.find(entry => entry.date === currentSelectedDate);
+        if (!existingEntry) {
+            showToast('Для этой даты нет записи', 'info');
+            return;
+        }
+
+        // Подтверждение удаления
+        if (!confirm(`Удалить запись за ${formatDateDisplay(currentSelectedDate)}?`)) {
+            return;
+        }
+
+        try {
+            // 🔧 ВАЖНО: URL должен соответствовать Flask маршруту
+            console.log('🔗 Отправляю DELETE запрос на:', `${CYCLE_API}/${currentSelectedDate}`);
+
+            const response = await fetch(`${CYCLE_API}/${currentSelectedDate}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
             });
 
-            if (response.ok) {
-                showToast(`Менструация отмечена на ${formatDateDisplay(targetDate)}!`, 'success');
-                await loadCycleData();
+            // Проверяем не только статус, но и тело ответа
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                showToast(`Запись за ${formatDateDisplay(currentSelectedDate)} удалена!`, 'success');
+
+                // ✅ ВАЖНО: Удаляем запись из ЛОКАЛЬНОГО массива cycleData
+                const index = cycleData.findIndex(entry => entry.date === currentSelectedDate);
+                if (index > -1) {
+                    cycleData.splice(index, 1);
+                    console.log(`🗑️ Удалена запись из cycleData: ${currentSelectedDate}`);
+                    console.log('📊 Теперь в cycleData записей:', cycleData.length);
+                }
+
+                // ✅ Перерисовываем календарь с обновленными данными
                 renderCalendar();
+
+                // ✅ Сбрасываем выбранную дату
+                resetToToday();
+
+                // ✅ Обновляем легенду симптомов
+                updateSymptomsLegend();
+
+                // ✅ Обновляем аналитику
+                updateChartsWithRealData();
+
+            } else {
+                // Если response.ok, но нет success в теле ответа
+                const errorMsg = result.error || 'Ошибка удаления записи';
+                throw new Error(errorMsg);
             }
+        } catch (error) {
+            console.error('Ошибка удаления:', error);
+            showToast('Ошибка удаления записи: ' + error.message, 'error');
         }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        showToast('Ошибка сохранения', 'error');
     }
-}
+    // Инициализация графиков
+    function initCharts() {
+        // Ждем загрузки всех данных
+        setTimeout(() => {
+            console.log('🔄 Инициализация графиков...');
+            console.log('📁 Данные цикла:', cycleData.length, 'записей');
+            updateChartsWithRealData();
+        }, 500);
+    }
+    // Обновляем функцию загрузки начальных данных
+    async function loadInitialData() {
+        try {
+            // Загружаем данные
+            await loadCycleData();
+            renderCalendar();
 
-// Функция для удаления записи
-async function deleteCycleEntry() {
-    if (!currentSelectedDate) {
-        showToast('Сначала выберите день в календаре', 'error');
-        return;
+            // Загружаем остальные данные
+            await Promise.allSettled([
+                loadMoodData(),
+                loadCycleStats(),
+                loadCyclePredictions(),
+                loadTodayMood()
+            ]);
+
+            // Инициализируем графики после загрузки всех данных
+            initCharts();
+
+        } catch (error) {
+            console.error('Ошибка загрузки данных:', error);
+            showToast('Ошибка загрузки данных', 'error');
+        }
     }
 
-    // Проверяем, что есть что удалять
-    const existingEntry = cycleData.find(entry => entry.date === currentSelectedDate);
-    if (!existingEntry) {
-        showToast('Для этой даты нет записи', 'info');
-        return;
-    }
+    // Функция для отображения легенды симптомов
+    function updateSymptomsLegend() {
+        const legendContainer = document.getElementById('symptomsLegend');
+        if (!legendContainer) return;
 
-    // Подтверждение удаления
-    if (!confirm(`Удалить запись за ${formatDateDisplay(currentSelectedDate)}?`)) {
-        return;
-    }
-
-    try {
-        // 🔧 ВАЖНО: URL должен соответствовать Flask маршруту
-        console.log('🔗 Отправляю DELETE запрос на:', `${CYCLE_API}/${currentSelectedDate}`);
-        
-        const response = await fetch(`${CYCLE_API}/${currentSelectedDate}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
+        // Собираем статистику симптомов
+        const symptomStats = {};
+        cycleData.forEach(entry => {
+            if (entry.symptoms && Array.isArray(entry.symptoms)) {
+                entry.symptoms.forEach(symptom => {
+                    symptomStats[symptom] = (symptomStats[symptom] || 0) + 1;
+                });
             }
         });
 
-        // Проверяем не только статус, но и тело ответа
-        const result = await response.json();
-        
-        if (response.ok && result.success) {
-            showToast(`Запись за ${formatDateDisplay(currentSelectedDate)} удалена!`, 'success');
-            
-            // ✅ ВАЖНО: Удаляем запись из ЛОКАЛЬНОГО массива cycleData
-            const index = cycleData.findIndex(entry => entry.date === currentSelectedDate);
-            if (index > -1) {
-                cycleData.splice(index, 1);
-                console.log(`🗑️ Удалена запись из cycleData: ${currentSelectedDate}`);
-                console.log('📊 Теперь в cycleData записей:', cycleData.length);
-            }
-            
-            // ✅ Перерисовываем календарь с обновленными данными
-            renderCalendar();
-            
-            // ✅ Сбрасываем выбранную дату
-            resetToToday();
-            
-            // ✅ Обновляем легенду симптомов
-            updateSymptomsLegend();
-            
-            // ✅ Обновляем аналитику
-            updateChartsWithRealData();
-            
-        } else {
-            // Если response.ok, но нет success в теле ответа
-            const errorMsg = result.error || 'Ошибка удаления записи';
-            throw new Error(errorMsg);
-        }
-    } catch (error) {
-        console.error('Ошибка удаления:', error);
-        showToast('Ошибка удаления записи: ' + error.message, 'error');
-    }
-}
-// Инициализация графиков
-function initCharts() {
-    // Ждем загрузки всех данных
-    setTimeout(() => {
-        console.log('🔄 Инициализация графиков...');
-        console.log('📁 Данные цикла:', cycleData.length, 'записей');
-        updateChartsWithRealData();
-    }, 500);
-}
-// Обновляем функцию загрузки начальных данных
-async function loadInitialData() {
-    try {
-        // Загружаем данные
-        await loadCycleData();
-        renderCalendar();
-        
-        // Загружаем остальные данные
-        await Promise.allSettled([
-            loadMoodData(),
-            loadCycleStats(),
-            loadCyclePredictions(),
-            loadTodayMood()
-        ]);
-        
-        // Инициализируем графики после загрузки всех данных
-        initCharts();
-        
-    } catch (error) {
-        console.error('Ошибка загрузки данных:', error);
-        showToast('Ошибка загрузки данных', 'error');
-    }
-}
+        // Сортируем по частоте
+        const sortedSymptoms = Object.entries(symptomStats)
+            .sort((a, b) => b[1] - a[1]);
 
-// Функция для отображения легенды симптомов
-function updateSymptomsLegend() {
-    const legendContainer = document.getElementById('symptomsLegend');
-    if (!legendContainer) return;
-    
-    // Собираем статистику симптомов
-    const symptomStats = {};
-    cycleData.forEach(entry => {
-        if (entry.symptoms && Array.isArray(entry.symptoms)) {
-            entry.symptoms.forEach(symptom => {
-                symptomStats[symptom] = (symptomStats[symptom] || 0) + 1;
-            });
+        if (sortedSymptoms.length === 0) {
+            legendContainer.innerHTML = '<p style="text-align: center; color: var(--gray);">Симптомы еще не добавлены</p>';
+            return;
         }
-    });
-    
-    // Сортируем по частоте
-    const sortedSymptoms = Object.entries(symptomStats)
-        .sort((a, b) => b[1] - a[1]);
-    
-    if (sortedSymptoms.length === 0) {
-        legendContainer.innerHTML = '<p style="text-align: center; color: var(--gray);">Симптомы еще не добавлены</p>';
-        return;
-    }
-    
-    // Создаем элементы легенды
-    legendContainer.innerHTML = sortedSymptoms.map(([symptom, count]) => `
+
+        // Создаем элементы легенды
+        legendContainer.innerHTML = sortedSymptoms.map(([symptom, count]) => `
         <div class="legend-item">
             <div class="legend-color" style="background: ${getSymptomColor(symptom)}"></div>
             <div class="legend-name">${symptom}</div>
             <div class="legend-count">${count}</div>
         </div>
     `).join('');
-}
-
-// Функция для переключения видимости легенды 
-function toggleLegend() {
-    const content = document.getElementById('symptomsLegend');
-    const toggleBtn = document.querySelector('.legend-toggle i');
-    
-    if (!content || !toggleBtn) return;
-    
-    content.classList.toggle('collapsed');
-    
-    if (content.classList.contains('collapsed')) {
-        toggleBtn.classList.remove('fa-chevron-up');
-        toggleBtn.classList.add('fa-chevron-down');
-    } else {
-        toggleBtn.classList.remove('fa-chevron-down');
-        toggleBtn.classList.add('fa-chevron-up');
     }
-}
-async function loadCycleData() {
-    try {
-        const response = await fetch(CYCLE_API);
-        console.log('🔍 Запрос к CYCLE_API:', CYCLE_API, 'Статус:', response.status);
-        
-        if (response.ok) {
-            cycleData = await response.json();
-            console.log('✅ Данные цикла загружены:', cycleData.length, 'записей');
-            
-            // Обновляем легенду после загрузки данных
-            updateSymptomsLegend();
+
+    // Функция для переключения видимости легенды 
+    function toggleLegend() {
+        const content = document.getElementById('symptomsLegend');
+        const toggleBtn = document.querySelector('.legend-toggle i');
+
+        if (!content || !toggleBtn) return;
+
+        content.classList.toggle('collapsed');
+
+        if (content.classList.contains('collapsed')) {
+            toggleBtn.classList.remove('fa-chevron-up');
+            toggleBtn.classList.add('fa-chevron-down');
         } else {
-            console.error('❌ Ошибка загрузки данных цикла:', response.status);
+            toggleBtn.classList.remove('fa-chevron-down');
+            toggleBtn.classList.add('fa-chevron-up');
         }
-    } catch (error) {
-        console.error('Сетевая ошибка загрузки данных цикла:', error);
     }
-}
+    async function loadCycleData() {
+        try {
+            const response = await fetch(CYCLE_API);
+            console.log('🔍 Запрос к CYCLE_API:', CYCLE_API, 'Статус:', response.status);
 
-// Вызываем загрузку данных
-loadInitialData();
+            if (response.ok) {
+                cycleData = await response.json();
+                console.log('✅ Данные цикла загружены:', cycleData.length, 'записей');
+
+                // Обновляем легенду после загрузки данных
+                updateSymptomsLegend();
+            } else {
+                console.error('❌ Ошибка загрузки данных цикла:', response.status);
+            }
+        } catch (error) {
+            console.error('Сетевая ошибка загрузки данных цикла:', error);
+        }
+    }
+
+    // Вызываем загрузку данных
+    loadInitialData();
 </script>
 {% endblock %}

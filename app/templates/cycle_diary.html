@@ -1363,14 +1363,7 @@ body {
         <div class="tracker-form">
             <h3 class="section-title"><i class="fas fa-edit"></i> Отметить сегодня</h3>
             
-            <div class="form-section">
-                <div class="section-title"><i class="fas fa-heartbeat"></i> Симптомы</div>
-                <div class="symptoms-grid" id="symptomsGrid">
-                    <!-- Симптомы будут добавлены через JavaScript -->
-                </div>
-            </div>
-
-            <!-- КНОПКИ МЕНСТРУАЦИИ ДОЛЖНЫ БЫТЬ ЗДЕСЬ, А НЕ ПОСЛЕ АНАЛИТИКИ -->
+            <!-- КНОПКИ МЕНСТРУАЦИИ -->
             <div class="form-section">
                 <div class="section-title"><i class="fas fa-droplet"></i> Быстрая отметка менструации</div>
                 <div class="quick-menstruation">
@@ -1506,6 +1499,9 @@ let moodPhaseChart = null;
 let symptomsChart = null;
 let currentSelectedDate = null; // Выбранная дата для редактирования
 let isEditMode = false; // Режим редактирования (true = редактируем выбранную дату)
+let selectedAnalyticsMonth = null;
+let selectedAnalyticsYear = null;
+
 
 
 // Инициализация при загрузке
@@ -1989,13 +1985,12 @@ async function saveCycleEntry() {
         return;
     }
 
-    const flowLevel = document.getElementById('flowLevel').value;
     const notes = document.getElementById('cycleNotes').value.trim();
 
     // Убираем дубликаты на всякий случай
     const uniqueSymptoms = [...new Set(selectedSymptoms)];
 
-    if (!uniqueSymptoms.length && !flowLevel && !notes) {
+    if (!uniqueSymptoms.length &&!notes) {
         showToast('Заполните хотя бы одно поле', 'error');
         return;
     }
@@ -2007,7 +2002,6 @@ async function saveCycleEntry() {
             body: JSON.stringify({
                 date: dateStr,
                 symptoms: uniqueSymptoms,
-                flow_intensity: flowLevel,
                 notes: notes
             })
         });
@@ -2122,9 +2116,11 @@ function goToMoodTracker() {
 function openDayDetail(dateStr) {
     // Показываем всплывашку с датой
     showToast(`День ${dateStr}`, 'info');
-    
-    // TODO: Можно сделать модальное окно с деталями
-    // window.location.href = `/cycle/day/${dateStr}`;
+    const d = new Date(dateStr);
+    selectedAnalyticsMonth = d.getMonth(); // 0-11
+    selectedAnalyticsYear = d.getFullYear();
+
+    updateChartsWithRealData();
 }
 
 // Утилиты
@@ -2161,6 +2157,20 @@ function initCharts() {
 }
 
 function updateChartsWithRealData() {
+    
+    let filteredCycleData = cycleData;
+
+if (selectedAnalyticsMonth !== null && selectedAnalyticsYear !== null) {
+    filteredCycleData = cycleData.filter(entry => {
+        const d = new Date(entry.date);
+        return (
+            d.getMonth() === selectedAnalyticsMonth &&
+            d.getFullYear() === selectedAnalyticsYear
+        );
+    });
+}
+
+    
     // Скрываем "нет данных" если они есть
     const noMoodData = document.getElementById('noMoodData');
     const noSymptomsData = document.getElementById('noSymptomsData');
@@ -2236,7 +2246,7 @@ function updateChartsWithRealData() {
     }
     
     // График распределения симптомов - АДАПТИВНЫЙ БЕЗ ПРОКРУТКИ
-    const symptomsData = calculateRealSymptomFrequency();
+    const symptomsData = calculateRealSymptomFrequency(filteredCycleData);
     const symptomsCtx = document.getElementById('symptomsChart');
     
     if (symptomsCtx && symptomsData.hasData) {
@@ -2384,56 +2394,36 @@ function calculateRealMoodByPhase() {
     };
 }
 
-function calculateRealSymptomFrequency() {
-    if (!cycleData || cycleData.length === 0) {
+function calculateRealSymptomFrequency(data) {
+    if (!data || data.length === 0) {
         return { hasData: false };
     }
-    
-    // Собираем все симптомы из всех записей
+
     const symptomCounts = {};
-    
-    cycleData.forEach(entry => {
-        if (entry.symptoms && Array.isArray(entry.symptoms)) {
-            entry.symptoms.forEach(symptom => {
-                if (symptomCounts[symptom]) {
-                    symptomCounts[symptom]++;
-                } else {
-                    symptomCounts[symptom] = 1;
-                }
-            });
-        }
+
+    data.forEach(entry => {
+        (entry.symptoms || []).forEach(symptom => {
+            symptomCounts[symptom] = (symptomCounts[symptom] || 0) + 1;
+        });
     });
-    
-    // Сортируем по частоте
-    const sortedSymptoms = Object.entries(symptomCounts)
-        .sort((a, b) => b[1] - a[1]);
-    
-    console.log('📊 Найдено симптомов:', sortedSymptoms.length, 'Список:', sortedSymptoms);
-    
-    if (sortedSymptoms.length === 0) {
+
+    const labels = Object.keys(symptomCounts);
+    const values = Object.values(symptomCounts);
+
+    if (labels.length === 0) {
         return { hasData: false };
     }
-    
-    // Генерируем уникальные цвета для каждого симптома
-    const colors = [];
-    const borderColors = [];
-    
-    sortedSymptoms.forEach((item, index) => {
-        const color = getSymptomColor(item[0]); // Используем ту же функцию что и для точек
-        colors.push(color.replace(')', ', 0.7)').replace('rgb', 'rgba'));
-        borderColors.push(color);
-    });
-    
+
     return {
         hasData: true,
-        labels: sortedSymptoms.map(item => item[0]),
-        values: sortedSymptoms.map(item => item[1]),
-        colors: colors,
-        borderColors: borderColors
+        labels: labels,
+        values: values,
+        colors: labels.map(getSymptomColor),
+        borderColors: labels.map(getSymptomColor)
     };
 }
 
-// Открытие деталей дня с возможностью редактирования
+
 // Открытие деталей дня с возможностью редактирования
 async function openDayDetail(dateStr) {
     // Проверяем, что дата не в будущем

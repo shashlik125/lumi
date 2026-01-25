@@ -1998,25 +1998,6 @@ async function saveCycleEntry() {
         dateStr = formatDate(new Date());
     }
 
-    // Получаем выбранные симптомы
-    const selectedSymptoms = Array.from(
-        document.querySelectorAll('input[name="symptoms"]:checked')
-    ).map(cb => cb.value);
-
-    // Находим запись за эту дату
-    const existingEntry = cycleData.find(entry => entry.date === dateStr);
-
-    if (existingEntry && existingEntry.symptoms) {
-        const duplicate = selectedSymptoms.find(symptom =>
-            existingEntry.symptoms.includes(symptom)
-        );
-
-        if (duplicate) {
-            showToast("Этот симптом уже отмечен сегодня", "error");
-            return; // ❌ НЕ сохраняем
-        }
-    }
-
     // Проверяем, что дата не в будущем
     const selected = new Date(dateStr);
     const today = new Date();
@@ -2027,87 +2008,80 @@ async function saveCycleEntry() {
         return;
     }
 
+    // Получаем выбранные симптомы
+    const selectedSymptoms = Array.from(
+        document.querySelectorAll('input[name="symptoms"]:checked')
+    ).map(cb => cb.value);
+
+    // Получаем заметки
     const notes = document.getElementById('cycleNotes').value.trim();
 
     // Убираем дубликаты на всякий случай
     const uniqueSymptoms = [...new Set(selectedSymptoms)];
 
-    if (!uniqueSymptoms.length &&!notes) {
-        showToast('Заполните хотя бы одно поле', 'error');
-        return;
-    }
+    // Получаем существующую запись
+    const existingEntry = cycleData.find(entry => entry.date === dateStr);
 
     try {
-        const response = await fetch(CYCLE_API, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                date: dateStr,
-                symptoms: uniqueSymptoms,
-                notes: notes
-            })
-        });
+        // Если есть существующая запись - обновляем её
+        if (existingEntry) {
+            // Объединяем симптомы (старые + новые)
+            const existingSymptoms = existingEntry.symptoms || [];
+            const allSymptoms = [...new Set([...existingSymptoms, ...uniqueSymptoms])];
+            
+            // Сохраняем flow_intensity из старой записи
+            const flowIntensity = existingEntry.flow_intensity || 'none';
+            
+            const response = await fetch(`${CYCLE_API}/${dateStr}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    symptoms: allSymptoms,
+                    flow_intensity: flowIntensity, // Сохраняем менструацию!
+                    notes: notes || existingEntry.notes
+                })
+            });
 
-        if (response.ok) {
-            showToast('Запись сохранена!', 'success');
-            await loadCycleData();
-            renderCalendar();
-            clearForm();
-            await updateAnalytics();
+            if (response.ok) {
+                showToast('Запись обновлена!', 'success');
+                await loadCycleData();
+                renderCalendar();
+                await updateAnalytics();
+            } else {
+                throw new Error('Ошибка обновления записи');
+            }
         } else {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Ошибка сохранения');
+            // Если записи нет - создаем новую
+            if (!uniqueSymptoms.length && !notes) {
+                showToast('Заполните хотя бы одно поле', 'error');
+                return;
+            }
+
+            const response = await fetch(CYCLE_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    date: dateStr,
+                    symptoms: uniqueSymptoms,
+                    flow_intensity: 'none', // По умолчанию нет менструации
+                    notes: notes
+                })
+            });
+
+            if (response.ok) {
+                showToast('Запись сохранена!', 'success');
+                await loadCycleData();
+                renderCalendar();
+                clearForm();
+                await updateAnalytics();
+            } else {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Ошибка сохранения');
+            }
         }
     } catch (error) {
         console.error('Ошибка:', error);
         showToast('Ошибка сохранения записи: ' + error.message, 'error');
-    }
-}
-
-// Проверка существующей записи за сегодня
-async function checkExistingEntry(date) {
-    try {
-        const response = await fetch(`${CYCLE_API}/${date}`);
-        if (response.ok) {
-            return await response.json();
-        }
-        return null;
-    } catch (error) {
-        console.error('Ошибка проверки записи:', error);
-        return null;
-    }
-}
-
-// Обновление существующей записи
-async function updateCycleEntry(date, symptoms, flowLevel, notes, existingEntry) {
-    try {
-        // Объединяем симптомы из существующей и новой записи, убираем дубликаты
-        const allSymptoms = [...new Set([...(existingEntry.symptoms || []), ...symptoms])];
-        
-        const response = await fetch(`${CYCLE_API}/${date}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                symptoms: allSymptoms,
-                flow_intensity: flowLevel || existingEntry.flow_intensity,
-                notes: notes || existingEntry.notes
-            })
-        });
-
-        if (response.ok) {
-            showToast('Запись обновлена!', 'success');
-            await loadCycleData();
-            renderCalendar();
-            clearForm();
-            await updateAnalytics();
-        } else {
-            throw new Error('Ошибка обновления записи');
-        }
-    } catch (error) {
-        console.error('Ошибка обновления:', error);
-        showToast('Ошибка обновления записи', 'error');
     }
 }
 
@@ -2643,89 +2617,45 @@ async function markMenstruationStart() {
         return;
     }
 
-    try {
-        const response = await fetch(CYCLE_API, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                date: targetDate,
-                flow_intensity: 'medium',
-                notes: 'Начало менструации'
-            })
-        });
+    // Получаем существующую запись
+    const existingEntry = cycleData.find(entry => entry.date === targetDate);
 
-        if (response.ok) {
-            showToast(`Менструация отмечена на ${formatDateDisplay(targetDate)}!`, 'success');
-            
-            // ✅ Обновляем данные
-            await loadCycleData();
-            renderCalendar();
-            
-            // ❌ НЕ сбрасываем выбранную дату, если она была выбрана
-            // Это позволяет пользователю продолжить редактирование
-            if (!currentSelectedDate) {
-                clearForm();
+    try {
+        if (existingEntry) {
+            // Обновляем существующую запись
+            const response = await fetch(`${CYCLE_API}/${targetDate}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    symptoms: existingEntry.symptoms || [], // Сохраняем симптомы!
+                    flow_intensity: 'medium', // Устанавливаем менструацию
+                    notes: existingEntry.notes || 'Начало менструации'
+                })
+            });
+
+            if (response.ok) {
+                showToast(`Менструация отмечена на ${formatDateDisplay(targetDate)}!`, 'success');
+                await loadCycleData();
+                renderCalendar();
             }
-        }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        showToast('Ошибка сохранения', 'error');
-    }
-}
-
-// Функция получения целевой даты (выбранная или сегодня)
-function getTargetDate() {
-    if (currentSelectedDate && isEditMode) {
-        return currentSelectedDate;
-    } else {
-        return formatDate(new Date());
-    }
-}
-
-async function markMenstruationEnd() {
-    const targetDate = getTargetDate();
-    
-    if (!targetDate) {
-        showToast('Сначала выберите день в календаре', 'error');
-        return;
-    }
-    
-    // Проверяем, что дата не в будущем
-    if (!isValidDateForEntry(targetDate)) {
-        showToast('Нельзя отметить менструацию в будущем', 'error');
-        return;
-    }
-    
-    try {
-        const response = await fetch(CYCLE_API, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                date: targetDate,
-                symptoms: [],
-                flow_intensity: 'none',
-                notes: 'Завершение менструации'
-            })
-        });
-
-        if (response.ok) {
-            showToast(`Завершение менструации отмечено на ${formatDateDisplay(targetDate)}`, 'success');
-            await loadCycleData();
-            renderCalendar();
-            updateSymptomsLegend();
-            
-            // Автоматически заполняем форму
-            setTimeout(() => {
-                fillFormWithData(targetDate, {
+        } else {
+            // Создаем новую запись
+            const response = await fetch(CYCLE_API, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    date: targetDate,
                     symptoms: [],
-                    flow_intensity: 'none',
-                    notes: 'Завершение менструации'
-                });
-            }, 300);
+                    flow_intensity: 'medium',
+                    notes: 'Начало менструации'
+                })
+            });
+
+            if (response.ok) {
+                showToast(`Менструация отмечена на ${formatDateDisplay(targetDate)}!`, 'success');
+                await loadCycleData();
+                renderCalendar();
+            }
         }
     } catch (error) {
         console.error('Ошибка:', error);

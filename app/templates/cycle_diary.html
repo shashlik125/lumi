@@ -700,14 +700,6 @@
     /* ==========================================================================
    УБИРАЕМ ОГРАНИЧЕНИЯ ДЛЯ ГРАФИКОВ
    ========================================================================== */
-    #moodPhaseChart,
-    #symptomsChart {
-        width: 100% !important;
-        height: 100% !important;
-        min-height: 250px;
-        max-width: 100%;
-        flex: 1;
-    }
 
     .chartjs-render-monitor {
         width: 100% !important;
@@ -967,6 +959,21 @@
         animation: spin 0.8s linear infinite;
         right: 15px;
     }
+
+    /* ИСПРАВЛЕНИЕ ОБРЕЗАННОЙ ДИАГРАММЫ СИМПТОМОВ */
+#symptomsChart {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 280px !important;
+}
+
+.analytics-block:nth-child(2) .chart-container {
+    height: 380px !important; /* Больше высота для круговой диаграммы */
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
     @media (max-width: 1024px) {
 

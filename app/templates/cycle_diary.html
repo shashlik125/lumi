@@ -961,19 +961,19 @@
     }
 
     /* ИСПРАВЛЕНИЕ ОБРЕЗАННОЙ ДИАГРАММЫ СИМПТОМОВ */
-#symptomsChart {
-    width: 100% !important;
-    height: auto !important;
-    max-height: 280px !important;
-}
+    #symptomsChart {
+        width: 100% !important;
+        height: auto !important;
+        max-height: 280px !important;
+    }
 
-.analytics-block:nth-child(2) .chart-container {
-    height: 380px !important; /* Больше высота для круговой диаграммы */
-    padding: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+    .analytics-block:nth-child(2) .chart-container {
+        height: 320px !important;
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 
     @media (max-width: 1024px) {
 
@@ -1448,29 +1448,6 @@
     }
 
 
-    /* ОГРАНИЧЕНИЯ ДЛЯ ГРАФИКОВ (ДОБАВЬ ЭТО В КОНЕЦ ФАЙЛА) */
-    .analytics-container {
-        max-height: 500px;
-        overflow-y: auto;
-    }
-
-    .charts-grid {
-        min-height: 0;
-        /* Важно для ограничения роста */
-    }
-
-    .chart-container {
-        height: 250px !important;
-        min-height: 250px;
-        max-height: 250px;
-    }
-
-    #moodPhaseChart,
-    #symptomsChart {
-        height: 250px !important;
-        width: 100% !important;
-        max-height: 250px !important;
-    }
 </style>
 {% endblock %}
 
@@ -1594,12 +1571,12 @@
 
     <!-- РАЗДЕЛЕННЫЕ БЛОКИ АНАЛИТИКИ -->
     <div class="analytics-grid">
-        <!-- ПЕРВЫЙ блок: Настроение по фазам цикла -->
+        <!-- ПЕРВЫЙ блок: Настроение по дням (ЛИНЕЙНЫЙ ГРАФИК) -->
         <div class="analytics-block">
-            <h3 class="section-title"><i class="fas fa-chart-line"></i> Настроение по фазам цикла</h3>
-            <div class="chart-container">
-                <canvas id="moodPhaseChart"></canvas>
-                <div class="no-data" id="noMoodData" style="display: none;">
+            <h3 class="section-title"><i class="fas fa-chart-line"></i> Настроение по дням</h3>
+            <div class="chart-container" style="height: 320px;">
+                <canvas id="moodOverTimeChart"></canvas>
+                <div class="no-data" id="noMoodTimeData" style="display: none;">
                     <i class="fas fa-chart-line" style="font-size: 40px; color: var(--gray); margin-bottom: 10px;"></i>
                     <p>Недостаточно данных для графика</p>
                     <p style="font-size: 12px;">Добавьте записи настроения</p>
@@ -1610,7 +1587,7 @@
         <!-- ВТОРОЙ блок: Распределение симптомов -->
         <div class="analytics-block">
             <h3 class="section-title"><i class="fas fa-chart-pie"></i> Распределение симптомов</h3>
-            <div class="chart-container">
+            <div class="chart-container" style="height: 320px;">
                 <canvas id="symptomsChart"></canvas>
                 <div class="no-data" id="noSymptomsData" style="display: none;">
                     <i class="fas fa-chart-pie" style="font-size: 40px; color: var(--gray); margin-bottom: 10px;"></i>
@@ -1659,6 +1636,7 @@
     let moodData = [];
     let moodChart = null;
     let symptomsChart = null;
+    let moodOverTimeChart = null;
     let currentSelectedDate = null;
     let isEditMode = false;
 
@@ -1724,6 +1702,137 @@
         }
     }
 
+    // ЛИНЕЙНЫЙ ГРАФИК НАСТРОЕНИЯ ПО ДНЯМ
+    function createMoodOverTimeChart() {
+        const canvas = document.getElementById('moodOverTimeChart');
+        if (!canvas) {
+            console.error('❌ Canvas для линейного графика не найден');
+            return;
+        }
+
+        // Уничтожаем старый график если он есть
+        if (moodOverTimeChart) {
+            moodOverTimeChart.destroy();
+        }
+
+        // Собираем данные для графика
+        const moodOverTimeData = getMoodOverTimeData();
+        const noMoodTimeData = document.getElementById('noMoodTimeData');
+
+        if (moodOverTimeData.hasData) {
+            if (noMoodTimeData) noMoodTimeData.style.display = 'none';
+
+            moodOverTimeChart = new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: moodOverTimeData.labels,
+                    datasets: [{
+                        label: 'Настроение',
+                        data: moodOverTimeData.values,
+                        borderColor: '#60F4E3',
+                        backgroundColor: 'rgba(96, 244, 227, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: moodOverTimeData.values.map(val => getMoodColorForValue(val)),
+                        pointBorderColor: '#fff',
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: 1,
+                            max: 10,
+                            ticks: {
+                                callback: function (value) {
+                                    const emojis = ['', '😞', '', '', '😐', '', '', '😊', '', '🤩'];
+                                    return emojis[value] || '';
+                                },
+                                stepSize: 1
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const value = context.raw;
+                                    if (value === null) return 'Нет данных';
+                                    const emoji = getMoodEmoji(value);
+                                    return `${emoji} Настроение: ${value.toFixed(1)}`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            console.log('✅ Линейный график настроения создан');
+        } else {
+            if (noMoodTimeData) noMoodTimeData.style.display = 'flex';
+            console.log('ℹ️ Нет данных для линейного графика настроения');
+        }
+    }
+
+    // Функция для получения цвета точки на графике по значению настроения
+    function getMoodColorForValue(moodValue) {
+        if (moodValue >= 7) return '#60F4E3'; // хорошее - бирюзовый
+        if (moodValue >= 4) return '#FF70EC'; // нейтральное - розовый
+        return '#F44336'; // плохое - красный
+    }
+
+    // Получение данных для линейного графика (последние 14 дней)
+    function getMoodOverTimeData() {
+        console.log('📈 Собираю данные для линейного графика...');
+
+        // Получаем последние 14 дней
+        const labels = [];
+        const values = [];
+        const today = new Date();
+
+        for (let i = 13; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(today.getDate() - i);
+            const dateStr = formatDate(date);
+
+            // Форматируем дату для отображения
+            const displayDate = date.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'short'
+            });
+            labels.push(displayDate);
+
+            // Ищем настроение для этой даты
+            const moodEntry = moodData.find(m => m.date === dateStr);
+            if (moodEntry && moodEntry.mood !== undefined && moodEntry.mood !== null) {
+                values.push(parseFloat(moodEntry.mood.toFixed(1)));
+            } else {
+                values.push(null);
+            }
+        }
+
+        // Проверяем, есть ли хоть какие-то данные
+        const hasData = values.some(val => val !== null);
+
+        console.log('📊 Данные для линейного графика:', { labels, values, hasData });
+        return { labels, values, hasData };
+    }
+
     async function loadMoodData() {
         try {
             const response = await fetch(MOOD_API);
@@ -1787,73 +1896,11 @@
 
     function initCharts() {
         console.log('📊 Инициализирую графики...');
-        createMoodChart();
-        createSymptomsChart();
+        createMoodOverTimeChart(); // НОВЫЙ линейный график
+        createSymptomsChart();     // Круговая диаграмма симптомов
     }
 
 
-
-    function createMoodChart() {
-        const canvas = document.getElementById('moodPhaseChart');
-        if (!canvas) return;
-
-        if (moodChart) moodChart.destroy();
-
-        const moodDataForChart = getMoodChartData();
-        const noMoodData = document.getElementById('noMoodData');
-
-        if (moodDataForChart.hasData) {
-            if (noMoodData) noMoodData.style.display = 'none';
-
-            moodChart = new Chart(canvas, {
-                type: 'bar',
-                data: {
-                    labels: moodDataForChart.labels,
-                    datasets: [{
-                        label: 'Среднее настроение',
-                        data: moodDataForChart.values,
-                        backgroundColor: 'rgba(96, 244, 227, 0.6)',
-                        borderColor: 'rgb(96, 244, 227)',
-                        borderWidth: 2,
-                        borderRadius: 5
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false, // ИЗМЕНИТЬ на false
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return `Настроение: ${context.raw}/10`;
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 10,
-                            title: {
-                                display: true,
-                                text: 'Настроение (0-10)'
-                            },
-                            ticks: { stepSize: 1 }
-                        },
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Фаза цикла'
-                            }
-                        }
-                    }
-                }
-            });
-        } else {
-            if (noMoodData) noMoodData.style.display = 'flex';
-        }
-    }
 
     function createSymptomsChart() {
         const canvas = document.getElementById('symptomsChart');
@@ -1910,53 +1957,6 @@
     }
 
 
-    function getMoodChartData() {
-        console.log('📊 Собираю данные для графика настроения...');
-
-        const phases = {
-            'Менструация': [],
-            'Фолликулярная': [],
-            'Овуляция': [],
-            'Лютеиновая': []
-        };
-
-        // Проходим по всем данным о цикле и находим соответствующие записи настроения
-        cycleData.forEach(cycleEntry => {
-            if (!cycleEntry.date) return;
-
-            // Ищем запись настроения для этой даты
-            const moodEntry = moodData.find(m => m.date === cycleEntry.date);
-            if (moodEntry && moodEntry.mood !== undefined && moodEntry.mood !== null) {
-                // Определяем фазу цикла (упрощенно)
-                let phase = 'Лютеиновая'; // по умолчанию
-
-                // Если есть менструация
-                if (cycleEntry.flow_intensity && cycleEntry.flow_intensity !== 'none') {
-                    phase = 'Менструация';
-                }
-                // Здесь должна быть ваша логика определения других фаз
-                // Например, по cycle_day или другим данным
-
-                phases[phase].push(moodEntry.mood);
-            }
-        });
-
-        const labels = [];
-        const values = [];
-        let hasData = false;
-
-        for (const [phase, moods] of Object.entries(phases)) {
-            if (moods.length > 0) {
-                labels.push(phase);
-                const avg = moods.reduce((a, b) => a + b, 0) / moods.length;
-                values.push(parseFloat(avg.toFixed(1)));
-                hasData = true;
-            }
-        }
-
-        console.log('📈 Данные для графика настроения:', { labels, values, hasData });
-        return { labels, values, hasData };
-    }
 
     function getSymptomsChartData() {
         console.log('📊 Собираю данные для графика симптомов...');

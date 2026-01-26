@@ -656,16 +656,22 @@
         box-shadow: var(--shadow);
         padding: 25px;
         width: 100%;
+        max-width: 100%;
+        overflow: hidden;
     }
 
-    .analytics-block .section-title {
-        font-size: 18px;
-        font-weight: 600;
-        margin-bottom: 20px;
-        color: var(--dark);
+    .analytics-block .chart-container {
+        position: relative;
+        background: var(--white);
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        height: 300px;
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
         display: flex;
-        align-items: center;
-        gap: 10px;
+        flex-direction: column;
     }
 
     .analytics-block .chart-container {
@@ -699,6 +705,20 @@
         width: 100% !important;
         height: 100% !important;
         min-height: 250px;
+        max-width: 100%;
+        flex: 1;
+    }
+
+    .chartjs-render-monitor {
+        width: 100% !important;
+        height: auto !important;
+        aspect-ratio: 16/9;
+    }
+
+    /* Обертка для canvas */
+    .chart-container canvas {
+        max-width: 100%;
+        height: auto !important;
     }
 
     /* ==========================================================================
@@ -1767,17 +1787,10 @@
 
     function createMoodChart() {
         const canvas = document.getElementById('moodPhaseChart');
-        if (!canvas) {
-            console.error('❌ Canvas для графика настроения не найден');
-            return;
-        }
+        if (!canvas) return;
 
-        // Уничтожаем старый график если он есть
-        if (moodChart) {
-            moodChart.destroy();
-        }
+        if (moodChart) moodChart.destroy();
 
-        // Собираем данные для графика
         const moodDataForChart = getMoodChartData();
         const noMoodData = document.getElementById('noMoodData');
 
@@ -1786,69 +1799,31 @@
 
             moodChart = new Chart(canvas, {
                 type: 'bar',
-                data: {
-                    labels: moodDataForChart.labels,
-                    datasets: [{
-                        label: 'Среднее настроение',
-                        data: moodDataForChart.values,
-                        backgroundColor: 'rgba(96, 244, 227, 0.6)',
-                        borderColor: 'rgb(96, 244, 227)',
-                        borderWidth: 2,
-                        borderRadius: 5
-                    }]
-                },
+                data: { /* ... ваши данные ... */ },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    return `Настроение: ${context.raw}/10`;
-                                }
-                            }
-                        }
-                    },
+                    maintainAspectRatio: true, // ВАЖНО: true для пропорций
+                    aspectRatio: 2, // Меньше = шире, больше = выше
+                    plugins: { /* ... */ },
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 10,
-                            title: {
-                                display: true,
-                                text: 'Настроение (0-10)'
-                            },
-                            ticks: { stepSize: 1 }
-                        },
                         x: {
-                            title: {
-                                display: true,
-                                text: 'Фаза цикла'
+                            ticks: {
+                                maxRotation: 45, // Поворачиваем подписи
+                                minRotation: 0
                             }
                         }
                     }
                 }
             });
-            console.log('✅ График настроения создан');
-        } else {
-            if (noMoodData) noMoodData.style.display = 'flex';
-            console.log('ℹ️ Нет данных для графика настроения');
         }
     }
 
     function createSymptomsChart() {
         const canvas = document.getElementById('symptomsChart');
-        if (!canvas) {
-            console.error('❌ Canvas для графика симптомов не найден');
-            return;
-        }
+        if (!canvas) return;
 
-        // Уничтожаем старый график если он есть
-        if (symptomsChart) {
-            symptomsChart.destroy();
-        }
+        if (symptomsChart) symptomsChart.destroy();
 
-        // Собираем данные для графика
         const symptomsDataForChart = getSymptomsChartData();
         const noSymptomsData = document.getElementById('noSymptomsData');
 
@@ -1857,18 +1832,11 @@
 
             symptomsChart = new Chart(canvas, {
                 type: 'doughnut',
-                data: {
-                    labels: symptomsDataForChart.labels,
-                    datasets: [{
-                        data: symptomsDataForChart.values,
-                        backgroundColor: symptomsDataForChart.colors,
-                        borderColor: symptomsDataForChart.colors.map(color => color.replace('0.6', '1')),
-                        borderWidth: 2
-                    }]
-                },
+                data: { /* ... ваши данные ... */ },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true,
+                    maintainAspectRatio: true, // ВАЖНО
+                    aspectRatio: 1.5, // Для круговой диаграммы
                     plugins: {
                         legend: {
                             position: 'right',
@@ -1877,27 +1845,13 @@
                                 padding: 15,
                                 font: { size: 12 }
                             }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = symptomsDataForChart.values.reduce((a, b) => a + b, 0);
-                                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                                    return `${label}: ${value} раз (${percentage}%)`;
-                                }
-                            }
                         }
                     }
                 }
             });
-            console.log('✅ График симптомов создан');
-        } else {
-            if (noSymptomsData) noSymptomsData.style.display = 'flex';
-            console.log('ℹ️ Нет данных для графика симптомов');
         }
     }
+
 
     function getMoodChartData() {
         console.log('📊 Собираю данные для графика настроения...');

@@ -1612,6 +1612,8 @@
 {% endblock %}
 {% block extra_js %}
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script>
     // ==========================================================================
     // КОНСТАНТЫ API
@@ -1651,13 +1653,20 @@
             await loadCycleData();
             renderCalendar();
 
-            // Загружаем остальные данные параллельно
+            // Загружаем остальные данные
             await Promise.all([
                 loadMoodData(),
                 loadCycleStats(),
-                loadCyclePredictions(),
                 loadTodayMood()
             ]);
+
+            // Загружаем прогнозы с обработкой ошибки 400
+            try {
+                await loadCyclePredictions();
+            } catch (error) {
+                console.log('ℹ️ Нет данных для прогнозов цикла');
+                // Это нормально, если нет настроек цикла
+            }
 
             // Инициализируем графики
             initCharts();
@@ -1715,9 +1724,18 @@
     async function loadCyclePredictions() {
         try {
             const response = await fetch(CYCLE_PREDICTIONS_API);
+
             if (response.ok) {
                 const predictions = await response.json();
                 updatePredictionsDisplay(predictions);
+            } else if (response.status === 400) {
+                console.log('📅 Нет данных для прогноза цикла (нужно настроить цикл)');
+                // Скрываем или показываем сообщение
+                document.getElementById('nextPeriod').textContent = 'настройте цикл';
+                document.getElementById('fertileWindow').textContent = 'настройте цикл';
+                return;
+            } else {
+                console.error('❌ Ошибка загрузки прогнозов:', response.status);
             }
         } catch (error) {
             console.error('Ошибка загрузки прогнозов цикла:', error);
@@ -1740,32 +1758,32 @@
     // ==========================================================================
     // ФУНКЦИИ ГРАФИКОВ
     // ==========================================================================
-    
+
     function initCharts() {
         console.log('📊 Инициализирую графики...');
         createMoodChart();
         createSymptomsChart();
     }
-    
+
     function createMoodChart() {
         const canvas = document.getElementById('moodPhaseChart');
         if (!canvas) {
             console.error('❌ Canvas для графика настроения не найден');
             return;
         }
-        
+
         // Уничтожаем старый график если он есть
         if (moodChart) {
             moodChart.destroy();
         }
-        
+
         // Собираем данные для графика
         const moodDataForChart = getMoodChartData();
         const noMoodData = document.getElementById('noMoodData');
-        
+
         if (moodDataForChart.hasData) {
             if (noMoodData) noMoodData.style.display = 'none';
-            
+
             moodChart = new Chart(canvas, {
                 type: 'bar',
                 data: {
@@ -1786,7 +1804,7 @@
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     return `Настроение: ${context.raw}/10`;
                                 }
                             }
@@ -1817,26 +1835,26 @@
             console.log('ℹ️ Нет данных для графика настроения');
         }
     }
-    
+
     function createSymptomsChart() {
         const canvas = document.getElementById('symptomsChart');
         if (!canvas) {
             console.error('❌ Canvas для графика симптомов не найден');
             return;
         }
-        
+
         // Уничтожаем старый график если он есть
         if (symptomsChart) {
             symptomsChart.destroy();
         }
-        
+
         // Собираем данные для графика
         const symptomsDataForChart = getSymptomsChartData();
         const noSymptomsData = document.getElementById('noSymptomsData');
-        
+
         if (symptomsDataForChart.hasData) {
             if (noSymptomsData) noSymptomsData.style.display = 'none';
-            
+
             symptomsChart = new Chart(canvas, {
                 type: 'doughnut',
                 data: {
@@ -1862,7 +1880,7 @@
                         },
                         tooltip: {
                             callbacks: {
-                                label: function(context) {
+                                label: function (context) {
                                     const label = context.label || '';
                                     const value = context.raw || 0;
                                     const total = symptomsDataForChart.values.reduce((a, b) => a + b, 0);
@@ -1880,42 +1898,42 @@
             console.log('ℹ️ Нет данных для графика симптомов');
         }
     }
-    
+
     function getMoodChartData() {
         console.log('📊 Собираю данные для графика настроения...');
-        
+
         const phases = {
             'Менструация': [],
             'Фолликулярная': [],
             'Овуляция': [],
             'Лютеиновая': []
         };
-        
+
         // Проходим по всем данным о цикле и находим соответствующие записи настроения
         cycleData.forEach(cycleEntry => {
             if (!cycleEntry.date) return;
-            
+
             // Ищем запись настроения для этой даты
             const moodEntry = moodData.find(m => m.date === cycleEntry.date);
             if (moodEntry && moodEntry.mood !== undefined && moodEntry.mood !== null) {
                 // Определяем фазу цикла (упрощенно)
                 let phase = 'Лютеиновая'; // по умолчанию
-                
+
                 // Если есть менструация
                 if (cycleEntry.flow_intensity && cycleEntry.flow_intensity !== 'none') {
                     phase = 'Менструация';
                 }
                 // Здесь должна быть ваша логика определения других фаз
                 // Например, по cycle_day или другим данным
-                
+
                 phases[phase].push(moodEntry.mood);
             }
         });
-        
+
         const labels = [];
         const values = [];
         let hasData = false;
-        
+
         for (const [phase, moods] of Object.entries(phases)) {
             if (moods.length > 0) {
                 labels.push(phase);
@@ -1924,17 +1942,17 @@
                 hasData = true;
             }
         }
-        
+
         console.log('📈 Данные для графика настроения:', { labels, values, hasData });
         return { labels, values, hasData };
     }
-    
+
     function getSymptomsChartData() {
         console.log('📊 Собираю данные для графика симптомов...');
-        
+
         const symptomStats = {};
         let totalEntries = 0;
-        
+
         cycleData.forEach(entry => {
             if (entry.symptoms && Array.isArray(entry.symptoms)) {
                 entry.symptoms.forEach(symptom => {
@@ -1943,7 +1961,7 @@
                 });
             }
         });
-        
+
         if (totalEntries === 0) {
             return {
                 labels: [],
@@ -1952,11 +1970,11 @@
                 hasData: false
             };
         }
-        
+
         const sorted = Object.entries(symptomStats)
             .sort((a, b) => b[1] - a[1])
             .slice(0, 8); // Ограничиваем 8 симптомами
-        
+
         return {
             labels: sorted.map(([symptom]) => symptom),
             values: sorted.map(([, count]) => count),
@@ -1968,7 +1986,7 @@
     // ==========================================================================
     // ОСТАЛЬНЫЕ ФУНКЦИИ (оставляем без изменений)
     // ==========================================================================
-    
+
     function initSymptomsGrid() {
         const symptomsGrid = document.getElementById('symptomsGrid');
         if (!symptomsGrid) return;
@@ -2607,13 +2625,13 @@
     // ==========================================================================
     // ФУНКЦИИ ОБНОВЛЕНИЯ ДАННЫХ
     // ==========================================================================
-    
+
     async function refreshAllData() {
         console.log('🔄 Обновляю все данные...');
-        
+
         try {
             showLoading(true);
-            
+
             await Promise.all([
                 loadCycleData(),
                 loadMoodData(),
@@ -2621,11 +2639,11 @@
                 loadCyclePredictions(),
                 loadTodayMood()
             ]);
-            
+
             renderCalendar();
             updateSymptomsLegend();
             initCharts(); // Обновляем графики
-            
+
             console.log('✅ Все данные обновлены');
         } catch (error) {
             console.error('❌ Ошибка при обновлении данных:', error);
@@ -2636,7 +2654,7 @@
 
     function showLoading(isLoading) {
         let overlay = document.getElementById('loading-overlay');
-        
+
         if (!overlay) {
             overlay = document.createElement('div');
             overlay.id = 'loading-overlay';
@@ -2655,7 +2673,7 @@
                 transition: opacity 0.3s;
                 pointer-events: none;
             `;
-            
+
             const spinner = document.createElement('div');
             spinner.style.cssText = `
                 width: 60px;
@@ -2665,11 +2683,11 @@
                 border-radius: 50%;
                 animation: spin 1s linear infinite;
             `;
-            
+
             overlay.appendChild(spinner);
             document.body.appendChild(overlay);
         }
-        
+
         if (isLoading) {
             overlay.style.opacity = '1';
             overlay.style.pointerEvents = 'auto';
@@ -2684,14 +2702,14 @@
     function showToast(message, type = 'info') {
         const oldToasts = document.querySelectorAll('.toast-notification');
         oldToasts.forEach(toast => toast.remove());
-        
+
         const toast = document.createElement('div');
         toast.className = `toast-notification toast-${type}`;
         toast.innerHTML = `
             <div class="toast-message">${message}</div>
             <button class="toast-close" onclick="this.parentElement.remove()">×</button>
         `;
-        
+
         toast.style.cssText = `
             position: fixed;
             top: 20px;
@@ -2709,9 +2727,9 @@
             z-index: 10000;
             animation: slideIn 0.3s ease;
         `;
-        
+
         document.body.appendChild(toast);
-        
+
         setTimeout(() => {
             if (toast.parentElement) {
                 toast.style.animation = 'slideOut 0.3s ease';

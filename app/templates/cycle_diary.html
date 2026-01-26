@@ -975,6 +975,69 @@
         justify-content: center;
     }
 
+    /* ==========================================================================
+   ЛЕГЕНДА ФАЗ ЦИКЛА
+   ========================================================================== */
+    .cycle-phases-legend {
+        background: var(--white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .legend-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--dark);
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .phases-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 12px;
+    }
+
+    .phase-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px;
+        background: rgba(96, 244, 227, 0.05);
+        border-radius: 10px;
+        transition: var(--transition);
+    }
+
+    .phase-item:hover {
+        background: rgba(96, 244, 227, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .phase-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 2px solid;
+        flex-shrink: 0;
+    }
+
+    .phase-name {
+        font-weight: 600;
+        color: var(--dark);
+        font-size: 14px;
+    }
+
+    .phase-desc {
+        font-size: 12px;
+        color: var(--gray);
+        margin-left: auto;
+    }
+
+
     @media (max-width: 1024px) {
 
         /* Планшеты и маленькие ноутбуки */
@@ -1007,6 +1070,9 @@
             color: var(--dark);
         }
 
+        .phases-container {
+            grid-template-columns: repeat(2, 1fr);
+        }
 
         /* При наведении (если устройство поддерживает hover) */
         @media (hover: hover) {
@@ -1289,6 +1355,14 @@
             width: 100%;
         }
 
+         .phases-container {
+            grid-template-columns: 1fr;
+        }
+
+        .phase-item {
+            justify-content: space-between;
+        }
+
         /* Статистика */
         .cycle-stats {
             grid-template-columns: 1fr;
@@ -1446,8 +1520,6 @@
             height: 200px;
         }
     }
-
-
 </style>
 {% endblock %}
 
@@ -1611,14 +1683,55 @@
         </div>
     </div>
 
+    <!-- Легенда фаз цикла -->
+    <div class="cycle-phases-legend">
+        <h4 class="legend-title"><i class="fas fa-moon"></i> Фазы цикла на графике</h4>
+        <div class="phases-container">
+            <div class="phase-item">
+                <div class="phase-color" style="background-color: rgba(255, 107, 107, 0.15); border-color: #FF6B6B;">
+                </div>
+                <div class="phase-name">Менструация</div>
+                <div class="phase-desc">Дни 1-5</div>
+            </div>
+            <div class="phase-item">
+                <div class="phase-color" style="background-color: rgba(96, 244, 227, 0.15); border-color: #60F4E3;">
+                </div>
+                <div class="phase-name">Фолликулярная</div>
+                <div class="phase-desc">Дни 6-13</div>
+            </div>
+            <div class="phase-item">
+                <div class="phase-color" style="background-color: rgba(255, 112, 236, 0.15); border-color: #FF70EC;">
+                </div>
+                <div class="phase-name">Овуляция</div>
+                <div class="phase-desc">Дни 14-15</div>
+            </div>
+            <div class="phase-item">
+                <div class="phase-color" style="background-color: rgba(255, 209, 102, 0.15); border-color: #FFD166;">
+                </div>
+                <div class="phase-name">Лютеиновая</div>
+                <div class="phase-desc">Дни 16-28</div>
+            </div>
+            <div class="phase-item">
+                <div class="phase-color" style="background-color: rgba(184, 179, 233, 0.15); border-color: #B8B3E9;">
+                </div>
+                <div class="phase-name">ПМС</div>
+                <div class="phase-desc">Дни 24-28</div>
+            </div>
+        </div>
+    </div>
+
 </main>
 
 {% endblock %}
 {% block extra_js %}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script
+    src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js"></script>
 
 <script>
+    // Регистрируем плагин аннотаций
+    Chart.register(ChartAnnotation);
     // ==========================================================================
     // КОНСТАНТЫ API
     // ==========================================================================
@@ -1702,7 +1815,7 @@
         }
     }
 
-    // ЛИНЕЙНЫЙ ГРАФИК НАСТРОЕНИЯ ПО ДНЯМ
+    // ЛИНЕЙНЫЙ ГРАФИК НАСТРОЕНИЯ ПО ДНЯМ С ФАЗАМИ ЦИКЛА
     function createMoodOverTimeChart() {
         const canvas = document.getElementById('moodOverTimeChart');
         if (!canvas) {
@@ -1721,6 +1834,9 @@
 
         if (moodOverTimeData.hasData) {
             if (noMoodTimeData) noMoodTimeData.style.display = 'none';
+
+            // Получаем фазы цикла для отображения на фоне
+            const phaseAnnotations = getCyclePhasesForChart(moodOverTimeData.labels);
 
             moodOverTimeChart = new Chart(canvas, {
                 type: 'line',
@@ -1767,7 +1883,15 @@
                     },
                     plugins: {
                         legend: {
-                            display: false
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 20,
+                                font: {
+                                    size: 12
+                                }
+                            }
                         },
                         tooltip: {
                             callbacks: {
@@ -1775,18 +1899,230 @@
                                     const value = context.raw;
                                     if (value === null) return 'Нет данных';
                                     const emoji = getMoodEmoji(value);
-                                    return `${emoji} Настроение: ${value.toFixed(1)}`;
+
+                                    // Добавляем информацию о фазе цикла в тултип
+                                    const dateStr = moodOverTimeData.dates[context.dataIndex];
+                                    const phase = getCyclePhaseForDate(dateStr);
+                                    return `${emoji} Настроение: ${value.toFixed(1)} (${phase})`;
+                                },
+                                afterLabel: function (context) {
+                                    // Дополнительная информация в тултипе
+                                    const dateStr = moodOverTimeData.dates[context.dataIndex];
+                                    const cycleEntry = cycleData.find(entry => entry.date === dateStr);
+
+                                    if (cycleEntry) {
+                                        const symptoms = cycleEntry.symptoms || [];
+                                        const notes = cycleEntry.notes || '';
+
+                                        let tooltipText = '';
+
+                                        // Показываем симптомы
+                                        if (symptoms.length > 0) {
+                                            tooltipText += `Симптомы: ${symptoms.slice(0, 3).join(', ')}${symptoms.length > 3 ? '...' : ''}\n`;
+                                        }
+
+                                        // Показываем менструацию
+                                        if (cycleEntry.flow_intensity && cycleEntry.flow_intensity !== 'none') {
+                                            const intensityMap = {
+                                                'light': 'Лёгкая',
+                                                'medium': 'Средняя',
+                                                'heavy': 'Сильная'
+                                            };
+                                            tooltipText += `Менструация: ${intensityMap[cycleEntry.flow_intensity] || cycleEntry.flow_intensity}\n`;
+                                        }
+
+                                        // Показываем заметки
+                                        if (notes) {
+                                            tooltipText += `Заметка: ${notes.substring(0, 50)}${notes.length > 50 ? '...' : ''}`;
+                                        }
+
+                                        return tooltipText;
+                                    }
+
+                                    return '';
                                 }
                             }
+                        },
+                        // ДОБАВЛЯЕМ АННОТАЦИИ ДЛЯ ФАЗ ЦИКЛА
+                        annotation: {
+                            annotations: phaseAnnotations
                         }
                     }
                 }
             });
-            console.log('✅ Линейный график настроения создан');
+            console.log('✅ Линейный график настроения с фазами цикла создан');
         } else {
             if (noMoodTimeData) noMoodTimeData.style.display = 'flex';
             console.log('ℹ️ Нет данных для линейного графика настроения');
         }
+    }
+
+    // Функция для получения фаз цикла для отображения на графике
+    function getCyclePhasesForChart(labels) {
+        const annotations = {};
+
+        // Предполагаем, что у нас есть данные о цикле
+        // Для примера создадим тестовые фазы
+        const today = new Date();
+        const phaseColors = {
+            'menstruation': 'rgba(255, 107, 107, 0.15)',
+            'follicular': 'rgba(96, 244, 227, 0.15)',
+            'ovulation': 'rgba(255, 112, 236, 0.15)',
+            'luteal': 'rgba(255, 209, 102, 0.15)',
+            'pms': 'rgba(184, 179, 233, 0.15)'
+        };
+
+        // Создаем тестовые фазы (в реальном приложении используйте данные из БД)
+        // День 1-5: Менструация
+        // День 6-13: Фолликулярная
+        // День 14-15: Овуляция
+        // День 16-28: Лютеиновая
+
+        if (labels.length >= 14) {
+            // Фаза менструации (первые 3 дня)
+            annotations['menstruation'] = {
+                type: 'box',
+                xMin: labels[0],
+                xMax: labels[2],
+                backgroundColor: phaseColors.menstruation,
+                borderWidth: 0,
+                label: {
+                    display: true,
+                    content: 'Менструация',
+                    position: 'start',
+                    backgroundColor: 'rgba(255, 107, 107, 0.8)',
+                    color: 'white',
+                    font: {
+                        size: 10,
+                        weight: 'bold'
+                    },
+                    padding: 4
+                }
+            };
+
+            // Фолликулярная фаза (дни 4-10)
+            annotations['follicular'] = {
+                type: 'box',
+                xMin: labels[3],
+                xMax: labels[9],
+                backgroundColor: phaseColors.follicular,
+                borderWidth: 0,
+                label: {
+                    display: true,
+                    content: 'Фолликулярная',
+                    position: 'start',
+                    backgroundColor: 'rgba(96, 244, 227, 0.8)',
+                    color: 'var(--dark)',
+                    font: {
+                        size: 10,
+                        weight: 'bold'
+                    },
+                    padding: 4
+                }
+            };
+
+            // Овуляция (день 11-12)
+            annotations['ovulation'] = {
+                type: 'box',
+                xMin: labels[10],
+                xMax: labels[11],
+                backgroundColor: phaseColors.ovulation,
+                borderWidth: 0,
+                label: {
+                    display: true,
+                    content: 'Овуляция',
+                    position: 'start',
+                    backgroundColor: 'rgba(255, 112, 236, 0.8)',
+                    color: 'white',
+                    font: {
+                        size: 10,
+                        weight: 'bold'
+                    },
+                    padding: 4
+                }
+            };
+
+            // Лютеиновая фаза (оставшиеся дни)
+            annotations['luteal'] = {
+                type: 'box',
+                xMin: labels[12],
+                xMax: labels[labels.length - 1],
+                backgroundColor: phaseColors.luteal,
+                borderWidth: 0,
+                label: {
+                    display: true,
+                    content: 'Лютеиновая',
+                    position: 'start',
+                    backgroundColor: 'rgba(255, 209, 102, 0.8)',
+                    color: 'var(--dark)',
+                    font: {
+                        size: 10,
+                        weight: 'bold'
+                    },
+                    padding: 4
+                }
+            };
+        }
+
+        return annotations;
+    }
+
+    // Функция для определения фазы цикла по дате
+    function getCyclePhaseForDate(dateStr) {
+        // В реальном приложении здесь должна быть логика определения фазы
+        // на основе данных о цикле пользователя
+
+        // Для примера просто возвращаем статическую фазу
+        const phases = ['Менструация', 'Фолликулярная', 'Овуляция', 'Лютеиновая', 'ПМС'];
+
+        // Простой алгоритм для демонстрации
+        const date = new Date(dateStr);
+        const dayOfMonth = date.getDate();
+
+        if (dayOfMonth >= 1 && dayOfMonth <= 5) return 'Менструация';
+        if (dayOfMonth >= 6 && dayOfMonth <= 13) return 'Фолликулярная';
+        if (dayOfMonth >= 14 && dayOfMonth <= 15) return 'Овуляция';
+        if (dayOfMonth >= 16 && dayOfMonth <= 25) return 'Лютеиновая';
+        return 'ПМС';
+    }
+
+    // Обновите функцию getMoodOverTimeData, чтобы возвращать даты
+    function getMoodOverTimeData() {
+        console.log('📈 Собираю данные для линейного графика...');
+
+        // Получаем последние 14 дней
+        const labels = [];
+        const values = [];
+        const dates = []; // ДОБАВЛЯЕМ МАССИВ ДАТ
+        const today = new Date();
+
+        for (let i = 13; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(today.getDate() - i);
+            const dateStr = formatDate(date);
+            dates.push(dateStr); // СОХРАНЯЕМ ДАТУ
+
+            // Форматируем дату для отображения
+            const displayDate = date.toLocaleDateString('ru-RU', {
+                day: 'numeric',
+                month: 'short'
+            });
+            labels.push(displayDate);
+
+            // Ищем настроение для этой даты
+            const moodEntry = moodData.find(m => m.date === dateStr);
+            if (moodEntry && moodEntry.mood !== undefined && moodEntry.mood !== null) {
+                values.push(parseFloat(moodEntry.mood.toFixed(1)));
+            } else {
+                values.push(null);
+            }
+        }
+
+        // Проверяем, есть ли хоть какие-то данные
+        const hasData = values.some(val => val !== null);
+
+        console.log('📊 Данные для линейного графика:', { labels, values, dates, hasData });
+        return { labels, values, dates, hasData };
     }
 
     // Функция для получения цвета точки на графике по значению настроения

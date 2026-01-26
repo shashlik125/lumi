@@ -641,65 +641,94 @@
     }
 
     /* ==========================================================================
-   Аналитика и графики
+   Аналитика - РАЗДЕЛЕННЫЕ БЛОКИ БЕЗ ПРОКРУТКИ
    ========================================================================== */
-    .analytics-container {
+    .analytics-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+        margin-bottom: 30px;
+    }
+
+    .analytics-block {
         background: var(--white);
         border-radius: var(--border-radius);
         box-shadow: var(--shadow);
         padding: 25px;
-        margin-bottom: 30px;
-    }
-
-    .charts-grid {
-        display: flex;
-        /* Изменили с grid на flex */
-        flex-direction: column;
-        /* Вертикальное расположение */
-        gap: 25px;
-        margin-top: 20px;
-    }
-
-    #symptomsChartContainer {
-        position: relative;
-        height: 300px;
         width: 100%;
-        min-height: 300px;
     }
 
-    #symptomsChart {
-        width: 100% !important;
-        height: 300px !important;
+    .analytics-block .section-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: var(--dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
 
-    .chart-container {
+    .analytics-block .chart-container {
         position: relative;
         background: var(--white);
         border-radius: 12px;
         padding: 20px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         height: 300px;
+        width: 100%;
         display: flex;
         flex-direction: column;
-        width: 100%;
-        /* Добавили ширину 100% */
     }
 
-    .chart-title {
-        font-size: 16px;
-        font-weight: 600;
-        margin-bottom: 15px;
-        color: var(--dark);
+    .analytics-block .no-data {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--gray);
         text-align: center;
-        flex-shrink: 0;
+        padding: 20px;
     }
 
-    /* Контейнер для канваса */
-    .chart-canvas-container {
-        flex-grow: 1;
-        position: relative;
-        width: 100%;
-        height: calc(100% - 40px);
+    /* ==========================================================================
+   УБИРАЕМ ОГРАНИЧЕНИЯ ДЛЯ ГРАФИКОВ
+   ========================================================================== */
+    #moodPhaseChart,
+    #symptomsChart {
+        width: 100% !important;
+        height: 100% !important;
+        min-height: 250px;
+    }
+
+    /* ==========================================================================
+   АДАПТИВНОСТЬ ДЛЯ ГРАФИКОВ
+   ========================================================================== */
+    @media (max-width: 768px) {
+        .analytics-block {
+            padding: 20px;
+        }
+
+        .analytics-block .chart-container {
+            height: 250px;
+            padding: 15px;
+        }
+
+        .analytics-block .section-title {
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .analytics-block {
+            padding: 15px;
+        }
+
+        .analytics-block .chart-container {
+            height: 200px;
+            padding: 10px;
+        }
     }
 
     /* ==========================================================================
@@ -1536,29 +1565,26 @@
     </div>
     <!-- КОНЕЦ ФОРМЫ ОТСЛЕЖИВАНИЯ -->
 
-    <!-- Аналитика -->
-    <div class="analytics-container">
-        <h3 class="section-title"><i class="fas fa-chart-bar"></i> Аналитика цикла</h3>
-        <div class="charts-grid">
-            <!-- ПЕРВЫЙ график: Настроение по фазам цикла -->
+    <!-- РАЗДЕЛЕННЫЕ БЛОКИ АНАЛИТИКИ -->
+    <div class="analytics-grid">
+        <!-- ПЕРВЫЙ блок: Настроение по фазам цикла -->
+        <div class="analytics-block">
+            <h3 class="section-title"><i class="fas fa-chart-line"></i> Настроение по фазам цикла</h3>
             <div class="chart-container">
-                <div class="chart-title">Настроение по фазам цикла</div>
-                <div class="chart-canvas-container">
-                    <canvas id="moodPhaseChart"></canvas>
-                </div>
+                <canvas id="moodPhaseChart"></canvas>
                 <div class="no-data" id="noMoodData" style="display: none;">
                     <i class="fas fa-chart-line" style="font-size: 40px; color: var(--gray); margin-bottom: 10px;"></i>
                     <p>Недостаточно данных для графика</p>
                     <p style="font-size: 12px;">Добавьте записи настроения</p>
                 </div>
             </div>
+        </div>
 
-            <!-- ВТОРОЙ график: Распределение симптомов -->
+        <!-- ВТОРОЙ блок: Распределение симптомов -->
+        <div class="analytics-block">
+            <h3 class="section-title"><i class="fas fa-chart-pie"></i> Распределение симптомов</h3>
             <div class="chart-container">
-                <div class="chart-title">Распределение симптомов</div>
-                <div class="chart-canvas-container">
-                    <canvas id="symptomsChart"></canvas>
-                </div>
+                <canvas id="symptomsChart"></canvas>
                 <div class="no-data" id="noSymptomsData" style="display: none;">
                     <i class="fas fa-chart-pie" style="font-size: 40px; color: var(--gray); margin-bottom: 10px;"></i>
                     <p>Нет данных о симптомах</p>
@@ -1567,6 +1593,20 @@
             </div>
         </div>
     </div>
+
+    <!-- Легенда симптомов -->
+    <div class="symptoms-legend">
+        <div class="legend-header">
+            <h4><i class="fas fa-info-circle"></i> Легенда симптомов</h4>
+            <button class="legend-toggle" onclick="toggleLegend()">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+        <div class="legend-content" id="symptomsLegend">
+            <!-- Легенда будет заполнена JavaScript -->
+        </div>
+    </div>
+
 </main>
 
 {% endblock %}

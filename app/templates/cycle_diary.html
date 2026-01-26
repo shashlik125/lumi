@@ -2074,54 +2074,100 @@
         return phaseDefinitions;
     }
 
-    // Создаем градиент для фона с фазами цикла за месяц
+    // Создаем градиент для фона с фазами цикла с учетом реальных данных
     function createCyclePhaseGradientForMonth(ctx, canvas, phases) {
         const width = canvas.width;
         const gradient = ctx.createLinearGradient(0, 0, width, 0);
 
-        // Для 28-дневного цикла
-        const totalDays = 28;
+        const daysInMonth = 31; // Максимальное количество дней для отображения
 
+        // Сначала добавляем прозрачный фон для дней до первой фазы
+        if (phases.length > 0 && phases[0].startDay > 1) {
+            const beforePhasePercent = (phases[0].startDay - 1) / daysInMonth;
+            gradient.addColorStop(0, 'transparent');
+            gradient.addColorStop(beforePhasePercent, 'transparent');
+        }
+
+        // Добавляем цвета для каждой фазы
         phases.forEach(phase => {
-            const startPercent = (phase.startDay - 1) / totalDays;
-            const endPercent = phase.endDay / totalDays;
+            // Проверяем, попадает ли фаза в текущий месяц
+            if (phase.endDay >= 1 && phase.startDay <= daysInMonth) {
+                const startPercent = Math.max(phase.startDay - 1, 0) / daysInMonth;
+                const endPercent = Math.min(phase.endDay, daysInMonth) / daysInMonth;
 
-            // Добавляем цветовые переходы
-            gradient.addColorStop(startPercent, getPhaseColor(phase.type, 0.15));
-            gradient.addColorStop(endPercent, getPhaseColor(phase.type, 0.15));
+                // Для реальных данных менструации делаем более насыщенный цвет
+                const opacity = (phase.type === 'menstruation' && phase.isActual) ? 0.25 : 0.15;
+                const color = getPhaseColor(phase.type, opacity);
 
-            // Добавляем плавные переходы между фазами
-            if (phase.endDay < totalDays) {
-                const nextPhaseStart = endPercent + 0.01;
-                const nextPhase = phases.find(p => p.startDay === phase.endDay + 1);
-                if (nextPhase) {
-                    gradient.addColorStop(endPercent, getPhaseColor(phase.type, 0.15));
-                    gradient.addColorStop(nextPhaseStart, getPhaseColor(nextPhase.type, 0.15));
+                gradient.addColorStop(startPercent, color);
+                gradient.addColorStop(endPercent, color);
+
+                // Добавляем плавные переходы между фазами
+                if (phase.endDay < daysInMonth) {
+                    const nextPhaseStart = endPercent + 0.001;
+                    gradient.addColorStop(nextPhaseStart, 'transparent');
                 }
             }
         });
 
+        // Добавляем прозрачный фон для дней после последней фазы
+        if (phases.length > 0) {
+            const lastPhase = phases[phases.length - 1];
+            if (lastPhase.endDay < daysInMonth) {
+                const afterPhasePercent = lastPhase.endDay / daysInMonth;
+                gradient.addColorStop(afterPhasePercent, 'transparent');
+                gradient.addColorStop(1, 'transparent');
+            }
+        }
+
         return gradient;
     }
 
-    // Создаем подписи для фаз цикла
+    // Создаем подписи для фаз цикла с учетом реальных данных
     function createPhaseLabels(phases) {
         const labels = [];
 
         phases.forEach(phase => {
-            // Добавляем подпись в середину каждой фазы
-            const middleDay = Math.floor((phase.startDay + phase.endDay) / 2);
-            labels.push({
-                day: middleDay,
-                name: getPhaseDisplayName(phase.type),
-                phaseType: phase.type
-            });
+            // Показываем только фазы, которые попадают в текущий месяц
+            if (phase.endDay >= 1 && phase.startDay <= 31) {
+                // Ограничиваем фазы границами месяца
+                const startDay = Math.max(phase.startDay, 1);
+                const endDay = Math.min(phase.endDay, 31);
+
+                if (startDay <= endDay) {
+                    // Вычисляем середину фазы для размещения подписи
+                    const middleDay = Math.floor((startDay + endDay) / 2);
+
+                    // Формируем название фазы
+                    let phaseName = getPhaseDisplayName(phase.type);
+
+                    // Если это реальные данные менструации, добавляем иконку
+                    if (phase.type === 'menstruation' && phase.isActual) {
+                        phaseName = '🩸 ' + phaseName;
+                    }
+
+                    // Если это текущая фаза, выделяем ее
+                    if (phase.isCurrent) {
+                        phaseName = '→ ' + phaseName;
+                    }
+
+                    labels.push({
+                        day: middleDay,
+                        name: phaseName,
+                        phaseType: phase.type,
+                        isActual: phase.isActual,
+                        isCurrent: phase.isCurrent,
+                        startDay: startDay,
+                        endDay: endDay
+                    });
+                }
+            }
         });
 
         return labels;
     }
 
-    // Получаем фазу цикла для конкретного дня
+    // Получаем фазу цикла для конкретного дня на основе реальных данных
     function getCyclePhaseForDay(dayOfMonth) {
         const phases = getCyclePhasesForCurrentMonth();
 
@@ -2129,14 +2175,35 @@
             if (dayOfMonth >= phase.startDay && dayOfMonth <= phase.endDay) {
                 return {
                     type: phase.type,
-                    name: getPhaseDisplayName(phase.type)
+                    name: getPhaseDisplayName(phase.type),
+                    isActual: phase.isActual || false,
+                    days: phase.days || [],
+                    description: getPhaseDescription(phase.type, dayOfMonth, phase.isActual)
                 };
             }
         }
 
-        // Если день больше 28, считаем его как начало нового цикла
-        const dayInCycle = ((dayOfMonth - 1) % 28) + 1;
-        return getCyclePhaseForDay(dayInCycle);
+        return {
+            type: 'unknown',
+            name: 'Неизвестно',
+            isActual: false,
+            description: 'Не удалось определить фазу цикла'
+        };
+    }
+
+    // Получаем описание фазы
+    function getPhaseDescription(phaseType, day, isActual) {
+        const descriptions = {
+            'menstruation': isActual
+                ? 'День менструации (реальные данные)'
+                : 'Предполагаемый день менструации',
+            'follicular': 'Фолликулярная фаза: уровень энергии растёт',
+            'ovulation': 'Овуляция: пик фертильности',
+            'luteal': 'Лютеиновая фаза: повышение прогестерона',
+            'pms': 'Предменструальная фаза: возможны симптомы ПМС'
+        };
+
+        return descriptions[phaseType] || 'Фаза цикла';
     }
 
     // Получаем отображаемое название фазы
@@ -2299,115 +2366,310 @@
         return phases[0];
     }
 
-    // Функция для получения фаз цикла для отображения на графике
-    function getCyclePhasesForChart(labels) {
-        const annotations = {};
+    // Получаем реальные данные о менструациях из календаря
+    function getMenstruationData() {
+        const menstruationData = [];
 
-        // Предполагаем, что у нас есть данные о цикле
-        // Для примера создадим тестовые фазы
-        const today = new Date();
-        const phaseColors = {
-            'menstruation': 'rgba(255, 107, 107, 0.15)',
-            'follicular': 'rgba(96, 244, 227, 0.15)',
-            'ovulation': 'rgba(255, 112, 236, 0.15)',
-            'luteal': 'rgba(255, 209, 102, 0.15)',
-            'pms': 'rgba(184, 179, 233, 0.15)'
-        };
+        // Собираем все записи с менструациями
+        cycleData.forEach(entry => {
+            if (entry.flow_intensity && entry.flow_intensity !== 'none') {
+                const date = new Date(entry.date);
+                menstruationData.push({
+                    date: date,
+                    dateStr: entry.date,
+                    flow_intensity: entry.flow_intensity
+                });
+            }
+        });
 
-        // Создаем тестовые фазы (в реальном приложении используйте данные из БД)
-        // День 1-5: Менструация
-        // День 6-13: Фолликулярная
-        // День 14-15: Овуляция
-        // День 16-28: Лютеиновая
+        // Сортируем по дате
+        menstruationData.sort((a, b) => a.date - b.date);
 
-        if (labels.length >= 14) {
-            // Фаза менструации (первые 3 дня)
-            annotations['menstruation'] = {
-                type: 'box',
-                xMin: labels[0],
-                xMax: labels[2],
-                backgroundColor: phaseColors.menstruation,
-                borderWidth: 0,
-                label: {
-                    display: true,
-                    content: 'Менструация',
-                    position: 'start',
-                    backgroundColor: 'rgba(255, 107, 107, 0.8)',
-                    color: 'white',
-                    font: {
-                        size: 10,
-                        weight: 'bold'
-                    },
-                    padding: 4
+        // Группируем последовательные дни менструации в циклы
+        const cycles = [];
+        let currentCycle = [];
+
+        for (let i = 0; i < menstruationData.length; i++) {
+            const current = menstruationData[i];
+
+            if (currentCycle.length === 0) {
+                // Начало нового цикла
+                currentCycle.push(current);
+            } else {
+                const lastInCycle = currentCycle[currentCycle.length - 1];
+                const timeDiff = (current.date - lastInCycle.date) / (1000 * 60 * 60 * 24);
+
+                if (timeDiff === 1) {
+                    // Последовательный день - продолжение цикла
+                    currentCycle.push(current);
+                } else {
+                    // Разрыв - начинаем новый цикл
+                    if (currentCycle.length > 0) {
+                        cycles.push([...currentCycle]);
+                    }
+                    currentCycle = [current];
                 }
-            };
-
-            // Фолликулярная фаза (дни 4-10)
-            annotations['follicular'] = {
-                type: 'box',
-                xMin: labels[3],
-                xMax: labels[9],
-                backgroundColor: phaseColors.follicular,
-                borderWidth: 0,
-                label: {
-                    display: true,
-                    content: 'Фолликулярная',
-                    position: 'start',
-                    backgroundColor: 'rgba(96, 244, 227, 0.8)',
-                    color: 'var(--dark)',
-                    font: {
-                        size: 10,
-                        weight: 'bold'
-                    },
-                    padding: 4
-                }
-            };
-
-            // Овуляция (день 11-12)
-            annotations['ovulation'] = {
-                type: 'box',
-                xMin: labels[10],
-                xMax: labels[11],
-                backgroundColor: phaseColors.ovulation,
-                borderWidth: 0,
-                label: {
-                    display: true,
-                    content: 'Овуляция',
-                    position: 'start',
-                    backgroundColor: 'rgba(255, 112, 236, 0.8)',
-                    color: 'white',
-                    font: {
-                        size: 10,
-                        weight: 'bold'
-                    },
-                    padding: 4
-                }
-            };
-
-            // Лютеиновая фаза (оставшиеся дни)
-            annotations['luteal'] = {
-                type: 'box',
-                xMin: labels[12],
-                xMax: labels[labels.length - 1],
-                backgroundColor: phaseColors.luteal,
-                borderWidth: 0,
-                label: {
-                    display: true,
-                    content: 'Лютеиновая',
-                    position: 'start',
-                    backgroundColor: 'rgba(255, 209, 102, 0.8)',
-                    color: 'var(--dark)',
-                    font: {
-                        size: 10,
-                        weight: 'bold'
-                    },
-                    padding: 4
-                }
-            };
+            }
         }
 
-        return annotations;
+        // Добавляем последний цикл
+        if (currentCycle.length > 0) {
+            cycles.push(currentCycle);
+        }
+
+        return {
+            allEntries: menstruationData,
+            cycles: cycles,
+            averageLength: calculateAverageCycleLength(cycles)
+        };
     }
+
+    // Рассчитываем среднюю длительность цикла
+    function calculateAverageCycleLength(cycles) {
+        if (cycles.length < 2) return 28; // По умолчанию
+
+        let totalLength = 0;
+        let count = 0;
+
+        for (let i = 1; i < cycles.length; i++) {
+            const prevCycleStart = cycles[i - 1][0].date;
+            const currentCycleStart = cycles[i][0].date;
+            const length = (currentCycleStart - prevCycleStart) / (1000 * 60 * 60 * 24);
+            totalLength += length;
+            count++;
+        }
+
+        return Math.round(totalLength / count);
+    }
+
+    // Рассчитываем среднюю длительность менструации
+    function calculateAveragePeriodLength(cycles) {
+        if (cycles.length === 0) return 5; // По умолчанию
+
+        let totalLength = 0;
+
+        cycles.forEach(cycle => {
+            totalLength += cycle.length;
+        });
+
+        return Math.round(totalLength / cycles.length);
+    }
+
+    // Получаем фазы цикла на основе реальных данных из календаря
+    function getCyclePhasesForCurrentMonth() {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+
+        // Получаем данные о менструациях
+        const menstruationData = getMenstruationData();
+        const currentMonthPeriods = [];
+
+        // Находим менструации текущего месяца
+        menstruationData.allEntries.forEach(entry => {
+            if (entry.date.getFullYear() === year && entry.date.getMonth() === month) {
+                currentMonthPeriods.push(entry);
+            }
+        });
+
+        // Если есть менструации в текущем месяце, строим фазы от них
+        if (currentMonthPeriods.length > 0) {
+            return calculatePhasesFromActualPeriods(currentMonthPeriods, menstruationData);
+        }
+
+        // Если нет менструаций в текущем месяце, ищем ближайшую предыдущую
+        const allPeriods = menstruationData.allEntries;
+        if (allPeriods.length > 0) {
+            // Находим последнюю менструацию перед текущим месяцем
+            const lastPeriod = allPeriods[allPeriods.length - 1];
+            const daysSinceLastPeriod = Math.floor((today - lastPeriod.date) / (1000 * 60 * 60 * 24));
+
+            // Используем настройки пользователя или рассчитанные средние
+            const cycleLength = menstruationData.averageLength || userCycleSettings?.cycle_length || 28;
+            const periodLength = calculateAveragePeriodLength(menstruationData.cycles) || userCycleSettings?.period_length || 5;
+
+            // Рассчитываем фазы на основе дня цикла
+            const dayInCycle = (daysSinceLastPeriod % cycleLength) + 1;
+            return calculatePhasesByDayInCycle(dayInCycle, cycleLength, periodLength);
+        }
+
+        // Если совсем нет данных, используем стандартный цикл
+        return getDefaultPhases();
+    }
+
+    // Рассчитываем фазы на основе реальных дат менструаций
+    function calculatePhasesFromActualPeriods(periodEntries, menstruationData) {
+        const phases = [];
+
+        if (periodEntries.length === 0) return getDefaultPhases();
+
+        // Определяем средние значения
+        const avgCycleLength = menstruationData.averageLength || 28;
+        const avgPeriodLength = calculateAveragePeriodLength(menstruationData.cycles) || 5;
+
+        // Сортируем даты менструаций
+        periodEntries.sort((a, b) => a.date - b.date);
+
+        // Берем первую менструацию в месяце как начало цикла
+        const firstPeriodDate = periodEntries[0].date;
+        const periodStartDay = firstPeriodDate.getDate();
+
+        // Фаза 1: Менструация (реальная длительность из данных)
+        const periodDays = [];
+        let currentDate = new Date(firstPeriodDate);
+
+        // Собираем все последовательные дни менструации
+        for (let i = 0; i < periodEntries.length; i++) {
+            const entryDate = periodEntries[i].date;
+            const day = entryDate.getDate();
+
+            // Проверяем последовательность дней
+            if (i === 0 || day === periodDays[periodDays.length - 1] + 1) {
+                periodDays.push(day);
+            }
+        }
+
+        if (periodDays.length > 0) {
+            phases.push({
+                type: 'menstruation',
+                startDay: periodDays[0],
+                endDay: periodDays[periodDays.length - 1],
+                color: '#FF6B6B',
+                isActual: true, // Флаг, что это реальные данные
+                days: [...periodDays]
+            });
+        }
+
+        // Если нет реальных данных о менструации, используем средние значения
+        if (periodDays.length === 0) {
+            phases.push({
+                type: 'menstruation',
+                startDay: periodStartDay,
+                endDay: Math.min(periodStartDay + avgPeriodLength - 1, 31),
+                color: '#FF6B6B',
+                isActual: false
+            });
+        }
+
+        // Рассчитываем остальные фазы на основе средних значений
+        const daysInMonth = new Date(firstPeriodDate.getFullYear(), firstPeriodDate.getMonth() + 1, 0).getDate();
+        const menstrualEndDay = phases[0].endDay;
+
+        // Фаза 2: Фолликулярная (после менструации до овуляции)
+        const follicularStart = menstrualEndDay + 1;
+        const follicularEnd = Math.min(follicularStart + 7, daysInMonth); // Обычно 7-8 дней
+
+        phases.push({
+            type: 'follicular',
+            startDay: follicularStart,
+            endDay: follicularEnd,
+            color: '#60F4E3',
+            isActual: false
+        });
+
+        // Фаза 3: Овуляция
+        const ovulationStart = follicularEnd + 1;
+        const ovulationEnd = Math.min(ovulationStart + 1, daysInMonth);
+
+        phases.push({
+            type: 'ovulation',
+            startDay: ovulationStart,
+            endDay: ovulationEnd,
+            color: '#FF70EC',
+            isActual: false
+        });
+
+        // Фаза 4: Лютеиновая
+        const lutealStart = ovulationEnd + 1;
+        const lutealEnd = Math.min(lutealStart + 7, daysInMonth);
+
+        phases.push({
+            type: 'luteal',
+            startDay: lutealStart,
+            endDay: lutealEnd,
+            color: '#FFD166',
+            isActual: false
+        });
+
+        // Фаза 5: ПМС (последние дни перед следующей менструацией)
+        const pmsStart = lutealEnd + 1;
+        const pmsEnd = Math.min(pmsStart + 4, daysInMonth);
+
+        if (pmsStart <= daysInMonth) {
+            phases.push({
+                type: 'pms',
+                startDay: pmsStart,
+                endDay: pmsEnd,
+                color: '#B8B3E9',
+                isActual: false
+            });
+        }
+
+        return phases;
+    }
+
+    // Рассчитываем фазы по дню в цикле
+    function calculatePhasesByDayInCycle(dayInCycle, cycleLength, periodLength) {
+        const phases = [];
+
+        // Приводим к стандартному 28-дневному циклу для отображения
+        const normalizedDay = Math.round((dayInCycle / cycleLength) * 28);
+
+        const phaseDefinitions = [
+            { type: 'menstruation', start: 1, end: periodLength },
+            { type: 'follicular', start: periodLength + 1, end: 13 },
+            { type: 'ovulation', start: 14, end: 15 },
+            { type: 'luteal', start: 16, end: 23 },
+            { type: 'pms', start: 24, end: 28 }
+        ];
+
+        // Находим текущую фазу
+        let currentPhase = phaseDefinitions[0];
+        for (const phase of phaseDefinitions) {
+            if (normalizedDay >= phase.start && normalizedDay <= phase.end) {
+                currentPhase = phase;
+                break;
+            }
+        }
+
+        // Создаем фазы для отображения
+        phaseDefinitions.forEach(phase => {
+            phases.push({
+                type: phase.type,
+                startDay: phase.start,
+                endDay: phase.end,
+                color: getPhaseColorByType(phase.type),
+                isActual: false,
+                isCurrent: (phase.type === currentPhase.type)
+            });
+        });
+
+        return phases;
+    }
+
+    // Стандартные фазы (если нет данных)
+    function getDefaultPhases() {
+        return [
+            { type: 'menstruation', startDay: 1, endDay: 5, color: '#FF6B6B', isActual: false },
+            { type: 'follicular', startDay: 6, endDay: 13, color: '#60F4E3', isActual: false },
+            { type: 'ovulation', startDay: 14, endDay: 15, color: '#FF70EC', isActual: false },
+            { type: 'luteal', startDay: 16, endDay: 23, color: '#FFD166', isActual: false },
+            { type: 'pms', startDay: 24, endDay: 28, color: '#B8B3E9', isActual: false }
+        ];
+    }
+
+    // Получаем цвет для типа фазы
+    function getPhaseColorByType(phaseType) {
+        const colors = {
+            'menstruation': '#FF6B6B',
+            'follicular': '#60F4E3',
+            'ovulation': '#FF70EC',
+            'luteal': '#FFD166',
+            'pms': '#B8B3E9'
+        };
+        return colors[phaseType] || '#CCCCCC';
+    }
+
 
     // Функция для определения фазы цикла по дате
     function getCyclePhaseForDate(dateStr) {

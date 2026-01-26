@@ -976,67 +976,30 @@
     }
 
     /* ==========================================================================
-   ЛЕГЕНДА ФАЗ ЦИКЛА
+   СТИЛИ ДЛЯ ГРАФИКА С ФАЗАМИ ЦИКЛА
    ========================================================================== */
-    .cycle-phases-legend {
-        background: var(--white);
-        border-radius: var(--border-radius);
-        box-shadow: var(--shadow);
-        padding: 20px;
-        margin-bottom: 30px;
+    .chart-container {
+        position: relative;
     }
 
-    .legend-title {
-        font-size: 16px;
-        font-weight: 600;
-        color: var(--dark);
-        margin-bottom: 15px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
+    #moodOverTimeChart {
+        width: 100% !important;
+        height: 300px !important;
     }
 
-    .phases-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 12px;
-    }
-
-    .phase-item {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        padding: 10px;
-        background: rgba(96, 244, 227, 0.05);
-        border-radius: 10px;
-        transition: var(--transition);
-    }
-
-    .phase-item:hover {
-        background: rgba(96, 244, 227, 0.1);
-        transform: translateY(-2px);
-    }
-
-    .phase-color {
-        width: 20px;
-        height: 20px;
+    /* Стили для подписей фаз под графиком */
+    .phase-label {
+        position: absolute;
+        bottom: -25px;
+        padding: 4px 8px;
         border-radius: 4px;
-        border: 2px solid;
-        flex-shrink: 0;
-    }
-
-    .phase-name {
+        font-size: 11px;
         font-weight: 600;
-        color: var(--dark);
-        font-size: 14px;
+        text-align: center;
+        white-space: nowrap;
+        transform: translateX(-50%);
+        z-index: 10;
     }
-
-    .phase-desc {
-        font-size: 12px;
-        color: var(--gray);
-        margin-left: auto;
-    }
-
 
     @media (max-width: 1024px) {
 
@@ -1068,10 +1031,6 @@
 
         nav a.active {
             color: var(--dark);
-        }
-
-        .phases-container {
-            grid-template-columns: repeat(2, 1fr);
         }
 
         /* При наведении (если устройство поддерживает hover) */
@@ -1353,14 +1312,6 @@
             font-size: 22px;
             text-align: center;
             width: 100%;
-        }
-
-        .phases-container {
-            grid-template-columns: 1fr;
-        }
-
-        .phase-item {
-            justify-content: space-between;
         }
 
         /* Статистика */
@@ -1683,43 +1634,6 @@
         </div>
     </div>
 
-    <!-- Легенда фаз цикла -->
-    <div class="cycle-phases-legend">
-        <h4 class="legend-title"><i class="fas fa-moon"></i> Фазы цикла на графике</h4>
-        <div class="phases-container">
-            <div class="phase-item">
-                <div class="phase-color" style="background-color: rgba(255, 107, 107, 0.15); border-color: #FF6B6B;">
-                </div>
-                <div class="phase-name">Менструация</div>
-                <div class="phase-desc">Дни 1-5</div>
-            </div>
-            <div class="phase-item">
-                <div class="phase-color" style="background-color: rgba(96, 244, 227, 0.15); border-color: #60F4E3;">
-                </div>
-                <div class="phase-name">Фолликулярная</div>
-                <div class="phase-desc">Дни 6-13</div>
-            </div>
-            <div class="phase-item">
-                <div class="phase-color" style="background-color: rgba(255, 112, 236, 0.15); border-color: #FF70EC;">
-                </div>
-                <div class="phase-name">Овуляция</div>
-                <div class="phase-desc">Дни 14-15</div>
-            </div>
-            <div class="phase-item">
-                <div class="phase-color" style="background-color: rgba(255, 209, 102, 0.15); border-color: #FFD166;">
-                </div>
-                <div class="phase-name">Лютеиновая</div>
-                <div class="phase-desc">Дни 16-28</div>
-            </div>
-            <div class="phase-item">
-                <div class="phase-color" style="background-color: rgba(184, 179, 233, 0.15); border-color: #B8B3E9;">
-                </div>
-                <div class="phase-name">ПМС</div>
-                <div class="phase-desc">Дни 24-28</div>
-            </div>
-        </div>
-    </div>
-
 </main>
 
 {% endblock %}
@@ -1835,7 +1749,7 @@
         }
     }
 
-    // ЛИНЕЙНЫЙ ГРАФИК НАСТРОЕНИЯ ПО ДНЯМ С ФАЗАМИ ЦИКЛА (упрощенная версия)
+    // ЛИНЕЙНЫЙ ГРАФИК НАСТРОЕНИЯ ПО ДНЯМ МЕСЯЦА С ФАЗАМИ ЦИКЛА
     function createMoodOverTimeChart() {
         const canvas = document.getElementById('moodOverTimeChart');
         if (!canvas) {
@@ -1848,22 +1762,23 @@
             moodOverTimeChart.destroy();
         }
 
-        // Собираем данные для графика
-        const moodOverTimeData = getMoodOverTimeData();
+        // Собираем данные за текущий месяц (с 1 по 31 число)
+        const moodOverTimeData = getMoodOverTimeDataForMonth();
         const noMoodTimeData = document.getElementById('noMoodTimeData');
 
         if (moodOverTimeData.hasData) {
             if (noMoodTimeData) noMoodTimeData.style.display = 'none';
 
-            // Получаем информацию о фазах цикла
-            const cyclePhases = detectCyclePhases(moodOverTimeData.dates);
-            console.log('📅 Обнаруженные фазы цикла:', cyclePhases);
-
-            // Создаем график
             const ctx = canvas.getContext('2d');
 
-            // Создаем градиент для фона с фазами
-            const gradient = createCyclePhaseGradient(ctx, canvas, cyclePhases, moodOverTimeData.labels);
+            // Получаем фазы цикла для текущего месяца
+            const cyclePhases = getCyclePhasesForCurrentMonth();
+
+            // Создаем градиент для фона с фазами цикла
+            const gradient = createCyclePhaseGradientForMonth(ctx, canvas, cyclePhases);
+
+            // Создаем подписи фаз цикла под осью X
+            const phaseLabels = createPhaseLabels(cyclePhases);
 
             moodOverTimeChart = new Chart(ctx, {
                 type: 'line',
@@ -1873,13 +1788,16 @@
                         // Фоновый слой с фазами цикла
                         {
                             label: 'Фазы цикла',
-                            data: new Array(moodOverTimeData.labels.length).fill(10), // Заполняем верхнюю границу
+                            data: new Array(moodOverTimeData.labels.length).fill(10), // Верхняя граница
                             backgroundColor: gradient,
                             borderWidth: 0,
                             fill: true,
                             pointRadius: 0,
-                            order: 2, // Рисуем первым (под основной линией)
-                            type: 'line'
+                            order: 2, // Рисуем под основной линией
+                            type: 'line',
+                            tooltip: {
+                                enabled: false
+                            }
                         },
                         // Основная линия настроения
                         {
@@ -1889,13 +1807,13 @@
                             backgroundColor: 'rgba(96, 244, 227, 0.1)',
                             tension: 0.4,
                             fill: false,
-                            pointBackgroundColor: moodOverTimeData.values.map(val => getMoodColorForValue(val)),
+                            pointBackgroundColor: moodOverTimeData.values.map(val => val !== null ? getMoodColorForValue(val) : '#ccc'),
                             pointBorderColor: '#fff',
                             pointRadius: 6,
                             pointHoverRadius: 8,
                             borderWidth: 3,
-                            order: 1, // Рисуем вторым (поверх фона)
-                            spanGaps: true // Пропускаем пропуски в данных
+                            order: 1, // Рисуем поверх фона
+                            spanGaps: false
                         }
                     ]
                 },
@@ -1910,12 +1828,13 @@
                             ticks: {
                                 callback: function (value) {
                                     const emojis = ['', '😞', '', '', '😐', '', '', '😊', '', '🤩'];
-                                    return emojis[value] || '';
+                                    return emojis[value] || value;
                                 },
                                 stepSize: 1,
                                 font: {
                                     size: 12
-                                }
+                                },
+                                padding: 10
                             },
                             grid: {
                                 color: 'rgba(0, 0, 0, 0.05)',
@@ -1936,8 +1855,22 @@
                             },
                             ticks: {
                                 font: {
-                                    size: 12
+                                    size: 11
+                                },
+                                maxRotation: 0,
+                                callback: function (value, index) {
+                                    // Показываем только даты
+                                    return moodOverTimeData.labels[index];
                                 }
+                            },
+                            // Добавляем подписи фаз под осью X
+                            afterBuildTicks: function (axis) {
+                                axis.ticks = axis.ticks.map((tick, index) => {
+                                    return {
+                                        value: tick.value,
+                                        label: moodOverTimeData.labels[index]
+                                    };
+                                });
                             }
                         }
                     },
@@ -1960,7 +1893,7 @@
                         tooltip: {
                             mode: 'index',
                             intersect: false,
-                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            backgroundColor: 'rgba(0, 0, 0, 0.9)',
                             titleFont: {
                                 size: 14
                             },
@@ -1979,19 +1912,19 @@
                                     });
                                 },
                                 label: function (context) {
-                                    if (context.datasetIndex === 1) { // Только для линии настроения
+                                    if (context.datasetIndex === 1) {
                                         const value = context.raw;
                                         if (value === null) return 'Настроение: Нет данных';
                                         const emoji = getMoodEmoji(value);
 
                                         // Добавляем информацию о фазе цикла
                                         const dateStr = moodOverTimeData.dates[context.dataIndex];
-                                        const phaseInfo = getCyclePhaseInfo(dateStr);
+                                        const dayOfMonth = new Date(dateStr).getDate();
+                                        const phaseInfo = getCyclePhaseForDay(dayOfMonth);
 
                                         return [
                                             `${emoji} Настроение: ${value.toFixed(1)}/10`,
-                                            `📅 Фаза цикла: ${phaseInfo.name}`,
-                                            phaseInfo.description ? `📝 ${phaseInfo.description}` : ''
+                                            `📅 Фаза цикла: ${phaseInfo.name} (день ${dayOfMonth})`
                                         ];
                                     }
                                     return null;
@@ -1999,39 +1932,30 @@
                                 afterLabel: function (context) {
                                     if (context.datasetIndex === 1) {
                                         const dateStr = moodOverTimeData.dates[context.dataIndex];
-                                        const cycleEntry = cycleData.find(entry => entry.date === dateStr);
+                                        const dayOfMonth = new Date(dateStr).getDate();
+                                        const phaseInfo = getCyclePhaseForDay(dayOfMonth);
 
-                                        if (cycleEntry) {
-                                            const info = [];
+                                        // Описание фазы цикла
+                                        const phaseDescriptions = {
+                                            'menstruation': 'Менструальное кровотечение. Возможны спазмы, усталость.',
+                                            'follicular': 'Уровень энергии растёт. Хорошее время для активностей.',
+                                            'ovulation': 'Пик фертильности. Возможна повышенная чувствительность.',
+                                            'luteal': 'Уровень прогестерона повышается.',
+                                            'pms': 'Возможны раздражительность, вздутие, усталость.'
+                                        };
 
-                                            // Показываем менструацию
-                                            if (cycleEntry.flow_intensity && cycleEntry.flow_intensity !== 'none') {
-                                                const intensityMap = {
-                                                    'light': 'Лёгкая',
-                                                    'medium': 'Средняя',
-                                                    'heavy': 'Сильная'
-                                                };
-                                                info.push(`🩸 Менструация: ${intensityMap[cycleEntry.flow_intensity] || cycleEntry.flow_intensity}`);
-                                            }
-
-                                            // Показываем симптомы
-                                            const symptoms = cycleEntry.symptoms || [];
-                                            if (symptoms.length > 0) {
-                                                info.push(`📋 Симптомы: ${symptoms.slice(0, 2).join(', ')}${symptoms.length > 2 ? '...' : ''}`);
-                                            }
-
-                                            // Показываем заметки
-                                            const notes = cycleEntry.notes || '';
-                                            if (notes) {
-                                                info.push(`💭 ${notes.substring(0, 40)}${notes.length > 40 ? '...' : ''}`);
-                                            }
-
-                                            return info;
-                                        }
+                                        return [
+                                            `📝 ${phaseDescriptions[phaseInfo.type] || ''}`
+                                        ];
                                     }
                                     return null;
                                 }
                             }
+                        },
+                        // Плагин для отображения подписей фаз под графиком
+                        phasesPlugin: {
+                            phases: cyclePhases,
+                            labels: phaseLabels
                         }
                     },
                     interaction: {
@@ -2043,7 +1967,43 @@
                             tension: 0.4
                         }
                     }
-                }
+                },
+                plugins: [{
+                    id: 'phasesPlugin',
+                    afterDraw: function (chart) {
+                        const ctx = chart.ctx;
+                        const xAxis = chart.scales.x;
+                        const yAxis = chart.scales.y;
+
+                        // Настройки для подписей фаз
+                        const phaseLabels = chart.options.plugins.phasesPlugin?.labels || [];
+
+                        phaseLabels.forEach(label => {
+                            const xPos = xAxis.getPixelForValue(label.day - 1);
+
+                            // Рисуем подпись фаз под осью X
+                            ctx.save();
+                            ctx.fillStyle = getPhaseColor(label.phaseType, 0.8);
+                            ctx.font = 'bold 11px Montserrat';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'top';
+
+                            // Рисуем прямоугольник фона
+                            const textWidth = ctx.measureText(label.name).width;
+                            const rectHeight = 22;
+                            const rectY = yAxis.bottom + 15;
+
+                            ctx.fillStyle = getPhaseColor(label.phaseType, 0.2);
+                            ctx.fillRect(xPos - textWidth / 2 - 8, rectY, textWidth + 16, rectHeight);
+
+                            // Текст
+                            ctx.fillStyle = getPhaseColor(label.phaseType, 1);
+                            ctx.fillText(label.name, xPos, rectY + 6);
+
+                            ctx.restore();
+                        });
+                    }
+                }]
             });
 
             console.log('✅ Линейный график настроения с фазами цикла создан');
@@ -2051,6 +2011,156 @@
             if (noMoodTimeData) noMoodTimeData.style.display = 'flex';
             console.log('ℹ️ Нет данных для линейного графика настроения');
         }
+    }
+
+    // Получаем данные за текущий месяц
+    function getMoodOverTimeDataForMonth() {
+        console.log('📈 Собираю данные за текущий месяц...');
+
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = today.getMonth();
+
+        const labels = [];
+        const values = [];
+        const dates = [];
+        let hasData = false;
+
+        // Получаем количество дней в текущем месяце
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const dateStr = formatDate(date);
+            dates.push(dateStr);
+
+            // Форматируем дату для отображения (только число)
+            labels.push(day.toString());
+
+            // Ищем настроение для этой даты
+            const moodEntry = moodData.find(m => m.date === dateStr);
+            if (moodEntry && moodEntry.mood !== undefined && moodEntry.mood !== null) {
+                values.push(parseFloat(moodEntry.mood.toFixed(1)));
+                hasData = true;
+            } else {
+                values.push(null);
+            }
+        }
+
+        console.log('📊 Данные за месяц:', { labels, values, hasData });
+        return { labels, values, dates, hasData };
+    }
+
+    // Получаем фазы цикла для текущего месяца
+    function getCyclePhasesForCurrentMonth() {
+        const phases = [];
+
+        // Используем настройки цикла пользователя или значения по умолчанию
+        const cycleLength = userCycleSettings?.cycle_length || 28;
+        const periodLength = userCycleSettings?.period_length || 5;
+        const lastPeriodStart = userCycleSettings?.last_period_start
+            ? new Date(userCycleSettings.last_period_start)
+            : new Date(); // Если нет данных, начинаем с сегодняшнего дня
+
+        // Определяем фазы для стандартного 28-дневного цикла
+        const phaseDefinitions = [
+            { type: 'menstruation', startDay: 1, endDay: 5, color: '#FF6B6B' },
+            { type: 'follicular', startDay: 6, endDay: 13, color: '#60F4E3' },
+            { type: 'ovulation', startDay: 14, endDay: 15, color: '#FF70EC' },
+            { type: 'luteal', startDay: 16, endDay: 23, color: '#FFD166' },
+            { type: 'pms', startDay: 24, endDay: 28, color: '#B8B3E9' }
+        ];
+
+        return phaseDefinitions;
+    }
+
+    // Создаем градиент для фона с фазами цикла за месяц
+    function createCyclePhaseGradientForMonth(ctx, canvas, phases) {
+        const width = canvas.width;
+        const gradient = ctx.createLinearGradient(0, 0, width, 0);
+
+        // Для 28-дневного цикла
+        const totalDays = 28;
+
+        phases.forEach(phase => {
+            const startPercent = (phase.startDay - 1) / totalDays;
+            const endPercent = phase.endDay / totalDays;
+
+            // Добавляем цветовые переходы
+            gradient.addColorStop(startPercent, getPhaseColor(phase.type, 0.15));
+            gradient.addColorStop(endPercent, getPhaseColor(phase.type, 0.15));
+
+            // Добавляем плавные переходы между фазами
+            if (phase.endDay < totalDays) {
+                const nextPhaseStart = endPercent + 0.01;
+                const nextPhase = phases.find(p => p.startDay === phase.endDay + 1);
+                if (nextPhase) {
+                    gradient.addColorStop(endPercent, getPhaseColor(phase.type, 0.15));
+                    gradient.addColorStop(nextPhaseStart, getPhaseColor(nextPhase.type, 0.15));
+                }
+            }
+        });
+
+        return gradient;
+    }
+
+    // Создаем подписи для фаз цикла
+    function createPhaseLabels(phases) {
+        const labels = [];
+
+        phases.forEach(phase => {
+            // Добавляем подпись в середину каждой фазы
+            const middleDay = Math.floor((phase.startDay + phase.endDay) / 2);
+            labels.push({
+                day: middleDay,
+                name: getPhaseDisplayName(phase.type),
+                phaseType: phase.type
+            });
+        });
+
+        return labels;
+    }
+
+    // Получаем фазу цикла для конкретного дня
+    function getCyclePhaseForDay(dayOfMonth) {
+        const phases = getCyclePhasesForCurrentMonth();
+
+        for (const phase of phases) {
+            if (dayOfMonth >= phase.startDay && dayOfMonth <= phase.endDay) {
+                return {
+                    type: phase.type,
+                    name: getPhaseDisplayName(phase.type)
+                };
+            }
+        }
+
+        // Если день больше 28, считаем его как начало нового цикла
+        const dayInCycle = ((dayOfMonth - 1) % 28) + 1;
+        return getCyclePhaseForDay(dayInCycle);
+    }
+
+    // Получаем отображаемое название фазы
+    function getPhaseDisplayName(phaseType) {
+        const names = {
+            'menstruation': 'Менструация',
+            'follicular': 'Фолликулярная',
+            'ovulation': 'Овуляция',
+            'luteal': 'Лютеиновая',
+            'pms': 'ПМС'
+        };
+        return names[phaseType] || phaseType;
+    }
+
+    // Получаем цвет для фазы
+    function getPhaseColor(phaseType, opacity = 1) {
+        const colors = {
+            'menstruation': `rgba(255, 107, 107, ${opacity})`,
+            'follicular': `rgba(96, 244, 227, ${opacity})`,
+            'ovulation': `rgba(255, 112, 236, ${opacity})`,
+            'luteal': `rgba(255, 209, 102, ${opacity})`,
+            'pms': `rgba(184, 179, 233, ${opacity})`
+        };
+        return colors[phaseType] || `rgba(100, 100, 100, ${opacity})`;
     }
 
     // Создаем градиент для фона с фазами цикла

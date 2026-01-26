@@ -1355,7 +1355,7 @@
             width: 100%;
         }
 
-         .phases-container {
+        .phases-container {
             grid-template-columns: 1fr;
         }
 
@@ -1726,12 +1726,8 @@
 {% block extra_js %}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script
-    src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js"></script>
 
 <script>
-    // Регистрируем плагин аннотаций
-    Chart.register(ChartAnnotation);
     // ==========================================================================
     // КОНСТАНТЫ API
     // ==========================================================================
@@ -1740,6 +1736,15 @@
     const TODAY_MOOD_API = "/api/today_mood";
     const CYCLE_STATS_API = "/api/cycle_stats";
     const CYCLE_PREDICTIONS_API = "/api/cycle_predictions";
+
+    // Цвета фаз цикла
+    const CYCLE_PHASE_COLORS = {
+        'menstruation': { bg: 'rgba(255, 107, 107, 0.15)', border: '#FF6B6B' },
+        'follicular': { bg: 'rgba(96, 244, 227, 0.15)', border: '#60F4E3' },
+        'ovulation': { bg: 'rgba(255, 112, 236, 0.15)', border: '#FF70EC' },
+        'luteal': { bg: 'rgba(255, 209, 102, 0.15)', border: '#FFD166' },
+        'pms': { bg: 'rgba(184, 179, 233, 0.15)', border: '#B8B3E9' }
+    };
 
     // ==========================================================================
     // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
@@ -1752,15 +1757,30 @@
     let moodOverTimeChart = null;
     let currentSelectedDate = null;
     let isEditMode = false;
+    let userCycleSettings = null; // Добавляем для хранения настроек цикла
 
     // ==========================================================================
     // ИНИЦИАЛИЗАЦИЯ
     // ==========================================================================
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', async function () {
         console.log('🚀 Инициализация дневника цикла...');
         initSymptomsGrid();
-        loadInitialData();
+        await loadUserCycleSettings(); // Загружаем настройки цикла
+        await loadInitialData();
     });
+
+    // Загружаем настройки цикла пользователя
+    async function loadUserCycleSettings() {
+        try {
+            const response = await fetch('/api/cycle_settings');
+            if (response.ok) {
+                userCycleSettings = await response.json();
+                console.log('⚙️ Настройки цикла загружены:', userCycleSettings);
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки настроек цикла:', error);
+        }
+    }
 
     // ==========================================================================
     // ОСНОВНЫЕ ФУНКЦИИ ЗАГРУЗКИ
@@ -1815,7 +1835,7 @@
         }
     }
 
-    // ЛИНЕЙНЫЙ ГРАФИК НАСТРОЕНИЯ ПО ДНЯМ С ФАЗАМИ ЦИКЛА
+    // ЛИНЕЙНЫЙ ГРАФИК НАСТРОЕНИЯ ПО ДНЯМ С ФАЗАМИ ЦИКЛА (упрощенная версия)
     function createMoodOverTimeChart() {
         const canvas = document.getElementById('moodOverTimeChart');
         if (!canvas) {
@@ -1835,49 +1855,89 @@
         if (moodOverTimeData.hasData) {
             if (noMoodTimeData) noMoodTimeData.style.display = 'none';
 
-            // Получаем фазы цикла для отображения на фоне
-            const phaseAnnotations = getCyclePhasesForChart(moodOverTimeData.labels);
+            // Получаем информацию о фазах цикла
+            const cyclePhases = detectCyclePhases(moodOverTimeData.dates);
+            console.log('📅 Обнаруженные фазы цикла:', cyclePhases);
 
-            moodOverTimeChart = new Chart(canvas, {
+            // Создаем график
+            const ctx = canvas.getContext('2d');
+
+            // Создаем градиент для фона с фазами
+            const gradient = createCyclePhaseGradient(ctx, canvas, cyclePhases, moodOverTimeData.labels);
+
+            moodOverTimeChart = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: moodOverTimeData.labels,
-                    datasets: [{
-                        label: 'Настроение',
-                        data: moodOverTimeData.values,
-                        borderColor: '#60F4E3',
-                        backgroundColor: 'rgba(96, 244, 227, 0.1)',
-                        tension: 0.4,
-                        fill: true,
-                        pointBackgroundColor: moodOverTimeData.values.map(val => getMoodColorForValue(val)),
-                        pointBorderColor: '#fff',
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                        borderWidth: 2
-                    }]
+                    datasets: [
+                        // Фоновый слой с фазами цикла
+                        {
+                            label: 'Фазы цикла',
+                            data: new Array(moodOverTimeData.labels.length).fill(10), // Заполняем верхнюю границу
+                            backgroundColor: gradient,
+                            borderWidth: 0,
+                            fill: true,
+                            pointRadius: 0,
+                            order: 2, // Рисуем первым (под основной линией)
+                            type: 'line'
+                        },
+                        // Основная линия настроения
+                        {
+                            label: 'Настроение',
+                            data: moodOverTimeData.values,
+                            borderColor: '#60F4E3',
+                            backgroundColor: 'rgba(96, 244, 227, 0.1)',
+                            tension: 0.4,
+                            fill: false,
+                            pointBackgroundColor: moodOverTimeData.values.map(val => getMoodColorForValue(val)),
+                            pointBorderColor: '#fff',
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            borderWidth: 3,
+                            order: 1, // Рисуем вторым (поверх фона)
+                            spanGaps: true // Пропускаем пропуски в данных
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
                         y: {
-                            beginAtZero: true,
-                            min: 1,
+                            beginAtZero: false,
+                            min: 0,
                             max: 10,
                             ticks: {
                                 callback: function (value) {
                                     const emojis = ['', '😞', '', '', '😐', '', '', '😊', '', '🤩'];
                                     return emojis[value] || '';
                                 },
-                                stepSize: 1
+                                stepSize: 1,
+                                font: {
+                                    size: 12
+                                }
                             },
                             grid: {
-                                color: 'rgba(0, 0, 0, 0.05)'
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Настроение (1-10)',
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                }
                             }
                         },
                         x: {
                             grid: {
                                 display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
                             }
                         }
                     },
@@ -1890,71 +1950,243 @@
                                 padding: 20,
                                 font: {
                                     size: 12
+                                },
+                                filter: function (item, chart) {
+                                    // Показываем только легенду для настроения
+                                    return item.datasetIndex === 1;
                                 }
                             }
                         },
                         tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleFont: {
+                                size: 14
+                            },
+                            bodyFont: {
+                                size: 13
+                            },
+                            padding: 12,
                             callbacks: {
+                                title: function (tooltipItems) {
+                                    const dateStr = moodOverTimeData.dates[tooltipItems[0].dataIndex];
+                                    const date = new Date(dateStr);
+                                    return date.toLocaleDateString('ru-RU', {
+                                        weekday: 'long',
+                                        day: 'numeric',
+                                        month: 'long'
+                                    });
+                                },
                                 label: function (context) {
-                                    const value = context.raw;
-                                    if (value === null) return 'Нет данных';
-                                    const emoji = getMoodEmoji(value);
+                                    if (context.datasetIndex === 1) { // Только для линии настроения
+                                        const value = context.raw;
+                                        if (value === null) return 'Настроение: Нет данных';
+                                        const emoji = getMoodEmoji(value);
 
-                                    // Добавляем информацию о фазе цикла в тултип
-                                    const dateStr = moodOverTimeData.dates[context.dataIndex];
-                                    const phase = getCyclePhaseForDate(dateStr);
-                                    return `${emoji} Настроение: ${value.toFixed(1)} (${phase})`;
+                                        // Добавляем информацию о фазе цикла
+                                        const dateStr = moodOverTimeData.dates[context.dataIndex];
+                                        const phaseInfo = getCyclePhaseInfo(dateStr);
+
+                                        return [
+                                            `${emoji} Настроение: ${value.toFixed(1)}/10`,
+                                            `📅 Фаза цикла: ${phaseInfo.name}`,
+                                            phaseInfo.description ? `📝 ${phaseInfo.description}` : ''
+                                        ];
+                                    }
+                                    return null;
                                 },
                                 afterLabel: function (context) {
-                                    // Дополнительная информация в тултипе
-                                    const dateStr = moodOverTimeData.dates[context.dataIndex];
-                                    const cycleEntry = cycleData.find(entry => entry.date === dateStr);
+                                    if (context.datasetIndex === 1) {
+                                        const dateStr = moodOverTimeData.dates[context.dataIndex];
+                                        const cycleEntry = cycleData.find(entry => entry.date === dateStr);
 
-                                    if (cycleEntry) {
-                                        const symptoms = cycleEntry.symptoms || [];
-                                        const notes = cycleEntry.notes || '';
+                                        if (cycleEntry) {
+                                            const info = [];
 
-                                        let tooltipText = '';
+                                            // Показываем менструацию
+                                            if (cycleEntry.flow_intensity && cycleEntry.flow_intensity !== 'none') {
+                                                const intensityMap = {
+                                                    'light': 'Лёгкая',
+                                                    'medium': 'Средняя',
+                                                    'heavy': 'Сильная'
+                                                };
+                                                info.push(`🩸 Менструация: ${intensityMap[cycleEntry.flow_intensity] || cycleEntry.flow_intensity}`);
+                                            }
 
-                                        // Показываем симптомы
-                                        if (symptoms.length > 0) {
-                                            tooltipText += `Симптомы: ${symptoms.slice(0, 3).join(', ')}${symptoms.length > 3 ? '...' : ''}\n`;
+                                            // Показываем симптомы
+                                            const symptoms = cycleEntry.symptoms || [];
+                                            if (symptoms.length > 0) {
+                                                info.push(`📋 Симптомы: ${symptoms.slice(0, 2).join(', ')}${symptoms.length > 2 ? '...' : ''}`);
+                                            }
+
+                                            // Показываем заметки
+                                            const notes = cycleEntry.notes || '';
+                                            if (notes) {
+                                                info.push(`💭 ${notes.substring(0, 40)}${notes.length > 40 ? '...' : ''}`);
+                                            }
+
+                                            return info;
                                         }
-
-                                        // Показываем менструацию
-                                        if (cycleEntry.flow_intensity && cycleEntry.flow_intensity !== 'none') {
-                                            const intensityMap = {
-                                                'light': 'Лёгкая',
-                                                'medium': 'Средняя',
-                                                'heavy': 'Сильная'
-                                            };
-                                            tooltipText += `Менструация: ${intensityMap[cycleEntry.flow_intensity] || cycleEntry.flow_intensity}\n`;
-                                        }
-
-                                        // Показываем заметки
-                                        if (notes) {
-                                            tooltipText += `Заметка: ${notes.substring(0, 50)}${notes.length > 50 ? '...' : ''}`;
-                                        }
-
-                                        return tooltipText;
                                     }
-
-                                    return '';
+                                    return null;
                                 }
                             }
-                        },
-                        // ДОБАВЛЯЕМ АННОТАЦИИ ДЛЯ ФАЗ ЦИКЛА
-                        annotation: {
-                            annotations: phaseAnnotations
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.4
                         }
                     }
                 }
             });
+
             console.log('✅ Линейный график настроения с фазами цикла создан');
         } else {
             if (noMoodTimeData) noMoodTimeData.style.display = 'flex';
             console.log('ℹ️ Нет данных для линейного графика настроения');
         }
+    }
+
+    // Создаем градиент для фона с фазами цикла
+    function createCyclePhaseGradient(ctx, canvas, cyclePhases, labels) {
+        const width = canvas.width;
+        const height = canvas.height;
+
+        // Создаем линейный градиент по горизонтали
+        const gradient = ctx.createLinearGradient(0, 0, width, 0);
+
+        // Если нет данных о фазах, возвращаем прозрачный
+        if (!cyclePhases || cyclePhases.length === 0) {
+            gradient.addColorStop(0, 'transparent');
+            gradient.addColorStop(1, 'transparent');
+            return gradient;
+        }
+
+        // Добавляем цветовые остановки для каждой фазы
+        let currentPosition = 0;
+        const totalDays = labels.length;
+
+        cyclePhases.forEach((phase, index) => {
+            const phaseStart = currentPosition / totalDays;
+            const phaseEnd = (currentPosition + phase.duration) / totalDays;
+
+            gradient.addColorStop(phaseStart, CYCLE_PHASE_COLORS[phase.type].bg);
+            gradient.addColorStop(phaseEnd, CYCLE_PHASE_COLORS[phase.type].bg);
+
+            currentPosition += phase.duration;
+        });
+
+        return gradient;
+    }
+
+    // Обнаруживаем фазы цикла на основе дат
+    function detectCyclePhases(dates) {
+        const phases = [];
+
+        if (!dates || dates.length === 0) return phases;
+
+        // Простая логика определения фаз для демонстрации
+        // В реальном приложении используйте данные из БД
+
+        const cycleLength = userCycleSettings?.cycle_length || 28;
+        const periodLength = userCycleSettings?.period_length || 5;
+
+        // Определяем начало цикла (последняя менструация)
+        let cycleStartDate = null;
+        if (userCycleSettings?.last_period_start) {
+            cycleStartDate = new Date(userCycleSettings.last_period_start);
+        } else {
+            // Если нет данных, используем первую дату
+            cycleStartDate = new Date(dates[0]);
+        }
+
+        // Определяем фазы для каждой даты
+        dates.forEach((dateStr, index) => {
+            const date = new Date(dateStr);
+            const daysSinceStart = Math.floor((date - cycleStartDate) / (1000 * 60 * 60 * 24)) % cycleLength;
+
+            let phaseType = 'follicular'; // По умолчанию
+
+            if (daysSinceStart < periodLength) {
+                phaseType = 'menstruation';
+            } else if (daysSinceStart >= periodLength && daysSinceStart < 13) {
+                phaseType = 'follicular';
+            } else if (daysSinceStart >= 13 && daysSinceStart < 15) {
+                phaseType = 'ovulation';
+            } else if (daysSinceStart >= 15 && daysSinceStart < 24) {
+                phaseType = 'luteal';
+            } else {
+                phaseType = 'pms';
+            }
+
+            // Группируем последовательные дни с одинаковой фазой
+            if (phases.length === 0 || phases[phases.length - 1].type !== phaseType) {
+                phases.push({
+                    type: phaseType,
+                    startIndex: index,
+                    duration: 1
+                });
+            } else {
+                phases[phases.length - 1].duration++;
+            }
+        });
+
+        return phases;
+    }
+
+    // Получаем информацию о фазе цикла для даты
+    function getCyclePhaseInfo(dateStr) {
+        const date = new Date(dateStr);
+        const phases = [
+            {
+                name: 'Менструация',
+                type: 'menstruation',
+                description: 'Менструальное кровотечение. Возможны спазмы, усталость.',
+                days: [1, 2, 3, 4, 5]
+            },
+            {
+                name: 'Фолликулярная фаза',
+                type: 'follicular',
+                description: 'Уровень энергии растет. Хорошее время для активностей.',
+                days: [6, 7, 8, 9, 10, 11, 12, 13]
+            },
+            {
+                name: 'Овуляция',
+                type: 'ovulation',
+                description: 'Пик фертильности. Возможна повышенная чувствительность.',
+                days: [14, 15]
+            },
+            {
+                name: 'Лютеиновая фаза',
+                type: 'luteal',
+                description: 'Уровень прогестерона повышается. Возможны перепады настроения.',
+                days: [16, 17, 18, 19, 20, 21, 22, 23]
+            },
+            {
+                name: 'Предменструальная фаза (ПМС)',
+                type: 'pms',
+                description: 'Возможны раздражительность, вздутие, усталость.',
+                days: [24, 25, 26, 27, 28]
+            }
+        ];
+
+        // Простая логика для демонстрации
+        const dayOfMonth = date.getDate();
+
+        for (const phase of phases) {
+            if (phase.days.includes(dayOfMonth % 28 || 28)) {
+                return phase;
+            }
+        }
+
+        // Возвращаем фазу по умолчанию
+        return phases[0];
     }
 
     // Функция для получения фаз цикла для отображения на графике

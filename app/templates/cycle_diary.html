@@ -1612,31 +1612,40 @@
 {% endblock %}
 {% block extra_js %}
 
+{% block extra_js %}
 <script>
-    // Константы API
+    // ==========================================================================
+    // КОНСТАНТЫ API
+    // ==========================================================================
     const CYCLE_API = "/api/cycle_entries";
     const MOOD_API = "/api/mood_entries";
     const TODAY_MOOD_API = "/api/today_mood";
     const CYCLE_STATS_API = "/api/cycle_stats";
     const CYCLE_PREDICTIONS_API = "/api/cycle_predictions";
 
-    // Глобальные переменные
+    // ==========================================================================
+    // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+    // ==========================================================================
     let currentDate = new Date();
     let cycleData = [];
     let moodData = [];
-    let moodPhaseChart = null;
+    let moodChart = null;
     let symptomsChart = null;
     let currentSelectedDate = null;
     let isEditMode = false;
 
-    // Инициализация при загрузке
+    // ==========================================================================
+    // ИНИЦИАЛИЗАЦИЯ
+    // ==========================================================================
     document.addEventListener('DOMContentLoaded', function () {
         console.log('🚀 Инициализация дневника цикла...');
         initSymptomsGrid();
         loadInitialData();
     });
 
-    // Загрузка начальных данных
+    // ==========================================================================
+    // ОСНОВНЫЕ ФУНКЦИИ ЗАГРУЗКИ
+    // ==========================================================================
     async function loadInitialData() {
         try {
             console.log('📥 Начинаю загрузку данных...');
@@ -1652,7 +1661,7 @@
             ]);
 
             // Инициализируем графики
-            setTimeout(updateChartsWithRealData, 500);
+            initCharts();
 
             console.log('✅ Все данные загружены');
         } catch (error) {
@@ -1669,12 +1678,6 @@
             if (response.ok) {
                 cycleData = await response.json();
                 console.log('✅ Данные цикла загружены:', cycleData.length, 'записей');
-
-                // Отладочный вывод
-                cycleData.forEach((entry, index) => {
-                    console.log(`📅 ${entry.date}: менструация=${entry.flow_intensity || 'none'}, симптомы=${entry.symptoms?.length || 0}`);
-                });
-
                 updateSymptomsLegend();
             } else {
                 console.error('❌ Ошибка загрузки данных цикла:', response.status);
@@ -1735,6 +1738,238 @@
         }
     }
 
+    // ==========================================================================
+    // ФУНКЦИИ ГРАФИКОВ
+    // ==========================================================================
+    
+    function initCharts() {
+        console.log('📊 Инициализирую графики...');
+        createMoodChart();
+        createSymptomsChart();
+    }
+    
+    function createMoodChart() {
+        const canvas = document.getElementById('moodPhaseChart');
+        if (!canvas) {
+            console.error('❌ Canvas для графика настроения не найден');
+            return;
+        }
+        
+        // Уничтожаем старый график если он есть
+        if (moodChart) {
+            moodChart.destroy();
+        }
+        
+        // Собираем данные для графика
+        const moodDataForChart = getMoodChartData();
+        const noMoodData = document.getElementById('noMoodData');
+        
+        if (moodDataForChart.hasData) {
+            if (noMoodData) noMoodData.style.display = 'none';
+            
+            moodChart = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: moodDataForChart.labels,
+                    datasets: [{
+                        label: 'Среднее настроение',
+                        data: moodDataForChart.values,
+                        backgroundColor: 'rgba(96, 244, 227, 0.6)',
+                        borderColor: 'rgb(96, 244, 227)',
+                        borderWidth: 2,
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `Настроение: ${context.raw}/10`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            title: {
+                                display: true,
+                                text: 'Настроение (0-10)'
+                            },
+                            ticks: { stepSize: 1 }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Фаза цикла'
+                            }
+                        }
+                    }
+                }
+            });
+            console.log('✅ График настроения создан');
+        } else {
+            if (noMoodData) noMoodData.style.display = 'flex';
+            console.log('ℹ️ Нет данных для графика настроения');
+        }
+    }
+    
+    function createSymptomsChart() {
+        const canvas = document.getElementById('symptomsChart');
+        if (!canvas) {
+            console.error('❌ Canvas для графика симптомов не найден');
+            return;
+        }
+        
+        // Уничтожаем старый график если он есть
+        if (symptomsChart) {
+            symptomsChart.destroy();
+        }
+        
+        // Собираем данные для графика
+        const symptomsDataForChart = getSymptomsChartData();
+        const noSymptomsData = document.getElementById('noSymptomsData');
+        
+        if (symptomsDataForChart.hasData) {
+            if (noSymptomsData) noSymptomsData.style.display = 'none';
+            
+            symptomsChart = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: symptomsDataForChart.labels,
+                    datasets: [{
+                        data: symptomsDataForChart.values,
+                        backgroundColor: symptomsDataForChart.colors,
+                        borderColor: symptomsDataForChart.colors.map(color => color.replace('0.6', '1')),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 15,
+                                padding: 15,
+                                font: { size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = symptomsDataForChart.values.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                    return `${label}: ${value} раз (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            console.log('✅ График симптомов создан');
+        } else {
+            if (noSymptomsData) noSymptomsData.style.display = 'flex';
+            console.log('ℹ️ Нет данных для графика симптомов');
+        }
+    }
+    
+    function getMoodChartData() {
+        console.log('📊 Собираю данные для графика настроения...');
+        
+        const phases = {
+            'Менструация': [],
+            'Фолликулярная': [],
+            'Овуляция': [],
+            'Лютеиновая': []
+        };
+        
+        // Проходим по всем данным о цикле и находим соответствующие записи настроения
+        cycleData.forEach(cycleEntry => {
+            if (!cycleEntry.date) return;
+            
+            // Ищем запись настроения для этой даты
+            const moodEntry = moodData.find(m => m.date === cycleEntry.date);
+            if (moodEntry && moodEntry.mood !== undefined && moodEntry.mood !== null) {
+                // Определяем фазу цикла (упрощенно)
+                let phase = 'Лютеиновая'; // по умолчанию
+                
+                // Если есть менструация
+                if (cycleEntry.flow_intensity && cycleEntry.flow_intensity !== 'none') {
+                    phase = 'Менструация';
+                }
+                // Здесь должна быть ваша логика определения других фаз
+                // Например, по cycle_day или другим данным
+                
+                phases[phase].push(moodEntry.mood);
+            }
+        });
+        
+        const labels = [];
+        const values = [];
+        let hasData = false;
+        
+        for (const [phase, moods] of Object.entries(phases)) {
+            if (moods.length > 0) {
+                labels.push(phase);
+                const avg = moods.reduce((a, b) => a + b, 0) / moods.length;
+                values.push(parseFloat(avg.toFixed(1)));
+                hasData = true;
+            }
+        }
+        
+        console.log('📈 Данные для графика настроения:', { labels, values, hasData });
+        return { labels, values, hasData };
+    }
+    
+    function getSymptomsChartData() {
+        console.log('📊 Собираю данные для графика симптомов...');
+        
+        const symptomStats = {};
+        let totalEntries = 0;
+        
+        cycleData.forEach(entry => {
+            if (entry.symptoms && Array.isArray(entry.symptoms)) {
+                entry.symptoms.forEach(symptom => {
+                    symptomStats[symptom] = (symptomStats[symptom] || 0) + 1;
+                    totalEntries++;
+                });
+            }
+        });
+        
+        if (totalEntries === 0) {
+            return {
+                labels: [],
+                values: [],
+                colors: [],
+                hasData: false
+            };
+        }
+        
+        const sorted = Object.entries(symptomStats)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 8); // Ограничиваем 8 симптомами
+        
+        return {
+            labels: sorted.map(([symptom]) => symptom),
+            values: sorted.map(([, count]) => count),
+            colors: sorted.map(([symptom]) => getSymptomColor(symptom)),
+            hasData: sorted.length > 0
+        };
+    }
+
+    // ==========================================================================
+    // ОСТАЛЬНЫЕ ФУНКЦИИ (оставляем без изменений)
+    // ==========================================================================
+    
     function initSymptomsGrid() {
         const symptomsGrid = document.getElementById('symptomsGrid');
         if (!symptomsGrid) return;
@@ -1753,7 +1988,6 @@
         `).join('');
     }
 
-    // ДОБАВИТЬ: Функция для отметки менструации
     async function markMenstruationStart() {
         const dateStr = currentSelectedDate || formatDate(new Date());
         const existingEntry = cycleData.find(entry => entry.date === dateStr);
@@ -1762,17 +1996,14 @@
         try {
             showLoading(true);
 
-            // Подготавливаем данные
             const requestData = {
                 date: dateStr,
                 symptoms: existingEntry?.symptoms || [],
                 notes: existingEntry?.notes || '',
-                flow_intensity: hasMenstruation ? 'none' : 'light', // Переключаем состояние
+                flow_intensity: hasMenstruation ? 'none' : 'light',
                 cycle_day: existingEntry?.cycle_day || null,
                 mood: existingEntry?.mood || null
             };
-
-            console.log('🩸 Отправляю данные менструации:', requestData);
 
             const response = await fetch(CYCLE_API, {
                 method: 'POST',
@@ -1989,7 +2220,6 @@
     async function saveCycleEntry() {
         console.log('💾 Начинаю сохранение записи...');
 
-        // Определяем дату
         let dateStr;
         if (currentSelectedDate && isEditMode) {
             dateStr = currentSelectedDate;
@@ -1999,7 +2229,6 @@
 
         console.log('📅 Сохраняем для даты:', dateStr);
 
-        // Проверяем, что дата не в будущем
         const selected = new Date(dateStr);
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -2010,38 +2239,23 @@
             return;
         }
 
-        // Получаем выбранные симптомы из формы
         const selectedSymptoms = Array.from(
             document.querySelectorAll('input[name="symptoms"]:checked')
         ).map(cb => cb.value);
 
-        // Получаем заметки
         const notes = document.getElementById('cycleNotes').value.trim();
 
-        // Проверяем, есть ли данные для сохранения
         if (selectedSymptoms.length === 0 && !notes) {
             showToast('Выберите симптомы или добавьте заметку', 'error');
             return;
         }
 
-        // Получаем существующую запись
         const existingEntry = cycleData.find(entry => entry.date === dateStr);
-
-        // Если есть существующая запись, сохраняем менструацию из нее
         const flowIntensity = existingEntry ? (existingEntry.flow_intensity || 'none') : 'none';
-
-        console.log('📝 Данные для сохранения:', {
-            date: dateStr,
-            symptoms: selectedSymptoms,
-            notes: notes,
-            flow_intensity: flowIntensity,
-            existingEntry: !!existingEntry
-        });
 
         try {
             showLoading(true);
 
-            // Подготавливаем данные в формате, который ожидает бэкенд
             const requestData = {
                 date: dateStr,
                 symptoms: selectedSymptoms,
@@ -2050,8 +2264,6 @@
                 cycle_day: null,
                 mood: null
             };
-
-            console.log('📤 Отправляю данные:', requestData);
 
             const response = await fetch(CYCLE_API, {
                 method: 'POST',
@@ -2062,21 +2274,10 @@
                 body: JSON.stringify(requestData)
             });
 
-            console.log('📥 Ответ сервера:', {
-                status: response.status,
-                statusText: response.statusText
-            });
-
             if (response.ok) {
                 const result = await response.json();
-                console.log('✅ Ответ от сервера:', result);
-
                 showToast(existingEntry ? 'Запись обновлена!' : 'Запись сохранена!', 'success');
-
-                // ОБНОВЛЯЕМ ВСЕ ДАННЫЕ
                 await refreshAllData();
-
-                // Очищаем форму если сохранили новую запись (не выбранную дату)
                 if (!currentSelectedDate) {
                     clearForm();
                 }
@@ -2122,22 +2323,11 @@
                 }
             });
 
-            console.log('📥 Ответ сервера (удаление):', {
-                status: response.status,
-                statusText: response.statusText
-            });
-
             if (response.ok) {
                 const result = await response.json();
-                console.log('✅ Ответ от сервера:', result);
-
                 if (result.success) {
                     showToast(`Запись за ${formatDateDisplay(currentSelectedDate)} удалена!`, 'success');
-
-                    // ОБНОВЛЯЕМ ВСЕ ДАННЫЕ
                     await refreshAllData();
-
-                    // Сбрасываем выбранную дату
                     resetToToday();
                 } else {
                     showToast('Ошибка удаления записи', 'error');
@@ -2157,16 +2347,10 @@
 
     function clearForm() {
         console.log('🧹 Очищаю форму...');
-
-        // Снимаем все галочки симптомов
         document.querySelectorAll('input[name="symptoms"]:checked').forEach(checkbox => {
             checkbox.checked = false;
         });
-
-        // Очищаем заметки
         document.getElementById('cycleNotes').value = '';
-
-        // Обновляем кнопку менструации
         updateMenstruationButton('none');
     }
 
@@ -2187,7 +2371,6 @@
 
     function resetToToday() {
         console.log('🔄 Сбрасываю к сегодняшнему дню...');
-
         currentSelectedDate = null;
         isEditMode = false;
 
@@ -2201,7 +2384,6 @@
         });
 
         clearForm();
-
         console.log('✅ Сброс выполнен');
     }
 
@@ -2294,11 +2476,9 @@
         currentSelectedDate = dateStr;
         isEditMode = true;
 
-        // Загружаем запись за выбранную дату
         const existingEntry = await loadDayEntry(dateStr);
         fillFormWithData(dateStr, existingEntry);
 
-        // Прокручиваем к форме
         document.querySelector('.tracker-form').scrollIntoView({
             behavior: 'smooth',
             block: 'start'
@@ -2332,7 +2512,6 @@
         clearForm();
 
         if (entry) {
-            // Симптомы
             if (entry.symptoms && Array.isArray(entry.symptoms)) {
                 entry.symptoms.forEach(symptom => {
                     const checkbox = Array.from(document.querySelectorAll('input[name="symptoms"]'))
@@ -2344,10 +2523,8 @@
                 });
             }
 
-            // Обновляем кнопку менструации
             updateMenstruationButton(entry.flow_intensity);
 
-            // Заметки
             const notesTextarea = document.getElementById('cycleNotes');
             if (notesTextarea && entry.notes) {
                 notesTextarea.value = entry.notes;
@@ -2428,264 +2605,16 @@
         }
     }
 
-    // Функция для расчета настроения по фазам цикла
-    function calculateRealMoodByPhase() {
-        try {
-            console.log('📊 Рассчитываю настроение по фазам...');
-
-            // Группируем данные по фазам цикла
-            const phaseData = {
-                'Менструация': [],
-                'Фолликулярная': [],
-                'Овуляция': [],
-                'Лютеиновая': [],
-                'ПМС': []
-            };
-
-            // Для каждого дня в cycleData определяем фазу и находим соответствующее настроение
-            cycleData.forEach(cycleEntry => {
-                if (!cycleEntry.date) return;
-
-                // Ищем запись настроения для этой даты
-                const moodEntry = moodData.find(m => m.date === cycleEntry.date);
-                if (moodEntry && moodEntry.mood !== undefined && moodEntry.mood !== null) {
-                    // Определяем фазу цикла (упрощенно, нужно заменить на вашу логику)
-                    let phase = 'Лютеиновая'; // по умолчанию
-
-                    // Если есть менструация
-                    if (cycleEntry.flow_intensity && cycleEntry.flow_intensity !== 'none') {
-                        phase = 'Менструация';
-                    }
-                    // Добавьте здесь вашу логику определения фаз
-
-                    phaseData[phase].push(moodEntry.mood);
-                }
-            });
-
-            // Рассчитываем средние значения
-            const labels = [];
-            const values = [];
-            let hasData = false;
-
-            for (const [phase, moods] of Object.entries(phaseData)) {
-                if (moods.length > 0) {
-                    labels.push(phase);
-                    const avg = moods.reduce((a, b) => a + b, 0) / moods.length;
-                    values.push(parseFloat(avg.toFixed(1)));
-                    hasData = true;
-                }
-            }
-
-            console.log('📈 Данные настроения по фазам:', { labels, values, hasData });
-
-            return {
-                labels: labels,
-                values: values,
-                hasData: hasData
-            };
-
-        } catch (error) {
-            console.error('❌ Ошибка расчета настроения по фазам:', error);
-            return {
-                labels: [],
-                values: [],
-                hasData: false
-            };
-        }
-    }
-
-    // Функция для расчета распределения симптомов
-    function calculateRealSymptomFrequency() {
-        try {
-            console.log('📊 Рассчитываю распределение симптомов...');
-
-            const symptomStats = {};
-            let totalSymptoms = 0;
-
-            cycleData.forEach(entry => {
-                if (entry.symptoms && Array.isArray(entry.symptoms)) {
-                    entry.symptoms.forEach(symptom => {
-                        symptomStats[symptom] = (symptomStats[symptom] || 0) + 1;
-                        totalSymptoms++;
-                    });
-                }
-            });
-
-            // Сортируем по частоте и берем топ-10
-            const sorted = Object.entries(symptomStats)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-
-            console.log('📈 Статистика симптомов:', sorted);
-
-            return {
-                labels: sorted.map(([symptom]) => symptom),
-                values: sorted.map(([, count]) => count),
-                colors: sorted.map(([symptom]) => getSymptomColor(symptom)),
-                borderColors: sorted.map(([symptom]) => getSymptomColor(symptom)),
-                hasData: sorted.length > 0
-            };
-
-        } catch (error) {
-            console.error('❌ Ошибка расчета симптомов:', error);
-            return {
-                labels: [],
-                values: [],
-                colors: [],
-                borderColors: [],
-                hasData: false
-            };
-        }
-    }
-
-    // Функция обновления графиков
-    function updateChartsWithRealData() {
-        console.log('📊 Обновляю графики аналитики...');
-
-        // 1. График настроения по фазам
-        const moodChartData = calculateRealMoodByPhase();
-        const moodCtx = document.getElementById('moodPhaseChart');
-        const noMoodData = document.getElementById('noMoodData');
-
-        if (moodCtx) {
-            // Уничтожаем старый график если он есть
-            if (window.moodPhaseChartInstance) {
-                window.moodPhaseChartInstance.destroy();
-            }
-
-            if (moodChartData.hasData) {
-                // Скрываем сообщение "нет данных"
-                if (noMoodData) noMoodData.style.display = 'none';
-
-                // Создаем новый график
-                window.moodPhaseChartInstance = new Chart(moodCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: moodChartData.labels,
-                        datasets: [{
-                            label: 'Среднее настроение',
-                            data: moodChartData.values,
-                            backgroundColor: 'rgba(96, 244, 227, 0.6)',
-                            borderColor: 'rgb(96, 244, 227)',
-                            borderWidth: 2,
-                            borderRadius: 5
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        return `Настроение: ${context.raw}/10`;
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                max: 10,
-                                title: {
-                                    display: true,
-                                    text: 'Настроение (0-10)'
-                                },
-                                ticks: {
-                                    stepSize: 1
-                                }
-                            },
-                            x: {
-                                title: {
-                                    display: true,
-                                    text: 'Фаза цикла'
-                                }
-                            }
-                        }
-                    }
-                });
-
-                console.log('✅ График настроения создан');
-            } else {
-                // Показываем сообщение "нет данных"
-                if (noMoodData) noMoodData.style.display = 'flex';
-                console.log('ℹ️ Нет данных для графика настроения');
-            }
-        }
-
-        // 2. График распределения симптомов
-        const symptomsData = calculateRealSymptomFrequency();
-        const symptomsCtx = document.getElementById('symptomsChart');
-        const noSymptomsData = document.getElementById('noSymptomsData');
-
-        if (symptomsCtx) {
-            // Уничтожаем старый график если он есть
-            if (window.symptomsChartInstance) {
-                window.symptomsChartInstance.destroy();
-            }
-
-            if (symptomsData.hasData) {
-                // Скрываем сообщение "нет данных"
-                if (noSymptomsData) noSymptomsData.style.display = 'none';
-
-                // Создаем новый график
-                window.symptomsChartInstance = new Chart(symptomsCtx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: symptomsData.labels,
-                        datasets: [{
-                            data: symptomsData.values,
-                            backgroundColor: symptomsData.colors,
-                            borderColor: symptomsData.borderColors,
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'right',
-                                labels: {
-                                    boxWidth: 15,
-                                    padding: 15
-                                }
-                            },
-                            tooltip: {
-                                callbacks: {
-                                    label: function (context) {
-                                        const label = context.label || '';
-                                        const value = context.raw || 0;
-                                        const total = symptomsData.values.reduce((a, b) => a + b, 0);
-                                        const percentage = Math.round((value / total) * 100);
-                                        return `${label}: ${value} раз (${percentage}%)`;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-
-                console.log('✅ График симптомов создан');
-            } else {
-                // Показываем сообщение "нет данных"
-                if (noSymptomsData) noSymptomsData.style.display = 'flex';
-                console.log('ℹ️ Нет данных для графика симптомов');
-            }
-        }
-    }
-
-    // Обновите функцию refreshAllData чтобы вызывать updateChartsWithRealData
+    // ==========================================================================
+    // ФУНКЦИИ ОБНОВЛЕНИЯ ДАННЫХ
+    // ==========================================================================
+    
     async function refreshAllData() {
         console.log('🔄 Обновляю все данные...');
-
+        
         try {
             showLoading(true);
-
-            // Загружаем свежие данные
+            
             await Promise.all([
                 loadCycleData(),
                 loadMoodData(),
@@ -2693,16 +2622,11 @@
                 loadCyclePredictions(),
                 loadTodayMood()
             ]);
-
-            // Перерисовываем календарь
+            
             renderCalendar();
-
-            // Обновляем графики
-            updateChartsWithRealData();
-
-            // Обновляем легенду
             updateSymptomsLegend();
-
+            initCharts(); // Обновляем графики
+            
             console.log('✅ Все данные обновлены');
         } catch (error) {
             console.error('❌ Ошибка при обновлении данных:', error);
@@ -2711,161 +2635,9 @@
         }
     }
 
-    // Обновите функцию loadInitialData
-    async function loadInitialData() {
-        try {
-            console.log('📥 Начинаю загрузку данных...');
-            await loadCycleData();
-            renderCalendar();
-
-            // Загружаем остальные данные параллельно
-            await Promise.all([
-                loadMoodData(),
-                loadCycleStats(),
-                loadCyclePredictions(),
-                loadTodayMood()
-            ]);
-
-            // Инициализируем графики после загрузки всех данных
-            setTimeout(updateChartsWithRealData, 500);
-
-            console.log('✅ Все данные загружены');
-        } catch (error) {
-            console.error('Ошибка загрузки данных:', error);
-            showToast('Ошибка загрузки данных', 'error');
-        }
-    }
-
-    function calculateRealSymptomFrequency() {
-        const symptomStats = {};
-        cycleData.forEach(entry => {
-            if (entry.symptoms && Array.isArray(entry.symptoms)) {
-                entry.symptoms.forEach(symptom => {
-                    symptomStats[symptom] = (symptomStats[symptom] || 0) + 1;
-                });
-            }
-        });
-
-        const sorted = Object.entries(symptomStats)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 10); // Ограничиваем 10 симптомами для графика
-
-        return {
-            labels: sorted.map(([symptom]) => symptom),
-            values: sorted.map(([, count]) => count),
-            colors: sorted.map(([symptom]) => getSymptomColor(symptom)),
-            borderColors: sorted.map(([symptom]) => getSymptomColor(symptom)),
-            hasData: sorted.length > 0
-        };
-    }
-
-    function updateChartsWithRealData() {
-        console.log('📊 Обновляю графики...');
-
-        // График настроения по фазам
-        const moodChartData = calculateRealMoodByPhase();
-        const moodCtx = document.getElementById('moodPhaseChart');
-
-        if (moodCtx && moodChartData.hasData) {
-            if (moodPhaseChart) {
-                moodPhaseChart.destroy();
-            }
-
-            moodPhaseChart = new Chart(moodCtx.getContext('2d'), {
-                type: 'line',
-                data: {
-                    labels: moodChartData.labels,
-                    datasets: [{
-                        label: 'Среднее настроение',
-                        data: moodChartData.values,
-                        borderColor: 'rgb(96, 244, 227)',
-                        backgroundColor: 'rgba(96, 244, 227, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 10
-                        }
-                    }
-                }
-            });
-        }
-
-        // График симптомов
-        const symptomsData = calculateRealSymptomFrequency();
-        const symptomsCtx = document.getElementById('symptomsChart');
-
-        if (symptomsCtx && symptomsData.hasData) {
-            if (symptomsChart) {
-                symptomsChart.destroy();
-            }
-
-            symptomsChart = new Chart(symptomsCtx.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: symptomsData.labels,
-                    datasets: [{
-                        label: 'Частота симптомов',
-                        data: symptomsData.values,
-                        backgroundColor: symptomsData.colors
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    // ДОБАВИТЬ: Функция полного обновления данных
-    async function refreshAllData() {
-        console.log('🔄 Обновляю все данные...');
-
-        try {
-            showLoading(true);
-
-            // Загружаем свежие данные
-            await Promise.all([
-                loadCycleData(),
-                loadMoodData(),
-                loadCycleStats(),
-                loadCyclePredictions(),
-                loadTodayMood()
-            ]);
-
-            // Перерисовываем календарь
-            renderCalendar();
-
-            // Обновляем графики
-            updateChartsWithRealData();
-
-            // Обновляем легенду
-            updateSymptomsLegend();
-
-            console.log('✅ Все данные обновлены');
-        } catch (error) {
-            console.error('❌ Ошибка при обновлении данных:', error);
-        } finally {
-            showLoading(false);
-        }
-    }
-
-    // ДОБАВИТЬ: Функция показа/скрытия загрузки
     function showLoading(isLoading) {
         let overlay = document.getElementById('loading-overlay');
-
+        
         if (!overlay) {
             overlay = document.createElement('div');
             overlay.id = 'loading-overlay';
@@ -2884,7 +2656,7 @@
                 transition: opacity 0.3s;
                 pointer-events: none;
             `;
-
+            
             const spinner = document.createElement('div');
             spinner.style.cssText = `
                 width: 60px;
@@ -2894,11 +2666,11 @@
                 border-radius: 50%;
                 animation: spin 1s linear infinite;
             `;
-
+            
             overlay.appendChild(spinner);
             document.body.appendChild(overlay);
         }
-
+        
         if (isLoading) {
             overlay.style.opacity = '1';
             overlay.style.pointerEvents = 'auto';
@@ -2910,20 +2682,17 @@
         }
     }
 
-    // ДОБАВИТЬ: Функция показа уведомлений
     function showToast(message, type = 'info') {
-        // Удаляем старые уведомления
         const oldToasts = document.querySelectorAll('.toast-notification');
         oldToasts.forEach(toast => toast.remove());
-
-        // Создаем новое уведомление
+        
         const toast = document.createElement('div');
         toast.className = `toast-notification toast-${type}`;
         toast.innerHTML = `
             <div class="toast-message">${message}</div>
             <button class="toast-close" onclick="this.parentElement.remove()">×</button>
         `;
-
+        
         toast.style.cssText = `
             position: fixed;
             top: 20px;
@@ -2941,10 +2710,9 @@
             z-index: 10000;
             animation: slideIn 0.3s ease;
         `;
-
+        
         document.body.appendChild(toast);
-
-        // Автоматическое удаление через 5 секунд
+        
         setTimeout(() => {
             if (toast.parentElement) {
                 toast.style.animation = 'slideOut 0.3s ease';
@@ -3001,99 +2769,6 @@
         }
     `;
     document.head.appendChild(style);
-
-    // Функция инициализации графиков
-    function initCharts() {
-        console.log('📊 Инициализирую графики...');
-
-        // График настроения по фазам
-        const moodCtx = document.getElementById('moodPhaseChart');
-        if (moodCtx) {
-            // Пример данных для графика (замените на реальные)
-            window.moodChart = new Chart(moodCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['Менструация', 'Фолликулярная', 'Овуляция', 'Лютеиновая'],
-                    datasets: [{
-                        label: 'Среднее настроение',
-                        data: [6.5, 7.8, 8.2, 6.0],
-                        backgroundColor: 'rgba(96, 244, 227, 0.6)',
-                        borderColor: 'rgb(96, 244, 227)',
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 10,
-                            title: {
-                                display: true,
-                                text: 'Настроение (0-10)'
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // График симптомов
-        const symptomsCtx = document.getElementById('symptomsChart');
-        if (symptomsCtx) {
-            // Пример данных для графика (замените на реальные)
-            window.symptomsChart = new Chart(symptomsCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Головная боль', 'Спазмы', 'Усталость', 'Набухание груди'],
-                    datasets: [{
-                        data: [15, 12, 8, 6],
-                        backgroundColor: [
-                            '#FF6B6B',
-                            '#FF70EC',
-                            '#60F4E3',
-                            '#FFD166'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'right'
-                        }
-                    }
-                }
-            });
-        }
-    }
-
-    // В функции loadInitialData добавьте вызов initCharts:
-    async function loadInitialData() {
-        try {
-            console.log('📥 Начинаю загрузку данных...');
-            await loadCycleData();
-            renderCalendar();
-
-            // Загружаем остальные данные параллельно
-            await Promise.all([
-                loadMoodData(),
-                loadCycleStats(),
-                loadCyclePredictions(),
-                loadTodayMood()
-            ]);
-
-            // Инициализируем графики
-            setTimeout(initCharts, 500);
-
-            console.log('✅ Все данные загружены');
-        } catch (error) {
-            console.error('Ошибка загрузки данных:', error);
-            showToast('Ошибка загрузки данных', 'error');
-        }
-    }
-
 </script>
+
 {% endblock %}

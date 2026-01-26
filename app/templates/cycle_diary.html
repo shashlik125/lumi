@@ -1750,15 +1750,14 @@
                 updatePredictionsDisplay(predictions);
             } else if (response.status === 400) {
                 console.log('📅 Нет данных для прогноза цикла (нужно настроить цикл)');
-                // Скрываем или показываем сообщение
-                document.getElementById('nextPeriod').textContent = 'настройте цикл';
-                document.getElementById('fertileWindow').textContent = 'настройте цикл';
+                // Не меняем DOM здесь - только логируем
                 return;
             } else {
                 console.error('❌ Ошибка загрузки прогнозов:', response.status);
             }
         } catch (error) {
             console.error('Ошибка загрузки прогнозов цикла:', error);
+            // Не показываем ошибку пользователю - это нормально
         }
     }
 
@@ -1785,6 +1784,8 @@
         createSymptomsChart();
     }
 
+
+
     function createMoodChart() {
         const canvas = document.getElementById('moodPhaseChart');
         if (!canvas) return;
@@ -1799,22 +1800,51 @@
 
             moodChart = new Chart(canvas, {
                 type: 'bar',
-                data: { /* ... ваши данные ... */ },
+                data: {
+                    labels: moodDataForChart.labels,
+                    datasets: [{
+                        label: 'Среднее настроение',
+                        data: moodDataForChart.values,
+                        backgroundColor: 'rgba(96, 244, 227, 0.6)',
+                        borderColor: 'rgb(96, 244, 227)',
+                        borderWidth: 2,
+                        borderRadius: 5
+                    }]
+                },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true, // ВАЖНО: true для пропорций
-                    aspectRatio: 2, // Меньше = шире, больше = выше
-                    plugins: { /* ... */ },
+                    maintainAspectRatio: false, // ИЗМЕНИТЬ на false
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    return `Настроение: ${context.raw}/10`;
+                                }
+                            }
+                        }
+                    },
                     scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 10,
+                            title: {
+                                display: true,
+                                text: 'Настроение (0-10)'
+                            },
+                            ticks: { stepSize: 1 }
+                        },
                         x: {
-                            ticks: {
-                                maxRotation: 45, // Поворачиваем подписи
-                                minRotation: 0
+                            title: {
+                                display: true,
+                                text: 'Фаза цикла'
                             }
                         }
                     }
                 }
             });
+        } else {
+            if (noMoodData) noMoodData.style.display = 'flex';
         }
     }
 
@@ -1832,11 +1862,18 @@
 
             symptomsChart = new Chart(canvas, {
                 type: 'doughnut',
-                data: { /* ... ваши данные ... */ },
+                data: {
+                    labels: symptomsDataForChart.labels,
+                    datasets: [{
+                        data: symptomsDataForChart.values,
+                        backgroundColor: symptomsDataForChart.colors,
+                        borderColor: symptomsDataForChart.colors.map(color => color.replace('0.6', '1')),
+                        borderWidth: 2
+                    }]
+                },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: true, // ВАЖНО
-                    aspectRatio: 1.5, // Для круговой диаграммы
+                    maintainAspectRatio: false, // ИЗМЕНИТЬ на false
                     plugins: {
                         legend: {
                             position: 'right',
@@ -1845,10 +1882,23 @@
                                 padding: 15,
                                 font: { size: 12 }
                             }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = symptomsDataForChart.values.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                    return `${label}: ${value} раз (${percentage}%)`;
+                                }
+                            }
                         }
                     }
                 }
             });
+        } else {
+            if (noSymptomsData) noSymptomsData.style.display = 'flex';
         }
     }
 

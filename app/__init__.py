@@ -16,16 +16,35 @@ login_manager.login_message_category = 'info'
 def get_db():
     """Получение нового соединения с базой данных"""
     try:
-        conn = mysql.connector.connect(
-            host='shashlik125.mysql.pythonanywhere-services.com',  # твой хост
-            user='shashlik125',  # твой пользователь
-            password=os.getenv('DB_PASSWORD', ''),
-            database='shashlik125$default',  # твоя БД
-            autocommit=True
-        )
+        # Сначала проверяем Railway MySQL URL
+        mysql_url = os.getenv('MYSQL_URL')
+        
+        if mysql_url:
+            # Для Railway MySQL
+            from urllib.parse import urlparse
+            parsed = urlparse(mysql_url)
+            conn = mysql.connector.connect(
+                host=parsed.hostname,
+                user=parsed.username,
+                password=parsed.password,
+                database=parsed.path[1:],
+                port=parsed.port or 3306,
+                autocommit=True
+            )
+            print(f"✓ Подключено к Railway MySQL: {parsed.hostname}")
+        else:
+            # Для локальной разработки
+            conn = mysql.connector.connect(
+                host=os.getenv('DB_HOST', 'localhost'),
+                user=os.getenv('DB_USER', 'root'),
+                password=os.getenv('DB_PASSWORD', ''),
+                database=os.getenv('DB_NAME', 'lumi'),
+                autocommit=True
+            )
+            print("✓ Подключено к локальной MySQL")
         return conn
     except Error as e:
-        print(f"Ошибка подключения к БД: {e}")
+        print(f"✗ Ошибка подключения к БД: {e}")
         return None
 
 def close_db(conn):

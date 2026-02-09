@@ -5,6 +5,7 @@ import mysql.connector
 from mysql.connector import Error
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # Инициализация расширений
@@ -16,35 +17,78 @@ login_manager.login_message_category = 'info'
 def get_db():
     """Получение нового соединения с базой данных"""
     try:
-        # Сначала проверяем Railway MySQL URL
+        # ДОБАВЛЯЕМ ОТЛАДКУ
         mysql_url = os.getenv('MYSQL_URL')
+        print(f"🔄 DEBUG: MYSQL_URL = {mysql_url}")
         
-        if mysql_url:
+        # ВАЖНО: проверяем, что URL не пустой
+        if mysql_url and mysql_url.strip() and mysql_url != 'mysql://':
+            print("✅ DEBUG: MYSQL_URL найден, парсим...")
+            
             # Для Railway MySQL
             from urllib.parse import urlparse
             parsed = urlparse(mysql_url)
+            
+            print(f"🔄 DEBUG parsed: scheme={parsed.scheme}, hostname={parsed.hostname}, username={parsed.username}, path={parsed.path}, port={parsed.port}")
+            
+            # Извлекаем параметры подключения
+            hostname = parsed.hostname
+            username = parsed.username or 'root'
+            password = parsed.password or ''
+            
+            # Обрабатываем путь к базе данных
+            database = parsed.path
+            if database.startswith('/'):
+                database = database[1:]  # Убираем ведущий слэш
+            if not database:
+                database = 'railway'  # Значение по умолчанию
+                
+            port = parsed.port or 3306
+            
+            print(f"🔄 DEBUG подключение: host={hostname}, user={username}, db={database}, port={port}")
+            
             conn = mysql.connector.connect(
-                host=parsed.hostname,
-                user=parsed.username,
-                password=parsed.password,
-                database=parsed.path[1:],
-                port=parsed.port or 3306,
+                host=hostname,
+                user=username,
+                password=password,
+                database=database,
+                port=port,
                 autocommit=True
             )
-            print(f"✓ Подключено к Railway MySQL: {parsed.hostname}")
+            print(f"✅ Подключено к Railway MySQL: {hostname}")
+            return conn
+            
         else:
-            # Для локальной разработки
-            conn = mysql.connector.connect(
-                host=os.getenv('DB_HOST', 'localhost'),
-                user=os.getenv('DB_USER', 'root'),
-                password=os.getenv('DB_PASSWORD', ''),
-                database=os.getenv('DB_NAME', 'lumi'),
-                autocommit=True
-            )
-            print("✓ Подключено к локальной MySQL")
-        return conn
+            # Если нет MYSQL_URL, пробуем отдельные переменные
+            print("⚠ DEBUG: MYSQL_URL не найден, проверяем отдельные переменные...")
+            
+            db_host = os.getenv('DB_HOST')
+            db_user = os.getenv('DB_USER')
+            db_password = os.getenv('DB_PASSWORD')
+            db_name = os.getenv('DB_NAME')
+            db_port = os.getenv('DB_PORT', 3306)
+            
+            print(f"🔄 DEBUG: DB_HOST={db_host}, DB_USER={db_user}, DB_NAME={db_name}, DB_PORT={db_port}")
+            
+            if db_host:
+                # Используем отдельные переменные
+                conn = mysql.connector.connect(
+                    host=db_host,
+                    user=db_user or 'root',
+                    password=db_password or '',
+                    database=db_name or 'railway',
+                    port=int(db_port),
+                    autocommit=True
+                )
+                print(f"✅ Подключено к MySQL: {db_host}")
+                return conn
+            else:
+                print("❌ DEBUG: Не найдены параметры подключения к БД")
+                return None
+                
     except Error as e:
-        print(f"✗ Ошибка подключения к БД: {e}")
+        print(f"❌ Ошибка подключения к БД: {e}")
+        print(f"❌ Подробности ошибки: {e.msg}")
         return None
 
 def close_db(conn):
@@ -60,16 +104,42 @@ def create_app():
     app = Flask(__name__)
     print("🚀 CREATE_APP началась")
     
+    # Проверяем все переменные окружения (для отладки)
+    print("🔄 Проверяем переменные окружения...")
+    env_vars = ['MYSQL_URL', 'DB_HOST', 'DB_USER', 'DB_NAME', 'DB_PORT']
+    for var in env_vars:
+        value = os.getenv(var)
+        if value:
+            print(f"   {var}: {value[:20]}..." if len(str(value)) > 20 else f"   {var}: {value}")
+        else:
+            print(f"   {var}: НЕ НАЙДЕНА")
+    
     # Быстрая проверка БД
     conn = get_db()
     if conn:
-        print("✅ БД подключена")
-        close_db(conn)
+        print("✅ БД подключена успешно")
+        
+        try:
+            cursor = conn.cursor()
+            cursor.execute("SHOW TABLES")
+            tables = cursor.fetchall()
+            cursor.close()
+            
+            if tables:
+                print(f"✅ Таблицы в БД ({len(tables)}): {', '.join([table[0] for table in tables])}")
+            else:
+                print("⚠ В БД нет таблиц")
+                
+        except Error as e:
+            print(f"⚠ Ошибка проверки таблиц: {e}")
+        finally:
+            close_db(conn)
     else:
         print("❌ БД не подключена")
+    
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     
-    # Конфигурация базы данных
+    # Конфигурация базы данных (для совместимости)
     app.config['MYSQL_HOST'] = os.getenv('DB_HOST', 'localhost')
     app.config['MYSQL_USER'] = os.getenv('DB_USER', 'root')
     app.config['MYSQL_PASSWORD'] = os.getenv('DB_PASSWORD', '')
@@ -103,7 +173,7 @@ def create_app():
                     first_name=user_data.get('first_name'),
                     last_name=user_data.get('last_name'),
                     avatar_path=user_data.get('avatar_path'),
-                      gender=user_data.get('gender')
+                    gender=user_data.get('gender')
                 )
             return None
         except Error as e:
@@ -119,30 +189,5 @@ def create_app():
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
     app.register_blueprint(main_blueprint)
     
-    # Проверка подключения к БД при запуске
-    with app.app_context():
-        conn = get_db()
-        if conn:
-            print("✓ База данных подключена успешно")
-            
-            try:
-                cursor = conn.cursor()
-                cursor.execute("SHOW TABLES LIKE 'users'")
-                users_table_exists = cursor.fetchone() is not None
-                cursor.close()
-                
-                if users_table_exists:
-                    print("✓ Таблицы БД существуют")
-                else:
-                    print("⚠ Таблицы БД не найдены")
-                    
-            except Error as e:
-                print(f"⚠ Ошибка проверки таблиц: {e}")
-            finally:
-                close_db(conn)
-        else:
-            print("✗ Ошибка подключения к базе данных")
-    
+    print("✅ Приложение Lumi инициализировано")
     return app
-
-

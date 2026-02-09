@@ -3,7 +3,7 @@ from app import get_db, close_db, bcrypt
 from mysql.connector import Error
 
 class User(UserMixin):
-    def __init__(self, id, username, email, password, first_name=None, last_name=None, avatar_path=None, gender=None):  # Добавьте gender в параметры
+    def __init__(self, id, username, email, password, first_name=None, last_name=None, avatar_path=None, gender=None):
         self.id = id
         self.username = username
         self.email = email
@@ -11,7 +11,7 @@ class User(UserMixin):
         self.first_name = first_name
         self.last_name = last_name
         self.avatar_path = avatar_path
-        self.gender = gender  
+        self.gender = gender
 
     @staticmethod
     def get_by_id(user_id):
@@ -34,7 +34,7 @@ class User(UserMixin):
                     first_name=user_data.get('first_name'),
                     last_name=user_data.get('last_name'),
                     avatar_path=user_data.get('avatar_path'),
-                    gender=user_data.get('gender')  # Добавлена запятая
+                    gender=user_data.get('gender')
                 )
             return None
         except Error as e:
@@ -64,7 +64,7 @@ class User(UserMixin):
                     first_name=user_data.get('first_name'),
                     last_name=user_data.get('last_name'),
                     avatar_path=user_data.get('avatar_path'),
-                    gender=user_data.get('gender')  # Добавлена запятая
+                    gender=user_data.get('gender')
                 )
             return None
         except Error as e:
@@ -83,10 +83,9 @@ class User(UserMixin):
             hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
             cursor = conn.cursor()
             
-            # Исправлен SQL запрос - добавлен gender
             cursor.execute(
-                "INSERT INTO users (username, password, first_name, last_name, email, gender) VALUES (%s, %s, %s, %s, %s, %s)",  # Добавлено gender
-                (username, hashed_password, first_name, last_name, email, gender)  # Добавлено gender
+                "INSERT INTO users (username, password, first_name, last_name, email, gender) VALUES (%s, %s, %s, %s, %s, %s)",
+                (username, hashed_password, first_name, last_name, email, gender)
             )
             
             user_id = cursor.lastrowid
@@ -101,7 +100,7 @@ class User(UserMixin):
                 first_name=first_name, 
                 last_name=last_name,
                 avatar_path=None,
-                gender=gender  # Добавлено
+                gender=gender
             )
         except Error as e:
             print(f"Database error in create: {e}")

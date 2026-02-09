@@ -1,11 +1,12 @@
-__pycache__/
-*.pyc
-venv/
-.env
-*.db
-*.sqlite3
-.DS_Store
-.idea/
-.vscode/
-lumi_db_backup.sql
-database_dump.sql
+# Старые настройки (PythonAnywhere):
+# host='shashlik125.mysql.pythonanywhere-services.com'
+# user='shashlik125'
+# password='...'
+# database='shashlik125$default'
+
+# Новые настройки (XAMPP):
+host='localhost'  # или '127.0.0.1'
+user='root'       # стандартный пользователь XAMPP
+password=''       # пароль по умолчанию пустой
+database='mood_tracker'  # имя вашей локальной базы
+port=3306

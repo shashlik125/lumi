@@ -4,6 +4,8 @@ from flask_bcrypt import Bcrypt
 import mysql.connector
 from mysql.connector import Error
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Инициализация расширений
 bcrypt = Bcrypt()
@@ -17,7 +19,7 @@ def get_db():
         conn = mysql.connector.connect(
             host='shashlik125.mysql.pythonanywhere-services.com',  # твой хост
             user='shashlik125',  # твой пользователь
-            password='kakashki1234',  # ⚠️ ВСТАВЬ ПАРОЛЬ!
+            password=os.getenv('DB_PASSWORD', ''),
             database='shashlik125$default',  # твоя БД
             autocommit=True
         )

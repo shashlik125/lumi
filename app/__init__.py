@@ -39,6 +39,15 @@ def close_db(conn):
 def create_app():
     """Фабрика приложения Flask"""
     app = Flask(__name__)
+    print("🚀 CREATE_APP началась")
+    
+    # Быстрая проверка БД
+    conn = get_db()
+    if conn:
+        print("✅ БД подключена")
+        close_db(conn)
+    else:
+        print("❌ БД не подключена")
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     
     # Конфигурация базы данных
@@ -55,6 +64,7 @@ def create_app():
     
     @login_manager.user_loader
     def load_user(user_id):
+        print(f"👤 LOAD_USER вызвана для user_id: {user_id}")
         conn = get_db()
         if conn is None:
             return None

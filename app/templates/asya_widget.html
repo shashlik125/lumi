@@ -673,20 +673,17 @@ asyaIcon.addEventListener('click', () => {
     }
   }
   
-  function saveChatHistory() {
+function saveChatHistory() {
     const messageElements = messages.querySelectorAll('.message.user-message, .message.asya-message');
     const history = Array.from(messageElements).map(el => ({
-      text: el.textContent,
-      sender: el.classList.contains('user-message') ? 'user' : 'asya',
-      emotion: el.dataset.emotion || 'neutral',
-      triggers: JSON.parse(el.dataset.triggers || '[]'),
-      timestamp: el.dataset.time || new Date().toISOString(),
-      stressLevel: parseInt(el.dataset.stressLevel || '0')
+        text: el.textContent,
+        sender: el.dataset.sender || (el.classList.contains('user-message') ? 'user' : 'asya'),
+        timestamp: el.dataset.time || new Date().toISOString()
     }));
     
     localStorage.setItem('asya_chat_history', JSON.stringify(history));
     console.log('💾 История сохранена:', history.length, 'сообщений');
-  }
+}
   
   function showNotification() {
     if (!chat.classList.contains('open')) {
@@ -699,7 +696,7 @@ function addMessage(text, sender, save = true) {
     div.className = `message ${sender}-message`;
     div.textContent = text;
     
-    // Только базовые данные
+    // Упрощаем - не храним эмоции/триггеры, так как анализ на сервере
     div.dataset.time = new Date().toISOString();
     div.dataset.sender = sender;
     
@@ -711,7 +708,7 @@ function addMessage(text, sender, save = true) {
     
     if (save) saveChatHistory();
     
-    console.log(`💬 Сообщение от ${sender}: "${text.substring(0, 30)}..."`);
+    console.log(`💬 ${sender === 'user' ? 'Вы' : 'Ася'}: "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}"`);
 }
   
   function generateSmartReply(text, analysis, moodEntries) {
@@ -761,16 +758,17 @@ async function sendMessage() {
     const text = input.value.trim();
     if (!text) return;
     
-    console.log('📤 Отправка:', text);
+    console.log('📤 Отправка пользователя:', text);
     
-    // Добавляем сообщение пользователя (упрощенная версия)
+    // Добавляем сообщение пользователя
     addMessage(text, 'user');
     input.value = '';
     
+    // Показываем индикатор набора
     typingIndicator.style.display = 'flex';
     
     try {
-        // Отправляем запрос на сервер
+        // Отправляем запрос на ваш Flask сервер
         const response = await fetch('/api/chat', {
             method: 'POST',
             headers: {
@@ -781,38 +779,55 @@ async function sendMessage() {
             })
         });
         
+        console.log('📥 Статус ответа:', response.status);
+        
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            let errorText = '';
+            try {
+                const errorData = await response.json();
+                errorText = errorData.error || 'Unknown error';
+            } catch {
+                errorText = await response.text();
+            }
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
         }
         
         const data = await response.json();
+        
+        console.log('✅ Данные ответа:', {
+            success: data.success,
+            has_analysis: data.has_analysis,
+            reply_length: data.reply?.length || 0
+        });
         
         typingIndicator.style.display = 'none';
         
         if (data.success) {
             addMessage(data.reply, 'asya');
-            console.log('✅ Ответ от сервера:', data.reply.substring(0, 50));
-            
-            // Проверяем, есть ли анализ
-            if (data.has_analysis) {
-                console.log('📊 Ответ содержит AI анализ');
-            }
+            console.log('🤖 Ответ от YandexGPT:', data.reply.substring(0, 100) + '...');
         } else {
-            addMessage('Что-то пошло не так, но я здесь для тебя! 🌸', 'asya');
+            // Локальный ответ при ошибке сервера
+            const fallbackReplies = [
+                'Кажется, у меня временные технические сложности. Но я здесь для тебя! 🌸',
+                'Ой, что-то пошло не так. Попробуй сказать мне что-нибудь ещё? 💫',
+                'Извини, возникла небольшая проблема. Я все равно слушаю тебя! 🤗'
+            ];
+            const reply = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
+            addMessage(reply, 'asya');
         }
         
     } catch (error) {
-        console.error('❌ Ошибка отправки:', error);
+        console.error('❌ Ошибка при отправке сообщения:', error);
         typingIndicator.style.display = 'none';
         
         // Локальный ответ при ошибке сети
-        const replies = [
-            'Кажется, есть проблемы с соединением. Но я здесь для тебя! 🌸',
-            'Не могу подключиться к серверу. Попробуй позже! 💫',
-            'Ой, технические неполадки. Я все равно слушаю тебя! 🤗'
+        const networkReplies = [
+            'Кажется, проблемы с интернет-соединением. Проверь подключение! 🌐',
+            'Не могу подключиться к серверу. Убедись, что есть интернет! 📡',
+            'Ой, потеряно соединение. Попробуй перезагрузить страницу! 🔄'
         ];
         
-        const reply = replies[Math.floor(Math.random() * replies.length)];
+        const reply = networkReplies[Math.floor(Math.random() * networkReplies.length)];
         addMessage(reply, 'asya');
     }
     
@@ -893,28 +908,39 @@ if (chatHistory.length > 0) {
   });
   
   // === АНАЛИТИКА ===
-  analyticsBtn.addEventListener('click', () => {
-    const analysis = generateUnifiedAnalysis();
-    
-    const analysisDiv = document.createElement('div');
-    analysisDiv.className = 'message analysis-message';
-    analysisDiv.innerHTML = `
-      <strong>📊 Анализ настроения</strong><br><br>
-      <strong>📈 Тенденции:</strong><br>
-      • Преобладающая эмоция: ${analysis.topEmotion}<br>
-      • Средний стресс: ${analysis.avgStress}/10<br>
-      • Среднее настроение: ${analysis.moodStats.averageMood}/10<br><br>
-      <strong>🎯 Топ-триггеры:</strong><br>
-      ${analysis.topTriggers.map(t => `• ${t}`).join('<br>') || 'Не определено'}<br><br>
-      <strong>💡 Рекомендации:</strong><br>
-      ${analysis.recommendations.map(r => `• ${r}`).join('<br>')}<br><br>
-      <em>${analysis.dataSource}</em>
-    `;
-    
-    messages.appendChild(analysisDiv);
-    setTimeout(() => {
-      messages.scrollTop = messages.scrollHeight;
-    }, 100);
+  analyticsBtn.addEventListener('click',  async () => {
+     try {
+        // Получаем анализ с сервера
+        const response = await fetch('/api/ai_insights');
+        const data = await response.json();
+        
+        if (data.success) {
+            const analysisDiv = document.createElement('div');
+            analysisDiv.className = 'message analysis-message';
+            analysisDiv.innerHTML = `
+                <strong>📊 AI-Анализ ваших данных</strong><br><br>
+                <strong>📈 Статистика настроения:</strong><br>
+                • Среднее настроение: ${data.stats_summary.avg_mood}/10<br>
+                • Общий балл: ${data.stats_summary.mood_score}/100<br>
+                • Тренд: ${data.stats_summary.trend === 'improving' ? 'Улучшение 📈' : data.stats_summary.trend === 'declining' ? 'Снижение 📉' : 'Стабильно 📊'}<br>
+                • Хороших дней: ${data.stats_summary.good_days}<br>
+                • Всего записей: ${data.stats_summary.total_entries}<br><br>
+                <strong>💡 AI-Рекомендации:</strong><br>
+                ${data.insights.replace(/\n/g, '<br>• ')}<br><br>
+                <em>Анализ сгенерирован с помощью YandexGPT</em>
+            `;
+            
+            messages.appendChild(analysisDiv);
+            setTimeout(() => {
+                messages.scrollTop = messages.scrollHeight;
+            }, 100);
+        } else {
+            addMessage('Пока недостаточно данных для анализа. Заполни календарь настроения! 📅', 'asya');
+        }
+    } catch (error) {
+        console.error('Ошибка получения анализа:', error);
+        addMessage('Не удалось получить анализ. Попробуй позже! 🔄', 'asya');
+    }
   });
   
   // === ЗАПУСК ===

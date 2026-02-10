@@ -694,42 +694,25 @@ asyaIcon.addEventListener('click', () => {
     }
   }
   
-  function addMessage(text, sender, emotion = null, triggers = [], stressLevel = 0, save = true) {
+function addMessage(text, sender, save = true) {
     const div = document.createElement('div');
     div.className = `message ${sender}-message`;
     div.textContent = text;
     
+    // Только базовые данные
     div.dataset.time = new Date().toISOString();
     div.dataset.sender = sender;
-    
-    if (sender === 'user') {
-      div.dataset.emotion = emotion || 'neutral';
-      div.dataset.triggers = JSON.stringify(triggers || []);
-      div.dataset.stressLevel = stressLevel || 0;
-      
-      if (emotion && emotion !== 'neutral') {
-        const emotionTag = document.createElement('div');
-        emotionTag.className = `emotion-tag emotion-${emotion}`;
-        const emoji = emotion === 'sad' ? '😔' :
-                     emotion === 'happy' ? '😊' :
-                     emotion === 'angry' ? '😠' :
-                     emotion === 'anxious' ? '😰' : '😐';
-        emotionTag.textContent = emoji;
-        emotionTag.title = `Эмоция: ${emotion}`;
-        div.appendChild(emotionTag);
-      }
-    }
     
     messages.appendChild(div);
     
     setTimeout(() => {
-      messages.scrollTop = messages.scrollHeight;
+        messages.scrollTop = messages.scrollHeight;
     }, 50);
     
     if (save) saveChatHistory();
     
-    console.log(`💬 Добавлено сообщение: "${text.substring(0, 30)}..." от ${sender}`);
-  }
+    console.log(`💬 Сообщение от ${sender}: "${text.substring(0, 30)}..."`);
+}
   
   function generateSmartReply(text, analysis, moodEntries) {
     const lowerText = text.toLowerCase();
@@ -774,64 +757,81 @@ asyaIcon.addEventListener('click', () => {
     return reply;
   }
   
-  async function sendMessage() {
+async function sendMessage() {
     const text = input.value.trim();
     if (!text) return;
     
     console.log('📤 Отправка:', text);
     
-    const moodEntries = getMoodEntries();
-    const analysis = analyzeMessageWithMood(text, moodEntries);
-    console.log('🧠 Анализ:', analysis);
-    
-    addMessage(text, 'user', analysis.emotion, analysis.triggers, analysis.stressLevel);
+    // Добавляем сообщение пользователя (упрощенная версия)
+    addMessage(text, 'user');
     input.value = '';
     
     typingIndicator.style.display = 'flex';
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 800));
-      typingIndicator.style.display = 'none';
-      
-      let reply = generateSmartReply(text, analysis, moodEntries);
-      
-      setTimeout(() => {
-        addMessage(reply, 'asya');
+        // Отправляем запрос на сервер
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: text
+            })
+        });
         
-        if (analysis.stressLevel >= 7) {
-          showNotification();
-          setTimeout(() => {
-            const urgentMsg = document.createElement('div');
-            urgentMsg.className = 'message asya-message';
-            urgentMsg.innerHTML = `⚠️ <strong>Замечен высокий уровень стресса (${analysis.stressLevel}/10).</strong> Могу порекомендовать технику дыхания 4-7-8.`;
-            messages.appendChild(urgentMsg);
-            messages.scrollTop = messages.scrollHeight;
-            saveChatHistory();
-          }, 1000);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         
-        saveChatHistory();
-        updateAnalyticsBadge();
-      }, 300);
-      
-    } catch (e) {
-      console.error('❌ Ошибка:', e);
-      typingIndicator.style.display = 'none';
-      addMessage('Кажется, что-то пошло не так. Но я всё равно здесь для тебя! 🌸', 'asya');
-      saveChatHistory();
+        const data = await response.json();
+        
+        typingIndicator.style.display = 'none';
+        
+        if (data.success) {
+            addMessage(data.reply, 'asya');
+            console.log('✅ Ответ от сервера:', data.reply.substring(0, 50));
+            
+            // Проверяем, есть ли анализ
+            if (data.has_analysis) {
+                console.log('📊 Ответ содержит AI анализ');
+            }
+        } else {
+            addMessage('Что-то пошло не так, но я здесь для тебя! 🌸', 'asya');
+        }
+        
+    } catch (error) {
+        console.error('❌ Ошибка отправки:', error);
+        typingIndicator.style.display = 'none';
+        
+        // Локальный ответ при ошибке сети
+        const replies = [
+            'Кажется, есть проблемы с соединением. Но я здесь для тебя! 🌸',
+            'Не могу подключиться к серверу. Попробуй позже! 💫',
+            'Ой, технические неполадки. Я все равно слушаю тебя! 🤗'
+        ];
+        
+        const reply = replies[Math.floor(Math.random() * replies.length)];
+        addMessage(reply, 'asya');
     }
-  }
-
-  // === ИНИЦИАЛИЗАЦИЯ ===
-  const chatHistory = JSON.parse(localStorage.getItem('asya_chat_history')) || [];
-  
-  if (chatHistory.length > 0) {
-    messages.innerHTML = '';
-    chatHistory.forEach(msg => {
-      addMessage(msg.text, msg.sender, msg.emotion, msg.triggers, msg.stressLevel, false);
-    });
+    
+    // Сохраняем историю
+    saveChatHistory();
     updateAnalyticsBadge();
-  }
+}
+
+// === ИНИЦИАЛИЗАЦИЯ ===
+const chatHistory = JSON.parse(localStorage.getItem('asya_chat_history')) || [];
+  
+if (chatHistory.length > 0) {
+  messages.innerHTML = '';
+  chatHistory.forEach(msg => {
+    // Упрощенная загрузка без эмоций/триггеров
+    addMessage(msg.text, msg.sender, false);
+  });
+  updateAnalyticsBadge();
+}
   
   console.log('✅ История чата загружена:', chatHistory.length, 'сообщений');
   

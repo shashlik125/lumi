@@ -301,7 +301,6 @@
     transition: opacity 0.3s ease, transform 0.3s ease;
   }
   
-  /* ВАЖНО: Скрываем иконку когда чат открыт */
   body.asya-chat-open .asya-icon {
     display: none !important;
     opacity: 0 !important;
@@ -310,7 +309,6 @@
     transform: scale(0) !important;
   }
   
-  /* Восстанавливаем иконку когда чат закрыт */
   .asya-chat:not(.open) ~ .asya-icon {
     opacity: 1 !important;
     visibility: visible !important;
@@ -342,40 +340,34 @@
     ) !important;
   }
   
-  
   .asya-chat.open {
     display: flex !important;
     transform: translateY(0) !important;
   }
   
-  /* ХЕДЕР АСИ - ДЕЛАЕМ ЕГО ЯРЧЕ И КОНТРАСТНЕЕ */
+  /* ХЕДЕР АСИ */
   .chat-header {
     position: sticky !important;
     top: 0 !important;
-    min-height: 70px;
-    padding: 18px 16px;
+    min-height: 60px;
+    padding: 12px 14px;
     z-index: 10 !important;
     border-radius: 0;
     flex-shrink: 0;
-    /* БОЛЕЕ ЯРКИЙ ФОН для контраста с белым хедером дашборда */
     background: linear-gradient(135deg, #4f63e0, #6a45b8) !important;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    margin-top: -80px !important; /* Соответственно увеличиваем */
-    /* Безопасные зоны iPhone */
-    padding-top: max(18px, env(safe-area-inset-top));
-    padding-top: max(18px, constant(safe-area-inset-top));
-    /* Тень для отделения от хедера дашборда */
+    margin-top: -60px !important;
+    padding-top: max(12px, env(safe-area-inset-top));
+    padding-top: max(12px, constant(safe-area-inset-top));
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    /* Контрастная обводка */
     border-bottom: 2px solid rgba(255, 255, 255, 0.3);
   }
   
-  /* Граница между хедерами для лучшей видимости */
   .chat-header::after {
     content: '';
     position: absolute;
-    bottom: -4px;
+    bottom: -2px;
     left: 10%;
     right: 10%;
     height: 2px;
@@ -383,49 +375,28 @@
     border-radius: 2px;
   }
   
-  /* Если хедер дашборда выше 80px */
-  .has-tall-header .asya-chat {
-    padding-top: 100px !important; /* Еще больше для высоких хедеров */
-  }
-  
-  .has-tall-header .chat-header {
-    margin-top: -100px !important;
-  }
-  
-  .has-tall-header .chat-body {
-    height: calc(100vh - 100px) !important;
-    max-height: calc(100vh - 100px) !important;
-  }
-  
-  /* ТЕЛО ЧАТА */
   .chat-body {
     flex: 1;
     display: flex;
     flex-direction: column;
     position: relative;
-    /* Безопасные зоны */
     padding-top: env(safe-area-inset-top);
     padding-top: constant(safe-area-inset-top);
     padding-bottom: calc(env(safe-area-inset-bottom) + 50px) !important;
     padding-bottom: calc(constant(safe-area-inset-bottom) + 50px) !important;
-    /* Высота с учетом хедера дашборда */
-    height: calc(100vh - 80px) !important;
-    max-height: calc(100vh - 80px) !important;
-    /* Фон только для нижней части */
+    height: calc(100vh - 60px) !important;
+    max-height: calc(100vh - 60px) !important;
     background: linear-gradient(180deg, #f8f9ff 0%, #fff5f9 100%) !important;
   }
   
-  /* КОНТЕЙНЕР СООБЩЕНИЙ */
   #asya-messages {
     flex: 1;
     padding: 20px 16px 120px !important;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     min-height: 0;
-    /* Безопасные зоны */
     padding-top: max(20px, env(safe-area-inset-top));
     padding-top: max(20px, constant(safe-area-inset-top));
-    /* Фон сообщений */
     background: transparent !important;
   }
   
@@ -436,41 +407,20 @@
     left: 0 !important;
     right: 0 !important;
     background: white;
-    padding: 15px 16px;
+    padding: 16px 16px;
     border-top: 2px solid rgba(255, 214, 231, 0.8);
     z-index: 100 !important;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-    /* Безопасные зоны iPhone */
-    padding-bottom: max(15px, env(safe-area-inset-bottom));
-    padding-bottom: max(15px, constant(safe-area-inset-bottom));
-    padding-left: max(16px, env(safe-area-inset-left));
-    padding-left: max(16px, constant(safe-area-inset-left));
-    padding-right: max(16px, env(safe-area-inset-right));
-    padding-right: max(16px, constant(safe-area-inset-right));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+    padding-bottom: max(16px, constant(safe-area-inset-bottom));
   }
   
-  /* ФИКС ДЛЯ БЕЛОГО ХЕДЕРА ДАШБОРДА */
-  /* Делаем область над хедером Аси прозрачной чтобы видеть навигацию */
-  .asya-chat::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 80px;
-    background: transparent !important;
-    z-index: -1;
-    pointer-events: none;
-  }
-  
-  /* КЛАВИАТУРА И КНОПКА ОТПРАВКИ */
   #asya-input {
     padding: 14px 18px;
     font-size: 16px;
     height: auto;
     min-height: 50px;
     flex: 1;
-    /* Безопасные зоны */
     padding-left: max(18px, env(safe-area-inset-left));
     padding-left: max(18px, constant(safe-area-inset-left));
     padding-right: max(18px, env(safe-area-inset-right));
@@ -482,44 +432,29 @@
     height: 50px;
     font-size: 20px;
     flex-shrink: 0;
-    /* Безопасные зоны */
     margin-right: env(safe-area-inset-right);
     margin-right: constant(safe-area-inset-right);
   }
   
-  /* КНОПКИ В ХЕДЕРЕ АСИ - ДЕЛАЕМ БОЛЕЕ КОНТРАСТНЫМИ */
-  .close-btn {
-    width: 40px;
-    height: 40px;
-    font-size: 20px;
-    background: rgba(255, 255, 255, 0.3) !important;
-    border: 2px solid rgba(255, 255, 255, 0.5) !important;
-    color: white !important;
-    /* Безопасные зоны */
-    margin-right: env(safe-area-inset-right);
-    margin-right: constant(safe-area-inset-right);
-  }
-  
-  .analytics-btn {
-    width: 40px;
-    height: 40px;
+  /* Кнопки и текст хедера Аси */
+  .close-btn, .analytics-btn {
+    width: 36px;
+    height: 36px;
     font-size: 18px;
     background: rgba(255, 255, 255, 0.3) !important;
     border: 2px solid rgba(255, 255, 255, 0.5) !important;
     color: white !important;
-    /* Безопасные зоны */
     margin-right: env(safe-area-inset-right);
     margin-right: constant(safe-area-inset-right);
   }
   
-  /* ТЕКСТ В ХЕДЕРЕ АСИ - ДЕЛАЕМ ЯРЧЕ */
   #asya-name {
     color: white !important;
-    font-weight: 700 !important;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
   }
   
-  /* СООБЩЕНИЯ */
   .message {
     max-width: 85%;
     font-size: 15px;
@@ -532,94 +467,32 @@
     max-width: 80%;
   }
   
-  /* Класс для iPhone с вырезом */
-  .has-notch .chat-header {
-    padding-top: max(18px, 44px) !important;
-  }
-  
-  .has-notch .chat-input {
-    padding-bottom: max(15px, 34px) !important;
-  }
-  
-  /* Фикс для Safari на iPhone */
-  @supports (-webkit-touch-callout: none) {
-    .asya-chat.open {
-      height: -webkit-fill-available !important;
-      height: fill-available !important;
-    }
-    
-    .chat-body {
-      height: -webkit-fill-available !important;
-      height: fill-available !important;
-    }
-    
-    /* Прячем панель навигации Safari */
-    .chat-input {
-      padding-bottom: calc(env(safe-area-inset-bottom) + 10px) !important;
-      padding-bottom: calc(constant(safe-area-inset-bottom) + 10px) !important;
-    }
-  }
-  
-  /* ДОПОЛНИТЕЛЬНЫЙ ФИКС ДЛЯ IPHONE */
-  @supports (-webkit-overflow-scrolling: touch) {
-    .asya-chat.open {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      right: 0 !important;
-      bottom: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-    }
-    
-    .chat-body {
-      padding-bottom: calc(env(safe-area-inset-bottom) + 60px) !important;
-    }
-  }
-  
-  /* Фикс для нижней панели на iPhone */
-  @media (max-width: 768px) and (max-height: 900px) {
-    #asya-messages {
-      padding-bottom: 140px !important;
-    }
-    
-    .chat-input {
-      padding-bottom: calc(env(safe-area-inset-bottom) + 20px) !important;
-      padding-bottom: calc(constant(safe-area-inset-bottom) + 20px) !important;
-    }
-  }
-  
-  /* ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ */
+  /* Маленькие экраны */
   @media (max-height: 600px) {
     .chat-header {
-      min-height: 60px;
-      padding: 14px 16px;
+      min-height: 50px;
+      padding: 12px 14px;
     }
-    
     .chat-input {
-      padding: 12px 16px;
+      padding: 12px 14px;
     }
-    
     #asya-send {
       width: 46px;
       height: 46px;
     }
   }
   
-  /* ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ ПО ШИРИНЕ */
   @media (max-width: 360px) {
     .asya-icon {
       width: 60px;
       height: 60px;
     }
-    
     #asya-input {
-      padding: 12px 16px;
+      padding: 12px 14px;
       font-size: 15px;
     }
   }
 }
-
 </style>
 
 

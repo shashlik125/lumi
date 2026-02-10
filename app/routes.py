@@ -1535,6 +1535,15 @@ def chat_with_asya():
         data = request.get_json()
         user_message = data.get('message', '').strip()
         
+        # ВАЖНО: ДОБАВЬТЕ ЭТУ ОТЛАДКУ
+        print("=== CHAT WITH ASYA DEBUG ===")
+        api_key = os.environ.get('DEEPSEEK_API_KEY')
+        print(f"🔑 DEEPSEEK_API_KEY exists: {bool(api_key)}")
+        print(f"🔑 DEEPSEEK_API_KEY length: {len(api_key) if api_key else 0}")
+        if api_key:
+            print(f"🔑 DEEPSEEK_API_KEY first 10: {api_key[:10]}...")
+        print("=============================")
+        
         if not user_message:
             return jsonify({
                 'reply': 'Привет! Я Ася, твой помощник в трекере настроения Lumi. Чем могу помочь? 😊',

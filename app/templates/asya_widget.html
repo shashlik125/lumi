@@ -1164,11 +1164,23 @@
     bottom: 20px;
     right: 20px;
     z-index: 10001;
+    transition: opacity 0.3s ease, transform 0.3s ease;
   }
   
-  /* Скрываем иконку когда чат открыт */
+  /* ВАЖНО: Скрываем иконку когда чат открыт */
   .asya-chat.open ~ .asya-icon {
-    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: scale(0) !important;
+  }
+  
+  /* Восстанавливаем иконку когда чат закрыт */
+  .asya-chat:not(.open) ~ .asya-icon {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: all !important;
+    transform: scale(1) !important;
   }
   
   /* ЧАТ - ОТКРЫВАЕТСЯ НИЖЕ ХЕДЕРА ДАШБОРДА */
@@ -1185,11 +1197,18 @@
     z-index: 9999 !important;
     transform: translateY(100%);
     transition: transform 0.4s ease-out;
-    /* Отступ сверху для хедера дашборда */
-    padding-top: 60px !important;
+    /* Отступ сверху для хедера дашборда - УВЕЛИЧИВАЕМ чтобы было видно навигацию */
+    padding-top: 80px !important; /* Было 60px */
     /* Убираем тени чтобы не создавать иллюзию перекрытия */
     box-shadow: none !important;
     border: none !important;
+    /* Прозрачный фон чата в верхней части чтобы видеть дашборд */
+    background: linear-gradient(to bottom, 
+      transparent 0px, 
+      transparent 80px, 
+      rgba(255, 249, 252, 0.98) 80px, 
+      rgba(255, 249, 252, 0.98) 100%
+    ) !important;
   }
   
   .asya-chat.open {
@@ -1197,7 +1216,7 @@
     transform: translateY(0) !important;
   }
   
-  /* ХЕДЕР АСИ - НЕ ФИКСИРОВАННЫЙ, А ВНУТРИ ЧАТА */
+  /* ХЕДЕР АСИ - ДЕЛАЕМ ЕГО ЯРЧЕ И КОНТРАСТНЕЕ */
   .chat-header {
     position: sticky !important;
     top: 0 !important;
@@ -1206,39 +1225,44 @@
     z-index: 10 !important;
     border-radius: 0;
     flex-shrink: 0;
-    /* Полупрозрачный фон чтобы было видно границу с хедером дашборда */
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9)) !important;
+    /* БОЛЕЕ ЯРКИЙ ФОН для контраста с белым хедером дашборда */
+    background: linear-gradient(135deg, #4f63e0, #6a45b8) !important;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    margin-top: -60px !important;
+    margin-top: -80px !important; /* Соответственно увеличиваем */
     /* Безопасные зоны iPhone */
     padding-top: max(18px, env(safe-area-inset-top));
     padding-top: max(18px, constant(safe-area-inset-top));
+    /* Тень для отделения от хедера дашборда */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    /* Контрастная обводка */
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
   }
   
   /* Граница между хедерами для лучшей видимости */
   .chat-header::after {
     content: '';
     position: absolute;
-    bottom: -2px;
-    left: 0;
-    right: 0;
+    bottom: -4px;
+    left: 10%;
+    right: 10%;
     height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+    background: linear-gradient(90deg, transparent, #ffffff, transparent);
+    border-radius: 2px;
   }
   
-  /* Если хедер дашборда выше 60px */
+  /* Если хедер дашборда выше 80px */
   .has-tall-header .asya-chat {
-    padding-top: 80px !important;
+    padding-top: 100px !important; /* Еще больше для высоких хедеров */
   }
   
   .has-tall-header .chat-header {
-    margin-top: -80px !important;
+    margin-top: -100px !important;
   }
   
   .has-tall-header .chat-body {
-    height: calc(100vh - 80px) !important;
-    max-height: calc(100vh - 80px) !important;
+    height: calc(100vh - 100px) !important;
+    max-height: calc(100vh - 100px) !important;
   }
   
   /* ТЕЛО ЧАТА */
@@ -1254,8 +1278,10 @@
     padding-bottom: calc(env(safe-area-inset-bottom) + 50px) !important;
     padding-bottom: calc(constant(safe-area-inset-bottom) + 50px) !important;
     /* Высота с учетом хедера дашборда */
-    height: calc(100vh - 60px) !important;
-    max-height: calc(100vh - 60px) !important;
+    height: calc(100vh - 80px) !important;
+    max-height: calc(100vh - 80px) !important;
+    /* Фон только для нижней части */
+    background: linear-gradient(180deg, #f8f9ff 0%, #fff5f9 100%) !important;
   }
   
   /* КОНТЕЙНЕР СООБЩЕНИЙ */
@@ -1268,6 +1294,8 @@
     /* Безопасные зоны */
     padding-top: max(20px, env(safe-area-inset-top));
     padding-top: max(20px, constant(safe-area-inset-top));
+    /* Фон сообщений */
+    background: transparent !important;
   }
   
   /* ПОЛЕ ВВОДА */
@@ -1288,6 +1316,20 @@
     padding-left: max(16px, constant(safe-area-inset-left));
     padding-right: max(16px, env(safe-area-inset-right));
     padding-right: max(16px, constant(safe-area-inset-right));
+  }
+  
+  /* ФИКС ДЛЯ БЕЛОГО ХЕДЕРА ДАШБОРДА */
+  /* Делаем область над хедером Аси прозрачной чтобы видеть навигацию */
+  .asya-chat::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 80px;
+    background: transparent !important;
+    z-index: -1;
+    pointer-events: none;
   }
   
   /* КЛАВИАТУРА И КНОПКА ОТПРАВКИ */
@@ -1314,11 +1356,14 @@
     margin-right: constant(safe-area-inset-right);
   }
   
-  /* КНОПКИ В ХЕДЕРЕ */
+  /* КНОПКИ В ХЕДЕРЕ АСИ - ДЕЛАЕМ БОЛЕЕ КОНТРАСТНЫМИ */
   .close-btn {
     width: 40px;
     height: 40px;
     font-size: 20px;
+    background: rgba(255, 255, 255, 0.3) !important;
+    border: 2px solid rgba(255, 255, 255, 0.5) !important;
+    color: white !important;
     /* Безопасные зоны */
     margin-right: env(safe-area-inset-right);
     margin-right: constant(safe-area-inset-right);
@@ -1328,9 +1373,19 @@
     width: 40px;
     height: 40px;
     font-size: 18px;
+    background: rgba(255, 255, 255, 0.3) !important;
+    border: 2px solid rgba(255, 255, 255, 0.5) !important;
+    color: white !important;
     /* Безопасные зоны */
     margin-right: env(safe-area-inset-right);
     margin-right: constant(safe-area-inset-right);
+  }
+  
+  /* ТЕКСТ В ХЕДЕРЕ АСИ - ДЕЛАЕМ ЯРЧЕ */
+  #asya-name {
+    color: white !important;
+    font-weight: 700 !important;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
   }
   
   /* СООБЩЕНИЯ */
@@ -1355,7 +1410,7 @@
     padding-bottom: max(15px, 34px) !important;
   }
   
-  /* Фикс для Safari на iPhone (скрываем панель URL) */
+  /* Фикс для Safari на iPhone */
   @supports (-webkit-touch-callout: none) {
     .asya-chat.open {
       height: -webkit-fill-available !important;
@@ -1431,19 +1486,6 @@
       padding: 12px 16px;
       font-size: 15px;
     }
-  }
-}
-
-/* ====== ПЛАНШЕТЫ ====== */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .asya-chat {
-    width: 420px;
-    height: 600px;
-  }
-  
-  .asya-icon {
-    width: 65px;
-    height: 65px;
   }
 }
 
@@ -1928,6 +1970,7 @@ function initMobileFeatures() {
     
     // === ОПРЕДЕЛЯЕМ ВЫСОТУ ХЕДЕРА ДАШБОРДА ===
     function calculateDashboardHeaderHeight() {
+      // Ищем ВСЕ возможные элементы хедера и навигации
       const possibleHeaders = [
         document.querySelector('header'),
         document.querySelector('.header'),
@@ -1937,45 +1980,92 @@ function initMobileFeatures() {
         document.querySelector('nav'),
         document.querySelector('.navbar'),
         document.querySelector('.top-bar'),
-        document.querySelector('.app-bar')
+        document.querySelector('.app-bar'),
+        document.querySelector('.navigation'),
+        document.querySelector('.nav'),
+        document.querySelector('[role="navigation"]'),
+        document.querySelector('.top-nav'),
+        document.querySelector('.main-nav'),
+        // Ищем элементы вверху страницы
+        document.querySelector('body > *:first-child'),
+        document.querySelector('body > div:first-child'),
+        document.querySelector('body > header:first-child'),
+        document.querySelector('body > nav:first-child')
       ];
       
-      let maxHeight = 60;
+      let maxHeight = 80; // Увеличиваем значение по умолчанию
       
       for (const header of possibleHeaders) {
         if (header && header.offsetHeight > 0) {
-          const height = header.offsetHeight;
-          console.log('📊 Найден хедер:', header.tagName, header.className, 'высота:', height);
+          const rect = header.getBoundingClientRect();
+          const height = rect.height;
           
-          if (height > maxHeight) {
-            maxHeight = height;
+          // Проверяем что элемент в верхней части страницы
+          if (rect.top < 100 && rect.bottom > 0) {
+            console.log('📊 Найден верхний элемент:', header.tagName, header.className, 'высота:', height);
+            
+            if (height > maxHeight) {
+              maxHeight = height;
+            }
           }
         }
       }
       
-      return maxHeight + 5;
+      console.log('📱 Итоговая высота хедера дашборда:', maxHeight);
+      return maxHeight + 10; // Добавляем запас
     }
     
     // === ПРИМЕНЯЕМ ВЫСОТУ ХЕДЕРА ===
     function applyDashboardHeaderHeight() {
       const headerHeight = calculateDashboardHeaderHeight();
-      console.log('📱 Высота хедера дашборда:', headerHeight);
       
       if (chat) {
+        // Применяем высоту к чату
         chat.style.paddingTop = headerHeight + 'px';
         
-        if (headerHeight > 70) {
+        // Обновляем градиент фона
+        chat.style.background = `linear-gradient(to bottom, 
+          transparent 0px, 
+          transparent ${headerHeight}px, 
+          rgba(255, 249, 252, 0.98) ${headerHeight}px, 
+          rgba(255, 249, 252, 0.98) 100%
+        ) !important`;
+        
+        // Добавляем прозрачную область над хедером Аси
+        const existingOverlay = chat.querySelector('.dashboard-header-overlay');
+        if (existingOverlay) {
+          existingOverlay.remove();
+        }
+        
+        const overlay = document.createElement('div');
+        overlay.className = 'dashboard-header-overlay';
+        overlay.style.cssText = `
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: ${headerHeight}px;
+          background: transparent;
+          pointer-events: none;
+          z-index: -1;
+        `;
+        chat.appendChild(overlay);
+        
+        // Добавляем класс если хедер высокий
+        if (headerHeight > 90) {
           chat.classList.add('has-tall-header');
         } else {
           chat.classList.remove('has-tall-header');
         }
       }
       
+      // Применяем к хедеру Аси
       const asyaHeader = document.querySelector('.chat-header');
       if (asyaHeader) {
         asyaHeader.style.marginTop = '-' + headerHeight + 'px';
       }
       
+      // Применяем к телу чата
       const chatBody = document.querySelector('.chat-body');
       if (chatBody) {
         chatBody.style.height = 'calc(100vh - ' + headerHeight + 'px)';
@@ -1986,11 +2076,30 @@ function initMobileFeatures() {
     }
     
     // === ИНИЦИАЛИЗАЦИЯ ===
-    let dashboardHeaderHeight = 60;
+    let dashboardHeaderHeight = 80;
+    
+    // === ФИКС ДЛЯ ИКОНКИ ===
+    // Гарантируем что иконка скрывается при открытии чата
+    const fixIconVisibility = () => {
+      const asyaIcon = document.querySelector('.asya-icon');
+      if (asyaIcon) {
+        if (chat.classList.contains('open')) {
+          asyaIcon.style.opacity = '0';
+          asyaIcon.style.visibility = 'hidden';
+          asyaIcon.style.pointerEvents = 'none';
+          asyaIcon.style.transform = 'scale(0)';
+        } else {
+          setTimeout(() => {
+            asyaIcon.style.opacity = '1';
+            asyaIcon.style.visibility = 'visible';
+            asyaIcon.style.pointerEvents = 'all';
+            asyaIcon.style.transform = 'scale(1)';
+          }, 400); // После анимации закрытия
+        }
+      }
+    };
     
     // Переопределяем обработчик открытия
-    const originalIconClick = icon.onclick;
-    
     icon.onclick = function(e) {
       e.stopPropagation();
       e.preventDefault();
@@ -1999,6 +2108,9 @@ function initMobileFeatures() {
       
       if (chat.classList.contains('open')) {
         notificationBadge.style.display = 'none';
+        
+        // Скрываем иконку
+        fixIconVisibility();
         
         // Вычисляем высоту хедера дашборда
         dashboardHeaderHeight = applyDashboardHeaderHeight();
@@ -2014,38 +2126,21 @@ function initMobileFeatures() {
         }, 300);
         
       } else {
+        // Показываем иконку при закрытии
+        fixIconVisibility();
         input.blur();
       }
     };
     
-    // === ОБРАБОТКА ИЗМЕНЕНИЯ РАЗМЕРА ===
-    window.addEventListener('resize', () => {
-      if (chat.classList.contains('open')) {
-        setTimeout(() => {
-          applyDashboardHeaderHeight();
-          
-          setTimeout(() => {
-            messages.scrollTop = messages.scrollHeight;
-          }, 50);
-        }, 100);
-      }
-    });
-    
-    // === МУТАЦИИ DOM ===
+    // === НАБЛЮДАТЕЛЬ ЗА ИЗМЕНЕНИЯМИ ===
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        if (mutation.type === 'childList' || 
-            (mutation.type === 'attributes' && mutation.attributeName === 'style')) {
-          
-          if (chat.classList.contains('open')) {
-            setTimeout(() => {
-              applyDashboardHeaderHeight();
-              
-              setTimeout(() => {
-                messages.scrollTop = messages.scrollHeight;
-              }, 100);
-            }, 300);
-          }
+        if (chat.classList.contains('open')) {
+          // Если DOM меняется, пересчитываем высоту
+          setTimeout(() => {
+            applyDashboardHeaderHeight();
+            fixIconVisibility();
+          }, 100);
         }
       });
     });
@@ -2053,63 +2148,13 @@ function initMobileFeatures() {
     observer.observe(document.body, { 
       childList: true, 
       subtree: true,
-      attributes: true,
-      attributeFilter: ['style', 'class']
-    });
-    
-    // === СВАЙП ДЛЯ ЗАКРЫТИЯ ===
-    let startY = 0;
-    let startX = 0;
-    
-    chat.addEventListener('touchstart', (e) => {
-      startY = e.touches[0].clientY;
-      startX = e.touches[0].clientX;
-    }, { passive: true });
-    
-    chat.addEventListener('touchmove', (e) => {
-      if (!chat.classList.contains('open')) return;
-      
-      const currentY = e.touches[0].clientY;
-      const currentX = e.touches[0].clientX;
-      const diffY = currentY - startY;
-      const diffX = currentX - startX;
-      
-      if (diffY > 50 && Math.abs(diffX) < 50) {
-        e.preventDefault();
-        chat.classList.remove('open');
-        input.blur();
-      }
-    }, { passive: false });
-    
-    // === ПРЕДОТВРАЩАЕМ ПРОПАГАЦИЮ ===
-    chat.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
-    
-    // === КЛАВИАТУРА ===
-    input.addEventListener('focus', () => {
-      if (chat.classList.contains('open')) {
-        setTimeout(() => {
-          messages.scrollTop = messages.scrollHeight;
-        }, 400);
-      }
-    });
-    
-    // Кнопка отправки
-    sendBtn.addEventListener('click', () => {
-      setTimeout(() => {
-        input.blur();
-        setTimeout(() => {
-          messages.scrollTop = messages.scrollHeight;
-        }, 200);
-      }, 100);
+      attributes: true
     });
     
     // === ДЛЯ iOS ===
     if (iOS) {
       document.body.classList.add('ios-device');
       
-      // Фикс для выреза
       const hasNotch = window.matchMedia("(display-mode: standalone)").matches || 
                       ('standalone' in navigator && navigator.standalone);
       
@@ -2118,6 +2163,11 @@ function initMobileFeatures() {
         console.log('📱 iPhone с вырезом обнаружен');
       }
     }
+    
+    // Инициализируем при загрузке
+    setTimeout(() => {
+      fixIconVisibility();
+    }, 100);
   }
 }
 </script>

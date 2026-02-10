@@ -1168,7 +1168,8 @@
   }
   
   /* ВАЖНО: Скрываем иконку когда чат открыт */
-  .asya-chat.open ~ .asya-icon {
+  body.asya-chat-open .asya-icon {
+    display: none !important;
     opacity: 0 !important;
     visibility: hidden !important;
     pointer-events: none !important;
@@ -1183,7 +1184,6 @@
     transform: scale(1) !important;
   }
   
-  /* ЧАТ - ОТКРЫВАЕТСЯ НИЖЕ ХЕДЕРА ДАШБОРДА */
   .asya-chat {
     position: fixed !important;
     top: 0 !important;
@@ -1197,12 +1197,9 @@
     z-index: 9999 !important;
     transform: translateY(100%);
     transition: transform 0.4s ease-out;
-    /* Отступ сверху для хедера дашборда - УВЕЛИЧИВАЕМ чтобы было видно навигацию */
-    padding-top: 80px !important; /* Было 60px */
-    /* Убираем тени чтобы не создавать иллюзию перекрытия */
+    padding-top: 80px !important;
     box-shadow: none !important;
     border: none !important;
-    /* Прозрачный фон чата в верхней части чтобы видеть дашборд */
     background: linear-gradient(to bottom, 
       transparent 0px, 
       transparent 80px, 
@@ -1210,6 +1207,7 @@
       rgba(255, 249, 252, 0.98) 100%
     ) !important;
   }
+  
   
   .asya-chat.open {
     display: flex !important;
@@ -1963,143 +1961,39 @@ function initMobileFeatures() {
   if (window.innerWidth <= 768) {
     console.log('📱 Инициализация мобильных функций');
     
-    const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-                      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    
-    const iOS = isIOS();
-    
-    // === ОПРЕДЕЛЯЕМ ВЫСОТУ ХЕДЕРА ДАШБОРДА ===
-    function calculateDashboardHeaderHeight() {
-      // Ищем ВСЕ возможные элементы хедера и навигации
-      const possibleHeaders = [
-        document.querySelector('header'),
-        document.querySelector('.header'),
-        document.querySelector('#header'),
-        document.querySelector('[class*="header"]'),
-        document.querySelector('[class*="Header"]'),
-        document.querySelector('nav'),
-        document.querySelector('.navbar'),
-        document.querySelector('.top-bar'),
-        document.querySelector('.app-bar'),
-        document.querySelector('.navigation'),
-        document.querySelector('.nav'),
-        document.querySelector('[role="navigation"]'),
-        document.querySelector('.top-nav'),
-        document.querySelector('.main-nav'),
-        // Ищем элементы вверху страницы
-        document.querySelector('body > *:first-child'),
-        document.querySelector('body > div:first-child'),
-        document.querySelector('body > header:first-child'),
-        document.querySelector('body > nav:first-child')
-      ];
-      
-      let maxHeight = 80; // Увеличиваем значение по умолчанию
-      
-      for (const header of possibleHeaders) {
-        if (header && header.offsetHeight > 0) {
-          const rect = header.getBoundingClientRect();
-          const height = rect.height;
-          
-          // Проверяем что элемент в верхней части страницы
-          if (rect.top < 100 && rect.bottom > 0) {
-            console.log('📊 Найден верхний элемент:', header.tagName, header.className, 'высота:', height);
-            
-            if (height > maxHeight) {
-              maxHeight = height;
-            }
-          }
-        }
-      }
-      
-      console.log('📱 Итоговая высота хедера дашборда:', maxHeight);
-      return maxHeight + 10; // Добавляем запас
-    }
-    
-    // === ПРИМЕНЯЕМ ВЫСОТУ ХЕДЕРА ===
-    function applyDashboardHeaderHeight() {
-      const headerHeight = calculateDashboardHeaderHeight();
-      
-      if (chat) {
-        // Применяем высоту к чату
-        chat.style.paddingTop = headerHeight + 'px';
-        
-        // Обновляем градиент фона
-        chat.style.background = `linear-gradient(to bottom, 
-          transparent 0px, 
-          transparent ${headerHeight}px, 
-          rgba(255, 249, 252, 0.98) ${headerHeight}px, 
-          rgba(255, 249, 252, 0.98) 100%
-        ) !important`;
-        
-        // Добавляем прозрачную область над хедером Аси
-        const existingOverlay = chat.querySelector('.dashboard-header-overlay');
-        if (existingOverlay) {
-          existingOverlay.remove();
-        }
-        
-        const overlay = document.createElement('div');
-        overlay.className = 'dashboard-header-overlay';
-        overlay.style.cssText = `
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: ${headerHeight}px;
-          background: transparent;
-          pointer-events: none;
-          z-index: -1;
-        `;
-        chat.appendChild(overlay);
-        
-        // Добавляем класс если хедер высокий
-        if (headerHeight > 90) {
-          chat.classList.add('has-tall-header');
-        } else {
-          chat.classList.remove('has-tall-header');
-        }
-      }
-      
-      // Применяем к хедеру Аси
-      const asyaHeader = document.querySelector('.chat-header');
-      if (asyaHeader) {
-        asyaHeader.style.marginTop = '-' + headerHeight + 'px';
-      }
-      
-      // Применяем к телу чата
-      const chatBody = document.querySelector('.chat-body');
-      if (chatBody) {
-        chatBody.style.height = 'calc(100vh - ' + headerHeight + 'px)';
-        chatBody.style.maxHeight = 'calc(100vh - ' + headerHeight + 'px)';
-      }
-      
-      return headerHeight;
-    }
-    
-    // === ИНИЦИАЛИЗАЦИЯ ===
-    let dashboardHeaderHeight = 80;
-    
-    // === ФИКС ДЛЯ ИКОНКИ ===
-    // Гарантируем что иконка скрывается при открытии чата
-    const fixIconVisibility = () => {
+    // === ФУНКЦИЯ ДЛЯ СКРЫТИЯ ИКОНКИ ===
+    const hideAsyaIcon = () => {
       const asyaIcon = document.querySelector('.asya-icon');
       if (asyaIcon) {
-        if (chat.classList.contains('open')) {
-          asyaIcon.style.opacity = '0';
-          asyaIcon.style.visibility = 'hidden';
-          asyaIcon.style.pointerEvents = 'none';
-          asyaIcon.style.transform = 'scale(0)';
-        } else {
-          setTimeout(() => {
-            asyaIcon.style.opacity = '1';
-            asyaIcon.style.visibility = 'visible';
-            asyaIcon.style.pointerEvents = 'all';
-            asyaIcon.style.transform = 'scale(1)';
-          }, 400); // После анимации закрытия
-        }
+        console.log('👁️ Скрываем иконку Аси');
+        asyaIcon.style.display = 'none';
+        asyaIcon.style.opacity = '0';
+        asyaIcon.style.visibility = 'hidden';
+        asyaIcon.style.pointerEvents = 'none';
       }
+      // Добавляем класс к body для CSS
+      document.body.classList.add('asya-chat-open');
     };
     
-    // Переопределяем обработчик открытия
+    // === ФУНКЦИЯ ДЛЯ ПОКАЗА ИКОНКИ ===
+    const showAsyaIcon = () => {
+      const asyaIcon = document.querySelector('.asya-icon');
+      if (asyaIcon) {
+        console.log('👁️ Показываем иконку Аси');
+        setTimeout(() => {
+          asyaIcon.style.display = 'flex';
+          asyaIcon.style.opacity = '1';
+          asyaIcon.style.visibility = 'visible';
+          asyaIcon.style.pointerEvents = 'all';
+        }, 400); // После анимации закрытия
+      }
+      // Убираем класс с body
+      document.body.classList.remove('asya-chat-open');
+    };
+    
+    // Перехватываем обработчик открытия/закрытия
+    const originalIconClick = icon.onclick;
+    
     icon.onclick = function(e) {
       e.stopPropagation();
       e.preventDefault();
@@ -2108,65 +2002,69 @@ function initMobileFeatures() {
       
       if (chat.classList.contains('open')) {
         notificationBadge.style.display = 'none';
+        hideAsyaIcon(); // Скрываем иконку
         
-        // Скрываем иконку
-        fixIconVisibility();
-        
-        // Вычисляем высоту хедера дашборда
-        dashboardHeaderHeight = applyDashboardHeaderHeight();
-        
+        // Остальная логика...
         setTimeout(() => {
-          setTimeout(() => {
-            messages.scrollTop = messages.scrollHeight;
-            
-            setTimeout(() => {
-              messages.scrollTop = messages.scrollHeight + 50;
-            }, 200);
-          }, 200);
+          messages.scrollTop = messages.scrollHeight;
         }, 300);
         
       } else {
-        // Показываем иконку при закрытии
-        fixIconVisibility();
+        showAsyaIcon(); // Показываем иконку
         input.blur();
       }
     };
     
-    // === НАБЛЮДАТЕЛЬ ЗА ИЗМЕНЕНИЯМИ ===
+    // === ДОПОЛНИТЕЛЬНАЯ ГАРАНТИЯ ===
+    // Наблюдаем за изменениями класса чата
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        if (chat.classList.contains('open')) {
-          // Если DOM меняется, пересчитываем высоту
-          setTimeout(() => {
-            applyDashboardHeaderHeight();
-            fixIconVisibility();
-          }, 100);
+        if (mutation.attributeName === 'class') {
+          if (chat.classList.contains('open')) {
+            hideAsyaIcon();
+          } else {
+            showAsyaIcon();
+          }
         }
       });
     });
     
-    observer.observe(document.body, { 
-      childList: true, 
-      subtree: true,
-      attributes: true
+    observer.observe(chat, { attributes: true });
+    
+    // === КНОПКА ЗАКРЫТИЯ ===
+    closeBtn.addEventListener('click', () => {
+      chat.classList.remove('open');
+      showAsyaIcon();
+      input.blur();
     });
     
-    // === ДЛЯ iOS ===
-    if (iOS) {
-      document.body.classList.add('ios-device');
-      
-      const hasNotch = window.matchMedia("(display-mode: standalone)").matches || 
-                      ('standalone' in navigator && navigator.standalone);
-      
-      if (hasNotch) {
-        document.body.classList.add('has-notch');
-        console.log('📱 iPhone с вырезом обнаружен');
-      }
-    }
+    // === СВАЙП ДЛЯ ЗАКРЫТИЯ ===
+    let startY = 0;
     
-    // Инициализируем при загрузке
+    chat.addEventListener('touchstart', (e) => {
+      startY = e.touches[0].clientY;
+    }, { passive: true });
+    
+    chat.addEventListener('touchmove', (e) => {
+      if (!chat.classList.contains('open')) return;
+      
+      const currentY = e.touches[0].clientY;
+      const diffY = currentY - startY;
+      
+      if (diffY > 50) {
+        e.preventDefault();
+        chat.classList.remove('open');
+        showAsyaIcon();
+        input.blur();
+      }
+    }, { passive: false });
+    
+    // Инициализация при загрузке
     setTimeout(() => {
-      fixIconVisibility();
+      // Убедимся что иконка видна если чат закрыт
+      if (!chat.classList.contains('open')) {
+        showAsyaIcon();
+      }
     }, 100);
   }
 }

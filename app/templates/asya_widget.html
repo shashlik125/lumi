@@ -1200,6 +1200,8 @@
     z-index: 10;
     border-radius: 0;
     flex-shrink: 0;
+    /* Безопасные зоны iPhone */
+    padding-top: max(18px, env(safe-area-inset-top));
   }
   
   /* ТЕЛО ЧАТА */
@@ -1209,21 +1211,25 @@
     flex-direction: column;
     overflow: hidden;
     position: relative;
+    /* Безопасные зоны */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
   }
   
   /* КОНТЕЙНЕР СООБЩЕНИЙ - ЗАНИМАЕТ ОСТАВШЕЕСЯ ПРОСТРАНСТВО */
   #asya-messages {
     flex: 1;
-    padding: 20px 16px;
+    padding: 20px 16px 100px !important; /* Больше отступа снизу для поля ввода */
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     min-height: 0;
-    padding-bottom: 100px; /* Место для поля ввода */
+    /* Безопасные зоны */
+    padding-top: max(20px, env(safe-area-inset-top));
   }
   
   /* ПОЛЕ ВВОДА - ФИКСИРОВАННОЕ ВНИЗУ */
   .chat-input {
-    position: absolute !important;
+    position: fixed !important; /* Важно: fixed, а не absolute */
     bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
@@ -1232,6 +1238,10 @@
     border-top: 2px solid rgba(255, 214, 231, 0.8);
     z-index: 10;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    /* Безопасные зоны iPhone */
+    padding-bottom: max(15px, env(safe-area-inset-bottom));
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
   }
   
   /* КЛАВИАТУРА И КНОПКА ОТПРАВКИ */
@@ -1241,6 +1251,9 @@
     height: auto;
     min-height: 50px;
     flex: 1;
+    /* Безопасные зоны */
+    padding-left: max(18px, env(safe-area-inset-left));
+    padding-right: max(18px, env(safe-area-inset-right));
   }
   
   #asya-send {
@@ -1248,6 +1261,8 @@
     height: 50px;
     font-size: 20px;
     flex-shrink: 0;
+    /* Безопасные зоны */
+    margin-right: env(safe-area-inset-right);
   }
   
   /* КНОПКИ В ХЕДЕРЕ */
@@ -1255,12 +1270,16 @@
     width: 40px;
     height: 40px;
     font-size: 20px;
+    /* Безопасные зоны */
+    margin-right: env(safe-area-inset-right);
   }
   
   .analytics-btn {
     width: 40px;
     height: 40px;
     font-size: 18px;
+    /* Безопасные зоны */
+    margin-right: env(safe-area-inset-right);
   }
   
   /* СООБЩЕНИЯ */
@@ -1276,19 +1295,13 @@
     max-width: 80%;
   }
   
-  /* БЕЗОПАСНЫЕ ЗОНЫ ДЛЯ IPHONE */
-  @supports (padding: max(0px)) {
-    .chat-header {
-      padding-top: max(18px, env(safe-area-inset-top));
-    }
-    
-    .chat-input {
-      padding-bottom: max(15px, env(safe-area-inset-bottom));
-    }
-    
-    #asya-messages {
-      padding-top: max(20px, env(safe-area-inset-top));
-    }
+  /* Класс для iPhone с вырезом */
+  .has-notch .chat-header {
+    padding-top: max(18px, 44px) !important; /* Высота статус-бара iPhone */
+  }
+  
+  .has-notch .chat-input {
+    padding-bottom: max(15px, 34px) !important; /* Высота нижней панели iPhone */
   }
   
   /* ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ */
@@ -1309,32 +1322,6 @@
   }
 }
 
-/* ====== ПЛАНШЕТЫ ====== */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .asya-chat {
-    width: 420px;
-    height: 600px;
-  }
-  
-  .asya-icon {
-    width: 65px;
-    height: 65px;
-  }
-}
-
-/* ====== ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ ====== */
-@media (max-width: 360px) {
-  .asya-icon {
-    width: 60px;
-    height: 60px;
-  }
-  
-  #asya-input {
-    padding: 12px 16px;
-    font-size: 15px;
-  }
-}
-
 </style>
 
 
@@ -1342,7 +1329,6 @@
 
 document.addEventListener('DOMContentLoaded', () => {
   
-  // === ВАЖНО: ЭТО ПРОВЕРКА РАБОТЫ ЧАТА ===
   console.log('🚀 Чат-бот Ася запускается...');
   
   const icon = document.getElementById('asya-icon');
@@ -1384,7 +1370,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // === ВАЖНАЯ ФУНКЦИЯ: ПОЛУЧЕНИЕ ДАННЫХ ИЗ MOOD_ENTRIES ===
   function getMoodEntries() {
-    // Проверяем несколько возможных мест хранения
     const possibleKeys = ['mood_entries', 'moodEntries', 'moodData', 'mood_records'];
     
     for (const key of possibleKeys) {
@@ -1402,7 +1387,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('ℹ️ Записей настроения не найдено, используем демо-данные');
     
-    // Демо-данные для тестирования
     const demoData = [
       { date: new Date(Date.now() - 86400000).toISOString(), mood_value: 4, notes: 'Усталый день' },
       { date: new Date(Date.now() - 86400000 * 2).toISOString(), mood_value: 7, notes: 'Хороший день' },
@@ -1410,7 +1394,6 @@ document.addEventListener('DOMContentLoaded', () => {
       { date: new Date(Date.now() - 86400000 * 4).toISOString(), mood_value: 3, notes: 'Сложный день' }
     ];
     
-    // Сохраняем демо-данные
     localStorage.setItem('mood_entries_demo', JSON.stringify(demoData));
     return demoData;
   }
@@ -1426,7 +1409,6 @@ document.addEventListener('DOMContentLoaded', () => {
       containsMoodScore: false
     };
     
-    // 1. Ищем упоминание оценки настроения в тексте
     const moodMatch = text.match(/(\d+)\s*\/\s*10|(\d+)\s*из\s*10|оцен[каю]\s*(\d+)/i);
     if (moodMatch) {
       const score = parseInt(moodMatch[1] || moodMatch[2] || moodMatch[3]);
@@ -1434,7 +1416,6 @@ document.addEventListener('DOMContentLoaded', () => {
         result.containsMoodScore = true;
         result.moodScore = score;
         
-        // Сравниваем с последней записью в дневнике
         if (moodEntries.length > 0) {
           const latestMood = moodEntries[0].mood_value;
           result.moodDiscrepancy = Math.abs(score - latestMood);
@@ -1446,7 +1427,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     
-    // 2. Определяем эмоцию
     for (const [emotion, patterns] of Object.entries(EMOTION_PATTERNS)) {
       if (patterns.some(pattern => lowerText.includes(pattern))) {
         result.emotion = emotion;
@@ -1454,7 +1434,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     
-    // 3. Ищем триггеры стресса
     for (const [category, keywords] of Object.entries(STRESS_TRIGGERS)) {
       if (keywords.some(keyword => lowerText.includes(keyword))) {
         result.triggers.push(category);
@@ -1473,10 +1452,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const moodEntries = getMoodEntries();
     
     console.log('📊 Генерация объединённого анализа...');
-    console.log('Чат:', chatHistory.length, 'сообщений');
-    console.log('Настроение:', moodEntries.length, 'записей');
     
-    // Анализ чата
     const chatStats = {
       totalMessages: chatHistory.filter(m => m.sender === 'user').length,
       emotions: {},
@@ -1498,7 +1474,6 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     });
     
-    // Анализ настроения
     const moodStats = {
       totalEntries: moodEntries.length,
       averageMood: moodEntries.length > 0 
@@ -1512,22 +1487,18 @@ document.addEventListener('DOMContentLoaded', () => {
         : null
     };
     
-    // Определяем преобладающую эмоцию
     const topEmotion = Object.keys(chatStats.emotions).length > 0
       ? Object.keys(chatStats.emotions).reduce((a, b) => chatStats.emotions[a] > chatStats.emotions[b] ? a : b)
       : 'не определена';
     
-    // Топ-3 триггера
     const topTriggers = Object.keys(chatStats.triggers)
       .sort((a, b) => chatStats.triggers[b] - chatStats.triggers[a])
       .slice(0, 3);
     
-    // Средний стресс
     const avgStress = chatStats.stressLevels.length > 0 
       ? Math.round(chatStats.stressLevels.reduce((a, b) => a + b, 0) / chatStats.stressLevels.length)
       : 0;
     
-    // Генерация рекомендаций
     let recommendations = [];
     
     if (moodStats.averageMood < 5) {
@@ -1561,19 +1532,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
   }
 
-  // === ИНИЦИАЛИЗАЦИЯ ===
-  const chatHistory = JSON.parse(localStorage.getItem('asya_chat_history')) || [];
-  
-  if (chatHistory.length > 0) {
-    messages.innerHTML = '';
-    chatHistory.forEach(msg => {
-      addMessage(msg.text, msg.sender, msg.emotion, msg.triggers, msg.stressLevel, false);
-    });
-    updateAnalyticsBadge();
-  }
-  
-  console.log('✅ История чата загружена:', chatHistory.length, 'сообщений');
-  
   // === ОСНОВНЫЕ ФУНКЦИИ ===
   function updateAnalyticsBadge() {
     const userMessages = document.querySelectorAll('.message.user-message');
@@ -1603,133 +1561,110 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
-  // === ОБРАБОТЧИК ОТКРЫТИЯ/ЗАКРЫТИЯ ЧАТА ===
-  icon.addEventListener('click', (e) => {
-    e.stopPropagation();
-    chat.classList.toggle('open');
+  function addMessage(text, sender, emotion = null, triggers = [], stressLevel = 0, save = true) {
+    const div = document.createElement('div');
+    div.className = `message ${sender}-message`;
+    div.textContent = text;
     
-    if (chat.classList.contains('open')) {
-      notificationBadge.style.display = 'none';
+    div.dataset.time = new Date().toISOString();
+    div.dataset.sender = sender;
+    
+    if (sender === 'user') {
+      div.dataset.emotion = emotion || 'neutral';
+      div.dataset.triggers = JSON.stringify(triggers || []);
+      div.dataset.stressLevel = stressLevel || 0;
       
-      // На мобильных фокус с задержкой
-      if (window.innerWidth <= 768) {
-        setTimeout(() => {
-          input.focus();
-        }, 500);
-      } else {
-        // На десктопе сразу фокус
-        setTimeout(() => {
-          input.focus();
-        }, 100);
-      }
-      
-      setTimeout(() => {
-        messages.scrollTop = messages.scrollHeight;
-      }, 100);
-    } else {
-      // При закрытии убираем фокус на мобильных
-      if (window.innerWidth <= 768) {
-        input.blur();
+      if (emotion && emotion !== 'neutral') {
+        const emotionTag = document.createElement('div');
+        emotionTag.className = `emotion-tag emotion-${emotion}`;
+        const emoji = emotion === 'sad' ? '😔' :
+                     emotion === 'happy' ? '😊' :
+                     emotion === 'angry' ? '😠' :
+                     emotion === 'anxious' ? '😰' : '😐';
+        emotionTag.textContent = emoji;
+        emotionTag.title = `Эмоция: ${emotion}`;
+        div.appendChild(emotionTag);
       }
     }
-  });
-  
-  closeBtn.addEventListener('click', () => {
-    chat.classList.remove('open');
     
-    // На мобильных разблокируем скролл
-    if (window.innerWidth <= 768) {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
-      input.blur();
-    }
+    messages.appendChild(div);
     
-    typingIndicator.style.display = 'none';
-  });
-  
-  // === МОБИЛЬНЫЕ ФУНКЦИИ ===
-  function initMobileFeatures() {
-    if (window.innerWidth <= 768) {
-      console.log('📱 Инициализация мобильных функций');
-      
-      // Блокируем скролл страницы при открытом чате
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.attributeName === 'class') {
-            if (chat.classList.contains('open')) {
-              document.body.style.overflow = 'hidden';
-              document.body.style.position = 'fixed';
-              document.body.style.width = '100%';
-            } else {
-              document.body.style.overflow = '';
-              document.body.style.position = '';
-              document.body.style.width = '';
-            }
-          }
-        });
-      });
-      
-      observer.observe(chat, { attributes: true });
-      
-      // Адаптация под клавиатуру
-      let originalHeight = window.innerHeight;
-      
-      window.addEventListener('resize', () => {
-        if (chat.classList.contains('open')) {
-          const newHeight = window.innerHeight;
-          const heightDiff = Math.abs(newHeight - originalHeight);
-          
-          if (heightDiff > 200) {
-            // Клавиатура открылась/закрылась
-            setTimeout(() => {
-              messages.scrollTop = messages.scrollHeight;
-            }, 300);
-          }
-          originalHeight = newHeight;
-        }
-      });
-    }
+    setTimeout(() => {
+      messages.scrollTop = messages.scrollHeight;
+    }, 50);
+    
+    if (save) saveChatHistory();
+    
+    console.log(`💬 Добавлено сообщение: "${text.substring(0, 30)}..." от ${sender}`);
   }
   
-  // === ОТПРАВКА СООБЩЕНИЯ ===
+  function generateSmartReply(text, analysis, moodEntries) {
+    const lowerText = text.toLowerCase();
+    
+    if (analysis.moodDiscrepancy && analysis.moodDiscrepancy >= 3) {
+      return `Заметил, что ты говоришь о настроении ${analysis.moodScore}/10, хотя в дневнике была другая оценка. Интересно, что изменилось? 🤔`;
+    }
+    
+    if (analysis.stressLevel >= 6) {
+      const stressTips = [
+        'Попробуй сделать глубокий вдох и медленный выдох. Помогает снизить напряжение.',
+        'Иногда полезно отвлечься на 5 минут. Может, короткая прогулка?',
+        'Ты уже делал перерыв сегодня? 5-10 минут отдыха могут творить чудеса.'
+      ];
+      return `Похоже, есть напряжение (${analysis.stressLevel}/10). ${stressTips[Math.floor(Math.random() * stressTips.length)]}`;
+    }
+    
+    if (analysis.triggers.includes('усталость')) {
+      return 'Усталость накапливается постепенно. Как твой сон в последнее время? 💤';
+    }
+    
+    if (analysis.emotion === 'happy' || (analysis.moodScore && analysis.moodScore >= 8)) {
+      return 'Рад слышать, что у тебя хорошее настроение! Что больше всего порадовало сегодня? 😊';
+    }
+    
+    const replies = [
+      'Спасибо, что поделился. Хочешь рассказать подробнее?',
+      'Понимаю. Как это повлияло на твой день?',
+      'Интересно. Что ты думаешь об этой ситуации?',
+      'Спасибо за доверие. Я здесь, чтобы выслушать.',
+      'Каждый день — это новый опыт. Что бы ты хотел изменить?'
+    ];
+    
+    let reply;
+
+    do {
+      reply = replies[Math.floor(Math.random() * replies.length)];
+    } while (reply === lastReply);
+
+    lastReply = reply;
+
+    return reply;
+  }
+  
   async function sendMessage() {
     const text = input.value.trim();
     if (!text) return;
     
     console.log('📤 Отправка:', text);
     
-    // Получаем данные настроения
     const moodEntries = getMoodEntries();
-    
-    // Анализируем сообщение ВМЕСТЕ с данными настроения
     const analysis = analyzeMessageWithMood(text, moodEntries);
     console.log('🧠 Анализ:', analysis);
     
-    // Добавляем сообщение пользователя
     addMessage(text, 'user', analysis.emotion, analysis.triggers, analysis.stressLevel);
     input.value = '';
     
-    // Показываем индикатор набора
     typingIndicator.style.display = 'flex';
     
-    // Имитация запроса к API
     try {
-      console.log('🔄 Имитация запроса к API...');
-      
-      // Искусственная задержка
       await new Promise(resolve => setTimeout(resolve, 800));
-      
       typingIndicator.style.display = 'none';
       
-      // Генерация умного ответа на основе анализа
       let reply = generateSmartReply(text, analysis, moodEntries);
       
-      // Добавляем ответ с задержкой
       setTimeout(() => {
         addMessage(reply, 'asya');
         
-        // Уведомление если высокий стресс
         if (analysis.stressLevel >= 7) {
           showNotification();
           setTimeout(() => {
@@ -1753,58 +1688,196 @@ document.addEventListener('DOMContentLoaded', () => {
       saveChatHistory();
     }
   }
+
+  // === МОБИЛЬНЫЕ ФУНКЦИИ ===
+  function initMobileFeatures() {
+    if (window.innerWidth <= 768) {
+      console.log('📱 Инициализация мобильных функций');
+      
+      const hasNotch = () => {
+        const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const hasNotchCSS = window.matchMedia("(display-mode: standalone)").matches || 
+                           window.matchMedia("(display-mode: fullscreen)").matches ||
+                           ('standalone' in navigator && navigator.standalone);
+        return iOS && hasNotchCSS;
+      };
+      
+      if (hasNotch()) {
+        document.body.classList.add('has-notch');
+        console.log('📱 iPhone с вырезом обнаружен');
+      }
+      
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'class') {
+            if (chat.classList.contains('open')) {
+              document.body.style.overflow = 'hidden';
+              document.body.style.position = 'fixed';
+              document.body.style.width = '100%';
+            } else {
+              document.body.style.overflow = '';
+              document.body.style.position = '';
+              document.body.style.width = '';
+            }
+          }
+        });
+      });
+      
+      observer.observe(chat, { attributes: true });
+      
+      let keyboardHeight = 0;
+      let originalViewportHeight = window.innerHeight;
+      
+      let resizeTimeout;
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          if (!chat.classList.contains('open')) return;
+          
+          const newHeight = window.innerHeight;
+          const diff = originalViewportHeight - newHeight;
+          
+          if (diff > 200 && diff < 500) {
+            keyboardHeight = diff;
+            console.log(`📱 Клавиатура открылась, высота: ${keyboardHeight}px`);
+            
+            setTimeout(() => {
+              messages.scrollTop = messages.scrollHeight;
+              setTimeout(() => {
+                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 100);
+            }, 300);
+            
+          } else if (diff <= 50) {
+            keyboardHeight = 0;
+            console.log('📱 Клавиатура закрылась');
+            setTimeout(() => {
+              messages.scrollTop = messages.scrollHeight;
+            }, 300);
+          }
+          
+          originalViewportHeight = newHeight;
+        }, 100);
+      });
+      
+      input.addEventListener('focus', () => {
+        if (chat.classList.contains('open')) {
+          setTimeout(() => {
+            const newHeight = window.innerHeight;
+            const diff = originalViewportHeight - newHeight;
+            
+            if (diff > 200) {
+              console.log('📱 Фокус на поле ввода, клавиатура открылась');
+              setTimeout(() => {
+                messages.scrollTop = messages.scrollHeight;
+                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 200);
+            }
+          }, 300);
+        }
+      });
+      
+      input.addEventListener('blur', () => {
+        if (chat.classList.contains('open')) {
+          setTimeout(() => {
+            messages.scrollTop = messages.scrollHeight;
+          }, 200);
+        }
+      });
+      
+      sendBtn.addEventListener('click', () => {
+        setTimeout(() => {
+          input.blur();
+          setTimeout(() => {
+            messages.scrollTop = messages.scrollHeight;
+          }, 100);
+        }, 100);
+      });
+      
+      let startY = 0;
+      let startX = 0;
+      
+      chat.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+        startX = e.touches[0].clientX;
+      }, { passive: true });
+      
+      chat.addEventListener('touchmove', (e) => {
+        if (!chat.classList.contains('open')) return;
+        
+        const currentY = e.touches[0].clientY;
+        const currentX = e.touches[0].clientX;
+        const diffY = currentY - startY;
+        const diffX = currentX - startX;
+        
+        if (diffY > 50 && Math.abs(diffX) < 50) {
+          e.preventDefault();
+          chat.classList.remove('open');
+          document.body.style.overflow = '';
+          document.body.style.position = '';
+          document.body.style.width = '';
+        }
+      }, { passive: false });
+    }
+  }
+
+  // === ИНИЦИАЛИЗАЦИЯ ===
+  const chatHistory = JSON.parse(localStorage.getItem('asya_chat_history')) || [];
   
-  // Умный ответ на основе контекста
-  function generateSmartReply(text, analysis, moodEntries) {
-    const lowerText = text.toLowerCase();
-    
-    // Если есть расхождение с дневником настроения
-    if (analysis.moodDiscrepancy && analysis.moodDiscrepancy >= 3) {
-      return `Заметил, что ты говоришь о настроении ${analysis.moodScore}/10, хотя в дневнике была другая оценка. Интересно, что изменилось? 🤔`;
-    }
-    
-    // Если упомянут стресс
-    if (analysis.stressLevel >= 6) {
-      const stressTips = [
-        'Попробуй сделать глубокий вдох и медленный выдох. Помогает снизить напряжение.',
-        'Иногда полезно отвлечься на 5 минут. Может, короткая прогулка?',
-        'Ты уже делал перерыв сегодня? 5-10 минут отдыха могут творить чудеса.'
-      ];
-      return `Похоже, есть напряжение (${analysis.stressLevel}/10). ${stressTips[Math.floor(Math.random() * stressTips.length)]}`;
-    }
-    
-    // Если упомянута усталость
-    if (analysis.triggers.includes('усталость')) {
-      return 'Усталость накапливается постепенно. Как твой сон в последнее время? 💤';
-    }
-    
-    // Если хорошее настроение
-    if (analysis.emotion === 'happy' || (analysis.moodScore && analysis.moodScore >= 8)) {
-      return 'Рад слышать, что у тебя хорошее настроение! Что больше всего порадовало сегодня? 😊';
-    }
-    
-    // Стандартные ответы
-    const replies = [
-      'Спасибо, что поделился. Хочешь рассказать подробнее?',
-      'Понимаю. Как это повлияло на твой день?',
-      'Интересно. Что ты думаешь об этой ситуации?',
-      'Спасибо за доверие. Я здесь, чтобы выслушать.',
-      'Каждый день — это новый опыт. Что бы ты хотел изменить?'
-    ];
-    
-    let reply;
-
-    do {
-      reply = replies[Math.floor(Math.random() * replies.length)];
-    } while (reply === lastReply);
-
-    lastReply = reply;
-
-    return reply;
+  if (chatHistory.length > 0) {
+    messages.innerHTML = '';
+    chatHistory.forEach(msg => {
+      addMessage(msg.text, msg.sender, msg.emotion, msg.triggers, msg.stressLevel, false);
+    });
+    updateAnalyticsBadge();
   }
   
-  // Обработчики отправки
+  console.log('✅ История чата загружена:', chatHistory.length, 'сообщений');
+  
+  // === ОБРАБОТЧИКИ СОБЫТИЙ ===
+  icon.addEventListener('click', (e) => {
+    e.stopPropagation();
+    chat.classList.toggle('open');
+    
+    if (chat.classList.contains('open')) {
+      notificationBadge.style.display = 'none';
+      
+      if (window.innerWidth <= 768) {
+        setTimeout(() => {
+          input.focus({preventScroll: false});
+          setTimeout(() => {
+            messages.scrollTop = messages.scrollHeight;
+          }, 300);
+        }, 500);
+      } else {
+        setTimeout(() => {
+          input.focus();
+          messages.scrollTop = messages.scrollHeight;
+        }, 100);
+      }
+      
+    } else {
+      if (window.innerWidth <= 768) {
+        input.blur();
+      }
+    }
+  });
+  
+  closeBtn.addEventListener('click', () => {
+    chat.classList.remove('open');
+    
+    if (window.innerWidth <= 768) {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      input.blur();
+    }
+    
+    typingIndicator.style.display = 'none';
+  });
+  
   sendBtn.addEventListener('click', sendMessage);
+  
   input.addEventListener('keydown', e => {
     if (e.key === 'Enter') sendMessage();
   });
@@ -1818,47 +1891,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   
-  // === ДОБАВЛЕНИЕ СООБЩЕНИЯ ===
-  function addMessage(text, sender, emotion = null, triggers = [], stressLevel = 0, save = true) {
-    const div = document.createElement('div');
-    div.className = `message ${sender}-message`;
-    div.textContent = text;
+  // === АНАЛИТИКА ===
+  analyticsBtn.addEventListener('click', () => {
+    const analysis = generateUnifiedAnalysis();
     
-    div.dataset.time = new Date().toISOString();
-    div.dataset.sender = sender;
+    const analysisDiv = document.createElement('div');
+    analysisDiv.className = 'message analysis-message';
+    analysisDiv.innerHTML = `
+      <strong>📊 Анализ настроения</strong><br><br>
+      <strong>📈 Тенденции:</strong><br>
+      • Преобладающая эмоция: ${analysis.topEmotion}<br>
+      • Средний стресс: ${analysis.avgStress}/10<br>
+      • Среднее настроение: ${analysis.moodStats.averageMood}/10<br><br>
+      <strong>🎯 Топ-триггеры:</strong><br>
+      ${analysis.topTriggers.map(t => `• ${t}`).join('<br>') || 'Не определено'}<br><br>
+      <strong>💡 Рекомендации:</strong><br>
+      ${analysis.recommendations.map(r => `• ${r}`).join('<br>')}<br><br>
+      <em>${analysis.dataSource}</em>
+    `;
     
-    if (sender === 'user') {
-      div.dataset.emotion = emotion || 'neutral';
-      div.dataset.triggers = JSON.stringify(triggers || []);
-      div.dataset.stressLevel = stressLevel || 0;
-      
-      // Тег эмоции
-      if (emotion && emotion !== 'neutral') {
-        const emotionTag = document.createElement('div');
-        emotionTag.className = `emotion-tag emotion-${emotion}`;
-        const emoji = emotion === 'sad' ? '😔' :
-                     emotion === 'happy' ? '😊' :
-                     emotion === 'angry' ? '😠' :
-                     emotion === 'anxious' ? '😰' : '😐';
-        emotionTag.textContent = emoji;
-        emotionTag.title = `Эмоция: ${emotion}`;
-        div.appendChild(emotionTag);
-      }
-    }
-    
-    messages.appendChild(div);
-    
-    // Прокручиваем к последнему сообщению
+    messages.appendChild(analysisDiv);
     setTimeout(() => {
       messages.scrollTop = messages.scrollHeight;
-    }, 50);
-    
-    if (save) saveChatHistory();
-    
-    console.log(`💬 Добавлено сообщение: "${text.substring(0, 30)}..." от ${sender}`);
-  }
+    }, 100);
+  });
   
-  // === ИНИЦИАЛИЗАЦИЯ МОБИЛЬНЫХ ФУНКЦИЙ ===
+  // === ЗАПУСК ===
   initMobileFeatures();
   
   console.log('🎉 Чат-бот Ася готов к работе!');

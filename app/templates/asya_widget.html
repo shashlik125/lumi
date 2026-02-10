@@ -281,6 +281,8 @@
 
 /* ====== МОБИЛЬНАЯ ВЕРСИЯ ====== */
 @media (max-width: 768px) {
+
+  /* Основной виджет */
   #asya-widget {
     bottom: 20px;
     right: 20px;
@@ -290,7 +292,8 @@
     background: transparent;
     z-index: 10000;
   }
-  
+
+  /* Иконка Аси */
   .asya-icon {
     width: 65px;
     height: 65px;
@@ -298,24 +301,20 @@
     bottom: 20px;
     right: 20px;
     z-index: 10001;
-    transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: all 0.3s ease;
   }
-  
+
+  /* Иконка при открытом чате */
   body.asya-chat-open .asya-icon {
-    display: none !important;
-    opacity: 0 !important;
-    visibility: hidden !important;
-    pointer-events: none !important;
-    transform: scale(0) !important;
+    bottom: auto !important;
+    top: 16px !important;
+    left: 16px !important;
+    right: auto !important;
+    transform: scale(0.8) !important;
+    z-index: 10010 !important;
   }
-  
-  .asya-chat:not(.open) ~ .asya-icon {
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: all !important;
-    transform: scale(1) !important;
-  }
-  
+
+  /* Основное окно чата */
   .asya-chat {
     position: fixed !important;
     top: 0 !important;
@@ -329,23 +328,29 @@
     z-index: 9999 !important;
     transform: translateY(100%);
     transition: transform 0.4s ease-out;
-    padding-top: 80px !important;
+    padding-top: 60px !important; /* подняли вплотную к хедеру дашборда */
     box-shadow: none !important;
     border: none !important;
     background: linear-gradient(to bottom, 
       transparent 0px, 
-      transparent 80px, 
-      rgba(255, 249, 252, 0.98) 80px, 
+      transparent 60px, 
+      rgba(255, 249, 252, 0.98) 60px, 
       rgba(255, 249, 252, 0.98) 100%
     ) !important;
   }
-  
+
+  /* Открытый чат */
   .asya-chat.open {
     display: flex !important;
     transform: translateY(0) !important;
   }
-  
-  /* ХЕДЕР АСИ */
+
+  /* Блокировка скролла дашборда */
+  body.asya-chat-open {
+    overflow: hidden !important;
+  }
+
+  /* Хедер Аси */
   .chat-header {
     position: sticky !important;
     top: 0 !important;
@@ -357,24 +362,12 @@
     background: linear-gradient(135deg, #4f63e0, #6a45b8) !important;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    margin-top: -60px !important;
-    padding-top: max(12px, env(safe-area-inset-top));
-    padding-top: max(12px, constant(safe-area-inset-top));
+    margin-top: -60px !important; /* вплотную к хедеру дашборда */
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
     border-bottom: 2px solid rgba(255, 255, 255, 0.3);
   }
-  
-  .chat-header::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 10%;
-    right: 10%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #ffffff, transparent);
-    border-radius: 2px;
-  }
-  
+
+  /* Тело чата */
   .chat-body {
     flex: 1;
     display: flex;
@@ -382,25 +375,24 @@
     position: relative;
     padding-top: env(safe-area-inset-top);
     padding-top: constant(safe-area-inset-top);
-    padding-bottom: calc(env(safe-area-inset-bottom) + 50px) !important;
-    padding-bottom: calc(constant(safe-area-inset-bottom) + 50px) !important;
+    padding-bottom: calc(env(safe-area-inset-bottom) + 80px) !important; /* подняли выше нижней панели */
+    padding-bottom: calc(constant(safe-area-inset-bottom) + 80px) !important;
     height: calc(100vh - 60px) !important;
     max-height: calc(100vh - 60px) !important;
     background: linear-gradient(180deg, #f8f9ff 0%, #fff5f9 100%) !important;
   }
-  
+
+  /* Контейнер сообщений */
   #asya-messages {
     flex: 1;
-    padding: 20px 16px 120px !important;
+    padding: 20px 16px 140px !important;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     min-height: 0;
-    padding-top: max(20px, env(safe-area-inset-top));
-    padding-top: max(20px, constant(safe-area-inset-top));
     background: transparent !important;
   }
-  
-  /* ПОЛЕ ВВОДА */
+
+  /* Поле ввода */
   .chat-input {
     position: fixed !important;
     bottom: 0 !important;
@@ -411,10 +403,9 @@
     border-top: 2px solid rgba(255, 214, 231, 0.8);
     z-index: 100 !important;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-    padding-bottom: max(16px, env(safe-area-inset-bottom));
-    padding-bottom: max(16px, constant(safe-area-inset-bottom));
+    padding-bottom: calc(max(16px, env(safe-area-inset-bottom)) + 20px) !important; /* подняли выше нижней панели */
   }
-  
+
   #asya-input {
     padding: 14px 18px;
     font-size: 16px;
@@ -426,7 +417,7 @@
     padding-right: max(18px, env(safe-area-inset-right));
     padding-right: max(18px, constant(safe-area-inset-right));
   }
-  
+
   #asya-send {
     width: 50px;
     height: 50px;
@@ -435,26 +426,16 @@
     margin-right: env(safe-area-inset-right);
     margin-right: constant(safe-area-inset-right);
   }
-  
-  /* Кнопки и текст хедера Аси */
-  .close-btn, .analytics-btn {
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
-    background: rgba(255, 255, 255, 0.3) !important;
-    border: 2px solid rgba(255, 255, 255, 0.5) !important;
-    color: white !important;
-    margin-right: env(safe-area-inset-right);
-    margin-right: constant(safe-area-inset-right);
-  }
-  
+
+  /* Текст хедера */
   #asya-name {
     color: white !important;
     font-weight: 600 !important;
     font-size: 14px !important;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
   }
-  
+
+  /* Сообщения */
   .message {
     max-width: 85%;
     font-size: 15px;
@@ -462,37 +443,12 @@
     padding: 12px 16px;
     margin-bottom: 10px;
   }
-  
+
   .user-message {
     max-width: 80%;
   }
-  
-  /* Маленькие экраны */
-  @media (max-height: 600px) {
-    .chat-header {
-      min-height: 50px;
-      padding: 12px 14px;
-    }
-    .chat-input {
-      padding: 12px 14px;
-    }
-    #asya-send {
-      width: 46px;
-      height: 46px;
-    }
-  }
-  
-  @media (max-width: 360px) {
-    .asya-icon {
-      width: 60px;
-      height: 60px;
-    }
-    #asya-input {
-      padding: 12px 14px;
-      font-size: 15px;
-    }
-  }
 }
+
 </style>
 
 
@@ -511,6 +467,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const typingIndicator = document.getElementById('typing-indicator');
   const notificationBadge = document.getElementById('notification-badge');
   const analyticsBtn = document.getElementById('asya-analytics');
+  const asyaIcon = document.querySelector('.asya-icon')
+  const asyaChat = document.querySelector('.asya-chat');
+
+asyaIcon.addEventListener('click', () => {
+  document.body.classList.toggle('asya-chat-open');
+});
   let lastReply = '';
 
   if (!icon || !chat) {

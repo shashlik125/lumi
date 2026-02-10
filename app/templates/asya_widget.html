@@ -1202,6 +1202,7 @@
     flex-shrink: 0;
     /* Безопасные зоны iPhone */
     padding-top: max(18px, env(safe-area-inset-top));
+    padding-top: max(18px, constant(safe-area-inset-top)); /* Для старых iOS */
   }
   
   /* ТЕЛО ЧАТА */
@@ -1213,18 +1214,21 @@
     position: relative;
     /* Безопасные зоны */
     padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: constant(safe-area-inset-top);
+    padding-bottom: calc(env(safe-area-inset-bottom) + 50px) !important; /* Дополнительный отступ */
+    padding-bottom: calc(constant(safe-area-inset-bottom) + 50px) !important;
   }
   
   /* КОНТЕЙНЕР СООБЩЕНИЙ - ЗАНИМАЕТ ОСТАВШЕЕСЯ ПРОСТРАНСТВО */
   #asya-messages {
     flex: 1;
-    padding: 20px 16px 100px !important; /* Больше отступа снизу для поля ввода */
+    padding: 20px 16px 120px !important; /* УВЕЛИЧИЛ ОТСТУП СНИЗУ для поля ввода */
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     min-height: 0;
     /* Безопасные зоны */
     padding-top: max(20px, env(safe-area-inset-top));
+    padding-top: max(20px, constant(safe-area-inset-top));
   }
   
   /* ПОЛЕ ВВОДА - ФИКСИРОВАННОЕ ВНИЗУ */
@@ -1240,8 +1244,11 @@
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
     /* Безопасные зоны iPhone */
     padding-bottom: max(15px, env(safe-area-inset-bottom));
+    padding-bottom: max(15px, constant(safe-area-inset-bottom));
     padding-left: max(16px, env(safe-area-inset-left));
+    padding-left: max(16px, constant(safe-area-inset-left));
     padding-right: max(16px, env(safe-area-inset-right));
+    padding-right: max(16px, constant(safe-area-inset-right));
   }
   
   /* КЛАВИАТУРА И КНОПКА ОТПРАВКИ */
@@ -1253,7 +1260,9 @@
     flex: 1;
     /* Безопасные зоны */
     padding-left: max(18px, env(safe-area-inset-left));
+    padding-left: max(18px, constant(safe-area-inset-left));
     padding-right: max(18px, env(safe-area-inset-right));
+    padding-right: max(18px, constant(safe-area-inset-right));
   }
   
   #asya-send {
@@ -1263,6 +1272,7 @@
     flex-shrink: 0;
     /* Безопасные зоны */
     margin-right: env(safe-area-inset-right);
+    margin-right: constant(safe-area-inset-right);
   }
   
   /* КНОПКИ В ХЕДЕРЕ */
@@ -1272,6 +1282,7 @@
     font-size: 20px;
     /* Безопасные зоны */
     margin-right: env(safe-area-inset-right);
+    margin-right: constant(safe-area-inset-right);
   }
   
   .analytics-btn {
@@ -1280,6 +1291,7 @@
     font-size: 18px;
     /* Безопасные зоны */
     margin-right: env(safe-area-inset-right);
+    margin-right: constant(safe-area-inset-right);
   }
   
   /* СООБЩЕНИЯ */
@@ -1304,6 +1316,25 @@
     padding-bottom: max(15px, 34px) !important; /* Высота нижней панели iPhone */
   }
   
+  /* Фикс для Safari на iPhone (скрываем панель URL) */
+  @supports (-webkit-touch-callout: none) {
+    .asya-chat.open {
+      height: -webkit-fill-available !important;
+      height: fill-available !important;
+    }
+    
+    .chat-body {
+      height: -webkit-fill-available !important;
+      height: fill-available !important;
+    }
+    
+    /* Прячем панель навигации Safari */
+    .chat-input {
+      padding-bottom: calc(env(safe-area-inset-bottom) + 10px) !important;
+      padding-bottom: calc(constant(safe-area-inset-bottom) + 10px) !important;
+    }
+  }
+  
   /* ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ */
   @media (max-height: 600px) {
     .chat-header {
@@ -1319,6 +1350,36 @@
       width: 46px;
       height: 46px;
     }
+  }
+}
+
+/* ====== ДОПОЛНИТЕЛЬНЫЕ ФИКСЫ ДЛЯ IPHONE ====== */
+/* Фикс для панели навигации Safari */
+@supports (-webkit-overflow-scrolling: touch) {
+  .asya-chat.open {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+  }
+  
+  .chat-body {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 60px) !important;
+  }
+}
+
+/* Фикс для нижней панели на iPhone */
+@media (max-width: 768px) and (max-height: 900px) {
+  #asya-messages {
+    padding-bottom: 140px !important; /* Еще больше места для поля ввода */
+  }
+  
+  .chat-input {
+    padding-bottom: calc(env(safe-area-inset-bottom) + 20px) !important;
+    padding-bottom: calc(constant(safe-area-inset-bottom) + 20px) !important;
   }
 }
 
@@ -1689,138 +1750,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // === МОБИЛЬНЫЕ ФУНКЦИИ ===
-  function initMobileFeatures() {
-    if (window.innerWidth <= 768) {
-      console.log('📱 Инициализация мобильных функций');
-      
-      const hasNotch = () => {
-        const iOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        const hasNotchCSS = window.matchMedia("(display-mode: standalone)").matches || 
-                           window.matchMedia("(display-mode: fullscreen)").matches ||
-                           ('standalone' in navigator && navigator.standalone);
-        return iOS && hasNotchCSS;
-      };
-      
-      if (hasNotch()) {
-        document.body.classList.add('has-notch');
-        console.log('📱 iPhone с вырезом обнаружен');
-      }
-      
-      const observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.attributeName === 'class') {
-            if (chat.classList.contains('open')) {
-              document.body.style.overflow = 'hidden';
-              document.body.style.position = 'fixed';
-              document.body.style.width = '100%';
-            } else {
-              document.body.style.overflow = '';
-              document.body.style.position = '';
-              document.body.style.width = '';
-            }
-          }
-        });
-      });
-      
-      observer.observe(chat, { attributes: true });
-      
-      let keyboardHeight = 0;
-      let originalViewportHeight = window.innerHeight;
-      
-      let resizeTimeout;
-      window.addEventListener('resize', () => {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(() => {
-          if (!chat.classList.contains('open')) return;
-          
-          const newHeight = window.innerHeight;
-          const diff = originalViewportHeight - newHeight;
-          
-          if (diff > 200 && diff < 500) {
-            keyboardHeight = diff;
-            console.log(`📱 Клавиатура открылась, высота: ${keyboardHeight}px`);
-            
-            setTimeout(() => {
-              messages.scrollTop = messages.scrollHeight;
-              setTimeout(() => {
-                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }, 100);
-            }, 300);
-            
-          } else if (diff <= 50) {
-            keyboardHeight = 0;
-            console.log('📱 Клавиатура закрылась');
-            setTimeout(() => {
-              messages.scrollTop = messages.scrollHeight;
-            }, 300);
-          }
-          
-          originalViewportHeight = newHeight;
-        }, 100);
-      });
-      
-      input.addEventListener('focus', () => {
-        if (chat.classList.contains('open')) {
-          setTimeout(() => {
-            const newHeight = window.innerHeight;
-            const diff = originalViewportHeight - newHeight;
-            
-            if (diff > 200) {
-              console.log('📱 Фокус на поле ввода, клавиатура открылась');
-              setTimeout(() => {
-                messages.scrollTop = messages.scrollHeight;
-                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }, 200);
-            }
-          }, 300);
-        }
-      });
-      
-      input.addEventListener('blur', () => {
-        if (chat.classList.contains('open')) {
-          setTimeout(() => {
-            messages.scrollTop = messages.scrollHeight;
-          }, 200);
-        }
-      });
-      
-      sendBtn.addEventListener('click', () => {
-        setTimeout(() => {
-          input.blur();
-          setTimeout(() => {
-            messages.scrollTop = messages.scrollHeight;
-          }, 100);
-        }, 100);
-      });
-      
-      let startY = 0;
-      let startX = 0;
-      
-      chat.addEventListener('touchstart', (e) => {
-        startY = e.touches[0].clientY;
-        startX = e.touches[0].clientX;
-      }, { passive: true });
-      
-      chat.addEventListener('touchmove', (e) => {
-        if (!chat.classList.contains('open')) return;
-        
-        const currentY = e.touches[0].clientY;
-        const currentX = e.touches[0].clientX;
-        const diffY = currentY - startY;
-        const diffX = currentX - startX;
-        
-        if (diffY > 50 && Math.abs(diffX) < 50) {
-          e.preventDefault();
-          chat.classList.remove('open');
-          document.body.style.overflow = '';
-          document.body.style.position = '';
-          document.body.style.width = '';
-        }
-      }, { passive: false });
-    }
-  }
-
   // === ИНИЦИАЛИЗАЦИЯ ===
   const chatHistory = JSON.parse(localStorage.getItem('asya_chat_history')) || [];
   
@@ -1921,5 +1850,230 @@ document.addEventListener('DOMContentLoaded', () => {
   
   console.log('🎉 Чат-бот Ася готов к работе!');
 });
+
+
+// === МОБИЛЬНЫЕ ФУНКЦИИ ===
+function initMobileFeatures() {
+  if (window.innerWidth <= 768) {
+    console.log('📱 Инициализация мобильных функций');
+    
+    // Определяем iOS устройство
+    const isIOS = () => {
+      return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    };
+    
+    // Определяем Safari
+    const isSafari = () => {
+      return /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
+             navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome');
+    };
+    
+    const iOS = isIOS();
+    const safari = isSafari();
+    
+    if (iOS) {
+      console.log('📱 iOS устройство обнаружено');
+      document.body.classList.add('ios-device');
+      
+      // Для Safari добавляем дополнительные фиксы
+      if (safari) {
+        document.body.classList.add('ios-safari');
+        console.log('🌐 Safari на iOS');
+      }
+    }
+    
+    // Блокируем скролл страницы при открытом чате
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === 'class') {
+          if (chat.classList.contains('open')) {
+            // Блокируем скролл основной страницы
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+            document.body.style.height = '100%';
+            
+            // На iOS Safari пытаемся скрыть панель навигации
+            if (iOS && safari) {
+              setTimeout(() => {
+                // Прокручиваем немного вниз и обратно чтобы скрыть панель
+                window.scrollTo(0, 0);
+                setTimeout(() => {
+                  window.scrollTo(0, 1);
+                }, 100);
+              }, 500);
+            }
+            
+            // Фокус на поле ввода с задержкой
+            setTimeout(() => {
+              input.focus({preventScroll: true});
+              
+              // Прокручиваем сообщения вниз
+              setTimeout(() => {
+                messages.scrollTop = messages.scrollHeight;
+                
+                // Дополнительно прокручиваем для iPhone
+                if (iOS) {
+                  setTimeout(() => {
+                    messages.scrollTop = messages.scrollHeight + 100;
+                  }, 300);
+                }
+              }, 300);
+            }, 600);
+            
+          } else {
+            // Разблокируем скролл
+            document.body.style.overflow = '';
+            document.body.style.position = '';
+            document.body.style.width = '';
+            document.body.style.height = '';
+            input.blur();
+          }
+        }
+      });
+    });
+    
+    observer.observe(chat, { attributes: true });
+    
+    // === ОБРАБОТКА КЛАВИАТУРЫ ===
+    let originalViewportHeight = window.innerHeight;
+    
+    window.addEventListener('resize', () => {
+      if (!chat.classList.contains('open')) return;
+      
+      const newHeight = window.innerHeight;
+      const diff = originalViewportHeight - newHeight;
+      
+      if (diff > 200) {
+        // Клавиатура открылась
+        console.log('📱 Клавиатура открылась, прокручиваем...');
+        
+        setTimeout(() => {
+          // Увеличиваем отступ для сообщений
+          messages.style.paddingBottom = '180px';
+          
+          // Прокручиваем вниз
+          messages.scrollTop = messages.scrollHeight;
+          
+          // Дополнительный скролл для iOS
+          if (iOS) {
+            setTimeout(() => {
+              messages.scrollTop = messages.scrollHeight + 50;
+            }, 100);
+          }
+        }, 300);
+        
+      } else if (diff < -50) {
+        // Клавиатура закрылась
+        console.log('📱 Клавиатура закрылась');
+        messages.style.paddingBottom = '120px';
+        
+        setTimeout(() => {
+          messages.scrollTop = messages.scrollHeight;
+        }, 300);
+      }
+      
+      originalViewportHeight = newHeight;
+    });
+    
+    // Когда поле ввода получает фокус
+    input.addEventListener('focus', () => {
+      if (chat.classList.contains('open')) {
+        // Даем время клавиатуре открыться
+        setTimeout(() => {
+          messages.scrollTop = messages.scrollHeight;
+          
+          // Для iOS дополнительная прокрутка
+          if (iOS) {
+            setTimeout(() => {
+              messages.scrollTop = messages.scrollHeight + 80;
+            }, 200);
+          }
+        }, 400);
+      }
+    });
+    
+    // Когда поле ввода теряет фокус
+    input.addEventListener('blur', () => {
+      if (chat.classList.contains('open')) {
+        // Возвращаем нормальный отступ
+        messages.style.paddingBottom = '120px';
+        
+        setTimeout(() => {
+          messages.scrollTop = messages.scrollHeight;
+        }, 200);
+      }
+    });
+    
+    // Кнопка отправки - убираем фокус чтобы закрыть клавиатуру
+    sendBtn.addEventListener('click', () => {
+      // Задержка перед убиранием фокуса
+      setTimeout(() => {
+        input.blur();
+        
+        // Прокручиваем к последнему сообщению
+        setTimeout(() => {
+          messages.scrollTop = messages.scrollHeight;
+          messages.style.paddingBottom = '120px';
+        }, 200);
+      }, 100);
+    });
+    
+    // === СВАЙП ДЛЯ ЗАКРЫТИЯ ===
+    let startY = 0;
+    let startX = 0;
+    
+    chat.addEventListener('touchstart', (e) => {
+      startY = e.touches[0].clientY;
+      startX = e.touches[0].clientX;
+    }, { passive: true });
+    
+    chat.addEventListener('touchmove', (e) => {
+      if (!chat.classList.contains('open')) return;
+      
+      const currentY = e.touches[0].clientY;
+      const currentX = e.touches[0].clientX;
+      const diffY = currentY - startY;
+      const diffX = currentX - startX;
+      
+      // Если свайп вниз и горизонтальное движение небольшое
+      if (diffY > 50 && Math.abs(diffX) < 50) {
+        e.preventDefault();
+        
+        // Закрываем чат
+        chat.classList.remove('open');
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.height = '';
+        
+        // Убираем фокус
+        input.blur();
+      }
+    }, { passive: false });
+    
+    // === ФИКС ДЛЯ ИКОНКИ НА МОБИЛЬНЫХ ===
+    // Скрываем иконку когда открыта клавиатура
+    input.addEventListener('focus', () => {
+      if (window.innerWidth <= 768) {
+        const icon = document.querySelector('.asya-icon');
+        if (icon) {
+          icon.style.display = 'none';
+        }
+      }
+    });
+    
+    input.addEventListener('blur', () => {
+      if (window.innerWidth <= 768 && !chat.classList.contains('open')) {
+        const icon = document.querySelector('.asya-icon');
+        if (icon) {
+          icon.style.display = 'flex';
+        }
+      }
+    });
+  }
+}
+
 
 </script>

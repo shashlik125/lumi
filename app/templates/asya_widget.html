@@ -1153,6 +1153,7 @@
     left: auto;
     width: auto;
     height: auto;
+    background: transparent;
   }
   
   .asya-icon {
@@ -1166,9 +1167,10 @@
   
   /* Скрываем иконку когда чат открыт */
   .asya-chat.open ~ .asya-icon {
-    display: none;
+    display: none !important;
   }
   
+  /* ЧАТ - ПОЛНОЭКРАННЫЙ */
   .asya-chat {
     position: fixed !important;
     top: 0 !important;
@@ -1180,17 +1182,16 @@
     border-radius: 0 !important;
     margin: 0 !important;
     z-index: 10000;
-    transform: translateY(0) scale(1);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    transform: translateY(100%);
+    transition: transform 0.4s ease-out;
   }
   
   .asya-chat.open {
     display: flex !important;
-    opacity: 1 !important;
+    transform: translateY(0) !important;
   }
   
-  /* ХЕДЕР - ФИКСИРОВАННЫЙ СВЕРХУ */
+  /* ХЕДЕР - ВИДИМЫЙ В ВЕРХНЕЙ ЧАСТИ */
   .chat-header {
     position: sticky !important;
     top: 0 !important;
@@ -1203,33 +1204,34 @@
   
   /* ТЕЛО ЧАТА */
   .chat-body {
+    flex: 1;
     display: flex;
     flex-direction: column;
-    flex: 1;
-    height: calc(100vh - 70px - 80px); /* минус хедер и поле ввода */
     overflow: hidden;
+    position: relative;
   }
   
-  /* КОНТЕЙНЕР СООБЩЕНИЙ */
+  /* КОНТЕЙНЕР СООБЩЕНИЙ - ЗАНИМАЕТ ОСТАВШЕЕСЯ ПРОСТРАНСТВО */
   #asya-messages {
     flex: 1;
-    padding: 15px 16px;
+    padding: 20px 16px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     min-height: 0;
-    max-height: none;
+    padding-bottom: 100px; /* Место для поля ввода */
   }
   
-  /* ПОЛЕ ВВОДА - В НИЖНЕЙ ЧАСТИ ЭКРАНА */
+  /* ПОЛЕ ВВОДА - ФИКСИРОВАННОЕ ВНИЗУ */
   .chat-input {
-    position: sticky !important;
+    position: absolute !important;
     bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
     background: white;
     padding: 15px 16px;
     border-top: 2px solid rgba(255, 214, 231, 0.8);
     z-index: 10;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-    flex-shrink: 0;
   }
   
   /* КЛАВИАТУРА И КНОПКА ОТПРАВКИ */
@@ -1238,6 +1240,7 @@
     font-size: 16px;
     height: auto;
     min-height: 50px;
+    flex: 1;
   }
   
   #asya-send {
@@ -1283,8 +1286,8 @@
       padding-bottom: max(15px, env(safe-area-inset-bottom));
     }
     
-    .chat-body {
-      height: calc(100vh - 70px - 80px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    #asya-messages {
+      padding-top: max(20px, env(safe-area-inset-top));
     }
   }
   
@@ -1295,10 +1298,6 @@
       padding: 14px 16px;
     }
     
-    .chat-body {
-      height: calc(100vh - 60px - 70px);
-    }
-    
     .chat-input {
       padding: 12px 16px;
     }
@@ -1306,12 +1305,6 @@
     #asya-send {
       width: 46px;
       height: 46px;
-    }
-    
-    @supports (padding: max(0px)) {
-      .chat-body {
-        height: calc(100vh - 60px - 70px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-      }
     }
   }
 }
@@ -1866,5 +1859,21 @@ input.addEventListener('focus', () => {
   initMobileFeatures();
   
   console.log('🎉 Чат-бот Ася готов к работе!');
+});
+
+// === ОБРАБОТЧИК ЗАКРЫТИЯ ЧАТА ===
+closeBtn.addEventListener('click', () => {
+  chat.classList.remove('open');
+  
+  // На мобильных разблокируем скролл
+  if (window.innerWidth <= 768) {
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+    input.blur(); // Убираем фокус с поля ввода
+  }
+  
+  // Скрываем индикатор набора, если был виден
+  typingIndicator.style.display = 'none';
 });
 </script>

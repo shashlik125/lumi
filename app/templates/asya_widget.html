@@ -59,6 +59,11 @@
       </div>
     </div>
   </div>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+</head>
+
 </div>
 
 <style>
@@ -239,26 +244,6 @@
   display: flex;
   transform: translateY(0) scale(1);
   opacity: 1;
-}
-
-/* Адаптив */
-@media (max-width: 480px) {
-  #asya-widget {
-    bottom: 15px;
-    right: 15px;
-  }
-  
-  .asya-chat {
-    width: calc(100vw - 30px);
-    height: 500px;
-    max-width: 400px;
-    right: 0;
-  }
-  
-  .asya-icon {
-    width: 60px;
-    height: 60px;
-  }
 }
 
 .chat-header {
@@ -624,6 +609,290 @@
 .highlight {
   animation: highlight 2s ease-out;
 }
+
+/* ====== МОБИЛЬНАЯ ВЕРСИЯ (полноэкранный режим) ====== */
+@media (max-width: 768px) {
+  /* Виджет на всю страницу */
+  #asya-widget {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    top: 0;
+    z-index: 10000;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* полупрозрачный фон */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Иконка Аси - остается круглая, фиксированная позиция */
+  .asya-icon {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 70px;
+    height: 70px;
+    z-index: 10001; /* поверх чата */
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+  }
+
+  /* Полноэкранный чат */
+  .asya-chat {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    transform: none !important;
+    animation: slideUp 0.4s ease-out !important;
+  }
+
+  /* Анимация открытия чата */
+  .asya-chat.open {
+    transform: none !important;
+    animation: slideUp 0.4s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Хедер чата - фиксированный сверху */
+  .chat-header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-radius: 0;
+    min-height: 70px;
+  }
+
+  /* Тело чата - с отступами под хедер и над полем ввода */
+  .chat-body {
+    height: calc(100vh - 140px); /* минус хедер и поле ввода */
+    overflow: hidden;
+  }
+
+  /* Контейнер сообщений */
+  #asya-messages {
+    height: 100%;
+    max-height: none;
+    padding: 20px 16px;
+  }
+
+  /* Сообщения */
+  .message {
+    max-width: 90%;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .user-message {
+    max-width: 85%;
+  }
+
+  /* Поле ввода - фиксированное снизу */
+  .chat-input {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    border-top: 2px solid rgba(255, 214, 231, 0.8);
+    padding: 16px;
+    border-radius: 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  #asya-input {
+    font-size: 16px;
+    padding: 16px 20px;
+    border-radius: 25px;
+    border: 2px solid #e0e0e0;
+  }
+
+  #asya-send {
+    width: 52px;
+    height: 52px;
+    font-size: 22px;
+  }
+
+  /* Кнопка закрытия - больше и заметнее */
+  .close-btn {
+    background: rgba(255, 255, 255, 0.3);
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+  }
+
+  .close-btn:hover {
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  /* Бейджи на иконке */
+  .asya-name-badge {
+    top: -8px;
+    right: -8px;
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+
+  .analytics-badge {
+    bottom: -5px;
+    left: -5px;
+    width: 26px;
+    height: 26px;
+    font-size: 13px;
+  }
+
+  .notification-badge {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+
+  /* Адаптация для очень маленьких экранов */
+  @media (max-height: 600px) {
+    .chat-body {
+      height: calc(100vh - 120px);
+    }
+    
+    .chat-header {
+      min-height: 60px;
+      padding: 14px;
+    }
+    
+    #asya-name {
+      font-size: 14px;
+    }
+    
+    .chat-input {
+      padding: 12px;
+    }
+    
+    #asya-input {
+      padding: 14px 18px;
+      font-size: 15px;
+    }
+    
+    #asya-send {
+      width: 48px;
+      height: 48px;
+    }
+  }
+
+  /* Горизонтальная ориентация */
+  @media (max-width: 768px) and (orientation: landscape) {
+    .asya-chat {
+      height: 100vh;
+    }
+    
+    .chat-body {
+      height: calc(100vh - 110px);
+    }
+    
+    #asya-messages {
+      padding: 15px 12px;
+    }
+    
+    .message {
+      max-width: 80%;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+    }
+  }
+
+  /* Защита от появления под клавиатурой на iOS */
+  @supports (-webkit-touch-callout: none) {
+    .chat-input {
+      padding-bottom: max(16px, env(safe-area-inset-bottom));
+    }
+  }
+}
+
+/* ====== АДАПТАЦИЯ ДЛЯ ПЛАНШЕТОВ ====== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  #asya-widget {
+    bottom: 20px;
+    right: 20px;
+  }
+  
+  .asya-chat {
+    width: 420px;
+    height: 600px;
+  }
+  
+  .asya-icon {
+    width: 65px;
+    height: 65px;
+  }
+}
+
+/* ====== ДОПОЛНИТЕЛЬНЫЕ СТИЛИ ДЛЯ УДОБСТВА ====== */
+/* Индикатор свайпа для закрытия на мобильных */
+.asya-chat::before {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .asya-chat::before {
+    display: block;
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 3px;
+    z-index: 11;
+  }
+  
+  /* Улучшаем скролл на мобильных */
+  #asya-messages {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* Убираем подсветку при тапе на iOS */
+  input, textarea, button, select, a {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  }
+}
+
+/* ====== ИСПРАВЛЕНИЯ ДЛЯ ТЕЛЕФОНОВ С "ЧЕЛКОЙ" ====== */
+@media (max-width: 768px) {
+  .asya-chat {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  .chat-header {
+    padding-top: calc(18px + env(safe-area-inset-top));
+    padding-left: max(18px, env(safe-area-inset-left));
+    padding-right: max(18px, env(safe-area-inset-right));
+  }
+  
+  .chat-body {
+    height: calc(100vh - 140px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  }
+}
+
 </style>
 
 <script>
@@ -1195,4 +1464,72 @@ return reply;
     console.log('🧹 Чат очищен');
   };
 });
+
+// Добавьте эти функции после инициализации
+function initMobileFeatures() {
+  const chat = document.getElementById('asya-chat');
+  const icon = document.getElementById('asya-icon');
+  
+  if (!chat || !icon) return;
+  
+  // Закрытие по свайпу вниз (только на мобильных)
+  let startY = 0;
+  let currentY = 0;
+  
+  chat.addEventListener('touchstart', (e) => {
+    if (window.innerWidth <= 768) {
+      startY = e.touches[0].clientY;
+    }
+  }, { passive: true });
+  
+  chat.addEventListener('touchmove', (e) => {
+    if (window.innerWidth <= 768 && chat.classList.contains('open')) {
+      currentY = e.touches[0].clientY;
+      const diff = currentY - startY;
+      
+      // Если свайпаем вниз больше 50px
+      if (diff > 50) {
+        chat.classList.remove('open');
+        // Восстанавливаем обычное состояние виджета
+        document.getElementById('asya-widget').style.cssText = '';
+      }
+    }
+  }, { passive: true });
+  
+  // Закрытие по клику на фон (только на мобильных)
+  document.getElementById('asya-widget').addEventListener('click', (e) => {
+    if (window.innerWidth <= 768 && 
+        e.target.id === 'asya-widget' && 
+        chat.classList.contains('open')) {
+      chat.classList.remove('open');
+      // Восстанавливаем обычное состояние виджета
+      document.getElementById('asya-widget').style.cssText = '';
+    }
+  });
+  
+  // Открытие чата на мобильных
+  icon.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      // На мобильных делаем фон полупрозрачным
+      document.getElementById('asya-widget').style.background = 'rgba(0, 0, 0, 0.5)';
+    }
+  });
+  
+  // Обработка закрытия кнопкой
+  document.getElementById('asya-close').addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      // Восстанавливаем обычное состояние виджета
+      document.getElementById('asya-widget').style.cssText = '';
+    }
+  });
+}
+
+// Вызовите эту функцию в конце DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+  // ... существующий код ...
+  
+  // Добавьте этот вызов в конец
+  initMobileFeatures();
+});
+
 </script>

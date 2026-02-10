@@ -1180,65 +1180,64 @@
     border-radius: 0 !important;
     margin: 0 !important;
     z-index: 10000;
-    transform: translateY(100%);
-    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transform: translateY(0) scale(1);
+    opacity: 0;
+    transition: opacity 0.3s ease;
   }
   
   .asya-chat.open {
-    display: flex;
-    transform: translateY(0);
+    display: flex !important;
+    opacity: 1 !important;
   }
   
   /* ХЕДЕР - ФИКСИРОВАННЫЙ СВЕРХУ */
   .chat-header {
-    position: fixed !important;
+    position: sticky !important;
     top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
     min-height: 70px;
     padding: 18px 16px;
-    z-index: 10002;
+    z-index: 10;
     border-radius: 0;
+    flex-shrink: 0;
   }
   
-  /* ТЕЛО ЧАТА - С ОТСТУПАМИ ПОД ХЕДЕР И НАД ПОЛЕМ ВВОДА */
+  /* ТЕЛО ЧАТА */
   .chat-body {
-    padding-top: 70px; /* Отступ под хедер */
-    padding-bottom: 90px; /* Отступ над полем ввода */
-    height: 100vh;
-    overflow: hidden;
     display: flex;
     flex-direction: column;
+    flex: 1;
+    height: calc(100vh - 70px - 80px); /* минус хедер и поле ввода */
+    overflow: hidden;
   }
   
-  /* КОНТЕЙНЕР СООБЩЕНИЙ - СКРОЛЛИТСЯ */
+  /* КОНТЕЙНЕР СООБЩЕНИЙ */
   #asya-messages {
     flex: 1;
-    padding: 20px 16px 10px 16px;
+    padding: 15px 16px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    height: calc(100vh - 160px); /* 70px хедер + 90px поле ввода */
     min-height: 0;
+    max-height: none;
   }
   
-  /* ПОЛЕ ВВОДА - ФИКСИРОВАННОЕ СНИЗУ */
+  /* ПОЛЕ ВВОДА - В НИЖНЕЙ ЧАСТИ ЭКРАНА */
   .chat-input {
-    position: fixed !important;
+    position: sticky !important;
     bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
     background: white;
     padding: 15px 16px;
     border-top: 2px solid rgba(255, 214, 231, 0.8);
-    z-index: 10002;
+    z-index: 10;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
   }
   
   /* КЛАВИАТУРА И КНОПКА ОТПРАВКИ */
   #asya-input {
     padding: 14px 18px;
     font-size: 16px;
-    height: 50px;
+    height: auto;
+    min-height: 50px;
   }
   
   #asya-send {
@@ -1278,20 +1277,14 @@
   @supports (padding: max(0px)) {
     .chat-header {
       padding-top: max(18px, env(safe-area-inset-top));
-      height: calc(70px + env(safe-area-inset-top));
-    }
-    
-    .chat-body {
-      padding-top: calc(70px + env(safe-area-inset-top));
-      padding-bottom: calc(90px + env(safe-area-inset-bottom));
     }
     
     .chat-input {
       padding-bottom: max(15px, env(safe-area-inset-bottom));
     }
     
-    #asya-messages {
-      height: calc(100vh - 160px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    .chat-body {
+      height: calc(100vh - 70px - 80px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     }
   }
   
@@ -1303,16 +1296,11 @@
     }
     
     .chat-body {
-      padding-top: 60px;
-      padding-bottom: 80px;
+      height: calc(100vh - 60px - 70px);
     }
     
     .chat-input {
       padding: 12px 16px;
-    }
-    
-    #asya-messages {
-      height: calc(100vh - 140px);
     }
     
     #asya-send {
@@ -1321,42 +1309,9 @@
     }
     
     @supports (padding: max(0px)) {
-      .chat-header {
-        height: calc(60px + env(safe-area-inset-top));
-      }
-      
       .chat-body {
-        padding-top: calc(60px + env(safe-area-inset-top));
-        padding-bottom: calc(80px + env(safe-area-inset-bottom));
+        height: calc(100vh - 60px - 70px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
       }
-      
-      #asya-messages {
-        height: calc(100vh - 140px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-      }
-    }
-  }
-  
-  /* ГОРИЗОНТАЛЬНАЯ ОРИЕНТАЦИЯ */
-  @media (orientation: landscape) {
-    .chat-header {
-      min-height: 60px;
-      padding: 12px 16px;
-    }
-    
-    .chat-body {
-      padding-top: 60px;
-      padding-bottom: 70px;
-    }
-    
-    #asya-messages {
-      height: calc(100vh - 130px);
-      padding: 10px 16px;
-    }
-    
-    .message {
-      max-width: 75%;
-      padding: 10px 14px;
-      margin-bottom: 8px;
     }
   }
 }

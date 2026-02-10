@@ -165,9 +165,10 @@
   width: 360px;
   height: 520px;
   background: linear-gradient(135deg,rgba(255,255,255,.95),rgba(255,249,252,.98));
-  border-radius: 24px;
+  border-radius: 24px;   /* ← ВЕРНУЛИ СКРУГЛЕНИЕ */
   box-shadow: 0 25px 50px rgba(0,0,0,.15);
   margin-bottom: 15px;
+  overflow: hidden;     /* ← КРИТИЧЕСКИ ВАЖНО для углов */
   transform: translateY(20px) scale(.95);
   opacity: 0;
   transition: .4s cubic-bezier(.175,.885,.32,1.275);
@@ -220,6 +221,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-height: 0;   /* ← чтобы сообщения не сжимали инпут */
   background: linear-gradient(180deg,#f8f9ff,#fff5f9);
 }
 
@@ -231,7 +233,6 @@
   flex-direction: column;
   gap: 15px;
 }
-
 /* ===== СООБЩЕНИЯ ===== */
 .message {
   padding: 14px 18px;
@@ -252,18 +253,21 @@
 
 /* ===== ВВОД ===== */
 .chat-input {
-  padding: 18px;
+  padding: 14px 16px;   /* ← нормальная высота */
   display: flex;
   gap: 12px;
   background: white;
   border-top: 1px solid #ffd6e7;
+  flex-shrink: 0;       /* ← НЕ даём сжиматься */
 }
 
 #asya-input {
   flex: 1;
-  padding: 14px 18px;
-  border-radius: 25px;
+  padding: 12px 16px;   /* ← ВОТ ЭТО решает "узкое поле" */
+  border-radius: 20px;
   border: 2px solid #ffd6e7;
+  font-size: 14px;
+  min-height: 42px;     /* ← КРИТИЧЕСКИ */
 }
 
 #asya-send {

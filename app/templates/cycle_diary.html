@@ -3213,10 +3213,11 @@
 
         const notes = document.getElementById('cycleNotes').value.trim();
 
-        if (selectedSymptoms.length === 0 && !notes) {
-            showToast('Выберите симптомы или добавьте заметку', 'error');
+            if (selectedSymptoms.length === 0 && !notes) {
+        if (!confirm('Сохранить пустую запись?')) {
             return;
         }
+    }
 
         const existingEntry = cycleData.find(entry => entry.date === dateStr);
         const flowIntensity = existingEntry ? (existingEntry.flow_intensity || 'none') : 'none';

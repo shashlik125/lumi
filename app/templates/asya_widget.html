@@ -1154,6 +1154,7 @@
     width: auto;
     height: auto;
     background: transparent;
+    z-index: 10000;
   }
   
   .asya-icon {
@@ -1170,7 +1171,7 @@
     display: none !important;
   }
   
-  /* ЧАТ - ПОЛНОЭКРАННЫЙ */
+  /* ЧАТ - ОТКРЫВАЕТСЯ НИЖЕ ХЕДЕРА ДАШБОРДА */
   .asya-chat {
     position: fixed !important;
     top: 0 !important;
@@ -1181,9 +1182,14 @@
     max-height: 100vh !important;
     border-radius: 0 !important;
     margin: 0 !important;
-    z-index: 10000;
+    z-index: 9999 !important;
     transform: translateY(100%);
     transition: transform 0.4s ease-out;
+    /* Отступ сверху для хедера дашборда */
+    padding-top: 60px !important;
+    /* Убираем тени чтобы не создавать иллюзию перекрытия */
+    box-shadow: none !important;
+    border: none !important;
   }
   
   .asya-chat.open {
@@ -1191,18 +1197,48 @@
     transform: translateY(0) !important;
   }
   
-  /* ХЕДЕР - ВИДИМЫЙ В ВЕРХНЕЙ ЧАСТИ */
+  /* ХЕДЕР АСИ - НЕ ФИКСИРОВАННЫЙ, А ВНУТРИ ЧАТА */
   .chat-header {
     position: sticky !important;
     top: 0 !important;
     min-height: 70px;
     padding: 18px 16px;
-    z-index: 10;
+    z-index: 10 !important;
     border-radius: 0;
     flex-shrink: 0;
+    /* Полупрозрачный фон чтобы было видно границу с хедером дашборда */
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9), rgba(118, 75, 162, 0.9)) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    margin-top: -60px !important;
     /* Безопасные зоны iPhone */
     padding-top: max(18px, env(safe-area-inset-top));
-    padding-top: max(18px, constant(safe-area-inset-top)); /* Для старых iOS */
+    padding-top: max(18px, constant(safe-area-inset-top));
+  }
+  
+  /* Граница между хедерами для лучшей видимости */
+  .chat-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+  }
+  
+  /* Если хедер дашборда выше 60px */
+  .has-tall-header .asya-chat {
+    padding-top: 80px !important;
+  }
+  
+  .has-tall-header .chat-header {
+    margin-top: -80px !important;
+  }
+  
+  .has-tall-header .chat-body {
+    height: calc(100vh - 80px) !important;
+    max-height: calc(100vh - 80px) !important;
   }
   
   /* ТЕЛО ЧАТА */
@@ -1215,14 +1251,17 @@
     /* Безопасные зоны */
     padding-top: env(safe-area-inset-top);
     padding-top: constant(safe-area-inset-top);
-    padding-bottom: calc(env(safe-area-inset-bottom) + 50px) !important; /* Дополнительный отступ */
+    padding-bottom: calc(env(safe-area-inset-bottom) + 50px) !important;
     padding-bottom: calc(constant(safe-area-inset-bottom) + 50px) !important;
+    /* Высота с учетом хедера дашборда */
+    height: calc(100vh - 60px) !important;
+    max-height: calc(100vh - 60px) !important;
   }
   
-  /* КОНТЕЙНЕР СООБЩЕНИЙ - ЗАНИМАЕТ ОСТАВШЕЕСЯ ПРОСТРАНСТВО */
+  /* КОНТЕЙНЕР СООБЩЕНИЙ */
   #asya-messages {
     flex: 1;
-    padding: 20px 16px 120px !important; /* УВЕЛИЧИЛ ОТСТУП СНИЗУ для поля ввода */
+    padding: 20px 16px 120px !important;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     min-height: 0;
@@ -1231,16 +1270,16 @@
     padding-top: max(20px, constant(safe-area-inset-top));
   }
   
-  /* ПОЛЕ ВВОДА - ФИКСИРОВАННОЕ ВНИЗУ */
+  /* ПОЛЕ ВВОДА */
   .chat-input {
-    position: fixed !important; /* Важно: fixed, а не absolute */
+    position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;
     right: 0 !important;
     background: white;
     padding: 15px 16px;
     border-top: 2px solid rgba(255, 214, 231, 0.8);
-    z-index: 10;
+    z-index: 100 !important;
     box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
     /* Безопасные зоны iPhone */
     padding-bottom: max(15px, env(safe-area-inset-bottom));
@@ -1309,11 +1348,11 @@
   
   /* Класс для iPhone с вырезом */
   .has-notch .chat-header {
-    padding-top: max(18px, 44px) !important; /* Высота статус-бара iPhone */
+    padding-top: max(18px, 44px) !important;
   }
   
   .has-notch .chat-input {
-    padding-bottom: max(15px, 34px) !important; /* Высота нижней панели iPhone */
+    padding-bottom: max(15px, 34px) !important;
   }
   
   /* Фикс для Safari на iPhone (скрываем панель URL) */
@@ -1335,6 +1374,35 @@
     }
   }
   
+  /* ДОПОЛНИТЕЛЬНЫЙ ФИКС ДЛЯ IPHONE */
+  @supports (-webkit-overflow-scrolling: touch) {
+    .asya-chat.open {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+    }
+    
+    .chat-body {
+      padding-bottom: calc(env(safe-area-inset-bottom) + 60px) !important;
+    }
+  }
+  
+  /* Фикс для нижней панели на iPhone */
+  @media (max-width: 768px) and (max-height: 900px) {
+    #asya-messages {
+      padding-bottom: 140px !important;
+    }
+    
+    .chat-input {
+      padding-bottom: calc(env(safe-area-inset-bottom) + 20px) !important;
+      padding-bottom: calc(constant(safe-area-inset-bottom) + 20px) !important;
+    }
+  }
+  
   /* ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ */
   @media (max-height: 600px) {
     .chat-header {
@@ -1351,35 +1419,31 @@
       height: 46px;
     }
   }
-}
-
-/* ====== ДОПОЛНИТЕЛЬНЫЕ ФИКСЫ ДЛЯ IPHONE ====== */
-/* Фикс для панели навигации Safari */
-@supports (-webkit-overflow-scrolling: touch) {
-  .asya-chat.open {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-  }
   
-  .chat-body {
-    padding-bottom: calc(env(safe-area-inset-bottom) + 60px) !important;
+  /* ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ ПО ШИРИНЕ */
+  @media (max-width: 360px) {
+    .asya-icon {
+      width: 60px;
+      height: 60px;
+    }
+    
+    #asya-input {
+      padding: 12px 16px;
+      font-size: 15px;
+    }
   }
 }
 
-/* Фикс для нижней панели на iPhone */
-@media (max-width: 768px) and (max-height: 900px) {
-  #asya-messages {
-    padding-bottom: 140px !important; /* Еще больше места для поля ввода */
+/* ====== ПЛАНШЕТЫ ====== */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .asya-chat {
+    width: 420px;
+    height: 600px;
   }
   
-  .chat-input {
-    padding-bottom: calc(env(safe-area-inset-bottom) + 20px) !important;
-    padding-bottom: calc(constant(safe-area-inset-bottom) + 20px) !important;
+  .asya-icon {
+    width: 65px;
+    height: 65px;
   }
 }
 
@@ -1857,167 +1921,140 @@ function initMobileFeatures() {
   if (window.innerWidth <= 768) {
     console.log('📱 Инициализация мобильных функций');
     
-    // Определяем iOS устройство
-    const isIOS = () => {
-      return /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-             (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    };
-    
-    // Определяем Safari
-    const isSafari = () => {
-      return /^((?!chrome|android).)*safari/i.test(navigator.userAgent) ||
-             navigator.userAgent.includes('Safari') && !navigator.userAgent.includes('Chrome');
-    };
+    const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     
     const iOS = isIOS();
-    const safari = isSafari();
     
-    if (iOS) {
-      console.log('📱 iOS устройство обнаружено');
-      document.body.classList.add('ios-device');
+    // === ОПРЕДЕЛЯЕМ ВЫСОТУ ХЕДЕРА ДАШБОРДА ===
+    function calculateDashboardHeaderHeight() {
+      const possibleHeaders = [
+        document.querySelector('header'),
+        document.querySelector('.header'),
+        document.querySelector('#header'),
+        document.querySelector('[class*="header"]'),
+        document.querySelector('[class*="Header"]'),
+        document.querySelector('nav'),
+        document.querySelector('.navbar'),
+        document.querySelector('.top-bar'),
+        document.querySelector('.app-bar')
+      ];
       
-      // Для Safari добавляем дополнительные фиксы
-      if (safari) {
-        document.body.classList.add('ios-safari');
-        console.log('🌐 Safari на iOS');
+      let maxHeight = 60;
+      
+      for (const header of possibleHeaders) {
+        if (header && header.offsetHeight > 0) {
+          const height = header.offsetHeight;
+          console.log('📊 Найден хедер:', header.tagName, header.className, 'высота:', height);
+          
+          if (height > maxHeight) {
+            maxHeight = height;
+          }
+        }
       }
+      
+      return maxHeight + 5;
     }
     
-    // Блокируем скролл страницы при открытом чате
+    // === ПРИМЕНЯЕМ ВЫСОТУ ХЕДЕРА ===
+    function applyDashboardHeaderHeight() {
+      const headerHeight = calculateDashboardHeaderHeight();
+      console.log('📱 Высота хедера дашборда:', headerHeight);
+      
+      if (chat) {
+        chat.style.paddingTop = headerHeight + 'px';
+        
+        if (headerHeight > 70) {
+          chat.classList.add('has-tall-header');
+        } else {
+          chat.classList.remove('has-tall-header');
+        }
+      }
+      
+      const asyaHeader = document.querySelector('.chat-header');
+      if (asyaHeader) {
+        asyaHeader.style.marginTop = '-' + headerHeight + 'px';
+      }
+      
+      const chatBody = document.querySelector('.chat-body');
+      if (chatBody) {
+        chatBody.style.height = 'calc(100vh - ' + headerHeight + 'px)';
+        chatBody.style.maxHeight = 'calc(100vh - ' + headerHeight + 'px)';
+      }
+      
+      return headerHeight;
+    }
+    
+    // === ИНИЦИАЛИЗАЦИЯ ===
+    let dashboardHeaderHeight = 60;
+    
+    // Переопределяем обработчик открытия
+    const originalIconClick = icon.onclick;
+    
+    icon.onclick = function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      
+      chat.classList.toggle('open');
+      
+      if (chat.classList.contains('open')) {
+        notificationBadge.style.display = 'none';
+        
+        // Вычисляем высоту хедера дашборда
+        dashboardHeaderHeight = applyDashboardHeaderHeight();
+        
+        setTimeout(() => {
+          setTimeout(() => {
+            messages.scrollTop = messages.scrollHeight;
+            
+            setTimeout(() => {
+              messages.scrollTop = messages.scrollHeight + 50;
+            }, 200);
+          }, 200);
+        }, 300);
+        
+      } else {
+        input.blur();
+      }
+    };
+    
+    // === ОБРАБОТКА ИЗМЕНЕНИЯ РАЗМЕРА ===
+    window.addEventListener('resize', () => {
+      if (chat.classList.contains('open')) {
+        setTimeout(() => {
+          applyDashboardHeaderHeight();
+          
+          setTimeout(() => {
+            messages.scrollTop = messages.scrollHeight;
+          }, 50);
+        }, 100);
+      }
+    });
+    
+    // === МУТАЦИИ DOM ===
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class') {
+        if (mutation.type === 'childList' || 
+            (mutation.type === 'attributes' && mutation.attributeName === 'style')) {
+          
           if (chat.classList.contains('open')) {
-            // Блокируем скролл основной страницы
-            document.body.style.overflow = 'hidden';
-            document.body.style.position = 'fixed';
-            document.body.style.width = '100%';
-            document.body.style.height = '100%';
-            
-            // На iOS Safari пытаемся скрыть панель навигации
-            if (iOS && safari) {
-              setTimeout(() => {
-                // Прокручиваем немного вниз и обратно чтобы скрыть панель
-                window.scrollTo(0, 0);
-                setTimeout(() => {
-                  window.scrollTo(0, 1);
-                }, 100);
-              }, 500);
-            }
-            
-            // Фокус на поле ввода с задержкой
             setTimeout(() => {
-              input.focus({preventScroll: true});
+              applyDashboardHeaderHeight();
               
-              // Прокручиваем сообщения вниз
               setTimeout(() => {
                 messages.scrollTop = messages.scrollHeight;
-                
-                // Дополнительно прокручиваем для iPhone
-                if (iOS) {
-                  setTimeout(() => {
-                    messages.scrollTop = messages.scrollHeight + 100;
-                  }, 300);
-                }
-              }, 300);
-            }, 600);
-            
-          } else {
-            // Разблокируем скролл
-            document.body.style.overflow = '';
-            document.body.style.position = '';
-            document.body.style.width = '';
-            document.body.style.height = '';
-            input.blur();
+              }, 100);
+            }, 300);
           }
         }
       });
     });
     
-    observer.observe(chat, { attributes: true });
-    
-    // === ОБРАБОТКА КЛАВИАТУРЫ ===
-    let originalViewportHeight = window.innerHeight;
-    
-    window.addEventListener('resize', () => {
-      if (!chat.classList.contains('open')) return;
-      
-      const newHeight = window.innerHeight;
-      const diff = originalViewportHeight - newHeight;
-      
-      if (diff > 200) {
-        // Клавиатура открылась
-        console.log('📱 Клавиатура открылась, прокручиваем...');
-        
-        setTimeout(() => {
-          // Увеличиваем отступ для сообщений
-          messages.style.paddingBottom = '180px';
-          
-          // Прокручиваем вниз
-          messages.scrollTop = messages.scrollHeight;
-          
-          // Дополнительный скролл для iOS
-          if (iOS) {
-            setTimeout(() => {
-              messages.scrollTop = messages.scrollHeight + 50;
-            }, 100);
-          }
-        }, 300);
-        
-      } else if (diff < -50) {
-        // Клавиатура закрылась
-        console.log('📱 Клавиатура закрылась');
-        messages.style.paddingBottom = '120px';
-        
-        setTimeout(() => {
-          messages.scrollTop = messages.scrollHeight;
-        }, 300);
-      }
-      
-      originalViewportHeight = newHeight;
-    });
-    
-    // Когда поле ввода получает фокус
-    input.addEventListener('focus', () => {
-      if (chat.classList.contains('open')) {
-        // Даем время клавиатуре открыться
-        setTimeout(() => {
-          messages.scrollTop = messages.scrollHeight;
-          
-          // Для iOS дополнительная прокрутка
-          if (iOS) {
-            setTimeout(() => {
-              messages.scrollTop = messages.scrollHeight + 80;
-            }, 200);
-          }
-        }, 400);
-      }
-    });
-    
-    // Когда поле ввода теряет фокус
-    input.addEventListener('blur', () => {
-      if (chat.classList.contains('open')) {
-        // Возвращаем нормальный отступ
-        messages.style.paddingBottom = '120px';
-        
-        setTimeout(() => {
-          messages.scrollTop = messages.scrollHeight;
-        }, 200);
-      }
-    });
-    
-    // Кнопка отправки - убираем фокус чтобы закрыть клавиатуру
-    sendBtn.addEventListener('click', () => {
-      // Задержка перед убиранием фокуса
-      setTimeout(() => {
-        input.blur();
-        
-        // Прокручиваем к последнему сообщению
-        setTimeout(() => {
-          messages.scrollTop = messages.scrollHeight;
-          messages.style.paddingBottom = '120px';
-        }, 200);
-      }, 100);
+    observer.observe(document.body, { 
+      childList: true, 
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class']
     });
     
     // === СВАЙП ДЛЯ ЗАКРЫТИЯ ===
@@ -2037,43 +2074,50 @@ function initMobileFeatures() {
       const diffY = currentY - startY;
       const diffX = currentX - startX;
       
-      // Если свайп вниз и горизонтальное движение небольшое
       if (diffY > 50 && Math.abs(diffX) < 50) {
         e.preventDefault();
-        
-        // Закрываем чат
         chat.classList.remove('open');
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.width = '';
-        document.body.style.height = '';
-        
-        // Убираем фокус
         input.blur();
       }
     }, { passive: false });
     
-    // === ФИКС ДЛЯ ИКОНКИ НА МОБИЛЬНЫХ ===
-    // Скрываем иконку когда открыта клавиатура
+    // === ПРЕДОТВРАЩАЕМ ПРОПАГАЦИЮ ===
+    chat.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+    
+    // === КЛАВИАТУРА ===
     input.addEventListener('focus', () => {
-      if (window.innerWidth <= 768) {
-        const icon = document.querySelector('.asya-icon');
-        if (icon) {
-          icon.style.display = 'none';
-        }
+      if (chat.classList.contains('open')) {
+        setTimeout(() => {
+          messages.scrollTop = messages.scrollHeight;
+        }, 400);
       }
     });
     
-    input.addEventListener('blur', () => {
-      if (window.innerWidth <= 768 && !chat.classList.contains('open')) {
-        const icon = document.querySelector('.asya-icon');
-        if (icon) {
-          icon.style.display = 'flex';
-        }
-      }
+    // Кнопка отправки
+    sendBtn.addEventListener('click', () => {
+      setTimeout(() => {
+        input.blur();
+        setTimeout(() => {
+          messages.scrollTop = messages.scrollHeight;
+        }, 200);
+      }, 100);
     });
+    
+    // === ДЛЯ iOS ===
+    if (iOS) {
+      document.body.classList.add('ios-device');
+      
+      // Фикс для выреза
+      const hasNotch = window.matchMedia("(display-mode: standalone)").matches || 
+                      ('standalone' in navigator && navigator.standalone);
+      
+      if (hasNotch) {
+        document.body.classList.add('has-notch');
+        console.log('📱 iPhone с вырезом обнаружен');
+      }
+    }
   }
 }
-
-
 </script>

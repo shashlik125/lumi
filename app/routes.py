@@ -1704,3 +1704,13 @@ def get_ai_insights():
             'error': 'Не удалось сгенерировать анализ',
             'insights': 'Продолжай отслеживать настроение, чтобы получить персональные рекомендации!'
         })
+        
+        
+@main.route('/health')
+def health_check():
+    """Маршрут для проверки здоровья приложения Railway"""
+    return jsonify({'status': 'healthy', 'service': 'Lumi'}), 200
+
+@main.route('/')
+def index():
+    return render_template('index.html')

@@ -1339,6 +1339,7 @@
 
 
 <script>
+
 document.addEventListener('DOMContentLoaded', () => {
   
   // === ВАЖНО: ЭТО ПРОВЕРКА РАБОТЫ ЧАТА ===
@@ -1602,88 +1603,94 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
   
-  // === МОБИЛЬНЫЕ ФУНКЦИИ ===
-function initMobileFeatures() {
-  if (window.innerWidth <= 768) {
-    // Блокируем скролл страницы при открытом чате
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class') {
-          if (chat.classList.contains('open')) {
-            document.body.style.overflow = 'hidden';
-            document.body.style.position = 'fixed';
-            document.body.style.width = '100%';
-            
-            // Фокус с задержкой (не сразу открываем клавиатуру)
-            setTimeout(() => {
-              input.focus();
-            }, 500);
-            
-            // Прокручиваем сообщения вниз
-            setTimeout(() => {
-              messages.scrollTop = messages.scrollHeight;
-            }, 100);
-          } else {
-            document.body.style.overflow = '';
-            document.body.style.position = '';
-            document.body.style.width = '';
-            input.blur(); // Убираем фокус при закрытии
-          }
-        }
-      });
-    });
+  // === ОБРАБОТЧИК ОТКРЫТИЯ/ЗАКРЫТИЯ ЧАТА ===
+  icon.addEventListener('click', (e) => {
+    e.stopPropagation();
+    chat.classList.toggle('open');
     
-    observer.observe(chat, { attributes: true });
-    
-    // Адаптация под клавиатуру
-    let originalHeight = window.innerHeight;
-    
-    window.addEventListener('resize', () => {
-      if (chat.classList.contains('open')) {
-        const newHeight = window.innerHeight;
-        const heightDiff = Math.abs(newHeight - originalHeight);
-        
-        if (heightDiff > 200) {
-          // Клавиатура открылась/закрылась
-          setTimeout(() => {
-            messages.scrollTop = messages.scrollHeight;
-          }, 300);
-        }
-        originalHeight = newHeight;
+    if (chat.classList.contains('open')) {
+      notificationBadge.style.display = 'none';
+      
+      // На мобильных фокус с задержкой
+      if (window.innerWidth <= 768) {
+        setTimeout(() => {
+          input.focus();
+        }, 500);
+      } else {
+        // На десктопе сразу фокус
+        setTimeout(() => {
+          input.focus();
+        }, 100);
       }
-    });
-    
-icon.addEventListener('click', (e) => {
-  e.stopPropagation();
-  chat.classList.toggle('open');
-  
-  if (chat.classList.contains('open')) {
-    notificationBadge.style.display = 'none';
-    
-    // На мобильных фокус с задержкой
-    if (window.innerWidth <= 768) {
+      
       setTimeout(() => {
-        input.focus();
-      }, 500);
-    } else {
-      // На десктопе сразу фокус
-      setTimeout(() => {
-        input.focus();
+        messages.scrollTop = messages.scrollHeight;
       }, 100);
+    } else {
+      // При закрытии убираем фокус на мобильных
+      if (window.innerWidth <= 768) {
+        input.blur();
+      }
     }
+  });
+  
+  closeBtn.addEventListener('click', () => {
+    chat.classList.remove('open');
     
-    setTimeout(() => {
-      messages.scrollTop = messages.scrollHeight;
-    }, 100);
-  } else {
-    // При закрытии убираем фокус
+    // На мобильных разблокируем скролл
     if (window.innerWidth <= 768) {
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
       input.blur();
     }
+    
+    typingIndicator.style.display = 'none';
+  });
+  
+  // === МОБИЛЬНЫЕ ФУНКЦИИ ===
+  function initMobileFeatures() {
+    if (window.innerWidth <= 768) {
+      console.log('📱 Инициализация мобильных функций');
+      
+      // Блокируем скролл страницы при открытом чате
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          if (mutation.attributeName === 'class') {
+            if (chat.classList.contains('open')) {
+              document.body.style.overflow = 'hidden';
+              document.body.style.position = 'fixed';
+              document.body.style.width = '100%';
+            } else {
+              document.body.style.overflow = '';
+              document.body.style.position = '';
+              document.body.style.width = '';
+            }
+          }
+        });
+      });
+      
+      observer.observe(chat, { attributes: true });
+      
+      // Адаптация под клавиатуру
+      let originalHeight = window.innerHeight;
+      
+      window.addEventListener('resize', () => {
+        if (chat.classList.contains('open')) {
+          const newHeight = window.innerHeight;
+          const heightDiff = Math.abs(newHeight - originalHeight);
+          
+          if (heightDiff > 200) {
+            // Клавиатура открылась/закрылась
+            setTimeout(() => {
+              messages.scrollTop = messages.scrollHeight;
+            }, 300);
+          }
+          originalHeight = newHeight;
+        }
+      });
+    }
   }
-});
-  }
-}
   
   // === ОТПРАВКА СООБЩЕНИЯ ===
   async function sendMessage() {
@@ -1794,7 +1801,6 @@ icon.addEventListener('click', (e) => {
     lastReply = reply;
 
     return reply;
-
   }
   
   // Обработчики отправки
@@ -1803,16 +1809,14 @@ icon.addEventListener('click', (e) => {
     if (e.key === 'Enter') sendMessage();
   });
   
-input.addEventListener('focus', () => {
-  if (window.innerWidth <= 768 && chat.classList.contains('open')) {
-    // На мобильных прокручиваем к полю ввода
-    setTimeout(() => {
-      messages.scrollTop = messages.scrollHeight;
-      // Мягкая прокрутка к полю ввода
-      input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 200);
-  }
-});
+  input.addEventListener('focus', () => {
+    if (window.innerWidth <= 768 && chat.classList.contains('open')) {
+      setTimeout(() => {
+        messages.scrollTop = messages.scrollHeight;
+        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 200);
+    }
+  });
   
   // === ДОБАВЛЕНИЕ СООБЩЕНИЯ ===
   function addMessage(text, sender, emotion = null, triggers = [], stressLevel = 0, save = true) {
@@ -1851,7 +1855,6 @@ input.addEventListener('focus', () => {
     
     if (save) saveChatHistory();
     
-    // Проверка работоспособности в консоли
     console.log(`💬 Добавлено сообщение: "${text.substring(0, 30)}..." от ${sender}`);
   }
   
@@ -1861,19 +1864,4 @@ input.addEventListener('focus', () => {
   console.log('🎉 Чат-бот Ася готов к работе!');
 });
 
-// === ОБРАБОТЧИК ЗАКРЫТИЯ ЧАТА ===
-closeBtn.addEventListener('click', () => {
-  chat.classList.remove('open');
-  
-  // На мобильных разблокируем скролл
-  if (window.innerWidth <= 768) {
-    document.body.style.overflow = '';
-    document.body.style.position = '';
-    document.body.style.width = '';
-    input.blur(); // Убираем фокус с поля ввода
-  }
-  
-  // Скрываем индикатор набора, если был виден
-  typingIndicator.style.display = 'none';
-});
 </script>

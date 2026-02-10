@@ -451,11 +451,8 @@
 
 </style>
 
-
 <script>
-
 document.addEventListener('DOMContentLoaded', () => {
-  
   console.log('🚀 Чат-бот Ася запускается...');
   
   const icon = document.getElementById('asya-icon');
@@ -467,12 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const typingIndicator = document.getElementById('typing-indicator');
   const notificationBadge = document.getElementById('notification-badge');
   const analyticsBtn = document.getElementById('asya-analytics');
-  const asyaIcon = document.querySelector('.asya-icon')
-  const asyaChat = document.querySelector('.asya-chat');
-
-asyaIcon.addEventListener('click', () => {
-  document.body.classList.toggle('asya-chat-open');
-});
+  
   let lastReply = '';
 
   if (!icon || !chat) {
@@ -482,7 +474,6 @@ asyaIcon.addEventListener('click', () => {
   
   console.log('✅ Все элементы найдены');
   
-
   // === ОСНОВНЫЕ ФУНКЦИИ ===
   function updateAnalyticsBadge() {
     const userMessages = document.querySelectorAll('.message.user-message');
@@ -491,152 +482,136 @@ asyaIcon.addEventListener('click', () => {
     }
   }
   
-function saveChatHistory() {
+  function saveChatHistory() {
     const messageElements = messages.querySelectorAll('.message.user-message, .message.asya-message');
     const history = Array.from(messageElements).map(el => ({
-        text: el.textContent,
-        sender: el.dataset.sender || (el.classList.contains('user-message') ? 'user' : 'asya'),
-        timestamp: el.dataset.time || new Date().toISOString()
+      text: el.textContent,
+      sender: el.dataset.sender || (el.classList.contains('user-message') ? 'user' : 'asya'),
+      timestamp: el.dataset.time || new Date().toISOString()
     }));
     
     localStorage.setItem('asya_chat_history', JSON.stringify(history));
     console.log('💾 История сохранена:', history.length, 'сообщений');
-}
+  }
   
-  
-function addMessage(text, sender, save = true) {
+  function addMessage(text, sender, save = true) {
     const div = document.createElement('div');
     div.className = `message ${sender}-message`;
     div.textContent = text;
-    
-    // Упрощаем - не храним эмоции/триггеры, так как анализ на сервере
     div.dataset.time = new Date().toISOString();
     div.dataset.sender = sender;
     
     messages.appendChild(div);
     
     setTimeout(() => {
-        messages.scrollTop = messages.scrollHeight;
+      messages.scrollTop = messages.scrollHeight;
     }, 50);
     
     if (save) saveChatHistory();
     
     console.log(`💬 ${sender === 'user' ? 'Вы' : 'Ася'}: "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}"`);
-}
+  }
   
-  
-async function sendMessage() {
+  async function sendMessage() {
     const text = input.value.trim();
     if (!text) return;
     
     console.log('📤 Отправка пользователя:', text);
     
-    // Добавляем сообщение пользователя
     addMessage(text, 'user');
     input.value = '';
     
-    // Показываем индикатор набора
     typingIndicator.style.display = 'flex';
     
     try {
-        // Отправляем запрос на ваш Flask сервер
-        const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                message: text
-            })
-        });
-        
-        console.log('📥 Статус ответа:', response.status);
-        
-        if (!response.ok) {
-            let errorText = '';
-            try {
-                const errorData = await response.json();
-                errorText = errorData.error || 'Unknown error';
-            } catch {
-                errorText = await response.text();
-            }
-            throw new Error(`HTTP ${response.status}: ${errorText}`);
-        }
-        
-        const data = await response.json();
-        
-        console.log('✅ Данные ответа:', {
-            success: data.success,
-            has_analysis: data.has_analysis,
-            reply_length: data.reply?.length || 0
-        });
-        
-        typingIndicator.style.display = 'none';
-        
-        if (data.success) {
-            addMessage(data.reply, 'asya');
-            console.log('🤖 Ответ от YandexGPT:', data.reply.substring(0, 100) + '...');
-        } else {
-            // Локальный ответ при ошибке сервера
-            const fallbackReplies = [
-                'Кажется, у меня временные технические сложности. Но я здесь для тебя! 🌸',
-                'Ой, что-то пошло не так. Попробуй сказать мне что-нибудь ещё? 💫',
-                'Извини, возникла небольшая проблема. Я все равно слушаю тебя! 🤗'
-            ];
-            const reply = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
-            addMessage(reply, 'asya');
-        }
-        
-    } catch (error) {
-        console.error('❌ Ошибка при отправке сообщения:', error);
-        typingIndicator.style.display = 'none';
-        
-        // Локальный ответ при ошибке сети
-        const networkReplies = [
-            'Кажется, проблемы с интернет-соединением. Проверь подключение! 🌐',
-            'Не могу подключиться к серверу. Убедись, что есть интернет! 📡',
-            'Ой, потеряно соединение. Попробуй перезагрузить страницу! 🔄'
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: text
+        })
+      });
+      
+      console.log('📥 Статус ответа:', response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      console.log('✅ Данные ответа:', {
+        success: data.success,
+        has_analysis: data.has_analysis,
+        reply_length: data.reply?.length || 0
+      });
+      
+      typingIndicator.style.display = 'none';
+      
+      if (data.success) {
+        addMessage(data.reply, 'asya');
+        console.log('🤖 Ответ от YandexGPT:', data.reply.substring(0, 100) + '...');
+      } else {
+        const fallbackReplies = [
+          'Кажется, у меня временные технические сложности. Но я здесь для тебя! 🌸',
+          'Ой, что-то пошло не так. Попробуй сказать мне что-нибудь ещё? 💫',
+          'Извини, возникла небольшая проблема. Я все равно слушаю тебя! 🤗'
         ];
-        
-        const reply = networkReplies[Math.floor(Math.random() * networkReplies.length)];
+        const reply = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
         addMessage(reply, 'asya');
+      }
+      
+    } catch (error) {
+      console.error('❌ Ошибка при отправке сообщения:', error);
+      typingIndicator.style.display = 'none';
+      
+      const networkReplies = [
+        'Кажется, проблемы с интернет-соединением. Проверь подключение! 🌐',
+        'Не могу подключиться к серверу. Убедись, что есть интернет! 📡',
+        'Ой, потеряно соединение. Попробуй перезагрузить страницу! 🔄'
+      ];
+      
+      const reply = networkReplies[Math.floor(Math.random() * networkReplies.length)];
+      addMessage(reply, 'asya');
     }
     
-    // Сохраняем историю
     saveChatHistory();
     updateAnalyticsBadge();
-}
-
-// === ИНИЦИАЛИЗАЦИЯ ===
-const chatHistory = JSON.parse(localStorage.getItem('asya_chat_history')) || [];
+  }
   
-if (chatHistory.length > 0) {
-  messages.innerHTML = '';
-  chatHistory.forEach(msg => {
-    // Упрощенная загрузка без эмоций/триггеров
-    addMessage(msg.text, msg.sender, false);
-  });
-  updateAnalyticsBadge();
-}
-  
-  console.log('✅ История чата загружена:', chatHistory.length, 'сообщений');
-  
-  // === ОБРАБОТЧИКИ СОБЫТИЙ ===
-  icon.addEventListener('click', (e) => {
-    e.stopPropagation();
+  // === ОБРАБОТЧИК ОТКРЫТИЯ/ЗАКРЫТИЯ ЧАТА ===
+  function toggleChat(e) {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+    
+    const wasOpen = chat.classList.contains('open');
     chat.classList.toggle('open');
     
-    if (chat.classList.contains('open')) {
+    if (!wasOpen) {
+      // Открытие чата
       notificationBadge.style.display = 'none';
       
       if (window.innerWidth <= 768) {
+        // На мобильных скрываем иконку и фиксируем body
+        icon.style.display = 'none';
+        icon.style.opacity = '0';
+        icon.style.visibility = 'hidden';
+        icon.style.pointerEvents = 'none';
+        document.body.classList.add('asya-chat-open');
+        
+        // Плавная фокусировка
         setTimeout(() => {
-          input.focus({preventScroll: false});
+          messages.scrollTop = messages.scrollHeight;
           setTimeout(() => {
-            messages.scrollTop = messages.scrollHeight;
-          }, 300);
-        }, 500);
+            input.focus({preventScroll: false});
+          }, 200);
+        }, 300);
       } else {
+        // На десктопе
         setTimeout(() => {
           input.focus();
           messages.scrollTop = messages.scrollHeight;
@@ -644,23 +619,52 @@ if (chatHistory.length > 0) {
       }
       
     } else {
+      // Закрытие чата
       if (window.innerWidth <= 768) {
+        // На мобильных показываем иконку обратно
         input.blur();
+        setTimeout(() => {
+          icon.style.display = 'flex';
+          icon.style.opacity = '1';
+          icon.style.visibility = 'visible';
+          icon.style.pointerEvents = 'all';
+          document.body.classList.remove('asya-chat-open');
+        }, 300);
       }
     }
-  });
+  }
   
-  closeBtn.addEventListener('click', () => {
+  // === ИНИЦИАЛИЗАЦИЯ ИСТОРИИ ===
+  const chatHistory = JSON.parse(localStorage.getItem('asya_chat_history')) || [];
+  
+  if (chatHistory.length > 0) {
+    messages.innerHTML = '';
+    chatHistory.forEach(msg => {
+      addMessage(msg.text, msg.sender, false);
+    });
+    updateAnalyticsBadge();
+  }
+  
+  console.log('✅ История чата загружена:', chatHistory.length, 'сообщений');
+  
+  // === ОБРАБОТЧИКИ СОБЫТИЙ ===
+  icon.addEventListener('click', toggleChat);
+  
+  closeBtn.addEventListener('click', (e) => {
     chat.classList.remove('open');
+    typingIndicator.style.display = 'none';
     
     if (window.innerWidth <= 768) {
-      document.body.style.overflow = '';
-      document.body.style.position = '';
-      document.body.style.width = '';
       input.blur();
+      // Показываем иконку
+      setTimeout(() => {
+        icon.style.display = 'flex';
+        icon.style.opacity = '1';
+        icon.style.visibility = 'visible';
+        icon.style.pointerEvents = 'all';
+        document.body.classList.remove('asya-chat-open');
+      }, 300);
     }
-    
-    typingIndicator.style.display = 'none';
   });
   
   sendBtn.addEventListener('click', sendMessage);
@@ -673,164 +677,95 @@ if (chatHistory.length > 0) {
     if (window.innerWidth <= 768 && chat.classList.contains('open')) {
       setTimeout(() => {
         messages.scrollTop = messages.scrollHeight;
-        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }, 200);
     }
   });
   
   // === АНАЛИТИКА ===
-  analyticsBtn.addEventListener('click',  async () => {
-     try {
-        // Получаем анализ с сервера
-        const response = await fetch('/api/ai_insights');
-        const data = await response.json();
+  analyticsBtn.addEventListener('click', async () => {
+    try {
+      const response = await fetch('/api/ai_insights');
+      const data = await response.json();
+      
+      if (data.success) {
+        const analysisDiv = document.createElement('div');
+        analysisDiv.className = 'message analysis-message';
+        analysisDiv.innerHTML = `
+          <strong>📊 AI-Анализ ваших данных</strong><br><br>
+          <strong>📈 Статистика настроения:</strong><br>
+          • Среднее настроение: ${data.stats_summary.avg_mood}/10<br>
+          • Общий балл: ${data.stats_summary.mood_score}/100<br>
+          • Тренд: ${data.stats_summary.trend === 'improving' ? 'Улучшение 📈' : data.stats_summary.trend === 'declining' ? 'Снижение 📉' : 'Стабильно 📊'}<br>
+          • Хороших дней: ${data.stats_summary.good_days}<br>
+          • Всего записей: ${data.stats_summary.total_entries}<br><br>
+          <strong>💡 AI-Рекомендации:</strong><br>
+          ${data.insights.replace(/\n/g, '<br>• ')}<br><br>
+          <em>Анализ сгенерирован с помощью YandexGPT</em>
+        `;
         
-        if (data.success) {
-            const analysisDiv = document.createElement('div');
-            analysisDiv.className = 'message analysis-message';
-            analysisDiv.innerHTML = `
-                <strong>📊 AI-Анализ ваших данных</strong><br><br>
-                <strong>📈 Статистика настроения:</strong><br>
-                • Среднее настроение: ${data.stats_summary.avg_mood}/10<br>
-                • Общий балл: ${data.stats_summary.mood_score}/100<br>
-                • Тренд: ${data.stats_summary.trend === 'improving' ? 'Улучшение 📈' : data.stats_summary.trend === 'declining' ? 'Снижение 📉' : 'Стабильно 📊'}<br>
-                • Хороших дней: ${data.stats_summary.good_days}<br>
-                • Всего записей: ${data.stats_summary.total_entries}<br><br>
-                <strong>💡 AI-Рекомендации:</strong><br>
-                ${data.insights.replace(/\n/g, '<br>• ')}<br><br>
-                <em>Анализ сгенерирован с помощью YandexGPT</em>
-            `;
-            
-            messages.appendChild(analysisDiv);
-            setTimeout(() => {
-                messages.scrollTop = messages.scrollHeight;
-            }, 100);
-        } else {
-            addMessage('Пока недостаточно данных для анализа. Заполни календарь настроения! 📅', 'asya');
-        }
+        messages.appendChild(analysisDiv);
+        setTimeout(() => {
+          messages.scrollTop = messages.scrollHeight;
+        }, 100);
+      } else {
+        addMessage('Пока недостаточно данных для анализа. Заполни календарь настроения! 📅', 'asya');
+      }
     } catch (error) {
-        console.error('Ошибка получения анализа:', error);
-        addMessage('Не удалось получить анализ. Попробуй позже! 🔄', 'asya');
+      console.error('Ошибка получения анализа:', error);
+      addMessage('Не удалось получить анализ. Попробуй позже! 🔄', 'asya');
     }
   });
   
-  // === ЗАПУСК ===
+  // === МОБИЛЬНЫЕ ОСОБЕННОСТИ ===
+  function initMobileFeatures() {
+    if (window.innerWidth <= 768) {
+      console.log('📱 Инициализация мобильных функций');
+      
+      // Свайп для закрытия
+      let startY = 0;
+      
+      chat.addEventListener('touchstart', (e) => {
+        startY = e.touches[0].clientY;
+      }, { passive: true });
+      
+      chat.addEventListener('touchmove', (e) => {
+        if (!chat.classList.contains('open')) return;
+        
+        const currentY = e.touches[0].clientY;
+        const diffY = currentY - startY;
+        
+        if (diffY > 50) {
+          e.preventDefault();
+          chat.classList.remove('open');
+          typingIndicator.style.display = 'none';
+          
+          // Показываем иконку
+          setTimeout(() => {
+            icon.style.display = 'flex';
+            icon.style.opacity = '1';
+            icon.style.visibility = 'visible';
+            icon.style.pointerEvents = 'all';
+            document.body.classList.remove('asya-chat-open');
+            input.blur();
+          }, 300);
+        }
+      }, { passive: false });
+      
+      // Убедимся, что при загрузке иконка видна
+      if (!chat.classList.contains('open')) {
+        setTimeout(() => {
+          icon.style.display = 'flex';
+          icon.style.opacity = '1';
+          icon.style.visibility = 'visible';
+          icon.style.pointerEvents = 'all';
+        }, 100);
+      }
+    }
+  }
+  
+  // Инициализация
   initMobileFeatures();
   
   console.log('🎉 Чат-бот Ася готов к работе!');
 });
-
-
-// === МОБИЛЬНЫЕ ФУНКЦИИ ===
-function initMobileFeatures() {
-  if (window.innerWidth <= 768) {
-    console.log('📱 Инициализация мобильных функций');
-    
-    // === ФУНКЦИЯ ДЛЯ СКРЫТИЯ ИКОНКИ ===
-    const hideAsyaIcon = () => {
-      const asyaIcon = document.querySelector('.asya-icon');
-      if (asyaIcon) {
-        console.log('👁️ Скрываем иконку Аси');
-        asyaIcon.style.display = 'none';
-        asyaIcon.style.opacity = '0';
-        asyaIcon.style.visibility = 'hidden';
-        asyaIcon.style.pointerEvents = 'none';
-      }
-      // Добавляем класс к body для CSS
-      document.body.classList.add('asya-chat-open');
-    };
-    
-    // === ФУНКЦИЯ ДЛЯ ПОКАЗА ИКОНКИ ===
-    const showAsyaIcon = () => {
-      const asyaIcon = document.querySelector('.asya-icon');
-      if (asyaIcon) {
-        console.log('👁️ Показываем иконку Аси');
-        setTimeout(() => {
-          asyaIcon.style.display = 'flex';
-          asyaIcon.style.opacity = '1';
-          asyaIcon.style.visibility = 'visible';
-          asyaIcon.style.pointerEvents = 'all';
-        }, 400); // После анимации закрытия
-      }
-      // Убираем класс с body
-      document.body.classList.remove('asya-chat-open');
-    };
-    
-    // Перехватываем обработчик открытия/закрытия
-    const originalIconClick = icon.onclick;
-    
-    icon.onclick = function(e) {
-      e.stopPropagation();
-      e.preventDefault();
-      
-      chat.classList.toggle('open');
-      
-      if (chat.classList.contains('open')) {
-        notificationBadge.style.display = 'none';
-        hideAsyaIcon(); // Скрываем иконку
-        
-        // Остальная логика...
-        setTimeout(() => {
-          messages.scrollTop = messages.scrollHeight;
-        }, 300);
-        
-      } else {
-        showAsyaIcon(); // Показываем иконку
-        input.blur();
-      }
-    };
-    
-    // === ДОПОЛНИТЕЛЬНАЯ ГАРАНТИЯ ===
-    // Наблюдаем за изменениями класса чата
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.attributeName === 'class') {
-          if (chat.classList.contains('open')) {
-            hideAsyaIcon();
-          } else {
-            showAsyaIcon();
-          }
-        }
-      });
-    });
-    
-    observer.observe(chat, { attributes: true });
-    
-    // === КНОПКА ЗАКРЫТИЯ ===
-    closeBtn.addEventListener('click', () => {
-      chat.classList.remove('open');
-      showAsyaIcon();
-      input.blur();
-    });
-    
-    // === СВАЙП ДЛЯ ЗАКРЫТИЯ ===
-    let startY = 0;
-    
-    chat.addEventListener('touchstart', (e) => {
-      startY = e.touches[0].clientY;
-    }, { passive: true });
-    
-    chat.addEventListener('touchmove', (e) => {
-      if (!chat.classList.contains('open')) return;
-      
-      const currentY = e.touches[0].clientY;
-      const diffY = currentY - startY;
-      
-      if (diffY > 50) {
-        e.preventDefault();
-        chat.classList.remove('open');
-        showAsyaIcon();
-        input.blur();
-      }
-    }, { passive: false });
-    
-    // Инициализация при загрузке
-    setTimeout(() => {
-      // Убедимся что иконка видна если чат закрыт
-      if (!chat.classList.contains('open')) {
-        showAsyaIcon();
-      }
-    }, 100);
-  }
-}
 </script>

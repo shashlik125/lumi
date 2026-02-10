@@ -1530,7 +1530,7 @@ def cycle_predictions(conn):
 @main.route('/api/chat', methods=['POST'])
 @login_required
 def chat_with_asya():
-    """ChatGPT чат-бот 'Ася' с использованием DeepSeek API и умным анализом данных"""
+    """Чат-бот 'Ася' с использованием YandexGPT API и умным анализом данных"""
     try:
         data = request.get_json()
         user_message = data.get('message', '').strip()
@@ -1538,11 +1538,14 @@ def chat_with_asya():
         
         # ВАЖНО: ДОБАВЬТЕ ЭТУ ОТЛАДКУ
         print("=== CHAT WITH ASYA DEBUG ===")
-        api_key = os.environ.get('DEEPSEEK_API_KEY')
-        print(f"🔑 DEEPSEEK_API_KEY exists: {bool(api_key)}")
-        print(f"🔑 DEEPSEEK_API_KEY length: {len(api_key) if api_key else 0}")
+        api_key = os.environ.get('YANDEX_API_KEY')
+        folder_id = os.environ.get('YANDEX_FOLDER_ID')
+        print(f"🔑 YANDEX_API_KEY exists: {bool(api_key)}")
+        print(f"📁 YANDEX_FOLDER_ID exists: {bool(folder_id)}")
+        print(f"🔑 YANDEX_API_KEY length: {len(api_key) if api_key else 0}")
+        print(f"📁 YANDEX_FOLDER_ID: {folder_id if folder_id else 'Not found'}")
         if api_key:
-            print(f"🔑 DEEPSEEK_API_KEY first 10: {api_key[:10]}...")
+            print(f"🔑 YANDEX_API_KEY first 10: {api_key[:10]}...")
         print("=============================")
         
         if not user_message:
@@ -1562,11 +1565,12 @@ def chat_with_asya():
         finally:
             close_db(conn)
         
-        # ШАГ 2: Получаем API ключ из .env
-        api_key = os.environ.get('DEEPSEEK_API_KEY')
+        # ШАГ 2: Получаем API ключи для YandexGPT
+        api_key = os.environ.get('YANDEX_API_KEY')
+        folder_id = os.environ.get('YANDEX_FOLDER_ID')
         
-        if not api_key:
-            # Если нет API ключа - локальные ответы с анализом
+        if not api_key or not folder_id:
+            # Если нет ключей - локальные ответы с анализом
             fallback_response = get_fallback_response(user_message)
             
             # ВАЖНОЕ ИСПРАВЛЕНИЕ: Правильно соединяем ответ и анализ
@@ -1592,8 +1596,7 @@ def chat_with_asya():
             })
         
         # ШАГ 3: Создаем промпт для психологического помощника с анализом
-        prompt = f"""
-Ты - Ася, виртуальный помощник в приложении для отслеживания настроения и ментального здоровья "Lumi".
+        prompt = f"""Ты - Ася, виртуальный помощник в приложении для отслеживания настроения и ментального здоровья "Lumi".
 
 Твоя роль:
 1. Эмпатичный, поддерживающий психологический помощник
@@ -1614,27 +1617,31 @@ def chat_with_asya():
 
 Запрос пользователя: "{user_message}"
 
-Твой ответ (максимум 2 предложения):
-"""
+Твой ответ (максимум 2 предложения):"""
         
-        # ШАГ 4: Отправляем запрос в DeepSeek API
+        # ШАГ 4: Отправляем запрос в YandexGPT API
         headers = {
-            'Authorization': f'Bearer {api_key}',
+            'Authorization': f'Api-Key {api_key}',
             'Content-Type': 'application/json'
         }
         
         payload = {
-            'model': 'deepseek-chat',
-            'messages': [
-                {'role': 'user', 'content': prompt}
-            ],
-            'max_tokens': 200,
-            'temperature': 0.7,
-            'stream': False
+            "modelUri": f"gpt://{folder_id}/yandexgpt-lite",
+            "completionOptions": {
+                "stream": False,
+                "temperature": 0.7,
+                "maxTokens": 200
+            },
+            "messages": [
+                {
+                    "role": "user",
+                    "text": prompt
+                }
+            ]
         }
         
         response = requests.post(
-            'https://api.deepseek.com/chat/completions',
+            'https://llm.api.cloud.yandex.net/foundationModels/v1/completion',
             headers=headers,
             json=payload,
             timeout=15
@@ -1642,7 +1649,8 @@ def chat_with_asya():
         
         if response.status_code == 200:
             data = response.json()
-            reply = data['choices'][0]['message']['content'].strip()
+            # YandexGPT возвращает ответ в другом формате
+            reply = data['result']['alternatives'][0]['message']['text'].strip()
             
             return jsonify({
                 'reply': reply,
@@ -1651,7 +1659,7 @@ def chat_with_asya():
             })
         else:
             # Если API ошибка - локальный ответ с анализом
-            current_app.logger.error(f"DeepSeek API error: {response.status_code}")
+            current_app.logger.error(f"YandexGPT API error: {response.status_code}, response: {response.text}")
             fallback_response = get_fallback_response(user_message)
             
             # Правильно соединяем ответ и анализ
@@ -1720,4 +1728,3 @@ def get_ai_insights():
 def health_check():
     """Маршрут для проверки здоровья приложения Railway"""
     return jsonify({'status': 'healthy', 'service': 'Lumi'}), 200
-

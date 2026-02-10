@@ -482,25 +482,6 @@ asyaIcon.addEventListener('click', () => {
   
   console.log('✅ Все элементы найдены');
 
-  // === СЛОВАРИ ДЛЯ АНАЛИЗА ===
-  const STRESS_TRIGGERS = {
-    'учебный стресс': ['сессия', 'экзамен', 'зачёт', 'дедлайн', 'универ', 'учёба', 'лекция', 'преподаватель', 'задание'],
-    'рабочий стресс': ['проект', 'начальник', 'коллеги', 'зарплата', 'работа', 'офис', 'отчёт', 'собрание'],
-    'отношения': ['друг', 'подруга', 'парень', 'девушка', 'ссора', 'обида', 'конфликт', 'непонимание'],
-    'усталость': ['устал', 'устала', 'нет сил', 'выгорание', 'переутомление', 'измотан', 'не высыпаюсь'],
-    'тревога': ['волнуюсь', 'страх', 'боюсь', 'тревожно', 'паника', 'опасение', 'переживаю'],
-    'финансы': ['деньги', 'бюджет', 'платёж', 'дорого', 'экономить', 'зарплата'],
-    'здоровье': ['болит', 'врач', 'больница', 'симптом', 'усталость', 'недомогание']
-  };
-  
-  const EMOTION_PATTERNS = {
-    'sad': ['грустно', 'плохо', 'тоск', 'печал', 'несчаст', 'плач', 'слёз', 'одинок'],
-    'happy': ['рад', 'радость', 'счастлив', 'отлично', 'прекрасно', 'хорошо', 'ура', 'восторг'],
-    'angry': ['злюсь', 'зло', 'раздраж', 'бесит', 'ненавижу', 'гнев', 'ярость', 'возмущён'],
-    'anxious': ['тревож', 'страх', 'боюсь', 'опасен', 'волнуюсь', 'нервничаю', 'переживаю', 'паник'],
-    'neutral': []
-  };
-
   // === ВАЖНАЯ ФУНКЦИЯ: ПОЛУЧЕНИЕ ДАННЫХ ИЗ MOOD_ENTRIES ===
   function getMoodEntries() {
     const possibleKeys = ['mood_entries', 'moodEntries', 'moodData', 'mood_records'];
@@ -531,139 +512,8 @@ asyaIcon.addEventListener('click', () => {
     return demoData;
   }
 
-  // === АНАЛИЗ СООБЩЕНИЯ С ИНТЕГРАЦИЕЙ НАСТРОЕНИЯ ===
-  function analyzeMessageWithMood(text, moodEntries) {
-    const lowerText = text.toLowerCase();
-    const result = {
-      emotion: 'neutral',
-      triggers: [],
-      stressLevel: 0,
-      moodDiscrepancy: null,
-      containsMoodScore: false
-    };
-    
-    const moodMatch = text.match(/(\d+)\s*\/\s*10|(\d+)\s*из\s*10|оцен[каю]\s*(\d+)/i);
-    if (moodMatch) {
-      const score = parseInt(moodMatch[1] || moodMatch[2] || moodMatch[3]);
-      if (score >= 1 && score <= 10) {
-        result.containsMoodScore = true;
-        result.moodScore = score;
-        
-        if (moodEntries.length > 0) {
-          const latestMood = moodEntries[0].mood_value;
-          result.moodDiscrepancy = Math.abs(score - latestMood);
-          
-          if (result.moodDiscrepancy >= 3) {
-            result.triggerNote = `Заметно расхождение: в чате ${score}/10, в дневнике ${latestMood}/10`;
-          }
-        }
-      }
-    }
-    
-    for (const [emotion, patterns] of Object.entries(EMOTION_PATTERNS)) {
-      if (patterns.some(pattern => lowerText.includes(pattern))) {
-        result.emotion = emotion;
-        break;
-      }
-    }
-    
-    for (const [category, keywords] of Object.entries(STRESS_TRIGGERS)) {
-      if (keywords.some(keyword => lowerText.includes(keyword))) {
-        result.triggers.push(category);
-        result.stressLevel++;
-      }
-    }
-    
-    result.stressLevel = Math.min(10, result.stressLevel * 2);
-    
-    return result;
-  }
-
-  // === ГЕНЕРАЦИЯ ОБЪЕДИНЁННОГО АНАЛИЗА ===
-  function generateUnifiedAnalysis() {
-    const chatHistory = JSON.parse(localStorage.getItem('asya_chat_history') || '[]');
-    const moodEntries = getMoodEntries();
-    
-    console.log('📊 Генерация объединённого анализа...');
-    
-    const chatStats = {
-      totalMessages: chatHistory.filter(m => m.sender === 'user').length,
-      emotions: {},
-      triggers: {},
-      stressLevels: []
-    };
-    
-    chatHistory.filter(m => m.sender === 'user').forEach(msg => {
-      const emotion = msg.emotion || 'neutral';
-      chatStats.emotions[emotion] = (chatStats.emotions[emotion] || 0) + 1;
-      
-      const triggers = msg.triggers || [];
-      triggers.forEach(t => {
-        chatStats.triggers[t] = (chatStats.triggers[t] || 0) + 1;
-      });
-      
-      if (msg.stressLevel) {
-        chatStats.stressLevels.push(msg.stressLevel);
-      }
-    });
-    
-    const moodStats = {
-      totalEntries: moodEntries.length,
-      averageMood: moodEntries.length > 0 
-        ? Math.round(moodEntries.reduce((sum, m) => sum + m.mood_value, 0) / moodEntries.length * 10) / 10
-        : 0,
-      bestDay: moodEntries.length > 0 
-        ? moodEntries.reduce((best, m) => m.mood_value > best.mood_value ? m : best)
-        : null,
-      worstDay: moodEntries.length > 0 
-        ? moodEntries.reduce((worst, m) => m.mood_value < worst.mood_value ? m : worst)
-        : null
-    };
-    
-    const topEmotion = Object.keys(chatStats.emotions).length > 0
-      ? Object.keys(chatStats.emotions).reduce((a, b) => chatStats.emotions[a] > chatStats.emotions[b] ? a : b)
-      : 'не определена';
-    
-    const topTriggers = Object.keys(chatStats.triggers)
-      .sort((a, b) => chatStats.triggers[b] - chatStats.triggers[a])
-      .slice(0, 3);
-    
-    const avgStress = chatStats.stressLevels.length > 0 
-      ? Math.round(chatStats.stressLevels.reduce((a, b) => a + b, 0) / chatStats.stressLevels.length)
-      : 0;
-    
-    let recommendations = [];
-    
-    if (moodStats.averageMood < 5) {
-      recommendations.push('Среднее настроение ниже 5/10. Рекомендуется добавить приятные активности в ежедневный график.');
-    }
-    
-    if (avgStress >= 7) {
-      recommendations.push('Высокий уровень стресса. Попробуйте техники дыхания или короткие перерывы каждые 2 часа.');
-    }
-    
-    if (topTriggers.includes('учебный стресс')) {
-      recommendations.push('Частый учебный стресс. Разбивайте большие задачи на мелкие этапы.');
-    }
-    
-    if (topTriggers.includes('усталость')) {
-      recommendations.push('Признаки усталости. Проверьте режим сна и отдыха.');
-    }
-    
-    if (recommendations.length === 0) {
-      recommendations.push('Состояние стабильное. Продолжайте отслеживать своё самочувствие.');
-    }
-    
-    return {
-      chatStats,
-      moodStats,
-      topEmotion,
-      topTriggers,
-      avgStress,
-      recommendations,
-      dataSource: `Данные: чат (${chatStats.totalMessages} сообщ.), настроение (${moodStats.totalEntries} записей)`
-    };
-  }
+  
+  
 
   // === ОСНОВНЫЕ ФУНКЦИИ ===
   function updateAnalyticsBadge() {
@@ -711,48 +561,6 @@ function addMessage(text, sender, save = true) {
     console.log(`💬 ${sender === 'user' ? 'Вы' : 'Ася'}: "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}"`);
 }
   
-  function generateSmartReply(text, analysis, moodEntries) {
-    const lowerText = text.toLowerCase();
-    
-    if (analysis.moodDiscrepancy && analysis.moodDiscrepancy >= 3) {
-      return `Заметил, что ты говоришь о настроении ${analysis.moodScore}/10, хотя в дневнике была другая оценка. Интересно, что изменилось? 🤔`;
-    }
-    
-    if (analysis.stressLevel >= 6) {
-      const stressTips = [
-        'Попробуй сделать глубокий вдох и медленный выдох. Помогает снизить напряжение.',
-        'Иногда полезно отвлечься на 5 минут. Может, короткая прогулка?',
-        'Ты уже делал перерыв сегодня? 5-10 минут отдыха могут творить чудеса.'
-      ];
-      return `Похоже, есть напряжение (${analysis.stressLevel}/10). ${stressTips[Math.floor(Math.random() * stressTips.length)]}`;
-    }
-    
-    if (analysis.triggers.includes('усталость')) {
-      return 'Усталость накапливается постепенно. Как твой сон в последнее время? 💤';
-    }
-    
-    if (analysis.emotion === 'happy' || (analysis.moodScore && analysis.moodScore >= 8)) {
-      return 'Рад слышать, что у тебя хорошее настроение! Что больше всего порадовало сегодня? 😊';
-    }
-    
-    const replies = [
-      'Спасибо, что поделился. Хочешь рассказать подробнее?',
-      'Понимаю. Как это повлияло на твой день?',
-      'Интересно. Что ты думаешь об этой ситуации?',
-      'Спасибо за доверие. Я здесь, чтобы выслушать.',
-      'Каждый день — это новый опыт. Что бы ты хотел изменить?'
-    ];
-    
-    let reply;
-
-    do {
-      reply = replies[Math.floor(Math.random() * replies.length)];
-    } while (reply === lastReply);
-
-    lastReply = reply;
-
-    return reply;
-  }
   
 async function sendMessage() {
     const text = input.value.trim();

@@ -2209,7 +2209,7 @@ def analyze_notes(user_id, user_message):
 - Сложных дней с заметками (4-/10): {notes_stats['challenging_notes'] or 0}
 
 ПОСЛЕДНИЕ ЗАМЕТКИ (первые 10):
-{chr(10).join([f"• {note['date']}: Настроение {note['mood']}/10 - \"{note['note']}\"" for note in all_notes[:10]])}
+{chr(10).join(['• {}: Настроение {}/10 - "{}"'.format(note['date'], note['mood'], str(note.get('note', '')).replace('"', "'")) for note in all_notes[:10]])}
 
 ПРОАНАЛИЗИРУЙ И ДАЙ ОТВЕТ:
 1. Какие основные темы в заметках пользователя?

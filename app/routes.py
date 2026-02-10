@@ -1711,6 +1711,3 @@ def health_check():
     """Маршрут для проверки здоровья приложения Railway"""
     return jsonify({'status': 'healthy', 'service': 'Lumi'}), 200
 
-@main.route('/')
-def index():
-    return render_template('index.html')

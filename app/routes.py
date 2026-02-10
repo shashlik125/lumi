@@ -1535,6 +1535,7 @@ def chat_with_asya():
         data = request.get_json()
         user_message = data.get('message', '').strip()
         
+        
         # ВАЖНО: ДОБАВЬТЕ ЭТУ ОТЛАДКУ
         print("=== CHAT WITH ASYA DEBUG ===")
         api_key = os.environ.get('DEEPSEEK_API_KEY')

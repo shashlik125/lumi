@@ -17,49 +17,46 @@ login_manager.login_message_category = 'info'
 def get_db():
     """Получение нового соединения с базой данных"""
     try:
-        # ДОБАВЛЯЕМ ОТЛАДКУ
         mysql_url = os.getenv('MYSQL_URL')
         print(f"🔄 DEBUG: MYSQL_URL = {mysql_url}")
         
-        # ВАЖНО: проверяем, что URL не пустой
         if mysql_url and mysql_url.strip() and mysql_url != 'mysql://':
             print("✅ DEBUG: MYSQL_URL найден, парсим...")
             
-            # Для Railway MySQL
             from urllib.parse import urlparse
             parsed = urlparse(mysql_url)
             
             print(f"🔄 DEBUG parsed: scheme={parsed.scheme}, hostname={parsed.hostname}, username={parsed.username}, path={parsed.path}, port={parsed.port}")
             
-            # Извлекаем параметры подключения
             hostname = parsed.hostname
             username = parsed.username or 'root'
             password = parsed.password or ''
             
-            # Обрабатываем путь к базе данных
             database = parsed.path
             if database.startswith('/'):
-                database = database[1:]  # Убираем ведущий слэш
+                database = database[1:]
             if not database:
-                database = 'railway'  # Значение по умолчанию
+                database = 'railway'
                 
             port = parsed.port or 3306
             
             print(f"🔄 DEBUG подключение: host={hostname}, user={username}, db={database}, port={port}")
             
+            # ✅ ГЛАВНОЕ ИЗМЕНЕНИЕ - ДОБАВЛЕН ТАЙМАУТ!
             conn = mysql.connector.connect(
                 host=hostname,
                 user=username,
                 password=password,
                 database=database,
                 port=port,
-                autocommit=True
+                autocommit=True,
+                connection_timeout=5,  # 👈 5 секунд таймаут!
+                pool_size=1
             )
             print(f"✅ Подключено к Railway MySQL: {hostname}")
             return conn
             
         else:
-            # Если нет MYSQL_URL, пробуем отдельные переменные
             print("⚠ DEBUG: MYSQL_URL не найден, проверяем отдельные переменные...")
             
             db_host = os.getenv('DB_HOST')
@@ -71,14 +68,14 @@ def get_db():
             print(f"🔄 DEBUG: DB_HOST={db_host}, DB_USER={db_user}, DB_NAME={db_name}, DB_PORT={db_port}")
             
             if db_host:
-                # Используем отдельные переменные
                 conn = mysql.connector.connect(
                     host=db_host,
                     user=db_user or 'root',
                     password=db_password or '',
                     database=db_name or 'railway',
                     port=int(db_port),
-                    autocommit=True
+                    autocommit=True,
+                    connection_timeout=5  # 👈 И ЗДЕСЬ ТОЖЕ ТАЙМАУТ!
                 )
                 print(f"✅ Подключено к MySQL: {db_host}")
                 return conn

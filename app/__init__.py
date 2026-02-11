@@ -114,29 +114,6 @@ def create_app():
         else:
             print(f"   {var}: НЕ НАЙДЕНА")
     
-    # Быстрая проверка БД
-    conn = get_db()
-    if conn:
-        print("✅ БД подключена успешно")
-        
-        try:
-            cursor = conn.cursor()
-            cursor.execute("SHOW TABLES")
-            tables = cursor.fetchall()
-            cursor.close()
-            
-            if tables:
-                print(f"✅ Таблицы в БД ({len(tables)}): {', '.join([table[0] for table in tables])}")
-            else:
-                print("⚠ В БД нет таблиц")
-                
-        except Error as e:
-            print(f"⚠ Ошибка проверки таблиц: {e}")
-        finally:
-            close_db(conn)
-    else:
-        print("❌ БД не подключена")
-    
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     
     # Конфигурация базы данных (для совместимости)

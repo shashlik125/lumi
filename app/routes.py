@@ -814,8 +814,8 @@ def mood_entries(conn):
             cursor = conn.cursor()
             cursor.execute(
                 """INSERT INTO mood_entries (user_id, date, mood, note) 
-                   VALUES (%s, %s, %s, %s) 
-                   ON DUPLICATE KEY UPDATE mood = VALUES(mood), note = VALUES(note)""",
+                VALUES (%s, %s, %s, %s) 
+                ON DUPLICATE KEY UPDATE mood = VALUES(mood), note = VALUES(note)""",
                 (current_user.id, date, float(mood), note)
             )
             conn.commit()
@@ -900,8 +900,8 @@ def hourly_moods(conn):
             cursor = conn.cursor()
             cursor.execute(
                 """INSERT INTO hourly_moods (user_id, date, hour, mood, note) 
-                   VALUES (%s, %s, %s, %s, %s) 
-                   ON DUPLICATE KEY UPDATE mood = VALUES(mood), note = VALUES(note)""",
+                VALUES (%s, %s, %s, %s, %s) 
+                ON DUPLICATE KEY UPDATE mood = VALUES(mood), note = VALUES(note)""",
                 (current_user.id, date, int(hour), int(mood), note)
             )
             conn.commit()
@@ -1208,9 +1208,9 @@ def joys(conn):
             cursor = conn.cursor(dictionary=True)
             date = request.args.get('date')
             cursor.execute(
-               "SELECT id, user_id, text, created_at FROM joys WHERE user_id = %s AND date = %s ORDER BY created_at DESC",
-               (current_user.id, date)
-               )
+            "SELECT id, user_id, text, created_at FROM joys WHERE user_id = %s AND date = %s ORDER BY created_at DESC",
+            (current_user.id, date)
+            )
             joys_data = cursor.fetchall()
             
             # Преобразуем даты
@@ -1526,14 +1526,14 @@ def cycle_entries(conn):
             cursor = conn.cursor()
             cursor.execute(
                 """INSERT INTO cycle_entries 
-                   (user_id, date, cycle_day, symptoms, flow_intensity, mood, notes) 
-                   VALUES (%s, %s, %s, %s, %s, %s, %s)
-                   ON DUPLICATE KEY UPDATE 
-                   cycle_day = VALUES(cycle_day), 
-                   symptoms = VALUES(symptoms),
-                   flow_intensity = VALUES(flow_intensity),
-                   mood = VALUES(mood),
-                   notes = VALUES(notes)""",
+                (user_id, date, cycle_day, symptoms, flow_intensity, mood, notes) 
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE 
+                cycle_day = VALUES(cycle_day), 
+                symptoms = VALUES(symptoms),
+                flow_intensity = VALUES(flow_intensity),
+                mood = VALUES(mood),
+                notes = VALUES(notes)""",
                 (current_user.id, date, cycle_day, symptoms_json, flow_intensity, mood, notes)
             )
             conn.commit()
@@ -1607,21 +1607,21 @@ def cycle_settings(conn):
                 # Обновляем существующие
                 cursor.execute(
                     """UPDATE cycle_settings SET 
-                       cycle_length = %s, period_length = %s, last_period_start = %s,
-                       notify_before_period = %s, notify_ovulation = %s
-                       WHERE user_id = %s""",
+                    cycle_length = %s, period_length = %s, last_period_start = %s,
+                    notify_before_period = %s, notify_ovulation = %s
+                    WHERE user_id = %s""",
                     (data.get('cycle_length'), data.get('period_length'), data.get('last_period_start'),
-                     data.get('notify_before_period'), data.get('notify_ovulation'), current_user.id)
+                    data.get('notify_before_period'), data.get('notify_ovulation'), current_user.id)
                 )
             else:
                 # Создаем новые
                 cursor.execute(
                     """INSERT INTO cycle_settings 
-                       (user_id, cycle_length, period_length, last_period_start, notify_before_period, notify_ovulation)
-                       VALUES (%s, %s, %s, %s, %s, %s)""",
+                    (user_id, cycle_length, period_length, last_period_start, notify_before_period, notify_ovulation)
+                    VALUES (%s, %s, %s, %s, %s, %s)""",
                     (current_user.id, data.get('cycle_length', 28), data.get('period_length', 5), 
-                     data.get('last_period_start'), data.get('notify_before_period', True), 
-                     data.get('notify_ovulation', True))
+                    data.get('last_period_start'), data.get('notify_before_period', True), 
+                    data.get('notify_ovulation', True))
                 )
             
             conn.commit()

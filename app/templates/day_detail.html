@@ -721,23 +721,37 @@ main {
     </div>
   </div>
 
-  <div class="positive-things">
-    <h3 class="section-title">Как настроение повлияло на ваш день?</h3>
-    
-    <!-- Форма для добавления радостного момента -->
-    <div class="add-positive-form">
-      <div class="input-group">
-        <input type="text" id="positiveInput" placeholder="Что сегодня вас порадовало?" class="positive-input">
-        <button class="btn btn-primary" onclick="addPositiveThing()">
-          <i class="fas fa-plus"></i> Добавить
-        </button>
-      </div>
-    </div>
-    
-    <div class="positive-list" id="positiveList">
-      <!-- Список положительных моментов будет здесь -->
-    </div>
+  <div class="day-notes-section">
+  <h3 class="section-title">Как настроение повлияло на ваш день?</h3>
+  <div class="input-group">
+    <textarea id="dayNoteInput" placeholder="Опишите, как настроение повлияло на день..."></textarea>
+    <button class="btn btn-primary" onclick="saveDayNote()">
+      <i class="fas fa-save"></i> Сохранить
+    </button>
   </div>
+</div>
+
+<div class="joys-section">
+  <h3 class="section-title">Расскажите о своих радостях</h3>
+  <div class="input-group">
+    <input type="text" id="joyInput" placeholder="Что сегодня вас порадовало?">
+    <button class="btn btn-primary" onclick="addJoy()">
+      <i class="fas fa-plus"></i> Добавить
+    </button>
+  </div>
+  <div id="joyList"></div>
+</div>
+
+<div class="goals-section">
+  <h3 class="section-title">Какие цели у вас есть?</h3>
+  <div class="input-group">
+    <input type="text" id="goalInput" placeholder="Введите цель на день...">
+    <button class="btn btn-primary" onclick="addGoal()">
+      <i class="fas fa-plus"></i> Добавить
+    </button>
+  </div>
+  <div id="goalList"></div>
+</div>
 
   <div style="text-align: center; margin-top: 20px;">
     <button class="back-btn" onclick="goBack()">
@@ -1265,6 +1279,70 @@ function showError(message) {
     const moodDisplay = document.getElementById('moodDisplay');
     moodDisplay.innerHTML = `<div class="no-mood"><p>${message}</p></div>`;
 }
+
+const GOALS_API = "/goals";
+
+// -------- 1. NOTE → mood_entries.note --------
+async function saveDayNote() {
+  const text = document.getElementById("dayNoteInput").value.trim();
+  if (!text) return showToast("Введите текст", "error");
+
+  const response = await fetch(API_BASE, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      date: currentDate,
+      mood: document.getElementById("moodSlider").value,
+      note: text
+    })
+  });
+
+  if (response.ok) showToast("Заметка сохранена!");
+  else showToast("Ошибка сохранения", "error");
+}
+
+// -------- 2. JOYS → joys --------
+async function addJoy() {
+  const text = document.getElementById("joyInput").value.trim();
+  if (!text) return showToast("Введите радость", "error");
+
+  const res = await fetch(JOYS_API, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ text, date: currentDate })
+  });
+
+  const data = await res.json();
+  document.getElementById("joyInput").value = "";
+  renderJoy(data);
+}
+
+function renderJoy(joy) {
+  const list = document.getElementById("joyList");
+  list.innerHTML += `<div class="item">🌟 ${joy.text}</div>`;
+}
+
+// -------- 3. GOALS → goals --------
+async function addGoal() {
+  const text = document.getElementById("goalInput").value.trim();
+  if (!text) return showToast("Введите цель", "error");
+
+  const res = await fetch(GOALS_API, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ text, date: currentDate })
+  });
+
+  const data = await res.json();
+  document.getElementById("goalInput").value = "";
+  renderGoal(data);
+}
+
+function renderGoal(goal) {
+  const list = document.getElementById("goalList");
+  list.innerHTML += `<div class="item">🎯 ${goal.text}</div>`;
+}
+
 </script>
 </body>
 </html>

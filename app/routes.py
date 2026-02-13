@@ -1011,9 +1011,10 @@ def goals(conn):
     if request.method == 'GET':
         try:
             cursor = conn.cursor(dictionary=True)
+            date = request.args.get('date')
             cursor.execute(
-                "SELECT id, user_id, text, completed, created_at FROM goals WHERE user_id = %s ORDER BY created_at DESC",
-                (current_user.id,)
+                "SELECT id, user_id, text, completed, created_at FROM goals WHERE user_id = %s AND date = %s ORDER BY created_at DESC",
+                (current_user.id, date)
             )
             goals_data = cursor.fetchall()
             
@@ -1040,10 +1041,11 @@ def goals(conn):
                 return jsonify({'error': 'Текст цели не может быть пустым'}), 400
             
             cursor = conn.cursor()
+            date = data.get('date')
             cursor.execute(
-                "INSERT INTO goals (user_id, text) VALUES (%s, %s)",
-                (current_user.id, text)
-            )
+                "INSERT INTO goals (user_id, text, date) VALUES (%s, %s, %s)",
+                (current_user.id, text, date)
+                )
             conn.commit()
             goal_id = cursor.lastrowid
             cursor.close()
@@ -1104,10 +1106,11 @@ def joys(conn):
     if request.method == 'GET':
         try:
             cursor = conn.cursor(dictionary=True)
+            date = request.args.get('date')
             cursor.execute(
-                "SELECT id, user_id, text, created_at FROM joys WHERE user_id = %s ORDER BY created_at DESC",
-                (current_user.id,)
-            )
+               "SELECT id, user_id, text, created_at FROM joys WHERE user_id = %s AND date = %s ORDER BY created_at DESC",
+               (current_user.id, date)
+               )
             joys_data = cursor.fetchall()
             
             # Преобразуем даты
@@ -1133,10 +1136,11 @@ def joys(conn):
                 return jsonify({'error': 'Текст не может быть пустым'}), 400
             
             cursor = conn.cursor()
+            date = data.get('date')
             cursor.execute(
-                "INSERT INTO joys (user_id, text) VALUES (%s, %s)",
-                (current_user.id, text)
-            )
+                "INSERT INTO joys (user_id, text, date) VALUES (%s, %s, %s)",
+                (current_user.id, text, date)
+                )
             conn.commit()
             joy_id = cursor.lastrowid
             cursor.close()

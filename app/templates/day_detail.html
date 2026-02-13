@@ -914,7 +914,7 @@ async function saveMood() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 date: currentDate,
-                hour: new Date().getHours(), 
+                hour: new Date(currentDate).getHours(), 
                 mood: moodValue,
                 note: note
             })
@@ -1037,22 +1037,20 @@ async function addPositiveThing() {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                text: text
+                text: text,
+                date: currentDate  // ← ДОБАВЛЯЕМ ДАТУ!
             })
         });
 
         if (response.ok) {
             const newJoy = await response.json();
+            // Добавляем дату в объект для фильтрации
+            newJoy.date = currentDate;
             positiveThings.unshift(newJoy);
             
-            // Очищаем поле ввода и обновляем список
             input.value = '';
             renderPositiveList();
             showToast('Радостный момент добавлен! 🌟');
-            
-            // Прокручиваем к новому элементу
-            const positiveList = document.getElementById('positiveList');
-            positiveList.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
             const errorData = await response.json();
             throw new Error(errorData.error || 'Ошибка сохранения');

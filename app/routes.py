@@ -642,7 +642,6 @@ def chatbot(conn):
     data = request.get_json()
     user_id = data.get('user_id')
     user_message = data.get('message', '').strip().lower()
-
     print(f"DEBUG user_message: '{user_message}'")
 
     if not user_id or not user_message:
@@ -660,14 +659,14 @@ def chatbot(conn):
 
         if any(word in user_message for word in ["цели", "задачи", "планы"]):
             goals = get_user_goals(conn, user_id)
-        if goals:
-            goals_text = "\n".join([
-                f"{g['created_at'].strftime('%d.%m.%Y') if isinstance(g['created_at'], datetime) else g['created_at']}: {g['goal']} ({g['status']})"
-                for g in goals
-                ])
-            return jsonify({'response': f"Вот твои цели:\n{goals_text}"})
-        else:
-            return jsonify({'response': "У тебя пока нет целей 😔"})
+            if goals:
+                goals_text = "\n".join([
+                    f"{g['created_at'].strftime('%d.%m.%Y') if isinstance(g['created_at'], datetime) else g['created_at']}: {g['goal']} ({g['status']})"
+                    for g in goals
+                    ])
+                return jsonify({'response': f"Вот твои цели:\n{goals_text}"})
+            else:
+                return jsonify({'response': "У тебя пока нет целей 😔"})
         stats = generate_user_statistics(conn, user_id)
         ai_response = generate_ai_insights(stats)
         fallback_response = get_fallback_response(user_message)

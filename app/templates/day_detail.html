@@ -721,36 +721,49 @@ main {
     </div>
   </div>
 
-  <div class="day-notes-section">
+  
+<div class="positive-things">
   <h3 class="section-title">Как настроение повлияло на ваш день?</h3>
   <div class="input-group">
-    <textarea id="dayNoteInput" placeholder="Опишите, как настроение повлияло на день..."></textarea>
+    <textarea 
+      id="dayNoteInput" 
+      class="note-input positive-input"
+      placeholder="Опишите, как настроение повлияло на день...">
+    </textarea>
     <button class="btn btn-primary" onclick="saveDayNote()">
       <i class="fas fa-save"></i> Сохранить
     </button>
   </div>
 </div>
 
-<div class="joys-section">
+<div class="positive-things">
   <h3 class="section-title">Расскажите о своих радостях</h3>
   <div class="input-group">
-    <input type="text" id="joyInput" placeholder="Что сегодня вас порадовало?">
+    <input 
+      type="text"
+      id="joyInput"
+      class="positive-input"
+      placeholder="Что сегодня вас порадовало?">
     <button class="btn btn-primary" onclick="addJoy()">
       <i class="fas fa-plus"></i> Добавить
     </button>
   </div>
-  <div id="joyList"></div>
+  <div id="joyList" class="positive-list"></div>
 </div>
 
-<div class="goals-section">
+<div class="positive-things">
   <h3 class="section-title">Какие цели у вас есть?</h3>
   <div class="input-group">
-    <input type="text" id="goalInput" placeholder="Введите цель на день...">
+    <input 
+      type="text"
+      id="goalInput"
+      class="positive-input"
+      placeholder="Введите цель на день...">
     <button class="btn btn-primary" onclick="addGoal()">
       <i class="fas fa-plus"></i> Добавить
     </button>
   </div>
-  <div id="goalList"></div>
+  <div id="goalList" class="positive-list"></div>
 </div>
 
   <div style="text-align: center; margin-top: 20px;">
@@ -837,7 +850,6 @@ function updateDayView(dayMoods) {
         showNoMood();
     }
 
-    loadPositiveThings();
     updateHourlyMoods();
 }
 
@@ -848,12 +860,14 @@ function showMoodDisplay(mood) {
     document.getElementById('moodValue').textContent = `${mood.mood}/10`;
     document.getElementById('moodEmoji').textContent = getMoodEmoji(mood.mood);
     
-    if (mood.note && mood.note.trim() !== '') {
-        document.getElementById('moodNoteText').textContent = mood.note;
-        document.getElementById('moodNoteDisplay').style.display = 'block';
-    } else {
-        document.getElementById('moodNoteDisplay').style.display = 'none';
-    }
+if (mood.note && mood.note.trim() !== '') {
+    document.getElementById('moodNoteText').textContent = mood.note;
+    document.getElementById('moodNoteDisplay').style.display = 'block';
+} else {
+    document.getElementById('moodNoteDisplay').style.display = 'none';
+}
+
+document.getElementById("dayNoteInput").value = mood.note || "";
     
     // Заполняем форму текущими значениями для редактирования
     document.getElementById('moodSlider').value = mood.mood;
@@ -900,20 +914,18 @@ function updateMoodPreview() {
 
 async function saveMood() {
     const moodValue = parseInt(document.getElementById('moodSlider').value);
-    const note = ''; // Заметка не обязательна
+    const note = document.getElementById("dayNoteInput").value.trim(); // ✅
 
     try {
-        // Сохраняем настроение дня
         const response = await fetch(API_BASE, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
                 date: currentDate,
                 mood: moodValue,
-                note: note  // ← ЭТО БЫЛО ПРОПУЩЕНО!
+                note: note   // ✅ теперь реально сохраняется текст
             })
         });
-
         if (!response.ok) {
             const err = await response.json();
             throw new Error(err.error || 'Ошибка сохранения общего настроения');
@@ -994,7 +1006,6 @@ async function loadPositiveThings() {
                 const joyDate = new Date(joy.created_at).toISOString().split('T')[0];
                 return joyDate === currentDate;
             });
-            renderPositiveList();
         } else {
             throw new Error('Ошибка загрузки радостных моментов');
         }
@@ -1280,7 +1291,7 @@ function showError(message) {
     moodDisplay.innerHTML = `<div class="no-mood"><p>${message}</p></div>`;
 }
 
-const GOALS_API = "/goals";
+const GOALS_API = "{{ url_for('main.goals') }}";
 
 // -------- 1. NOTE → mood_entries.note --------
 async function saveDayNote() {

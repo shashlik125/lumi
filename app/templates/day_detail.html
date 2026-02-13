@@ -934,7 +934,10 @@ async function saveMood() {
         // Обновляем остальные данные
         await updateHourlyMoods();
         showToast('Настроение сохранено!', 'success');
-
+        // Обновляем данные в календаре (если он открыт в другой вкладке)
+        if (window.opener && window.opener.refreshCalendarData) {
+          window.opener.refreshCalendarData();
+        }
     } catch (error) {
         console.error(error);
         showToast('Ошибка: ' + error.message, 'error');
@@ -954,6 +957,10 @@ async function deleteMood() {
             showNoMood();  // ← ВОЗВРАЩАЕМСЯ К СОСТОЯНИЮ "НЕТ НАСТРОЕНИЯ"
             await updateHourlyMoods();
             showToast('Запись удалена!', 'success');
+        // Обновляем данные в календаре
+        if (window.opener && window.opener.refreshCalendarData) {
+            window.opener.refreshCalendarData();
+        }
         } else {
             throw new Error('Ошибка удаления');
         }

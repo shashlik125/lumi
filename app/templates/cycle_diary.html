@@ -5,7 +5,7 @@
 {% block extra_css %}
 <style>
     /* ==========================================================================
-   Глобальные стили и переменные
+Глобальные стили и переменные
    ========================================================================== */
     * {
         font-family: 'Montserrat', sans-serif !important;
@@ -2773,62 +2773,70 @@
         return { labels, values, hasData };
     }
 
-    async function loadMoodData() {
-        try {
-            const response = await fetch(MOOD_API);
-            if (response.ok) {
-                moodData = await response.json();
-                console.log('✅ Данные настроения загружены:', moodData.length, 'записей');
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки данных настроения:', error);
-        }
-    }
-
-    async function loadCycleStats() {
-        try {
-            const response = await fetch(CYCLE_STATS_API);
-            if (response.ok) {
+async function loadCycleStats() {
+    try {
+        const response = await fetch(CYCLE_STATS_API, { credentials: 'include' });
+        if (response.ok) {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
                 const stats = await response.json();
                 updateStatsDisplay(stats);
+            } else {
+                const text = await response.text();
+                console.error('Ответ сервера не JSON (loadCycleStats):', text);
             }
-        } catch (error) {
-            console.error('Ошибка загрузки статистики цикла:', error);
+        } else {
+            console.error('Ошибка загрузки статистики цикла:', response.status);
         }
+    } catch (error) {
+        console.error('Ошибка загрузки статистики цикла:', error);
     }
+}
 
-    async function loadCyclePredictions() {
-        try {
-            const response = await fetch(CYCLE_PREDICTIONS_API);
-
-            if (response.ok) {
+async function loadCyclePredictions() {
+    try {
+        const response = await fetch(CYCLE_PREDICTIONS_API, { credentials: 'include' });
+        if (response.ok) {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
                 const predictions = await response.json();
                 updatePredictionsDisplay(predictions);
-            } else if (response.status === 400) {
-                console.log('📅 Нет данных для прогноза цикла (нужно настроить цикл)');
-                // Не меняем DOM здесь - только логируем
-                return;
             } else {
-                console.error('❌ Ошибка загрузки прогнозов:', response.status);
+                const text = await response.text();
+                console.error('Ответ сервера не JSON (loadCyclePredictions):', text);
             }
-        } catch (error) {
-            console.error('Ошибка загрузки прогнозов цикла:', error);
-            // Не показываем ошибку пользователю - это нормально
+        } else if (response.status === 400) {
+            console.log('📅 Нет данных для прогноза цикла (нужно настроить цикл)');
+        } else {
+            console.error('Ошибка загрузки прогнозов:', response.status);
         }
+    } catch (error) {
+        console.error('Ошибка загрузки прогнозов цикла:', error);
     }
+}
 
-    async function loadTodayMood() {
-        try {
-            const response = await fetch(TODAY_MOOD_API);
-            if (response.ok) {
+async function loadTodayMood() {
+    try {
+        const response = await fetch(TODAY_MOOD_API, { credentials: 'include' });
+        if (response.ok) {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
                 const todayMood = await response.json();
                 updateTodayMoodDisplay(todayMood);
+            } else {
+                const text = await response.text();
+                console.error('Ответ сервера не JSON (loadTodayMood):', text);
+                updateTodayMoodDisplay(null);
             }
-        } catch (error) {
-            console.error('Ошибка загрузки сегодняшнего настроения:', error);
+        } else {
+            console.error('Ошибка загрузки сегодняшнего настроения:', response.status);
             updateTodayMoodDisplay(null);
         }
+    } catch (error) {
+        console.error('Ошибка загрузки сегодняшнего настроения:', error);
+        updateTodayMoodDisplay(null);
     }
+}
 
     // ==========================================================================
     // ФУНКЦИИ ГРАФИКОВ

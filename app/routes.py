@@ -247,6 +247,16 @@ def generate_user_statistics(conn, user_id):
         LIMIT 5
     """, (user_id,))
     recent_joys = cursor.fetchall()
+            # 9. Статистика цикла (общая)
+    cursor.execute("""
+        SELECT 
+            COUNT(*) as cycle_entries,
+            COUNT(CASE WHEN flow_intensity IN ('light', 'medium', 'heavy') THEN 1 END) as period_days,
+            AVG(mood) as avg_mood_cycle
+        FROM cycle_entries 
+        WHERE user_id = %s
+    """, (user_id,))
+    cycle_stats_summary = cursor.fetchone()
     
     cursor.close()
 
@@ -284,9 +294,14 @@ def generate_user_statistics(conn, user_id):
         # Циклы
         "cycle_analysis": cycle_analysis,
         
-        # ⭐⭐⭐ ДОБАВЛЯЕМ РАДОСТИ ⭐⭐⭐
+                # ⭐⭐⭐ ДОБАВЛЯЕМ РАДОСТИ ⭐⭐⭐
         "joys_count": joys_stats['joys_count'] if joys_stats else 0,
         "recent_joys": [joy['text'] for joy in recent_joys] if recent_joys else [],
+        
+        # ⭐⭐⭐ ДОБАВЛЯЕМ СТАТИСТИКУ ЦИКЛА ⭐⭐⭐
+        "cycle_entries": cycle_stats_summary['cycle_entries'] if cycle_stats_summary else 0,
+        "period_days": cycle_stats_summary['period_days'] if cycle_stats_summary else 0,
+        "avg_mood_cycle": float(cycle_stats_summary['avg_mood_cycle'] or 0) if cycle_stats_summary and cycle_stats_summary['avg_mood_cycle'] else 0,
         
         # Общая оценка
         "mood_score": 0
@@ -390,8 +405,18 @@ def generate_ai_insights(stats):
         insights.append(f"Общий балл: {mood_score}/100. Есть пространство для улучшений. Попробуйте добавить ежедневные ритуалы заботы о себе. 🌱")
     
     # 8. Цикличность (для женщин)
+        # 8. Анализ циклов (для женщин)
     if stats['cycle_analysis']:
         insights.append(stats['cycle_analysis'])
+    elif 'cycle_entries' in stats:
+        if stats['cycle_entries'] >= 10:
+            insights.append(f"📊 У тебя {stats['cycle_entries']} записей о цикле. Отлично отслеживаешь!")
+        elif stats['cycle_entries'] >= 5:
+            insights.append(f"🌸 У тебя {stats['cycle_entries']} записей о цикле. Продолжай отмечать!")
+        elif stats['cycle_entries'] > 0:
+            insights.append(f"🌸 Ты начала отслеживать цикл ({stats['cycle_entries']} записей).")
+        else:
+            insights.append("🌸 Отслеживай цикл в дневнике — это поможет понять влияние физиологии на настроение!")
     
     # 9. Анализ радостей (joys)
     if 'joys_count' in stats:
@@ -1636,6 +1661,12 @@ def chat_with_asya():
         if any(cmd in user_message_lower for cmd in joys_commands):
             print(f"✨ Пользователь запросил радости: {user_message}")
             return analyze_joys(current_user.id)
+                # Если пользователь спрашивает о цикле
+        cycle_commands = ['цикл', 'менструация', 'месячные', 'овуляция', 'пмс', 'фаза цикла', 'дневник цикла']
+        
+        if any(cmd in user_message_lower for cmd in cycle_commands):
+            print(f"🔄 Пользователь запросил анализ цикла: {user_message}")
+            return analyze_cycle(current_user.id)
         # ШАГ 1: Получаем статистику пользователя (но НЕ используем для обычных ответов)
         conn = get_db()
         if conn is None:
@@ -2430,6 +2461,125 @@ def analyze_joys(user_id):
         print(f"❌ Ошибка анализа радостей: {str(e)}")
         return jsonify({
             'reply': 'Не могу проанализировать радости сейчас. Попробуй позже! 🔄',
+            'success': False
+        })
+def analyze_cycle(user_id):
+    """Анализ данных менструального цикла"""
+    try:
+        print(f"🔄 АНАЛИЗ ЦИКЛА: user_id={user_id}")
+        
+        conn = get_db()
+        if conn is None:
+            return jsonify({
+                'reply': 'Не могу подключиться к базе данных. Попробуй позже! 🔄',
+                'success': False
+            })
+        
+        try:
+            cursor = conn.cursor(dictionary=True)
+            
+            # 1. Получаем настройки цикла
+            cursor.execute("SELECT * FROM cycle_settings WHERE user_id = %s", (user_id,))
+            settings = cursor.fetchone()
+            
+            # 2. Получаем записи цикла
+            cursor.execute("""
+                SELECT date, cycle_day, symptoms, flow_intensity, mood, notes
+                FROM cycle_entries 
+                WHERE user_id = %s 
+                ORDER BY date DESC 
+                LIMIT 30
+            """, (user_id,))
+            cycle_entries = cursor.fetchall()
+            
+            # 3. Статистика по циклу
+            cursor.execute("""
+                SELECT 
+                    COUNT(*) as total_entries,
+                    COUNT(CASE WHEN flow_intensity IN ('light', 'medium', 'heavy') THEN 1 END) as period_days,
+                    AVG(mood) as avg_mood_period
+                FROM cycle_entries 
+                WHERE user_id = %s
+            """, (user_id,))
+            stats = cursor.fetchone()
+            
+            cursor.close()
+            
+        finally:
+            close_db(conn)
+        
+        # Формируем ответ
+        if len(cycle_entries) == 0:
+            return jsonify({
+                'reply': "🌸 У тебя пока нет записей о цикле. Начни отмечать дни в дневнике цикла — это поможет лучше понимать своё тело!",
+                'success': True,
+                'analysis_type': 'cycle'
+            })
+        
+        reply_parts = []
+        
+        # Информация о настройках
+        if settings and settings.get('last_period_start'):
+            try:
+                last_period = datetime.strptime(str(settings['last_period_start']), '%Y-%m-%d').date()
+                today = datetime.now().date()
+                days_since = (today - last_period).days
+                
+                if days_since <= settings.get('period_length', 5):
+                    reply_parts.append(f"🩸 У тебя сейчас менструация (день {days_since}).")
+                else:
+                    next_period = last_period + timedelta(days=settings.get('cycle_length', 28))
+                    days_to = (next_period - today).days
+                    if days_to > 0:
+                        reply_parts.append(f"📅 Следующая менструация предположительно через {days_to} дней.")
+            except:
+                pass
+        
+        # Статистика записей
+        if stats and stats['total_entries'] > 0:
+            if stats['period_days'] > 0:
+                reply_parts.append(f"📊 Отмечено {stats['period_days']} дней менструации.")
+            
+            if stats['avg_mood_period']:
+                avg_mood = float(stats['avg_mood_period'])
+                if avg_mood >= 7:
+                    reply_parts.append(f"😊 В дни цикла настроение в среднем {avg_mood:.1f}/10 — отлично!")
+                elif avg_mood >= 5:
+                    reply_parts.append(f"😐 Настроение в дни цикла: {avg_mood:.1f}/10.")
+                else:
+                    reply_parts.append(f"😔 В дни цикла настроение снижено ({avg_mood:.1f}/10). Обрати внимание на отдых.")
+        
+        # Анализ симптомов
+        all_symptoms = []
+        for entry in cycle_entries:
+            if entry.get('symptoms') and isinstance(entry['symptoms'], list):
+                all_symptoms.extend(entry['symptoms'])
+        
+        if all_symptoms:
+            from collections import Counter
+            symptom_counts = Counter(all_symptoms)
+            top_symptoms = symptom_counts.most_common(3)
+            
+            symptoms_text = ", ".join([f"{s} ({c} раз)" for s, c in top_symptoms])
+            reply_parts.append(f"🔍 Частые симптомы: {symptoms_text}.")
+        
+        # Советы по фазам
+        reply_parts.append("\n💡 Советы по фазам цикла:")
+        reply_parts.append("• Менструация: отдых, тепло, меньше нагрузок")
+        reply_parts.append("• Фолликулярная: энергия растёт — время для новых дел")
+        reply_parts.append("• Овуляция: пик коммуникабельности")
+        reply_parts.append("• Лютеиновая и ПМС: будь добрее к себе, больше отдыха")
+        
+        return jsonify({
+            'reply': "\n".join(reply_parts),
+            'success': True,
+            'analysis_type': 'cycle'
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Cycle analysis error: {str(e)}")
+        return jsonify({
+            'reply': 'Не могу проанализировать цикл сейчас. Попробуй позже! 🔄',
             'success': False
         })
 # ================== ДОПОЛНИТЕЛЬНЫЙ API ДЛЯ ПОЛУЧЕНИЯ АНАЛИЗА ==================

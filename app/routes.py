@@ -230,7 +230,24 @@ def generate_user_statistics(conn, user_id):
             cycle_analysis = f"У вас {cycle_stats['cycle_entries']} записей в дневнике цикла. "
             if cycle_stats['avg_mood_cycle']:
                 cycle_analysis += f"Среднее настроение в дни цикла: {float(cycle_stats['avg_mood_cycle']):.1f}/10."
+    # 7. Анализ радостей (joys)
+    cursor.execute("""
+        SELECT COUNT(*) as joys_count
+        FROM joys
+        WHERE user_id = %s
+    """, (user_id,))
+    joys_stats = cursor.fetchone()
 
+    # 8. Последние 5 радостей
+    cursor.execute("""
+        SELECT text, created_at
+        FROM joys
+        WHERE user_id = %s
+        ORDER BY created_at DESC
+        LIMIT 5
+    """, (user_id,))
+    recent_joys = cursor.fetchall()
+    
     cursor.close()
 
     # Формируем финальный объект статистики
@@ -258,7 +275,7 @@ def generate_user_statistics(conn, user_id):
         "keyword_counts": keyword_counts,
         "recent_positive": recent_positive,
         "recent_negative": recent_negative,
-        "notes_sample": all_notes_text[:5],  # Только 5 последних для контекста
+        "notes_sample": all_notes_text[:5],
         
         # Дни недели
         "worst_day": worst_day,
@@ -267,8 +284,12 @@ def generate_user_statistics(conn, user_id):
         # Циклы
         "cycle_analysis": cycle_analysis,
         
+        # ⭐⭐⭐ ДОБАВЛЯЕМ РАДОСТИ ⭐⭐⭐
+        "joys_count": joys_stats['joys_count'] if joys_stats else 0,
+        "recent_joys": [joy['text'] for joy in recent_joys] if recent_joys else [],
+        
         # Общая оценка
-        "mood_score": 0  # Будет вычислено ниже
+        "mood_score": 0
     }
     
     # Вычисляем общий балл настроения (0-100)
@@ -300,7 +321,6 @@ def generate_user_statistics(conn, user_id):
     stats['mood_score'] = min(100, max(0, int(mood_score)))
     
     return stats
-
 
 def generate_ai_insights(stats):
     """Генерация умных выводов на основе статистики"""
@@ -373,15 +393,31 @@ def generate_ai_insights(stats):
     if stats['cycle_analysis']:
         insights.append(stats['cycle_analysis'])
     
-    # Добавляем рандомный совет из базы
+    # 9. Анализ радостей (joys)
+    if 'joys_count' in stats:
+        if stats['joys_count'] > 0:
+            if stats['joys_count'] >= 10:
+                insights.append(f"Ты записал уже {stats['joys_count']} радостей! 🎉 Отличная привычка замечать хорошее!")
+            elif stats['joys_count'] >= 5:
+                insights.append(f"У тебя {stats['joys_count']} записанных радостей. Продолжай копить позитивные моменты! ✨")
+            elif stats['joys_count'] >= 1:
+                insights.append(f"Ты начал записывать радости — это первый шаг к осознанности! 🌸")
+            
+            # Добавляем примеры последних радостей
+            if stats.get('recent_joys') and len(stats['recent_joys']) > 0:
+                joys_text = ", ".join(stats['recent_joys'][:3])
+                insights.append(f"Недавно ты радовался(ась): {joys_text}. 😊")
+        else:
+            insights.append("Попробуй записывать маленькие радости дня — это помогает замечать хорошее даже в обычные дни. 📝")
+    
+    # 10. Добавляем рандомный совет из базы
     random_advice = get_random_advice(stats)
     if random_advice:
         insights.append(random_advice)
     
-    # ИСПРАВЛЕНИЕ: Убираем лишний пробел в конце
+    # Убираем лишний пробел в конце
     result = " ".join(insights)
     return result.strip()
-
 
 def get_random_advice(stats):
     """Возвращает случайный совет на основе статистики"""
@@ -422,10 +458,18 @@ def get_random_advice(stats):
         "Читайте перед сном вместо просмотра соцсетей."
     ])
     
+    # Совет по радостям
+    advice_pool.extend([
+        "Записывать радости — как собирать конфетти счастья. Попробуй каждый день хотя бы одну! 🎊",
+        "Перечитай свои записи радостей, когда грустно — это работает как тёплый плед. 📖",
+        "Маленькие радости важнее больших побед, потому что они случаются каждый день. 🌈",
+        "Сегодня была хоть маленькая радость? Запиши её в дневник радостей! ✨",
+        "Копилка радостей помогает видеть, что хорошего случилось за неделю. 💝"
+    ])
+    
     if advice_pool:
         return random.choice(advice_pool)
     return None
-
 
 def get_fallback_response(user_message):
     """Локальные ответы если API недоступно"""
@@ -525,6 +569,11 @@ def get_fallback_response(user_message):
             'Ты не одинок в этом чувстве. Многие проходят через это 🌙',
             'Попробуй связаться с кем-то близким, даже просто написать сообщение 💌',
             'Иногда помогает заняться чем-то творческим: рисование, письмо, музыка 🎨'
+        ],
+        'радост': [
+            'Ого! Ты записываешь радости? Это так круто! 🌟 Что сегодня порадовало?',
+            'Копилка радостей — лучшее, что можно вести! Поделишься? ✨',
+            'Радости делают день ярче. Записывай их в дневник радостей! 💖'
         ],
         'lumi': [
             'Lumi - это трекер настроения, который помогает понимать свои эмоции и улучшать ментальное здоровье! 🌈',
@@ -663,9 +712,15 @@ def mood_entries(conn):
                 (current_user.id, date, float(mood), note)
             )
             conn.commit()
-            cursor.close()
-            
-            return jsonify({'message': 'Настроение сохранено успешно'})
+            cursor.execute("SELECT LAST_INSERT_ID() as id")
+            result = cursor.fetchone()
+            new_id = result[0] if result else None
+            cursor.close()  # ← ПЕРЕНОСИМ СЮДА
+
+            return jsonify({
+                'message': 'Настроение сохранено успешно',
+                'id': new_id
+            })  
         except Error as e:
             print(f"Database error in mood_entries POST: {e}")
             return jsonify({'error': str(e)}), 500
@@ -1575,7 +1630,12 @@ def chat_with_asya():
         if any(cmd in user_message_lower for cmd in notes_commands):
             print(f"📝 Пользователь запросил заметки: {user_message}")
             return analyze_notes(current_user.id, user_message)
+                # Если пользователь спрашивает о радостях
+        joys_commands = ['радости', 'радость', 'joys', 'что меня радует', 'мои радости', 'копилка радостей']
         
+        if any(cmd in user_message_lower for cmd in joys_commands):
+            print(f"✨ Пользователь запросил радости: {user_message}")
+            return analyze_joys(current_user.id)
         # ШАГ 1: Получаем статистику пользователя (но НЕ используем для обычных ответов)
         conn = get_db()
         if conn is None:
@@ -1766,6 +1826,21 @@ def generate_deep_analysis(user_id):
             """, (user_id,))
             days_stats = cursor.fetchall()
             
+            # ⭐⭐⭐ НОВОЕ: Статистика радостей ⭐⭐⭐
+            cursor.execute("""
+                SELECT 
+                    COUNT(*) as joys_count,
+                    GROUP_CONCAT(text ORDER BY created_at DESC SEPARATOR '|||') as recent_joys_text
+                FROM joys
+                WHERE user_id = %s
+            """, (user_id,))
+            joys_stats = cursor.fetchone()
+            
+            # ⭐⭐⭐ НОВОЕ: Последние 3 радости ⭐⭐⭐
+            recent_joys_list = []
+            if joys_stats and joys_stats['recent_joys_text']:
+                recent_joys_list = joys_stats['recent_joys_text'].split('|||')[:3]
+            
             cursor.close()
             
         finally:
@@ -1777,7 +1852,9 @@ def generate_deep_analysis(user_id):
             "recent_notes": notes_with_text,
             "positive_notes": positive_notes,
             "challenging_notes": challenging_notes,
-            "days_stats": days_stats
+            "days_stats": days_stats,
+            "joys_stats": joys_stats,
+            "recent_joys_list": recent_joys_list
         }
         
         # Получаем ключи API
@@ -1786,6 +1863,14 @@ def generate_deep_analysis(user_id):
         
         if not api_key or not folder_id:
             # Локальный ответ если нет API
+            joys_block = ""
+            if joys_stats and joys_stats['joys_count'] > 0:
+                joys_block = f"""
+😊 ТВОИ РАДОСТИ:
+• Всего радостей: {joys_stats['joys_count']}
+{chr(10).join([f"• {joy}" for joy in recent_joys_list[:3]]) if recent_joys_list else ''}
+"""
+            
             reply = f"""📊 Анализ ваших данных:
 
 🎯 ОСНОВНЫЕ ПОКАЗАТЕЛИ:
@@ -1807,7 +1892,7 @@ def generate_deep_analysis(user_id):
 
 📅 ДНИ НЕДЕЛИ:
 {chr(10).join([f"• {day['day_name']}: {float(day['avg_mood'] or 0):.1f}/10" for day in days_stats]) if days_stats else 'Недостаточно данных'}
-
+{joys_block}
 💡 Продолжай отслеживать настроение!"""
             
             return jsonify({
@@ -1816,7 +1901,13 @@ def generate_deep_analysis(user_id):
                 'analysis_type': 'deep_analysis'
             })
         
-        # Создаем промпт для YandexGPT
+        # Создаем промпт для YandexGPT с радостями
+        joys_text = f"""
+6. СТАТИСТИКА РАДОСТЕЙ:
+- Всего радостей: {joys_stats['joys_count'] if joys_stats else 0}
+- Последние радости: {', '.join(recent_joys_list) if recent_joys_list else 'нет записей'}
+"""
+        
         prompt = f"""
 ПРОАНАЛИЗИРУЙ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ И ДАЙ РАЗВЁРНУТЫЙ ОТВЕТ:
 
@@ -1842,13 +1933,14 @@ def generate_deep_analysis(user_id):
 
 5. НАСТРОЕНИЕ ПО ДНЯМ НЕДЕЛИ:
 {chr(10).join([f"- {day['day_name']}: {float(day['avg_mood'] or 0):.1f}/10 ({day['count']} записей)" for day in days_stats]) if days_stats else 'Недостаточно данных'}
-
+{joys_text}
 ДАЙ АНАЛИЗ (4-5 предложений):
 1. Оцени общее эмоциональное состояние на основе заметок
 2. Отметь, о чём пользователь чаще пишет в заметках
 3. Укажи на связь между настроением и содержанием заметок
-4. Дай рекомендации на основе анализа заметок
-5. Будь поддерживающим и мотивирующим
+4. Похвали за количество радостей и приведи пример одной из последних
+5. Дай рекомендации на основе анализа заметок и радостей
+6. Будь поддерживающим и мотивирующим
 
 Используй эмодзи. Ориентируйся на содержание заметок.
 """
@@ -1885,11 +1977,15 @@ def generate_deep_analysis(user_id):
             reply = data['result']['alternatives'][0]['message']['text'].strip()
         else:
             # Локальный ответ при ошибке
+            joys_block = ""
+            if joys_stats and joys_stats['joys_count'] > 0:
+                joys_block = f"\n😊 Твои радости: {joys_stats['joys_count']} записей! 🎉"
+            
             reply = f"""📊 Анализ ваших данных:
 
 Среднее настроение: {float(mood_stats['avg_mood'] or 0):.1f}/10
 Всего записей: {mood_stats['total'] or 0}
-Заметок с текстом: {len(notes_with_text)}
+Заметок с текстом: {len(notes_with_text)}{joys_block}
 Продолжай записывать заметки для более подробного анализа! 📝"""
         
         return jsonify({
@@ -1904,7 +2000,6 @@ def generate_deep_analysis(user_id):
             'reply': 'Извини, не могу проанализировать данные сейчас. Попробуй позже! 🔄',
             'success': False
         })
-
 def analyze_patterns(user_id, user_message):
     """Анализ паттернов настроения"""
     try:
@@ -1950,6 +2045,11 @@ def analyze_patterns(user_id, user_message):
             except Exception as hour_error:
                 print(f"ℹ️ Таблица hourly_moods не найдена или пуста: {hour_error}")
             
+            # Статистика радостей
+            cursor.execute("SELECT COUNT(*) as count FROM joys WHERE user_id = %s", (user_id,))
+            joys_count_result = cursor.fetchone()
+            joys_count = joys_count_result['count'] if joys_count_result else 0
+            
             cursor.close()
             
         finally:
@@ -1968,13 +2068,17 @@ def analyze_patterns(user_id, user_message):
                 days_text = chr(10).join([f"• {day['day_name']}: {float(day['avg_mood'] or 0):.1f}/10" for day in days_stats])
                 hours_text = chr(10).join([f"• {hour['hour']}:00: {float(hour['avg_mood'] or 0):.1f}/10" for hour in hours_stats]) if hours_stats else "Недостаточно данных по времени"
                 
+                joys_text = ""
+                if joys_count > 0:
+                    joys_text = f"\n\n✨ Твоя копилка радостей: {joys_count} записей. Отличная работа!"
+                
                 reply = f"""📈 Паттерны настроения:
 
 📅 ПО ДНЯМ НЕДЕЛИ (от худшего к лучшему):
 {days_text}
 
 ⏰ ПО ВРЕМЕНИ СУТОК:
-{hours_text}
+{hours_text}{joys_text}
 
 💡 Используй эту информацию для планирования дня!"""
                 print(f"✅ Сформирован локальный ответ с паттернами")
@@ -2001,11 +2105,15 @@ def analyze_patterns(user_id, user_message):
 2. НАСТРОЕНИЕ ПО ВРЕМЕНИ СУТОК:
 {chr(10).join([f"- {hour['hour']}:00: {float(hour['avg_mood'] or 0):.1f}/10 ({hour['count']} записей)" for hour in hours_stats]) if hours_stats else 'Недостаточно данных по времени суток'}
 
+3. СТАТИСТИКА РАДОСТЕЙ:
+- Всего радостей: {joys_count}
+
 ПРОАНАЛИЗИРУЙ ЭТИ ДАННЫЕ:
 1. В какие дни настроение обычно лучше/хуже?
 2. В какое время суток пики и спады настроения (если есть данные)?
-3. Какие практические рекомендации можешь дать на основе этих паттернов?
-4. Как использовать эту информацию для улучшения самочувствия?
+3. Отметь, что пользователь записал {joys_count} радостей — похвали за это
+4. Какие практические рекомендации можешь дать на основе этих паттернов?
+5. Как использовать эту информацию для улучшения самочувствия?
 
 Ответ: 3-4 предложения, дружеский тон, с эмодзи.
 """
@@ -2047,11 +2155,15 @@ def analyze_patterns(user_id, user_message):
             best_day = max(days_stats, key=lambda x: x['avg_mood']) if days_stats else None
             worst_day = min(days_stats, key=lambda x: x['avg_mood']) if days_stats else None
             
+            joys_text = ""
+            if joys_count > 0:
+                joys_text = f" И ещё у тебя {joys_count} радостей в копилке! 🎉"
+            
             if best_day and worst_day:
                 reply = f"""📊 Ваши паттерны настроения:
 
 Лучший день: {best_day['day_name']} ({float(best_day['avg_mood']):.1f}/10)
-Сложный день: {worst_day['day_name']} ({float(worst_day['avg_mood']):.1f}/10)
+Сложный день: {worst_day['day_name']} ({float(worst_day['avg_mood']):.1f}/10){joys_text}
 
 Планируйте важные дела на {best_day['day_name']}, а на {worst_day['day_name']} оставьте время для отдыха! 💪"""
             else:
@@ -2070,8 +2182,7 @@ def analyze_patterns(user_id, user_message):
             'reply': 'Не могу проанализировать паттерны сейчас. Попробуй позже! 📊',
             'success': False
         })
-
-
+    
 def analyze_notes(user_id, user_message):
     """Анализ заметок пользователя из mood_entries"""
     try:
@@ -2249,6 +2360,76 @@ def analyze_notes(user_id, user_message):
         print(f"❌ Ошибка анализа заметок: {str(e)}")
         return jsonify({
             'reply': 'Не могу проанализировать заметки сейчас. Попробуй позже! 📝',
+            'success': False
+        })
+def analyze_joys(user_id):
+    """Анализ радостей пользователя"""
+    try:
+        print(f"✨ АНАЛИЗ РАДОСТЕЙ: user_id={user_id}")
+        
+        conn = get_db()
+        if conn is None:
+            return jsonify({
+                'reply': 'Не могу подключиться к базе данных. Попробуй позже! 🔄',
+                'success': False
+            })
+        
+        try:
+            cursor = conn.cursor(dictionary=True)
+            
+            # Считаем общее количество радостей
+            cursor.execute("SELECT COUNT(*) as count FROM joys WHERE user_id = %s", (user_id,))
+            joys_count = cursor.fetchone()['count']
+            
+            # Получаем последние 5 радостей
+            cursor.execute("""
+                SELECT text, created_at 
+                FROM joys 
+                WHERE user_id = %s 
+                ORDER BY created_at DESC 
+                LIMIT 5
+            """, (user_id,))
+            recent_joys = cursor.fetchall()
+            
+            cursor.close()
+            
+        finally:
+            close_db(conn)
+        
+        # Формируем ответ
+        if joys_count == 0:
+            reply = "📭 У тебя пока нет записей о радостях. Попробуй каждый день записывать хотя бы одну маленькую радость — это помогает замечать хорошее! ✨"
+        
+        elif joys_count == 1:
+            reply = f"🌸 У тебя 1 радость в копилке! Это первый шаг к осознанности. Не забывай пополнять коллекцию! 💖"
+        
+        else:
+            # Показываем примеры радостей
+            joys_examples = []
+            for joy in recent_joys[:3]:
+                date = joy['created_at'].strftime('%d.%m') if joy['created_at'] else ''
+                joys_examples.append(f"• {joy['text']} ({date})")
+            
+            joys_text = "\n".join(joys_examples)
+            
+            if joys_count >= 10:
+                reply = f"🎉 У тебя уже {joys_count} радостей! Ты настоящий коллекционер счастья! Вот твои последние:\n\n{joys_text}\n\nПродолжай в том же духе! 🌟"
+            elif joys_count >= 5:
+                reply = f"✨ У тебя {joys_count} радостей. Отличная привычка! Недавно ты радовался(ась):\n\n{joys_text}\n\n💖"
+            else:
+                reply = f"😊 У тебя {joys_count} радостей. Продолжай копить позитивные моменты!\n\n{joys_text}"
+        
+        return jsonify({
+            'reply': reply,
+            'success': True,
+            'analysis_type': 'joys'
+        })
+        
+    except Exception as e:
+        current_app.logger.error(f"Joys analysis error: {str(e)}")
+        print(f"❌ Ошибка анализа радостей: {str(e)}")
+        return jsonify({
+            'reply': 'Не могу проанализировать радости сейчас. Попробуй позже! 🔄',
             'success': False
         })
 # ================== ДОПОЛНИТЕЛЬНЫЙ API ДЛЯ ПОЛУЧЕНИЯ АНАЛИЗА ==================

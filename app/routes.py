@@ -635,50 +635,6 @@ def get_fallback_response(user_message):
     
     return random.choice(general_responses)
 
-
-@main.route('/api/chatbot', methods=['POST'])
-@with_db_connection
-def chatbot(conn):
-    data = request.get_json()
-    user_id = data.get('user_id')
-    user_message = data.get('message', '').strip().lower()
-    print(f"DEBUG user_message: '{user_message}'")
-
-    if not user_id or not user_message:
-        return jsonify({'error': 'user_id или message отсутствуют'}), 400
-
-    try:
-        # Команды для заметок и целей
-        if "заметки" in user_message:
-            notes = get_user_notes(conn, user_id)
-            if notes:
-                notes_text = "\n".join([f"{n['date']}: {n['note']}" for n in notes])
-                return jsonify({'response': f"Вот твои последние заметки:\n{notes_text}"})
-            else:
-                return jsonify({'response': "У тебя пока нет заметок 😔"})
-
-        if any(word in user_message for word in ["цели", "задачи", "планы"]):
-            print("DEBUG: команда цели распознана")
-            goals = get_user_goals(conn, user_id)
-            if goals:
-                goals_text = "\n".join([
-                    f"{g['created_at'].strftime('%d.%m.%Y') if isinstance(g['created_at'], datetime) else g['created_at']}: {g['text']} ({'выполнено' if g['completed'] else 'не выполнено'})"
-                    for g in goals
-                ])
-                return jsonify({'response': f"Вот твои цели:\n{goals_text}"})
-            else:
-                return jsonify({'response': "У тебя пока нет целей 😔"})
-        stats = generate_user_statistics(conn, user_id)
-        ai_response = generate_ai_insights(stats)
-        fallback_response = get_fallback_response(user_message)
-        final_response = f"{fallback_response}\n\n{ai_response}"
-        return jsonify({'response': final_response})
-
-    except Exception as e:
-        print(f"Ошибка в chatbot: {e}")
-        return jsonify({'response': get_fallback_response(user_message)})
-
-
 def get_user_notes(conn, user_id):
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
@@ -704,6 +660,53 @@ def get_user_goals(conn, user_id):
     goals = cursor.fetchall()
     cursor.close()
     return goals
+
+@main.route('/api/chatbot', methods=['POST'])
+@with_db_connection
+def chatbot(conn):
+    data = request.get_json()
+    user_id = data.get('user_id')
+    user_message = data.get('message', '').strip().lower()
+    print(f"DEBUG user_message: '{user_message}'")
+
+    if not user_id or not user_message:
+        return jsonify({'error': 'user_id или message отсутствуют'}), 400
+
+    try:
+        # Заметки
+        if "заметки" in user_message:
+            notes = get_user_notes(conn, user_id)
+            if notes:
+                notes_text = "\n".join([f"{n['date']}: {n['note']}" for n in notes])
+                return jsonify({'response': f"Вот твои последние заметки:\n{notes_text}"})
+            else:
+                return jsonify({'response': "У тебя пока нет заметок 😔"})
+
+        # Цели
+        if any(word in user_message for word in ["цели", "задачи", "планы"]):
+            print("DEBUG: команда цели распознана")
+            goals = get_user_goals(conn, user_id)
+            if goals:
+                goals_text = "\n".join([
+                    f"{g['created_at'].strftime('%d.%m.%Y') if isinstance(g['created_at'], datetime) else g['created_at']}: {g['text']} ({'выполнено' if g['completed'] else 'не выполнено'})"
+                    for g in goals
+                ])
+                return jsonify({'response': f"Вот твои цели:\n{goals_text}"})
+            else:
+                return jsonify({'response': "У тебя пока нет целей 😔"})
+
+        # Fallback / общий анализ
+        stats = generate_user_statistics(conn, user_id)
+        ai_response = generate_ai_insights(stats)
+        fallback_response = get_fallback_response(user_message)
+        final_response = f"{fallback_response}\n\n{ai_response}"
+        return jsonify({'response': final_response})
+
+    except Exception as e:
+        print(f"Ошибка в chatbot: {e}")
+        return jsonify({'response': get_fallback_response(user_message)})
+
+
 
 # ================== ОСНОВНЫЕ МАРШРУТЫ СТРАНИЦ ==================
 

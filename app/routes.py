@@ -2397,12 +2397,16 @@ def analyze_notes(user_id, user_message):
         
         print(f"🔗 Отправляем запрос в YandexGPT с {len(all_notes)} заметками")
         
-        # Подготавливаем заметки для промпта
+        #Подготавливаем заметки для промпта
         notes_for_prompt = []
         for i, note in enumerate(all_notes[:15], 1):  # Ограничиваем 15 заметками
-            date_str = note['date'].strftime('%d.%m.%Y') if isinstance(note['date'], datetime.date) else str(note['date'])
-            notes_for_prompt.append(f"{i}. {date_str}: Настроение {note['mood']}/10 - '{note['note']}'")
-        
+            note_date = note.get('date')
+            if isinstance(note_date, date):
+                date_str = note_date.strftime('%d.%m.%Y')
+            else:
+                date_str = str(note_date)
+
+        notes_for_prompt.append(f"{i}. {date_str}: Настроение {note.get('mood', '?')}/10 - '{note.get('note', '')}'")
         # Создаем промпт для YandexGPT
         prompt = f"""
 ПРОАНАЛИЗИРУЙ ЗАМЕТКИ ПОЛЬЗОВАТЕЛЯ ИЗ ДНЕВНИКА НАСТРОЕНИЯ:

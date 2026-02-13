@@ -11,7 +11,7 @@ from app import get_db, close_db
 from mysql.connector import Error
 from functools import wraps
 
-# Сначала определяем blueprint
+# Сначала определяем blueprint...........
 main = Blueprint('main', __name__)
 
 def with_db_connection(f):

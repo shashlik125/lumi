@@ -1632,14 +1632,15 @@ def cycle_settings(conn):
             return jsonify({'error': str(e)}), 500
 
 
+
+
+# ================== CYCLE STATS ==================
 @main.route('/api/cycle_stats')
 @login_required
 @with_db_connection
 def cycle_stats(conn):
     try:
         cursor = conn.cursor(dictionary=True)
-        
-        # Статистика по циклу
         cursor.execute("""
             SELECT 
                 COUNT(*) as total_entries,
@@ -1648,52 +1649,49 @@ def cycle_stats(conn):
             FROM cycle_entries 
             WHERE user_id = %s
         """, (current_user.id,))
-        
         stats = cursor.fetchone()
         cursor.close()
-        
+
+        if not stats:
+            stats = {'total_entries': 0, 'avg_mood': 0, 'period_days': 0}
+
         return jsonify({
             'total_entries': stats['total_entries'] or 0,
             'avg_mood': round(float(stats['avg_mood'] or 0), 1),
             'period_days': stats['period_days'] or 0
         })
-        
     except Error as e:
         print(f"Database error in cycle_stats: {e}")
         return jsonify({'error': str(e)}), 500
 
 
+# ================== CYCLE PREDICTIONS ==================
 @main.route('/api/cycle_predictions')
 @login_required
 @with_db_connection
 def cycle_predictions(conn):
     try:
         cursor = conn.cursor(dictionary=True)
-        
-        # Получаем настройки пользователя
         cursor.execute("SELECT * FROM cycle_settings WHERE user_id = %s", (current_user.id,))
         settings = cursor.fetchone()
-        
-        if not settings or not settings['last_period_start']:
+        cursor.close()
+
+        if not settings or not settings.get('last_period_start'):
             return jsonify({'error': 'Недостаточно данных для прогноза'}), 400
-        
-        # Простой расчет прогнозов
+
         last_period = settings['last_period_start']
-        cycle_length = settings['cycle_length'] or 28
-        period_length = settings['period_length'] or 5
-        
-        # Следующая менструация
+        if isinstance(last_period, str):
+            last_period = datetime.strptime(last_period, '%Y-%m-%d').date()
+
+        cycle_length = settings.get('cycle_length') or 28
+        period_length = settings.get('period_length') or 5
+
         next_period = last_period + timedelta(days=cycle_length)
-        
-        # Овуляция (примерно за 14 дней до следующей менструации)
         ovulation_date = next_period - timedelta(days=14)
-        
-        # Фертильное окно (за 5 дней до овуляции и 1 день после)
         fertile_start = ovulation_date - timedelta(days=5)
         fertile_end = ovulation_date + timedelta(days=1)
-        
-        cursor.close()
-        
+        current_cycle_day = (datetime.now().date() - last_period).days + 1
+
         return jsonify({
             'next_period': next_period.isoformat(),
             'ovulation_date': ovulation_date.isoformat(),
@@ -1701,11 +1699,13 @@ def cycle_predictions(conn):
                 'start': fertile_start.isoformat(),
                 'end': fertile_end.isoformat()
             },
-            'current_cycle_day': (datetime.now().date() - last_period).days + 1
+            'current_cycle_day': current_cycle_day
         })
-        
     except Error as e:
         print(f"Database error in cycle_predictions: {e}")
+        return jsonify({'error': str(e)}), 500
+    except Exception as e:
+        print(f"Unexpected error in cycle_predictions: {e}")
         return jsonify({'error': str(e)}), 500
 
 

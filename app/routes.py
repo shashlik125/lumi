@@ -632,28 +632,66 @@ def get_fallback_response(user_message):
 def chatbot(conn):
     data = request.get_json()
     user_id = data.get('user_id')
-    user_message = data.get('message', '').strip()
+    user_message = data.get('message', '').strip().lower()
 
     if not user_id or not user_message:
         return jsonify({'error': 'user_id или message отсутствуют'}), 400
 
     try:
-        # Получаем статистику пользователя
+        # Команды для заметок и целей
+        if "заметки" in user_message:
+            notes = get_user_notes(conn, user_id)
+            if notes:
+                notes_text = "\n".join([f"{n['date']}: {n['note']}" for n in notes])
+                return jsonify({'response': f"Вот твои последние заметки:\n{notes_text}"})
+            else:
+                return jsonify({'response': "У тебя пока нет заметок 😔"})
+
+        if "цели" in user_message:
+            goals = get_user_goals(conn, user_id)
+            if goals:
+                goals_text = "\n".join([f"{g['created_at']}: {g['goal']} ({g['status']})" for g in goals])
+                return jsonify({'response': f"Вот твои цели:\n{goals_text}"})
+            else:
+                return jsonify({'response': "У тебя пока нет целей 😔"})
+
+        # Если не команда — обычный анализ
         stats = generate_user_statistics(conn, user_id)
-        # Генерируем умные выводы
         ai_response = generate_ai_insights(stats)
-
-        # Если пользователь написал что-то конкретное, возвращаем fallback
         fallback_response = get_fallback_response(user_message)
-
-        # Смешиваем ответы (AI + fallback)
         final_response = f"{fallback_response}\n\n{ai_response}"
-
         return jsonify({'response': final_response})
+
     except Exception as e:
         print(f"Ошибка в chatbot: {e}")
         return jsonify({'response': get_fallback_response(user_message)})
 
+
+def get_user_notes(conn, user_id):
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT note, date 
+        FROM mood_entries 
+        WHERE user_id = %s AND note IS NOT NULL AND note != ''
+        ORDER BY date DESC
+        LIMIT 20
+    """, (user_id,))
+    notes = cursor.fetchall()
+    cursor.close()
+    return notes
+
+def get_user_goals(conn, user_id):
+    cursor = conn.cursor(dictionary=True)
+    cursor.execute("""
+        SELECT goal, status, created_at 
+        FROM goals 
+        WHERE user_id = %s 
+        ORDER BY created_at DESC
+        LIMIT 20
+    """, (user_id,))
+    goals = cursor.fetchall()
+    cursor.close()
+    return goals
 
 # ================== ОСНОВНЫЕ МАРШРУТЫ СТРАНИЦ ==================
 

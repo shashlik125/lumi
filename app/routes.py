@@ -658,11 +658,11 @@ def chatbot(conn):
                 return jsonify({'response': "У тебя пока нет заметок 😔"})
 
         if any(word in user_message for word in ["цели", "задачи", "планы"]):
+            print("DEBUG: команда цели распознана")
             goals = get_user_goals(conn, user_id)
-            print(f"DEBUG goals from DB: {goals}") 
             if goals:
                 goals_text = "\n".join([
-                    f"{g['created_at'].strftime('%d.%m.%Y') if isinstance(g['created_at'], datetime) else g['created_at']}: {g['goal']} ({g['status']})"
+                    f"{g['created_at'].strftime('%d.%m.%Y') if isinstance(g['created_at'], datetime) else g['created_at']}: {g['text']} ({'выполнено' if g['completed'] else 'не выполнено'})"
                     for g in goals
                 ])
                 return jsonify({'response': f"Вот твои цели:\n{goals_text}"})
@@ -695,7 +695,7 @@ def get_user_notes(conn, user_id):
 def get_user_goals(conn, user_id):
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
-        SELECT goal, status, created_at 
+        SELECT text, completed, created_at 
         FROM goals 
         WHERE user_id = %s 
         ORDER BY created_at DESC

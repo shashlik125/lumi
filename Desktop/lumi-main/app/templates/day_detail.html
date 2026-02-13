@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lumi — День {{ date }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+:root {
+  --primary: #60F4E3;
+  --primary-dark: #48cbbd;
+  --secondary: #FF70EC;
+  --accent: #FFEFFD;
+  --dark: #264653;
+  --light: #f8f9fa;
+  --white: #ffffff;
+  --gray: #6c757d;
+  --success: #4CAF50;
+  --warning: #FFC107;
+  --danger: #F44336;
+  --border-radius: 16px;
+  --shadow: 0 6px 16px rgba(0,0,0,0.1);
+  --transition: all 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Montserrat', sans-serif;
+}
+
+body { 
+  margin: 0; 
+  background: linear-gradient(to right, #60F4E3 0%, #FFEFFD 50%, #FF70EC 100%);
+  color: var(--dark);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+header {
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  backdrop-filter: blur(10px);
+  flex-wrap: nowrap;
+  min-height: 60px;
+}
+
+.logo {
+  font-weight: 700;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: var(--dark);
+  flex-shrink: 0;
+}
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--white);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+
+nav {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 1;
+  min-width: 0;
+}
+.nav-link {
+  color: var(--dark);
+  text-decoration: none;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: var(--transition);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+
+.nav-link:hover {
+  background: rgba(96, 244, 227, 0.1);
+}
+
+main { 
+  padding: 30px 20px; 
+  max-width: 800px; 
+  margin: 0 auto; 
+}
+
+.day-header {
+  text-align: center;
+  margin-bottom: 30px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 25px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
+
+.day-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 10px;
+}
+
+.back-btn {
+  background: var(--white);
+  color: var(--dark);
+  border: 2px solid var(--primary);
+  padding: 10px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+  margin: 0 auto;
+}
+
+.back-btn:hover {
+  background: var(--primary);
+  transform: translateY(-2px);
+}
+
+.mood-section {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 15px 25px;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: var(--dark);
+  text-align: center;
+  font-weight: 700;
+}
+
+.mood-display {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.mood-value {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--primary);
+}
+
+.mood-emoji {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.mood-note {
+  background: var(--light);
+  padding: 10px 15px;
+  border-radius: 12px;
+  margin-top: 10px;
+  text-align: left;
+  border-left: 4px solid var(--primary);
+}
+
+.mood-note p {
+  margin: 0;
+  color: var(--dark);
+  line-height: 1.5;
+}
+
+.no-mood {
+  text-align: center;
+  padding: 40px;
+  color: var(--gray);
+}
+
+.no-mood i {
+  font-size: 48px;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.add-mood-section {
+  background: var(--accent);
+  border-radius: var(--border-radius);
+  padding: 15px 25px;
+  margin-bottom: 20px;
+  border: 2px solid var(--primary);
+}
+
+.mood-slider-container {
+  margin: 20px 0;
+}
+
+.mood-slider {
+  width: 100%;
+  height: 20px;
+  border-radius: 10px;
+  background: linear-gradient(to right, var(--danger), var(--warning), var(--success));
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.mood-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 3px solid var(--primary);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: var(--transition);
+}
+
+.mood-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.mood-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 3px solid var(--primary);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.mood-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--gray);
+  font-weight: 600;
+}
+
+.mood-preview {
+  text-align: center;
+  margin: 15px 0;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+}
+
+.note-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(96, 244, 227, 0.3);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--dark);
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: var(--white);
+}
+
+.btn-danger:hover {
+  background: #d32f2f;
+  transform: translateY(-2px);
+}
+
+.positive-things {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 25px;
+  margin-bottom: 20px;
+}
+
+.add-positive-form {
+  margin-bottom: 20px;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.positive-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 2px solid var(--primary);
+  border-radius: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  transition: var(--transition);
+}
+
+.positive-input:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(255, 112, 236, 0.2);
+}
+
+.positive-list {
+  display: grid;
+  gap: 10px;
+}
+
+.positive-item {
+  background: rgba(96, 244, 227, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+  animation: slideIn 0.3s ease;
+  transition: var(--transition);
+}
+
+.positive-item:hover {
+  transform: translateX(5px);
+  background: rgba(96, 244, 227, 0.2);
+}
+
+.positive-item-content {
+  flex: 1;
+  min-width: 0; /* Предотвращает переполнение */
+}
+
+.positive-item-text {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+}
+
+.positive-item-actions {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.positive-item-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: var(--transition);
+  color: var(--gray);
+}
+
+.positive-item-btn:hover {
+  background: rgba(0,0,0,0.1);
+  color: var(--dark);
+}
+
+.delete-btn:hover {
+  color: var(--danger);
+}
+
+.empty-positive {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--gray);
+}
+
+.empty-positive i {
+  font-size: 48px;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.hourly-mood-section {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 25px;
+  margin-bottom: 20px;
+}
+
+.hours-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.hour-item {
+  background: var(--light);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 8px 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.hour-item:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.hour-item.active {
+  background: var(--primary);
+  color: var(--dark);
+  border-color: var(--primary-dark);
+}
+
+.hour-time {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.hour-mood {
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.time-note {
+  font-size: 9px;
+  opacity: 0.7;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+  padding: 0 2px;
+}
+
+/* Стили для разных состояний настроения */
+.hour-item.mood-good {
+  background: rgba(96, 244, 227, 0.3);
+  border-color: var(--primary);
+}
+
+.hour-item.mood-neutral {
+  background: rgba(255, 112, 236, 0.2);
+  border-color: var(--secondary);
+}
+
+.hour-item.mood-bad {
+  background: rgba(244, 67, 54, 0.2);
+  border-color: var(--danger);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Стили для уведомлений */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--success);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  z-index: 1000;
+  font-weight: 600;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.toast.show {
+  transform: translateX(0);
+}
+
+.toast.error {
+  background: var(--danger);
+}
+
+.user-name {
+  font-size: 14px;
+}
+
+
+@media (max-width: 768px) {
+  header {
+    padding: 8px 12px;
+    min-height: 56px;
+  }
+  
+  .logo {
+    font-size: 18px;
+  }
+  
+  .nav-link {
+    padding: 5px 8px;
+    font-size: 13px;
+  }
+  
+  .user-name {
+    display: none; /* Скрываем имя пользователя */
+  }
+  
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+  }
+   .day-title {
+    font-size: 20px; /* Уменьшаем с 24px до 20px */
+  }
+  
+  .day-header {
+    padding: 15px; /* Уменьшаем отступы */
+  }
+}
+
+
+@media (max-width: 480px) {
+  header {
+    padding: 6px 10px;
+    min-height: 52px;
+  }
+  
+  .logo {
+    font-size: 16px;
+  }
+  
+  .nav-link {
+    padding: 4px 6px;
+    font-size: 12px;
+  }
+  
+  .nav-link i {
+    font-size: 14px;
+  }
+  
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+  }
+  .day-title {
+    font-size: 18px; /* Еще меньше на маленьких экранах */
+  }
+  
+  .day-header {
+    padding: 12px;
+  }
+}
+
+
+@media (max-width: 360px) {
+   .day-title {
+    font-size: 16px; /* Минимальный размер */
+  }
+  .logo {
+    font-size: 15px;
+  }
+  
+  .nav-link {
+    padding: 4px;
+  }
+  
+  .user-avatar {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+
+
+
+    </style>
+<header>
+  <div class="logo">
+    <span>Lumi</span>
+  </div>
+  <nav>
+    <a href="{{ url_for('main.calendar') }}" class="nav-link">
+      <i class="fas fa-arrow-left"></i> 
+      <span class="nav-text">Назад к календарю</span>
+    </a>
+    <div class="user-info">
+      <span class="user-name" id="username">
+        {% if current_user.is_authenticated %}
+          {{ current_user.first_name or current_user.username }}
+        {% else %}
+          Пользователь
+        {% endif %}
+      </span>
+      {% if current_user.avatar_path %}
+        <img src="{{ url_for('static', filename=current_user.avatar_path) }}" alt="Аватар" class="user-avatar">
+      {% else %}
+        <img src="https://ui-avatars.com/api/?name={{ current_user.first_name or 'Пользователь' }}&background=60F4E3&color=264653&size=64" alt="Аватар" class="user-avatar">
+      {% endif %}
+    </div>
+  </nav>
+</header>
+<main>
+  <div class="day-header">
+    <h2 class="day-title" id="dayTitle">Загрузка...</h2>
+  </div>
+
+  <div class="mood-section">
+    <h3 class="section-title">Настроение дня</h3>
+    
+    <div id="moodDisplay">
+      <div class="no-mood" id="noMood">
+        <i class="fas fa-cloud"></i>
+        <h4>Настроение не отмечено</h4>
+        <p>Добавьте ваше настроение ниже</p>
+      </div>
+      
+      <div class="mood-display" id="moodDisplayContent" style="display: none;">
+        <div class="mood-value" id="moodValue">0/10</div>
+        <div class="mood-emoji" id="moodEmoji">😐</div>
+        <div class="mood-note" id="moodNoteDisplay">
+          <p id="moodNoteText">Нет заметки</p>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-danger" onclick="deleteMood()">
+            <i class="fas fa-trash"></i> Удалить
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="add-mood-section">
+    <h3 class="section-title">Оцените настроение</h3>
+    
+    <div class="mood-slider-container">
+      <input type="range" min="1" max="10" value="5" class="mood-slider" id="moodSlider" oninput="updateMoodPreview()">
+      <div class="mood-labels">
+        <span>😞 Плохо</span>
+        <span>😐 Нормально</span>
+        <span>😊 Отлично</span>
+      </div>
+    </div>
+    
+    <div class="mood-preview" id="moodPreview">
+      5/10 - Нормально 😐
+    </div>
+    
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="saveMood()">
+        <i class="fas fa-save"></i> Сохранить настроение
+      </button>
+    </div>
+  </div>
+
+  <div class="hourly-mood-section">
+    <h3 class="section-title">Настроение по часам (24 часа)</h3>
+    <div class="hours-grid" id="hoursGrid">
+      <!-- 24 часа будут сгенерированы через JavaScript -->
+    </div>
+  </div>
+
+  <div class="positive-things">
+    <h3 class="section-title">Как настроение повлияло на ваш день?</h3>
+    
+    <!-- Форма для добавления радостного момента -->
+    <div class="add-positive-form">
+      <div class="input-group">
+        <input type="text" id="positiveInput" placeholder="Что сегодня вас порадовало?" class="positive-input">
+        <button class="btn btn-primary" onclick="addPositiveThing()">
+          <i class="fas fa-plus"></i> Добавить
+        </button>
+      </div>
+    </div>
+    
+    <div class="positive-list" id="positiveList">
+      <!-- Список положительных моментов будет здесь -->
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 20px;">
+    <button class="back-btn" onclick="goBack()">
+      <i class="fas fa-arrow-left"></i> Назад к календарю
+    </button>
+  </div>
+</main>
+
+<script>
+const API_BASE = "{{ url_for('main.mood_entries') }}";
+const JOYS_API = "{{ url_for('main.joys') }}";
+const HOURLY_MOODS_API = "{{ url_for('main.hourly_moods') }}";
+let currentDate = null;
+let currentMood = null;
+let hourlyMoods = {};
+let positiveThings = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Страница загружена, инициализация...');
+    loadDayData();
+    init24HourTracking();
+    
+    // Добавляем обработчик нажатия Enter в поле ввода
+    const positiveInput = document.getElementById('positiveInput');
+    if (positiveInput) {
+        positiveInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addPositiveThing();
+            }
+        });
+    }
+});
+
+function getDateFromUrl() {
+    const path = window.location.pathname;
+    const match = path.match(/\/calendar\/day\/(\d{4}-\d{1,2}-\d{1,2})/);
+    return match ? match[1] : null;
+}
+
+async function loadDayData() {
+    const date = getDateFromUrl();
+    if (!date) {
+        showError('Дата не найдена');
+        return;
+    }
+
+    currentDate = date;
+    console.log('📅 Текущая дата:', currentDate);
+
+    try {
+        const response = await fetch(`${API_BASE}?date=${date}`);
+        if (response.ok) {
+            const dayMoods = await response.json();
+            updateDayView(dayMoods);
+        } else {
+            throw new Error('Ошибка загрузки данных');
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки данных дня:', error);
+        showError('Ошибка загрузки данных дня');
+    }
+}
+
+function updateDayView(dayMoods) {
+    const date = currentDate;
+    if (!date) return;
+
+    const [year, month, day] = date.split('-');
+    const dateObj = new Date(year, month - 1, day);
+    
+    document.getElementById('dayTitle').textContent = dateObj.toLocaleDateString("ru-RU", {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+    
+    // Берем первую запись настроения за день (у нас одна запись на день)
+    if (dayMoods.length > 0) {
+        currentMood = dayMoods[0];
+        showMoodDisplay(currentMood);
+    } else {
+        showNoMood();
+    }
+
+    loadPositiveThings();
+    updateHourlyMoods();
+}
+
+function showMoodDisplay(mood) {
+    document.getElementById('noMood').style.display = 'none';
+    document.getElementById('moodDisplayContent').style.display = 'block';
+    
+    document.getElementById('moodValue').textContent = `${mood.mood}/10`;
+    document.getElementById('moodEmoji').textContent = getMoodEmoji(mood.mood);
+    
+    if (mood.note && mood.note.trim() !== '') {
+        document.getElementById('moodNoteText').textContent = mood.note;
+        document.getElementById('moodNoteDisplay').style.display = 'block';
+    } else {
+        document.getElementById('moodNoteDisplay').style.display = 'none';
+    }
+    
+    // Заполняем форму текущими значениями для редактирования
+    document.getElementById('moodSlider').value = mood.mood;
+    updateMoodPreview();
+}
+
+function showNoMood() {
+    document.getElementById('noMood').style.display = 'block';
+    document.getElementById('moodDisplayContent').style.display = 'none';
+    
+    // Сбрасываем форму
+    document.getElementById('moodSlider').value = 5;
+    updateMoodPreview();
+}
+
+function getMoodEmoji(moodValue) {
+    if (moodValue >= 8) return '😊';
+    if (moodValue >= 5) return '😐';
+    if (moodValue >= 3) return '😕';
+    return '😞';
+}
+
+function getMoodText(moodValue) {
+    if (moodValue >= 9) return 'Отлично';
+    if (moodValue >= 7) return 'Очень хорошо';
+    if (moodValue >= 5) return 'Нормально';
+    if (moodValue >= 3) return 'Не очень';
+    return 'Плохо';
+}
+
+function getMoodColorClass(moodValue) {
+    if (moodValue >= 7) return 'mood-good';
+    if (moodValue >= 4) return 'mood-neutral';
+    return 'mood-bad';
+}
+
+function updateMoodPreview() {
+    const moodValue = document.getElementById('moodSlider').value;
+    const emoji = getMoodEmoji(parseInt(moodValue));
+    const text = getMoodText(parseInt(moodValue));
+    
+    document.getElementById('moodPreview').textContent = `${moodValue}/10 - ${text} ${emoji}`;
+}
+
+async function saveMood() {
+    const moodValue = parseInt(document.getElementById('moodSlider').value);
+    const note = ''; // Заметка не обязательна
+
+    try {
+        // Сохраняем настроение дня
+        const response = await fetch(API_BASE, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                date: currentDate,
+                mood: moodValue,
+                note: note  // ← ЭТО БЫЛО ПРОПУЩЕНО!
+            })
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Ошибка сохранения общего настроения');
+        }
+
+        // Получаем ответ от сервера (там может быть id новой записи)
+        const data = await response.json();
+        
+        // Сохраняем почасовое настроение
+        await fetch(HOURLY_MOODS_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                date: currentDate,
+                hour: new Date(currentDate).getHours(), 
+                mood: moodValue,
+                note: note
+            })
+        });
+
+        // Обновляем currentMood
+        currentMood = {
+            id: currentMood?.id || data.id, // Если есть id из ответа
+            mood: moodValue,
+            note: note,
+            date: currentDate
+        };
+
+        // Показываем блок с настроением
+        showMoodDisplay(currentMood);
+        
+        // Обновляем остальные данные
+        await updateHourlyMoods();
+        showToast('Настроение сохранено!', 'success');
+        // Обновляем данные в календаре (если он открыт в другой вкладке)
+        if (window.opener && window.opener.refreshCalendarData) {
+          window.opener.refreshCalendarData();
+        }
+    } catch (error) {
+        console.error(error);
+        showToast('Ошибка: ' + error.message, 'error');
+    }
+}
+
+async function deleteMood() {
+    if (!currentMood || !confirm('Удалить запись о настроении?')) return;
+
+    try {
+        const response = await fetch(`${API_BASE}/${currentMood.id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            currentMood = null;
+            showNoMood();  // ← ВОЗВРАЩАЕМСЯ К СОСТОЯНИЮ "НЕТ НАСТРОЕНИЯ"
+            await updateHourlyMoods();
+            showToast('Запись удалена!', 'success');
+        // Обновляем данные в календаре
+        if (window.opener && window.opener.refreshCalendarData) {
+            window.opener.refreshCalendarData();
+        }
+        } else {
+            throw new Error('Ошибка удаления');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('Ошибка удаления записи', 'error');
+    }
+}
+// Функции для работы с радостными моментами
+async function loadPositiveThings() {
+    try {
+        const response = await fetch(JOYS_API);
+        if (response.ok) {
+            const joys = await response.json();
+            // Фильтруем радости по текущей дате
+            positiveThings = joys.filter(joy => {
+                const joyDate = new Date(joy.created_at).toISOString().split('T')[0];
+                return joyDate === currentDate;
+            });
+            renderPositiveList();
+        } else {
+            throw new Error('Ошибка загрузки радостных моментов');
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки радостных моментов:', error);
+        positiveThings = [];
+        renderPositiveList();
+    }
+}
+
+function renderPositiveList() {
+    const positiveList = document.getElementById('positiveList');
+    
+    if (positiveThings.length === 0) {
+        positiveList.innerHTML = `
+            <div class="empty-positive">
+                <i class="fas fa-sun"></i>
+                <p>Пока нет записей о радостных моментах</p>
+                <small>Добавьте что-то, что вас сегодня порадовало!</small>
+            </div>
+        `;
+    } else {
+        positiveList.innerHTML = positiveThings.map((item, index) => `
+            <div class="positive-item">
+                <div class="positive-item-content">
+                    <div class="positive-item-text">
+                        <strong>${item.text}</strong>
+                    </div>
+                    ${item.created_at ? `<div class="time-note" style="margin-top: 5px;">${new Date(item.created_at).toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'})}</div>` : ''}
+                </div>
+                <div class="positive-item-actions">
+                    <button class="positive-item-btn delete-btn" onclick="deletePositiveThing(${item.id})" title="Удалить">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+}
+
+async function addPositiveThing() {
+    const input = document.getElementById('positiveInput');
+    const text = input.value.trim();
+    
+    if (!text) {
+        showToast('Введите описание радостного момента', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch(JOYS_API, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                text: text,
+                date: currentDate  // ← ДОБАВЛЯЕМ ДАТУ!
+            })
+        });
+
+        if (response.ok) {
+            const newJoy = await response.json();
+            // Добавляем дату в объект для фильтрации
+            newJoy.date = currentDate;
+            positiveThings.unshift(newJoy);
+            
+            input.value = '';
+            renderPositiveList();
+            showToast('Радостный момент добавлен! 🌟');
+        } else {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Ошибка сохранения');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('Ошибка добавления радостного момента: ' + error.message, 'error');
+    }
+}
+
+async function deletePositiveThing(joyId) {
+    if (!confirm('Удалить этот радостный момент?')) return;
+
+    try {
+        const response = await fetch(`${JOYS_API}/${joyId}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            // Удаляем из локального массива
+            positiveThings = positiveThings.filter(item => item.id !== joyId);
+            renderPositiveList();
+            showToast('Запись удалена');
+        } else {
+            throw new Error('Ошибка удаления');
+        }
+    } catch (error) {
+        console.error('Ошибка:', error);
+        showToast('Ошибка удаления записи', 'error');
+    }
+}
+
+// Функции для работы с почасовым настроением
+async function updateHourlyMoods() {
+    try {
+        console.log('🕒 Загрузка почасового настроения для даты:', currentDate);
+        const response = await fetch(`${HOURLY_MOODS_API}?date=${currentDate}`);
+        
+        console.log('📡 Статус ответа:', response.status);
+        
+        if (response.ok) {
+            const hourlyData = await response.json();
+            console.log('✅ Получены данные почасового настроения:', hourlyData);
+            
+            hourlyMoods = {};
+            
+            // Заполняем объект hourlyMoods данными из базы
+            hourlyData.forEach(entry => {
+                hourlyMoods[entry.hour] = {
+                    id: entry.id,
+                    mood: entry.mood,
+                    note: entry.note
+                };
+            });
+            
+            console.log('📊 hourlyMoods объект:', hourlyMoods);
+            
+            // Обновляем отображение
+            renderHourlyMoods();
+        } else {
+            console.error('❌ Ошибка HTTP:', response.status, response.statusText);
+            const errorText = await response.text();
+            console.error('❌ Текст ошибки:', errorText);
+            throw new Error('Ошибка загрузки почасового настроения');
+        }
+    } catch (error) {
+        console.error('❌ Ошибка загрузки почасового настроения:', error);
+        hourlyMoods = {};
+        renderHourlyMoods();
+    }
+}
+
+function renderHourlyMoods() {
+    console.log('🎨 Отрисовка почасового настроения. Данные:', hourlyMoods);
+    
+    let updatedCount = 0;
+    
+    // Обновляем отображение всех часов
+    for (let hour = 0; hour < 24; hour++) {
+        const hourItem = document.querySelector(`[data-hour="${hour}"]`);
+        const moodElement = document.getElementById(`hourMood${hour}`);
+        const noteElement = document.getElementById(`hourNote${hour}`);
+        
+        if (hourItem && moodElement && noteElement) {
+            if (hourlyMoods[hour]) {
+                const moodData = hourlyMoods[hour];
+                console.log(`🕐 Час ${hour}: настроение ${moodData.mood}, заметка: "${moodData.note}"`);
+                
+                moodElement.textContent = getMoodEmoji(moodData.mood);
+                noteElement.textContent = moodData.note || '';
+                
+                // Устанавливаем классы в зависимости от настроения
+                hourItem.className = 'hour-item active';
+                hourItem.classList.add(getMoodColorClass(moodData.mood));
+                
+                updatedCount++;
+            } else {
+                moodElement.textContent = '-';
+                noteElement.textContent = '';
+                
+                // Сбрасываем классы
+                hourItem.className = 'hour-item';
+                hourItem.classList.remove('mood-good', 'mood-neutral', 'mood-bad', 'active');
+            }
+        } else {
+            console.warn(`⚠️ Не найден элемент для часа ${hour}`);
+        }
+    }
+    
+    console.log(`✅ Обновлено ${updatedCount} часов из 24`);
+}
+
+async function selectHour(hour) {
+    console.log('🎯 Выбран час:', hour);
+    
+    const moodInput = prompt(`Введите настроение для ${hour.toString().padStart(2, '0')}:00 (1-10):`);
+    if (moodInput && moodInput >= 1 && moodInput <= 10) {
+        const mood = parseInt(moodInput);
+        const note = prompt('Добавьте заметку (необязательно):') || '';
+        
+        console.log('💾 Сохранение настроения:', { 
+            date: currentDate, 
+            hour: hour, 
+            mood: mood, 
+            note: note 
+        });
+        
+        try {
+            const response = await fetch(HOURLY_MOODS_API, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    date: currentDate,
+                    hour: hour,
+                    mood: mood,
+                    note: note
+                })
+            });
+
+            console.log('📡 Ответ сервера:', response.status, response.statusText);
+
+            if (response.ok) {
+                console.log('✅ Настроение успешно сохранено в базу');
+                // Обновляем локальные данные и перерисовываем
+                await updateHourlyMoods();
+                showToast(`Настроение для ${hour.toString().padStart(2, '0')}:00 сохранено!`);
+            } else {
+                const errorData = await response.json();
+                console.error('❌ Ошибка сервера:', errorData);
+                throw new Error(errorData.error || 'Ошибка сохранения');
+            }
+        } catch (error) {
+            console.error('❌ Ошибка:', error);
+            showToast('Ошибка сохранения настроения: ' + error.message, 'error');
+        }
+    }
+}
+
+function init24HourTracking() {
+    const hoursGrid = document.getElementById('hoursGrid');
+    if (!hoursGrid) {
+        console.error('❌ Не найден элемент hoursGrid');
+        return;
+    }
+    
+    console.log('🎯 Инициализация 24-часовой сетки');
+    
+    let html = '';
+    for (let hour = 0; hour < 24; hour++) {
+        const hourDisplay = hour.toString().padStart(2, '0');
+        html += `
+            <div class="hour-item" data-hour="${hour}" onclick="selectHour(${hour})">
+                <div class="hour-time">${hourDisplay}:00</div>
+                <div class="hour-mood" id="hourMood${hour}">-</div>
+                <div class="time-note" id="hourNote${hour}"></div>
+            </div>
+        `;
+    }
+    hoursGrid.innerHTML = html;
+    console.log('✅ 24-часовая сетка создана');
+}
+
+function goBack() {
+    window.location.href = "{{ url_for('main.calendar') }}";
+}
+
+function showToast(message, type = 'info') {
+    // Создаем простой toast
+    const toast = document.createElement('div');
+    toast.className = `toast ${type === 'error' ? 'error' : ''}`;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    
+    // Показываем toast
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 10);
+    
+    // Убираем через 3 секунды
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
+
+function showError(message) {
+    document.getElementById('dayTitle').textContent = 'Ошибка';
+    const moodDisplay = document.getElementById('moodDisplay');
+    moodDisplay.innerHTML = `<div class="no-mood"><p>${message}</p></div>`;
+}
+</script>
+</body>
+</html>

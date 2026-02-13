@@ -656,15 +656,16 @@ def chatbot(conn):
             else:
                 return jsonify({'response': "У тебя пока нет заметок 😔"})
 
-        if "цели" in user_message:
+        if any(word in user_message for word in ["цели", "задачи", "планы"]):
             goals = get_user_goals(conn, user_id)
-            if goals:
-                goals_text = "\n".join([f"{g['created_at']}: {g['goal']} ({g['status']})" for g in goals])
-                return jsonify({'response': f"Вот твои цели:\n{goals_text}"})
-            else:
-                return jsonify({'response': "У тебя пока нет целей 😔"})
-
-        # Если не команда — обычный анализ
+        if goals:
+            goals_text = "\n".join([
+                f"{g['created_at'].strftime('%d.%m.%Y') if isinstance(g['created_at'], datetime) else g['created_at']}: {g['goal']} ({g['status']})"
+                for g in goals
+                ])
+            return jsonify({'response': f"Вот твои цели:\n{goals_text}"})
+        else:
+            return jsonify({'response': "У тебя пока нет целей 😔"})
         stats = generate_user_statistics(conn, user_id)
         ai_response = generate_ai_insights(stats)
         fallback_response = get_fallback_response(user_message)

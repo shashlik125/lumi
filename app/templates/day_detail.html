@@ -886,7 +886,7 @@ function updateMoodPreview() {
 
 async function saveMood() {
     const moodValue = parseInt(document.getElementById('moodSlider').value);
-    const note = '';
+    const note = ''; // Заметка не обязательна
 
     try {
         // Сохраняем настроение дня
@@ -896,6 +896,7 @@ async function saveMood() {
             body: JSON.stringify({
                 date: currentDate,
                 mood: moodValue,
+                note: note  // ← ЭТО БЫЛО ПРОПУЩЕНО!
             })
         });
 
@@ -904,6 +905,9 @@ async function saveMood() {
             throw new Error(err.error || 'Ошибка сохранения общего настроения');
         }
 
+        // Получаем ответ от сервера (там может быть id новой записи)
+        const data = await response.json();
+        
         // Сохраняем почасовое настроение
         await fetch(HOURLY_MOODS_API, {
             method: 'POST',
@@ -916,8 +920,19 @@ async function saveMood() {
             })
         });
 
+        // Обновляем currentMood
+        currentMood = {
+            id: currentMood?.id || data.id, // Если есть id из ответа
+            mood: moodValue,
+            note: note,
+            date: currentDate
+        };
+
+        // Показываем блок с настроением
+        showMoodDisplay(currentMood);
+        
+        // Обновляем остальные данные
         await updateHourlyMoods();
-        await loadDayData();
         showToast('Настроение сохранено!', 'success');
 
     } catch (error) {
@@ -935,7 +950,9 @@ async function deleteMood() {
         });
 
         if (response.ok) {
-            await loadDayData();
+            currentMood = null;
+            showNoMood();  // ← ВОЗВРАЩАЕМСЯ К СОСТОЯНИЮ "НЕТ НАСТРОЕНИЯ"
+            await updateHourlyMoods();
             showToast('Запись удалена!', 'success');
         } else {
             throw new Error('Ошибка удаления');
@@ -945,7 +962,6 @@ async function deleteMood() {
         showToast('Ошибка удаления записи', 'error');
     }
 }
-
 // Функции для работы с радостными моментами
 async function loadPositiveThings() {
     try {

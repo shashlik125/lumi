@@ -1017,7 +1017,16 @@ async function updateStats() {
         if (filledDaysElement) filledDaysElement.textContent = `0/${daysInMonth}`;
     }
 }
+// Принудительная перезагрузка данных календаря
+async function refreshCalendarData() {
+    console.log('🔄 Принудительная перезагрузка данных календаря...');
+    await loadMoodData();
+    renderCalendar();
+    updateStats();
+}
 
+// Делаем функцию глобальной
+window.refreshCalendarData = refreshCalendarData;
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', async function() {
     try {

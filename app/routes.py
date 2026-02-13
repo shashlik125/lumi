@@ -659,11 +659,12 @@ def chatbot(conn):
 
         if any(word in user_message for word in ["цели", "задачи", "планы"]):
             goals = get_user_goals(conn, user_id)
+            print(f"DEBUG goals from DB: {goals}") 
             if goals:
                 goals_text = "\n".join([
                     f"{g['created_at'].strftime('%d.%m.%Y') if isinstance(g['created_at'], datetime) else g['created_at']}: {g['goal']} ({g['status']})"
                     for g in goals
-                    ])
+                ])
                 return jsonify({'response': f"Вот твои цели:\n{goals_text}"})
             else:
                 return jsonify({'response': "У тебя пока нет целей 😔"})

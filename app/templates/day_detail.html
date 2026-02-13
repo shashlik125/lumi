@@ -1349,9 +1349,38 @@ async function addGoal() {
   renderGoal(data);
 }
 
+
 function renderGoal(goal) {
   const list = document.getElementById("goalList");
-  list.innerHTML += `<div class="item">🎯 ${goal.text}</div>`;
+  list.innerHTML += `
+    <div class="positive-item">
+      <label style="display:flex; align-items:center; gap:10px;">
+        <input 
+          type="checkbox"
+          ${goal.completed ? "checked" : ""}
+          onchange="toggleGoalStatus(${goal.id}, this.checked)"
+        >
+        <span>${goal.text}</span>
+      </label>
+    </div>
+  `;
+}
+
+// Эта функция глобальная
+async function toggleGoalStatus(goalId, isDone) {
+  const res = await fetch(`/api/goals/${goalId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      completed: isDone
+    })
+  });
+
+  if (!res.ok) {
+    showToast("Ошибка при обновлении цели", "error");
+  }
 }
 
 </script>

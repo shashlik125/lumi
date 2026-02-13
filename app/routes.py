@@ -1059,6 +1059,24 @@ def goals(conn):
         except Error as e:
             print(f"Database error in goals POST: {e}")
             return jsonify({'error': str(e)}), 500
+        
+        
+@main.route("/api/goals/<int:goal_id>", methods=["PUT"])
+@login_required
+@with_db_connection
+def update_goal_status(conn, goal_id):
+    data = request.get_json()
+    completed = data.get("completed")
+
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE goals SET completed=%s WHERE id=%s AND user_id=%s",
+        (completed, goal_id, current_user.id)
+    )
+    conn.commit()
+    cursor.close()
+
+    return jsonify({"success": True})        
 
 
 @main.route('/api/goals/<int:goal_id>/toggle', methods=['POST'])

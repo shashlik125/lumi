@@ -973,24 +973,30 @@ def stats(conn):
 def today_mood(conn):
     try:
         today = datetime.now().date().isoformat()
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute(
-            "SELECT mood, note FROM mood_entries WHERE user_id = %s AND date = %s",
-            (current_user.id, today)
-        )
-        mood_entry = cursor.fetchone()
-        cursor.close()
-        
+
+        # Используем with для курсора, чтобы он точно закрылся
+        with conn.cursor(dictionary=True) as cursor:
+            cursor.execute(
+                "SELECT mood, note FROM mood_entries WHERE user_id = %s AND date = %s",
+                (current_user.id, today)
+            )
+            mood_entry = cursor.fetchone()
+
+        # Проверяем, есть ли запись
         if mood_entry:
+            mood_value = mood_entry.get('mood')
             return jsonify({
-                'mood': float(mood_entry['mood']),
+                'mood': float(mood_value) if mood_value is not None else None,
                 'note': mood_entry.get('note', '')
             })
         else:
             return jsonify({'mood': None, 'note': ''})
-        
+
     except Error as e:
         print(f"Database error in today_mood: {e}")
+        return jsonify({'error': str(e)}), 500
+    except Exception as e:
+        print(f"Unexpected error in today_mood: {e}")
         return jsonify({'error': str(e)}), 500
 
 

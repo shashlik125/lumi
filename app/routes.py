@@ -643,6 +643,8 @@ def chatbot(conn):
     user_id = data.get('user_id')
     user_message = data.get('message', '').strip().lower()
 
+    print(f"DEBUG user_message: '{user_message}'")
+
     if not user_id or not user_message:
         return jsonify({'error': 'user_id или message отсутствуют'}), 400
 

@@ -148,7 +148,9 @@ def generate_user_statistics(conn, user_id):
     all_notes_text = []
     
     for note in notes_data:
-        note_text = note['note'].lower()
+        note_text = note.get('note', '')  # безопасно, если note нет или None
+        if isinstance(note_text, str) and note_text.strip():  # проверяем, что это непустая строка
+            note_text = note_text.lower()
         all_notes_text.append(note_text)
         
         # Считаем ключевые слова
@@ -160,10 +162,17 @@ def generate_user_statistics(conn, user_id):
             keyword_counts['neutral'] += 1
         
         # Разделяем по времени (последние 7 дней)
-        note_date = note['date']
+        note_date = note.get('date')
         if isinstance(note_date, str):
-            note_date = datetime.strptime(note_date, '%Y-%m-%d').date()
-        
+            try:
+                note_date = datetime.strptime(note_date, '%Y-%m-%d').date()
+            except ValueError:
+                continue  # если дата в неверном формате, пропускаем
+        elif isinstance(note_date, datetime):
+            note_date = note_date.date()
+        else:
+            continue  # если дата вообще не строка и не datetime, пропускаем
+
         if note_date >= datetime.now().date() - timedelta(days=7):
             if any(keyword in note_text for keyword in positive_keywords):
                 recent_positive += 1

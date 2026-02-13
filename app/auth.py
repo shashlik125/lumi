@@ -25,13 +25,15 @@ def login():
 @auth.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
+        # Получаем данные из формы регистрации
         first_name = request.form.get('first_name')
         last_name = request.form.get('last_name')
         username = request.form.get('username')
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
-        gender = request.form.get('gender')  # Получаем пол из формы
+        gender = request.form.get('gender')  # Пол пользователя
 
+        # ======== ВАЛИДАЦИЯ ДАННЫХ =========
         if password != confirm_password:
             flash('Пароли не совпадают', 'error')
             return render_template('register.html')
@@ -44,18 +46,17 @@ def register():
             flash('Логин должен содержать не менее 3 символов', 'error')
             return render_template('register.html')
         
-        # Проверяем, что пол был выбран
         if gender not in ['male', 'female']:
             flash('Пожалуйста, выберите ваш пол', 'error')
             return render_template('register.html')
 
+        # ======== ПРОВЕРКА, СУЩЕСТВУЕТ ЛИ ПОЛЬЗОВАТЕЛЬ =========
         existing_user = User.get_by_username(username)
         if existing_user:
             flash('Пользователь с таким логином уже существует', 'error')
             return render_template('register.html')
 
-        # Создаем пользователя с передачей пола
-        # Используем именованные аргументы для надежности
+        # ======== СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ =========
         user = User.create(
             username=username,
             password=password,
@@ -65,6 +66,24 @@ def register():
         )
         
         if user:
+            # ======== СОЗДАНИЕ DEFOLT CYCLE_SETTINGS ДЛЯ ЖЕНЩИН =========
+            if user.gender == 'female':
+                conn = get_db()  # Получаем соединение с базой
+                try:
+                    cursor = conn.cursor()
+                    cursor.execute("""
+                        INSERT INTO cycle_settings
+                        (user_id, cycle_length, period_length, notify_before_period, notify_ovulation)
+                        VALUES (%s, %s, %s, %s, %s)
+                    """, (user.id, 28, 5, True, True))
+                    conn.commit()
+                    cursor.close()
+                except Error as e:
+                    print(f"Database error while creating cycle_settings: {e}")
+                finally:
+                    close_db(conn)  # Закрываем соединение
+
+            # ======== ВХОД ПОЛЬЗОВАТЕЛЯ =========
             login_user(user)
             flash('Регистрация прошла успешно!', 'success')
             return redirect(url_for('main.dashboard'))

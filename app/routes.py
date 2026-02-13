@@ -686,6 +686,7 @@ def chatbot(conn):
         if any(word in user_message for word in ["цели", "задачи", "планы"]):
             print("DEBUG: команда цели распознана")
             goals = get_user_goals(conn, user_id)
+            print(f"DEBUG: goals from DB: {goals}")
             if goals:
                 goals_text = "\n".join([
                     f"{g['created_at'].strftime('%d.%m.%Y') if isinstance(g['created_at'], datetime) else g['created_at']}: {g['text']} ({'выполнено' if g['completed'] else 'не выполнено'})"

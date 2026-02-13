@@ -1462,7 +1462,6 @@ def delete_avatar():
 
 
 # ================== API МАРШРУТЫ ДЛЯ МЕНСТРУАЛЬНОГО ЦИКЛА ==================
-
 @main.route('/api/cycle_entries', methods=['GET', 'POST'])
 @login_required
 @with_db_connection
@@ -1470,75 +1469,64 @@ def cycle_entries(conn):
     if request.method == 'GET':
         try:
             date_filter = request.args.get('date')
-            
+            query = """
+                SELECT id, user_id, date, cycle_day, symptoms, flow_intensity, mood, notes
+                FROM cycle_entries
+                WHERE user_id = %s
+            """
+            params = [current_user.id]
+
             if date_filter:
-                cursor = conn.cursor(dictionary=True)
-                cursor.execute(
-                    "SELECT id, user_id, date, cycle_day, symptoms, flow_intensity, mood, notes FROM cycle_entries WHERE user_id = %s AND date = %s",
-                    (current_user.id, date_filter)
-                )
+                query += " AND date = %s"
+                params.append(date_filter)
             else:
-                cursor = conn.cursor(dictionary=True)
-                cursor.execute(
-                    "SELECT id, user_id, date, cycle_day, symptoms, flow_intensity, mood, notes FROM cycle_entries WHERE user_id = %s ORDER BY date DESC",
-                    (current_user.id,)
-                )
-            
-            entries = cursor.fetchall()
-            
+                query += " ORDER BY date DESC"
+
+            with conn.cursor(dictionary=True) as cursor:
+                cursor.execute(query, params)
+                entries = cursor.fetchall()
+
             # Обрабатываем JSON симптомы
             for entry in entries:
-                if entry['symptoms']:
-                    try:
-                        entry['symptoms'] = json.loads(entry['symptoms'])
-                    except:
-                        entry['symptoms'] = []
-                else:
-                    entry['symptoms'] = []
-                
-                if entry['date']:
+                entry['symptoms'] = json.loads(entry['symptoms']) if entry.get('symptoms') else []
+                if entry.get('date'):
                     entry['date'] = entry['date'].isoformat()
-            
-            cursor.close()
+
             return jsonify(entries)
         except Error as e:
             print(f"Database error in cycle_entries GET: {e}")
             return jsonify({'error': str(e)}), 500
-            
+
     elif request.method == 'POST':
         try:
             data = request.get_json()
             if not data:
                 return jsonify({'error': 'No data provided'}), 400
-                
+
             date = data.get('date')
+            if not date:
+                return jsonify({'error': 'Date is required'}), 400
+
             cycle_day = data.get('cycle_day')
-            symptoms = data.get('symptoms', [])
+            symptoms_json = json.dumps(data.get('symptoms', [])) if data.get('symptoms') else None
             flow_intensity = data.get('flow_intensity')
             mood = data.get('mood')
             notes = data.get('notes', '')
-            
-            if not date:
-                return jsonify({'error': 'Date is required'}), 400
-            
-            symptoms_json = json.dumps(symptoms) if symptoms else None
-            
-            cursor = conn.cursor()
-            cursor.execute(
-                """INSERT INTO cycle_entries 
-                (user_id, date, cycle_day, symptoms, flow_intensity, mood, notes) 
-                VALUES (%s, %s, %s, %s, %s, %s, %s)
-                ON DUPLICATE KEY UPDATE 
-                cycle_day = VALUES(cycle_day), 
-                symptoms = VALUES(symptoms),
-                flow_intensity = VALUES(flow_intensity),
-                mood = VALUES(mood),
-                notes = VALUES(notes)""",
-                (current_user.id, date, cycle_day, symptoms_json, flow_intensity, mood, notes)
-            )
-            conn.commit()
-            cursor.close()
-            
+
+            with conn.cursor() as cursor:
+                cursor.execute("""
+                    INSERT INTO cycle_entries
+                    (user_id, date, cycle_day, symptoms, flow_intensity, mood, notes)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE
+                        cycle_day = VALUES(cycle_day),
+                        symptoms = VALUES(symptoms),
+                        flow_intensity = VALUES(flow_intensity),
+                        mood = VALUES(mood),
+                        notes = VALUES(notes)
+                """, (current_user.id, date, cycle_day, symptoms_json, flow_intensity, mood, notes))
+                conn.commit()
+
             return jsonify({'message': 'Данные цикла сохранены успешно'})
         except Error as e:
             print(f"Database error in cycle_entries POST: {e}")
@@ -1550,20 +1538,15 @@ def cycle_entries(conn):
 @with_db_connection
 def delete_cycle_entry(conn, date):
     try:
-        print(f"🗑️ DELETE request for date: {date}, user_id: {current_user.id}")
-        
-        cursor = conn.cursor()
-        cursor.execute(
-            "DELETE FROM cycle_entries WHERE date = %s AND user_id = %s",
-            (date, current_user.id)
-        )
-        affected_rows = cursor.rowcount
-        conn.commit()
-        cursor.close()
-        
-        print(f"✅ Deleted {affected_rows} rows for date {date}")
-        return jsonify({'success': True, 'deleted': affected_rows})
-        
+        with conn.cursor() as cursor:
+            cursor.execute(
+                "DELETE FROM cycle_entries WHERE date = %s AND user_id = %s",
+                (date, current_user.id)
+            )
+            deleted = cursor.rowcount
+            conn.commit()
+
+        return jsonify({'success': True, 'deleted': deleted})
     except Error as e:
         print(f"Database error in delete_cycle_entry: {e}")
         return jsonify({'error': str(e)}), 500
@@ -1575,63 +1558,64 @@ def delete_cycle_entry(conn, date):
 def cycle_settings(conn):
     if request.method == 'GET':
         try:
-            cursor = conn.cursor(dictionary=True)
-            cursor.execute(
-                "SELECT * FROM cycle_settings WHERE user_id = %s",
-                (current_user.id,)
-            )
-            settings = cursor.fetchone()
-            cursor.close()
-            
-            if settings and settings['last_period_start']:
+            with conn.cursor(dictionary=True) as cursor:
+                cursor.execute("SELECT * FROM cycle_settings WHERE user_id = %s", (current_user.id,))
+                settings = cursor.fetchone()
+
+            if settings and settings.get('last_period_start'):
                 settings['last_period_start'] = settings['last_period_start'].isoformat()
-            
+
             return jsonify(settings or {})
         except Error as e:
             print(f"Database error in cycle_settings GET: {e}")
             return jsonify({'error': str(e)}), 500
-            
+
     elif request.method == 'PUT':
         try:
             data = request.get_json()
             if not data:
                 return jsonify({'error': 'No data provided'}), 400
-            
-            cursor = conn.cursor()
-            
-            # Проверяем существующие настройки
-            cursor.execute("SELECT id FROM cycle_settings WHERE user_id = %s", (current_user.id,))
-            existing = cursor.fetchone()
-            
-            if existing:
-                # Обновляем существующие
-                cursor.execute(
-                    """UPDATE cycle_settings SET 
-                    cycle_length = %s, period_length = %s, last_period_start = %s,
-                    notify_before_period = %s, notify_ovulation = %s
-                    WHERE user_id = %s""",
-                    (data.get('cycle_length'), data.get('period_length'), data.get('last_period_start'),
-                    data.get('notify_before_period'), data.get('notify_ovulation'), current_user.id)
-                )
-            else:
-                # Создаем новые
-                cursor.execute(
-                    """INSERT INTO cycle_settings 
-                    (user_id, cycle_length, period_length, last_period_start, notify_before_period, notify_ovulation)
-                    VALUES (%s, %s, %s, %s, %s, %s)""",
-                    (current_user.id, data.get('cycle_length', 28), data.get('period_length', 5), 
-                    data.get('last_period_start'), data.get('notify_before_period', True), 
-                    data.get('notify_ovulation', True))
-                )
-            
-            conn.commit()
-            cursor.close()
+
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT id FROM cycle_settings WHERE user_id = %s", (current_user.id,))
+                existing = cursor.fetchone()
+
+                if existing:
+                    cursor.execute("""
+                        UPDATE cycle_settings SET
+                            cycle_length = %s,
+                            period_length = %s,
+                            last_period_start = %s,
+                            notify_before_period = %s,
+                            notify_ovulation = %s
+                        WHERE user_id = %s
+                    """, (
+                        data.get('cycle_length'),
+                        data.get('period_length'),
+                        data.get('last_period_start'),
+                        data.get('notify_before_period'),
+                        data.get('notify_ovulation'),
+                        current_user.id
+                    ))
+                else:
+                    cursor.execute("""
+                        INSERT INTO cycle_settings
+                        (user_id, cycle_length, period_length, last_period_start, notify_before_period, notify_ovulation)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                    """, (
+                        current_user.id,
+                        data.get('cycle_length', 28),
+                        data.get('period_length', 5),
+                        data.get('last_period_start'),
+                        data.get('notify_before_period', True),
+                        data.get('notify_ovulation', True)
+                    ))
+                conn.commit()
+
             return jsonify({'message': 'Настройки цикла обновлены'})
         except Error as e:
             print(f"Database error in cycle_settings PUT: {e}")
             return jsonify({'error': str(e)}), 500
-
-
 
 
 # ================== CYCLE STATS ==================
@@ -1640,25 +1624,21 @@ def cycle_settings(conn):
 @with_db_connection
 def cycle_stats(conn):
     try:
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("""
-            SELECT 
-                COUNT(*) as total_entries,
-                AVG(mood) as avg_mood,
-                COUNT(CASE WHEN flow_intensity IN ('medium', 'heavy') THEN 1 END) as period_days
-            FROM cycle_entries 
-            WHERE user_id = %s
-        """, (current_user.id,))
-        stats = cursor.fetchone()
-        cursor.close()
-
-        if not stats:
-            stats = {'total_entries': 0, 'avg_mood': 0, 'period_days': 0}
+        with conn.cursor(dictionary=True) as cursor:
+            cursor.execute("""
+                SELECT 
+                    COUNT(*) as total_entries,
+                    AVG(mood) as avg_mood,
+                    COUNT(CASE WHEN flow_intensity IN ('medium', 'heavy') THEN 1 END) as period_days
+                FROM cycle_entries
+                WHERE user_id = %s
+            """, (current_user.id,))
+            stats = cursor.fetchone() or {}
 
         return jsonify({
-            'total_entries': stats['total_entries'] or 0,
-            'avg_mood': round(float(stats['avg_mood'] or 0), 1),
-            'period_days': stats['period_days'] or 0
+            'total_entries': stats.get('total_entries', 0),
+            'avg_mood': round(float(stats.get('avg_mood') or 0), 1),
+            'period_days': stats.get('period_days', 0)
         })
     except Error as e:
         print(f"Database error in cycle_stats: {e}")
@@ -1671,10 +1651,9 @@ def cycle_stats(conn):
 @with_db_connection
 def cycle_predictions(conn):
     try:
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM cycle_settings WHERE user_id = %s", (current_user.id,))
-        settings = cursor.fetchone()
-        cursor.close()
+        with conn.cursor(dictionary=True) as cursor:
+            cursor.execute("SELECT * FROM cycle_settings WHERE user_id = %s", (current_user.id,))
+            settings = cursor.fetchone()
 
         if not settings or not settings.get('last_period_start'):
             return jsonify({'error': 'Недостаточно данных для прогноза'}), 400

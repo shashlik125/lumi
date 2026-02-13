@@ -627,6 +627,34 @@ def get_fallback_response(user_message):
     return random.choice(general_responses)
 
 
+@main.route('/api/chatbot', methods=['POST'])
+@with_db_connection
+def chatbot(conn):
+    data = request.get_json()
+    user_id = data.get('user_id')
+    user_message = data.get('message', '').strip()
+
+    if not user_id or not user_message:
+        return jsonify({'error': 'user_id или message отсутствуют'}), 400
+
+    try:
+        # Получаем статистику пользователя
+        stats = generate_user_statistics(conn, user_id)
+        # Генерируем умные выводы
+        ai_response = generate_ai_insights(stats)
+
+        # Если пользователь написал что-то конкретное, возвращаем fallback
+        fallback_response = get_fallback_response(user_message)
+
+        # Смешиваем ответы (AI + fallback)
+        final_response = f"{fallback_response}\n\n{ai_response}"
+
+        return jsonify({'response': final_response})
+    except Exception as e:
+        print(f"Ошибка в chatbot: {e}")
+        return jsonify({'response': get_fallback_response(user_message)})
+
+
 # ================== ОСНОВНЫЕ МАРШРУТЫ СТРАНИЦ ==================
 
 @main.route('/')

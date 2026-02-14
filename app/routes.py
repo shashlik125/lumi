@@ -759,31 +759,29 @@ def cycle_diary():
 
 # ================== API МАРШРУТЫ ДЛЯ НАСТРОЕНИЯ ==================
 
+# ================== MOOD ENTRIES ==================
 @main.route('/api/mood_entries', methods=['GET', 'POST'])
 @login_required
 @with_db_connection
 def mood_entries(conn):
     if request.method == 'GET':
         try:
-            # ДОБАВЛЕНА ВОЗМОЖНОСТЬ ФИЛЬТРАЦИИ ПО ДАТЕ
             date_filter = request.args.get('date')
-            
+
+            cursor = conn.cursor(buffered=True, dictionary=True)  # buffered=True чтобы избежать "Unread result found"
             if date_filter:
-                cursor = conn.cursor(dictionary=True)
                 cursor.execute(
                     "SELECT id, user_id, date, mood, note, created_at FROM mood_entries WHERE user_id = %s AND date = %s ORDER BY date DESC",
                     (current_user.id, date_filter)
                 )
             else:
-                cursor = conn.cursor(dictionary=True)
                 cursor.execute(
                     "SELECT id, user_id, date, mood, note, created_at FROM mood_entries WHERE user_id = %s ORDER BY date DESC",
                     (current_user.id,)
                 )
-            
+
             entries = cursor.fetchall()
-            
-            # Преобразуем Decimal в float для JSON
+
             for entry in entries:
                 if 'mood' in entry and entry['mood'] is not None:
                     entry['mood'] = float(entry['mood'])
@@ -791,55 +789,52 @@ def mood_entries(conn):
                     entry['date'] = entry['date'].isoformat()
                 if 'created_at' in entry and entry['created_at']:
                     entry['created_at'] = entry['created_at'].isoformat()
-            
+
             cursor.close()
             return jsonify(entries)
         except Error as e:
             print(f"Database error in mood_entries GET: {e}")
             return jsonify({'error': str(e)}), 500
-            
+
     elif request.method == 'POST':
         try:
             data = request.get_json()
             if not data:
                 return jsonify({'error': 'No data provided'}), 400
-                
+
             date = data.get('date')
             mood = data.get('mood')
             note = data.get('note', '')
-            
+
             if not date or mood is None:
                 return jsonify({'error': 'Date and mood are required'}), 400
-            
-            cursor = conn.cursor()
+
+            cursor = conn.cursor(buffered=True)
             cursor.execute(
-                """INSERT INTO mood_entries (user_id, date, mood, note) 
-                VALUES (%s, %s, %s, %s) 
+                """INSERT INTO mood_entries (user_id, date, mood, note)
+                VALUES (%s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE mood = VALUES(mood), note = VALUES(note)""",
                 (current_user.id, date, float(mood), note)
             )
             conn.commit()
+
             cursor.execute("SELECT LAST_INSERT_ID() as id")
             result = cursor.fetchone()
             new_id = result[0] if result else None
-            cursor.close()  # ← ПЕРЕНОСИМ СЮДА
+            cursor.close()
 
-            return jsonify({
-                'message': 'Настроение сохранено успешно',
-                'id': new_id
-            })  
+            return jsonify({'message': 'Настроение сохранено успешно', 'id': new_id})
         except Error as e:
             print(f"Database error in mood_entries POST: {e}")
             return jsonify({'error': str(e)}), 500
 
 
-# ДОБАВЛЕН МАРШРУТ ДЛЯ УДАЛЕНИЯ ЗАПИСИ НАСТРОЕНИЯ
 @main.route('/api/mood_entries/<int:mood_id>', methods=['DELETE'])
 @login_required
 @with_db_connection
 def delete_mood_entry(conn, mood_id):
     try:
-        cursor = conn.cursor()
+        cursor = conn.cursor(buffered=True)
         cursor.execute(
             "DELETE FROM mood_entries WHERE id = %s AND user_id = %s",
             (mood_id, current_user.id)
@@ -852,7 +847,7 @@ def delete_mood_entry(conn, mood_id):
         return jsonify({'error': str(e)}), 500
 
 
-# API маршруты для почасового настроения
+# ================== HOURLY MOODS ==================
 @main.route('/api/hourly_moods', methods=['GET', 'POST'])
 @login_required
 @with_db_connection
@@ -860,53 +855,50 @@ def hourly_moods(conn):
     if request.method == 'GET':
         try:
             date_filter = request.args.get('date')
-            
             if not date_filter:
                 return jsonify({'error': 'Date parameter is required'}), 400
-                
-            cursor = conn.cursor(dictionary=True)
+
+            cursor = conn.cursor(buffered=True, dictionary=True)
             cursor.execute(
                 "SELECT id, user_id, date, hour, mood, note FROM hourly_moods WHERE user_id = %s AND date = %s ORDER BY hour",
                 (current_user.id, date_filter)
             )
             entries = cursor.fetchall()
-            
-            # Преобразуем даты
+
             for entry in entries:
                 if 'date' in entry and entry['date']:
                     entry['date'] = entry['date'].isoformat()
-            
+
             cursor.close()
             return jsonify(entries)
         except Error as e:
             print(f"Database error in hourly_moods GET: {e}")
             return jsonify({'error': str(e)}), 500
-            
+
     elif request.method == 'POST':
         try:
             data = request.get_json()
-            
             if not data:
                 return jsonify({'error': 'No data provided'}), 400
-                
+
             date = data.get('date')
             hour = data.get('hour')
             mood = data.get('mood')
             note = data.get('note', '')
-            
-            if not all([date, hour is not None, mood is not None]):
+
+            if date is None or hour is None or mood is None:
                 return jsonify({'error': 'Date, hour and mood are required'}), 400
-            
-            cursor = conn.cursor()
+
+            cursor = conn.cursor(buffered=True)
             cursor.execute(
-                """INSERT INTO hourly_moods (user_id, date, hour, mood, note) 
-                VALUES (%s, %s, %s, %s, %s) 
+                """INSERT INTO hourly_moods (user_id, date, hour, mood, note)
+                VALUES (%s, %s, %s, %s, %s)
                 ON DUPLICATE KEY UPDATE mood = VALUES(mood), note = VALUES(note)""",
                 (current_user.id, date, int(hour), int(mood), note)
             )
             conn.commit()
             cursor.close()
-            
+
             return jsonify({'message': 'Почасовое настроение сохранено успешно'})
         except Error as e:
             print(f"Database error in hourly_moods POST: {e}")
@@ -918,7 +910,7 @@ def hourly_moods(conn):
 @with_db_connection
 def delete_hourly_mood(conn, mood_id):
     try:
-        cursor = conn.cursor()
+        cursor = conn.cursor(buffered=True)
         cursor.execute(
             "DELETE FROM hourly_moods WHERE id = %s AND user_id = %s",
             (mood_id, current_user.id)
@@ -929,7 +921,6 @@ def delete_hourly_mood(conn, mood_id):
     except Error as e:
         print(f"Database error in delete_hourly_mood: {e}")
         return jsonify({'error': str(e)}), 500
-
 
 @main.route('/api/stats')
 @login_required
@@ -1015,14 +1006,15 @@ def update_profile(conn):
         last_name = data.get('last_name', '').strip()
         gender = data.get('gender')
 
-        # Валидация пола
+        # Проверка корректности пола
         if gender not in (None, '', 'male', 'female'):
             return jsonify({'error': 'Некорректное значение пола'}), 400
 
-        cursor = conn.cursor()
+        # Создаем буферизированный курсор, чтобы избежать ошибок с "unread result"
+        cursor = conn.cursor(buffered=True)
         cursor.execute(
             """
-            UPDATE users 
+            UPDATE users
             SET first_name = %s,
                 last_name = %s,
                 gender = %s
@@ -1031,14 +1023,13 @@ def update_profile(conn):
             (first_name, last_name, gender, current_user.id)
         )
         conn.commit()
-        cursor.close()
+        cursor.close()  # Закрываем курсор после выполнения запроса
 
         return jsonify({'message': 'Профиль успешно обновлен'})
 
     except Error as e:
         print(f"Database error in update_profile: {e}")
         return jsonify({'error': str(e)}), 500
-
 
 @main.route('/api/change_password', methods=['POST'])
 @login_required
@@ -1097,8 +1088,9 @@ def change_password(conn):
 @with_db_connection
 def goals(conn):
     if request.method == 'GET':
+        cursor = None
         try:
-            cursor = conn.cursor(dictionary=True)
+            cursor = conn.cursor(dictionary=True, buffered=True)
             date = request.args.get('date')
             cursor.execute(
                 "SELECT id, user_id, text, completed, created_at FROM goals WHERE user_id = %s AND date = %s ORDER BY created_at DESC",
@@ -1106,101 +1098,117 @@ def goals(conn):
             )
             goals_data = cursor.fetchall()
             
-            # Преобразуем даты
+            # Преобразуем даты в ISO-формат
             for goal in goals_data:
                 if 'created_at' in goal and goal['created_at']:
                     goal['created_at'] = goal['created_at'].isoformat()
             
-            cursor.close()
             return jsonify(goals_data)
         except Error as e:
             print(f"Database error in goals GET: {e}")
             return jsonify({'error': str(e)}), 500
+        finally:
+            if cursor:
+                cursor.close()
             
     elif request.method == 'POST':
+        cursor = None
         try:
             data = request.get_json()
             if not data:
                 return jsonify({'error': 'No data provided'}), 400
                 
             text = data.get('text', '').strip()
-            
             if not text:
                 return jsonify({'error': 'Текст цели не может быть пустым'}), 400
             
-            cursor = conn.cursor()
             date = data.get('date')
+            cursor = conn.cursor(buffered=True)
             cursor.execute(
                 "INSERT INTO goals (user_id, text, date) VALUES (%s, %s, %s)",
                 (current_user.id, text, date)
-                )
+            )
             conn.commit()
             goal_id = cursor.lastrowid
-            cursor.close()
             
             return jsonify({
-                'id': goal_id, 
-                'text': text, 
+                'id': goal_id,
+                'text': text,
                 'completed': False,
                 'user_id': current_user.id
             })
         except Error as e:
             print(f"Database error in goals POST: {e}")
             return jsonify({'error': str(e)}), 500
-        
-        
+        finally:
+            if cursor:
+                cursor.close()
+
+
 @main.route("/api/goals/<int:goal_id>", methods=["PUT"])
 @login_required
 @with_db_connection
 def update_goal_status(conn, goal_id):
-    data = request.get_json()
-    completed = data.get("completed")
+    cursor = None
+    try:
+        data = request.get_json()
+        completed = data.get("completed")
 
-    cursor = conn.cursor()
-    cursor.execute(
-        "UPDATE goals SET completed=%s WHERE id=%s AND user_id=%s",
-        (completed, goal_id, current_user.id)
-    )
-    conn.commit()
-    cursor.close()
-
-    return jsonify({"success": True})        
+        cursor = conn.cursor(buffered=True)
+        cursor.execute(
+            "UPDATE goals SET completed=%s WHERE id=%s AND user_id=%s",
+            (completed, goal_id, current_user.id)
+        )
+        conn.commit()
+        return jsonify({"success": True})
+    except Error as e:
+        print(f"Database error in update_goal_status: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
 
 
 @main.route('/api/goals/<int:goal_id>/toggle', methods=['POST'])
 @login_required
 @with_db_connection
 def toggle_goal(conn, goal_id):
+    cursor = None
     try:
-        cursor = conn.cursor()
+        cursor = conn.cursor(buffered=True)
         cursor.execute(
             "UPDATE goals SET completed = NOT completed WHERE id = %s AND user_id = %s",
             (goal_id, current_user.id)
         )
         conn.commit()
-        cursor.close()
         return jsonify({'success': True})
     except Error as e:
         print(f"Database error in toggle_goal: {e}")
         return jsonify({'error': str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
 
 
 @main.route('/api/goals/<int:goal_id>', methods=['DELETE'])
 @login_required
 @with_db_connection
 def delete_goal(conn, goal_id):
+    cursor = None
     try:
-        cursor = conn.cursor()
+        cursor = conn.cursor(buffered=True)
         cursor.execute(
             "DELETE FROM goals WHERE id = %s AND user_id = %s",
             (goal_id, current_user.id)
         )
         conn.commit()
-        cursor.close()
         return jsonify({'success': True})
     except Error as e:
         print(f"Database error in delete_goal: {e}")
         return jsonify({'error': str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
 
 
 # ================== API МАРШРУТЫ ДЛЯ РАДОСТЕЙ ==================
@@ -1209,27 +1217,30 @@ def delete_goal(conn, goal_id):
 @login_required
 @with_db_connection
 def joys(conn):
+    cursor = None
     if request.method == 'GET':
         try:
-            cursor = conn.cursor(dictionary=True)
+            cursor = conn.cursor(dictionary=True, buffered=True)
             date = request.args.get('date')
             cursor.execute(
-            "SELECT id, user_id, text, created_at FROM joys WHERE user_id = %s AND date = %s ORDER BY created_at DESC",
-            (current_user.id, date)
+                "SELECT id, user_id, text, created_at FROM joys WHERE user_id = %s AND date = %s ORDER BY created_at DESC",
+                (current_user.id, date)
             )
             joys_data = cursor.fetchall()
             
-            # Преобразуем даты
+            # Преобразуем даты в ISO-формат
             for joy in joys_data:
-                if 'created_at' in joy and joy['created_at']:
+                if joy.get('created_at'):
                     joy['created_at'] = joy['created_at'].isoformat()
             
-            cursor.close()
             return jsonify(joys_data)
         except Error as e:
             print(f"Database error in joys GET: {e}")
             return jsonify({'error': str(e)}), 500
-            
+        finally:
+            if cursor:
+                cursor.close()
+    
     elif request.method == 'POST':
         try:
             data = request.get_json()
@@ -1237,19 +1248,17 @@ def joys(conn):
                 return jsonify({'error': 'No data provided'}), 400
                 
             text = data.get('text', '').strip()
-            
             if not text:
                 return jsonify({'error': 'Текст не может быть пустым'}), 400
             
-            cursor = conn.cursor()
             date = data.get('date')
+            cursor = conn.cursor(buffered=True)
             cursor.execute(
                 "INSERT INTO joys (user_id, text, date) VALUES (%s, %s, %s)",
                 (current_user.id, text, date)
-                )
+            )
             conn.commit()
             joy_id = cursor.lastrowid
-            cursor.close()
             
             return jsonify({
                 'id': joy_id, 
@@ -1259,31 +1268,37 @@ def joys(conn):
         except Error as e:
             print(f"Database error in joys POST: {e}")
             return jsonify({'error': str(e)}), 500
+        finally:
+            if cursor:
+                cursor.close()
 
 
 @main.route('/api/joys/<int:joy_id>', methods=['DELETE'])
 @login_required
 @with_db_connection
 def delete_joy(conn, joy_id):
+    cursor = None
     try:
-        cursor = conn.cursor()
+        cursor = conn.cursor(buffered=True)
         cursor.execute(
             "DELETE FROM joys WHERE id = %s AND user_id = %s",
             (joy_id, current_user.id)
         )
         conn.commit()
-        cursor.close()
         return jsonify({'success': True})
     except Error as e:
         print(f"Database error in delete_joy: {e}")
         return jsonify({'error': str(e)}), 500
+    finally:
+        if cursor:
+            cursor.close()
 
 
 # ================== API ДЛЯ ЗАГРУЗКИ АВАТАРА ==================
-
 @main.route('/api/upload_avatar', methods=['POST'])
 @login_required
-def upload_avatar():
+@with_db_connection
+def upload_avatar(conn):
     try:
         if 'avatar' not in request.files:
             return jsonify({'error': 'Файл не выбран'}), 400
@@ -1308,30 +1323,25 @@ def upload_avatar():
         file.save(filepath)
         
         # Обновляем путь в БД
-        conn = get_db()
-        if conn is None:
-            return jsonify({'error': 'Ошибка подключения к БД'}), 500
-            
+        cursor = None
         try:
-            cursor = conn.cursor()
+            cursor = conn.cursor(buffered=True)
             avatar_path = f"avatars/{filename}"
             cursor.execute(
                 "UPDATE users SET avatar_path = %s WHERE id = %s",
                 (avatar_path, current_user.id)
             )
             conn.commit()
-            cursor.close()
-            
             return jsonify({
                 'message': 'Аватар успешно загружен', 
                 'path': avatar_path
             })
-            
         except Error as e:
             print(f"Database error in upload_avatar: {e}")
             return jsonify({'error': str(e)}), 500
         finally:
-            close_db(conn)
+            if cursor:
+                cursor.close()
         
     except Exception as e:
         print(f"Error in upload_avatar: {e}")
@@ -1443,29 +1453,24 @@ def export_data(conn):
 
 @main.route('/api/delete_avatar', methods=['DELETE'])
 @login_required
-def delete_avatar():
+@with_db_connection
+def delete_avatar(conn):
+    cursor = None
     try:
-        conn = get_db()
-        if conn is None:
-            return jsonify({'error': 'Ошибка подключения к БД'}), 500
-            
-        cursor = conn.cursor()
-        # Устанавливаем avatar_path в NULL
+        cursor = conn.cursor(buffered=True)
+        # Устанавливаем avatar_path в NULL для текущего пользователя
         cursor.execute(
             "UPDATE users SET avatar_path = NULL WHERE id = %s",
             (current_user.id,)
         )
         conn.commit()
-        cursor.close()
-        
         return jsonify({'message': 'Аватар успешно удален'})
-        
     except Error as e:
         print(f"Database error in delete_avatar: {e}")
         return jsonify({'error': str(e)}), 500
     finally:
-        close_db(conn)
-
+        if cursor:
+            cursor.close()
 
 # ================== API МАРШРУТЫ ДЛЯ МЕНСТРУАЛЬНОГО ЦИКЛА ==================
 @main.route('/api/cycle_entries', methods=['GET', 'POST'])

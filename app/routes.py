@@ -767,31 +767,34 @@ def mood_entries(conn):
     if request.method == 'GET':
         try:
             date_filter = request.args.get('date')
-
-            cursor = conn.cursor(buffered=True, dictionary=True)  # buffered=True чтобы избежать "Unread result found"
-            if date_filter:
-                cursor.execute(
-                    "SELECT id, user_id, date, mood, note, created_at FROM mood_entries WHERE user_id = %s AND date = %s ORDER BY date DESC",
-                    (current_user.id, date_filter)
-                )
-            else:
-                cursor.execute(
-                    "SELECT id, user_id, date, mood, note, created_at FROM mood_entries WHERE user_id = %s ORDER BY date DESC",
-                    (current_user.id,)
-                )
-
-            entries = cursor.fetchall()
-
+            
+            # Используем with + buffered=True
+            with conn.cursor(buffered=True, dictionary=True) as cursor:
+                if date_filter:
+                    cursor.execute(
+                        "SELECT id, user_id, date, mood, note, created_at "
+                        "FROM mood_entries WHERE user_id = %s AND date = %s ORDER BY date DESC",
+                        (current_user.id, date_filter)
+                    )
+                else:
+                    cursor.execute(
+                        "SELECT id, user_id, date, mood, note, created_at "
+                        "FROM mood_entries WHERE user_id = %s ORDER BY date DESC",
+                        (current_user.id,)
+                    )
+                entries = cursor.fetchall()
+            
+            # Преобразуем данные для JSON
             for entry in entries:
-                if 'mood' in entry and entry['mood'] is not None:
+                if entry.get('mood') is not None:
                     entry['mood'] = float(entry['mood'])
-                if 'date' in entry and entry['date']:
+                if entry.get('date'):
                     entry['date'] = entry['date'].isoformat()
-                if 'created_at' in entry and entry['created_at']:
+                if entry.get('created_at'):
                     entry['created_at'] = entry['created_at'].isoformat()
 
-            cursor.close()
             return jsonify(entries)
+        
         except Error as e:
             print(f"Database error in mood_entries GET: {e}")
             return jsonify({'error': str(e)}), 500
@@ -809,25 +812,24 @@ def mood_entries(conn):
             if not date or mood is None:
                 return jsonify({'error': 'Date and mood are required'}), 400
 
-            cursor = conn.cursor(buffered=True)
-            cursor.execute(
-                """INSERT INTO mood_entries (user_id, date, mood, note)
-                VALUES (%s, %s, %s, %s)
-                ON DUPLICATE KEY UPDATE mood = VALUES(mood), note = VALUES(note)""",
-                (current_user.id, date, float(mood), note)
-            )
-            conn.commit()
-
-            cursor.execute("SELECT LAST_INSERT_ID() as id")
-            result = cursor.fetchone()
-            new_id = result[0] if result else None
-            cursor.close()
+            with conn.cursor(buffered=True) as cursor:
+                cursor.execute(
+                    """INSERT INTO mood_entries (user_id, date, mood, note)
+                    VALUES (%s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE mood = VALUES(mood), note = VALUES(note)""",
+                    (current_user.id, date, float(mood), note)
+                )
+                conn.commit()
+                
+                cursor.execute("SELECT LAST_INSERT_ID() as id")
+                result = cursor.fetchone()
+                new_id = result[0] if result else None
 
             return jsonify({'message': 'Настроение сохранено успешно', 'id': new_id})
+        
         except Error as e:
             print(f"Database error in mood_entries POST: {e}")
             return jsonify({'error': str(e)}), 500
-
 
 @main.route('/api/mood_entries/<int:mood_id>', methods=['DELETE'])
 @login_required
@@ -1662,20 +1664,32 @@ def cycle_stats(conn):
 @with_db_connection
 def cycle_predictions(conn):
     try:
-        with conn.cursor(dictionary=True) as cursor:
+        cursor = conn.cursor(dictionary=True)
+        try:
+            # Получаем настройки цикла пользователя
             cursor.execute("SELECT * FROM cycle_settings WHERE user_id = %s", (current_user.id,))
             settings = cursor.fetchone()
+        finally:
+            cursor.close()
 
-        if not settings or not settings.get('last_period_start'):
-            return jsonify({'error': 'Недостаточно данных для прогноза'}), 400
+        # Проверка наличия данных
+        if not settings:
+            return jsonify({'error': 'Настройки цикла не найдены'}), 400
+        if not settings.get('last_period_start'):
+            return jsonify({'error': 'Дата последней менструации не указана'}), 400
 
+        # Преобразуем last_period_start в объект date
         last_period = settings['last_period_start']
         if isinstance(last_period, str):
-            last_period = datetime.strptime(last_period, '%Y-%m-%d').date()
+            try:
+                last_period = datetime.strptime(last_period, '%Y-%m-%d').date()
+            except ValueError:
+                return jsonify({'error': 'Некорректная дата последней менструации'}), 400
 
         cycle_length = settings.get('cycle_length') or 28
         period_length = settings.get('period_length') or 5
 
+        # Рассчёты
         next_period = last_period + timedelta(days=cycle_length)
         ovulation_date = next_period - timedelta(days=14)
         fertile_start = ovulation_date - timedelta(days=5)
@@ -1691,6 +1705,7 @@ def cycle_predictions(conn):
             },
             'current_cycle_day': current_cycle_day
         })
+
     except Error as e:
         print(f"Database error in cycle_predictions: {e}")
         return jsonify({'error': str(e)}), 500

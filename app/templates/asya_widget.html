@@ -721,36 +721,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.innerWidth <= 768) {
       console.log('📱 Инициализация мобильных функций');
       
-      // Свайп для закрытия
-      let startY = 0;
-      
-      chat.addEventListener('touchstart', (e) => {
-        startY = e.touches[0].clientY;
-      }, { passive: true });
-      
-      chat.addEventListener('touchmove', (e) => {
-        if (!chat.classList.contains('open')) return;
-        
-        const currentY = e.touches[0].clientY;
-        const diffY = currentY - startY;
-        
-        if (diffY > 50) {
-          e.preventDefault();
-          chat.classList.remove('open');
-          typingIndicator.style.display = 'none';
-          
-          // Показываем иконку
-          setTimeout(() => {
-            icon.style.display = 'flex';
-            icon.style.opacity = '1';
-            icon.style.visibility = 'visible';
-            icon.style.pointerEvents = 'all';
-            document.body.classList.remove('asya-chat-open');
-            input.blur();
-          }, 300);
-        }
-      }, { passive: false });
-      
       // Убедимся, что при загрузке иконка видна
       if (!chat.classList.contains('open')) {
         setTimeout(() => {

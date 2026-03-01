@@ -1726,11 +1726,6 @@
 
 </main>
 
-{% endblock %}
-{% block extra_js %}
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
     // ==========================================================================
     // КОНСТАНТЫ API
@@ -1762,1367 +1757,26 @@
     let moodOverTimeChart = null;
     let currentSelectedDate = null;
     let isEditMode = false;
-    let userCycleSettings = null; // Добавляем для хранения настроек цикла
-
-// ==========================================================================
-// ПРОВЕРКА АВТОРИЗАЦИИ
-// ==========================================================================
-async function checkAuth() {
-    try {
-        const response = await fetch('/api/check-auth', {
-            credentials: 'include',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            console.log('✅ Авторизация подтверждена, user_id:', data.user_id);
-            return true;
-        } else if (response.status === 401) {
-            console.error('❌ Не авторизован, перенаправление на логин');
-            window.location.href = '/auth/login';
-            return false;
-        } else {
-            console.error('❌ Ошибка проверки авторизации:', response.status);
-            return false;
-        }
-    } catch (error) {
-        console.error('❌ Ошибка при проверке авторизации:', error);
-        return false;
-    }
-}
-
+    let userCycleSettings = null;
 
     // ==========================================================================
-    // ИНИЦИАЛИЗАЦИЯ
+    // ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
     // ==========================================================================
-document.addEventListener('DOMContentLoaded', async function () {
-    console.log('🚀 Инициализация дневника цикла...');
-    
-    // Проверяем авторизацию
-    const isAuth = await checkAuth();
-    if (!isAuth) return;
-    
-    initSymptomsGrid();
-    await loadUserCycleSettings();
-    await loadInitialData();
-});
 
-async function loadUserCycleSettings() {
-    try {
-        const response = await fetch('/api/cycle_settings', {  // <--- ДОБАВЛЕНО
-            credentials: 'include'                              // <--- ДОБАВЛЕНО
-        });
-        if (response.ok) {
-            userCycleSettings = await response.json();
-            console.log('⚙️ Настройки цикла загружены:', userCycleSettings);
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки настроек цикла:', error);
-    }
-}
-
-async function loadDayEntry(dateStr) {
-    try {
-        const response = await fetch(`${CYCLE_API}?date=${dateStr}`, {
-            credentials: 'include',  // <--- ДОБАВЛЕНО
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        if (response.ok) {
-            const entries = await response.json();
-            return entries.length > 0 ? entries[0] : null;
-        }
-        return null;
-    } catch (error) {
-        console.error('Ошибка загрузки записи:', error);
-        return null;
-    }
-}
-
-    // ==========================================================================
-    // ОСНОВНЫЕ ФУНКЦИИ ЗАГРУЗКИ
-    // ==========================================================================
-async function loadInitialData() {
-    try {
-        console.log('📥 Начинаю загрузку данных...');
-        
-        // Проверяем авторизацию
-        const isAuth = await checkAuth();
-        if (!isAuth) return;
-        
-        // Загружаем данные ПОСЛЕДОВАТЕЛЬНО, а не параллельно
-        await loadCycleData();
-        renderCalendar();
-
-        await loadMoodData();
-        await new Promise(resolve => setTimeout(resolve, 300)); // задержка 300мс
-        
-        await loadCycleStats();
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        await loadTodayMood();
-        await new Promise(resolve => setTimeout(resolve, 300));
-
-        // Загружаем прогнозы
-        try {
-            await loadCyclePredictions();
-        } catch (error) {
-            console.log('ℹ️ Нет данных для прогнозов цикла');
-        }
-
-        // Инициализируем графики
-        initCharts();
-
-        console.log('✅ Все данные загружены');
-    } catch (error) {
-        console.error('❌ Ошибка загрузки данных:', error);
-        showToast('Ошибка загрузки данных', 'error');
-    }
-}
-
-async function loadCycleData() {
-    try {
-        console.log('📊 Загружаю данные цикла...');
-        const response = await fetch(CYCLE_API, {  // <--- ДОБАВЛЕНО
-            credentials: 'include',                 // <--- ДОБАВЛЕНО
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-
-        if (response.ok) {
-            cycleData = await response.json();
-            console.log('✅ Данные цикла загружены:', cycleData.length, 'записей');
-            updateSymptomsLegend();
-        } else {
-            console.error('❌ Ошибка загрузки данных цикла:', response.status);
-            showToast('Ошибка загрузки данных цикла', 'error');
-        }
-    } catch (error) {
-        console.error('Сетевая ошибка загрузки данных цикла:', error);
-        showToast('Сетевая ошибка', 'error');
-    }
-}
-
-
-// Получаем данные для графика настроения за выбранный месяц
-function getMoodOverTimeDataForCurrentMonth() {
-    console.log(`📈 Собираю данные за ${currentChartDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}...`);
-    console.log('📊 moodData содержит:', moodData ? moodData.length : 0, 'записей');
-
-    const year = currentChartDate.getFullYear();
-    const month = currentChartDate.getMonth();
-
-    const labels = [];
-    const values = [];
-    const dates = [];
-    let hasData = false;
-
-    // Получаем количество дней в выбранном месяце
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    console.log(`📅 Дней в выбранном месяце: ${daysInMonth}`);
-
-    for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(year, month, day);
-        const dateStr = formatDate(date);
-        dates.push(dateStr);
-        labels.push(day.toString());
-
-        // Ищем настроение для этой даты
-        if (moodData && Array.isArray(moodData)) {
-            const moodEntry = moodData.find(m => m && m.date === dateStr);
-            if (moodEntry && moodEntry.mood !== undefined && moodEntry.mood !== null) {
-                values.push(parseFloat(moodEntry.mood));
-                hasData = true;
-            } else {
-                values.push(null);
-            }
-        } else {
-            values.push(null);
-        }
+    function formatDate(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
-    console.log(`📊 Данные за ${month+1}.${year}:`, { 
-        labels, 
-        values: values.filter(v => v !== null), 
-        hasData,
-        count: values.filter(v => v !== null).length 
-    });
-    
-    return { labels, values, dates, hasData };
-}
-
-// ЛИНЕЙНЫЙ ГРАФИК НАСТРОЕНИЯ С ФАЗАМИ ЦИКЛА
-function createMoodOverTimeChart() {
-    const canvas = document.getElementById('moodOverTimeChart');
-    if (!canvas) {
-        console.error('❌ Canvas для линейного графика не найден');
-        return;
-    }
-
-    // Уничтожаем старый график если он есть
-    if (moodOverTimeChart) {
-        moodOverTimeChart.destroy();
-    }
-
-    // Получаем данные за текущий месяц
-    const moodOverTimeData = getMoodOverTimeDataForCurrentMonth();
-    const noMoodTimeData = document.getElementById('noMoodTimeData');
-
-    // Получаем фазы цикла для текущего месяца
-    const cyclePhases = getCyclePhasesForChart();
-    console.log('🔄 Фазы цикла для графика:', cyclePhases);
-
-    if (moodOverTimeData.hasData) {
-        if (noMoodTimeData) noMoodTimeData.style.display = 'none';
-
-        const ctx = canvas.getContext('2d');
-
-        // Создаем dataset для фона с фазами цикла
-        const backgroundColors = moodOverTimeData.labels.map((_, index) => {
-            const day = index + 1;
-            const phase = cyclePhases.find(p => p.day === day);
-            return phase ? phase.color : 'rgba(200, 200, 200, 0.1)';
-        });
-
-        moodOverTimeChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: moodOverTimeData.labels,
-                datasets: [
-                    {
-                        label: 'Фазы цикла',
-                        data: moodOverTimeData.values.map(() => 10), // Заполняем верхним значением
-                        backgroundColor: backgroundColors,
-                        borderWidth: 0,
-                        pointRadius: 0,
-                        fill: true,
-                        order: 2, // Рисуем под основной линией
-                        tooltip: { enabled: false }
-                    },
-                    {
-                        label: 'Настроение',
-                        data: moodOverTimeData.values,
-                        borderColor: '#60F4E3',
-                        backgroundColor: 'transparent',
-                        tension: 0.4,
-                        fill: false,
-                        pointBackgroundColor: moodOverTimeData.values.map(val => 
-                            val !== null ? getMoodColorForValue(val) : '#ccc'),
-                        pointBorderColor: '#fff',
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
-                        borderWidth: 3,
-                        order: 1, // Рисуем поверх фона
-                        spanGaps: false
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        min: 0,
-                        max: 10,
-                        ticks: {
-                            stepSize: 1,
-                            font: { size: 12 },
-                            callback: function(value) {
-                                const emojis = ['', '😞', '', '', '😐', '', '', '😊', '', '🤩'];
-                                return emojis[value] || value;
-                            }
-                        },
-                        grid: { color: 'rgba(0, 0, 0, 0.05)' },
-                        title: {
-                            display: true,
-                            text: 'Настроение (1-10)',
-                            font: { size: 14, weight: 'bold' }
-                        }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { 
-                            font: { size: 11 },
-                            maxRotation: 0
-                        }
-                    }
-                },
-                plugins: {
-                    legend: { 
-                        display: true, 
-                        position: 'top',
-                        labels: {
-                            filter: function(item) {
-                                // Показываем только легенду для настроения
-                                return item.datasetIndex === 1;
-                            }
-                        }
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                        callbacks: {
-                            title: function(tooltipItems) {
-                                const dateStr = moodOverTimeData.dates[tooltipItems[0].dataIndex];
-                                const date = new Date(dateStr);
-                                return date.toLocaleDateString('ru-RU', {
-                                    weekday: 'long',
-                                    day: 'numeric',
-                                    month: 'long'
-                                });
-                            },
-                            label: function(context) {
-                                if (context.datasetIndex === 1) {
-                                    const value = context.raw;
-                                    if (value === null) return 'Настроение: Нет данных';
-                                    const emoji = getMoodEmoji(value);
-                                    
-                                    // Добавляем информацию о фазе цикла
-                                    const day = context.dataIndex + 1;
-                                    const phase = cyclePhases.find(p => p.day === day);
-                                    const phaseNames = {
-                                        'menstruation': '🩸 Менструация',
-                                        'follicular': '🌱 Фолликулярная фаза',
-                                        'ovulation': '🥚 Овуляция',
-                                        'luteal': '🌙 Лютеиновая фаза',
-                                        'pms': '💫 ПМС'
-                                    };
-                                    
-                                    return [
-                                        `${emoji} Настроение: ${value.toFixed(1)}/10`,
-                                        `${phaseNames[phase?.type] || 'Неизвестно'}`
-                                    ];
-                                }
-                                return null;
-                            },
-                            afterLabel: function(context) {
-                                if (context.datasetIndex === 1) {
-                                    const day = context.dataIndex + 1;
-                                    const phase = cyclePhases.find(p => p.day === day);
-                                    
-                                    const descriptions = {
-                                        'menstruation': 'Отдыхай больше, возможны спазмы',
-                                        'follicular': 'Энергия растёт, время для активностей',
-                                        'ovulation': 'Пик энергии и коммуникабельности',
-                                        'luteal': 'Возможны перепады настроения',
-                                        'pms': 'Будь добрее к себе, возможна усталость'
-                                    };
-                                    
-                                    return descriptions[phase?.type] || '';
-                                }
-                                return null;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
-        console.log('✅ Линейный график настроения с фазами цикла создан');
-    } else {
-        if (noMoodTimeData) noMoodTimeData.style.display = 'flex';
-        console.log('ℹ️ Нет данных для линейного графика настроения');
-    }
-}
-
-    // Создаем градиент для фона с фазами цикла
-    function createCyclePhaseGradient(ctx, canvas, cyclePhases, labels) {
-        const width = canvas.width;
-        const height = canvas.height;
-
-        // Создаем линейный градиент по горизонтали
-        const gradient = ctx.createLinearGradient(0, 0, width, 0);
-
-        // Если нет данных о фазах, возвращаем прозрачный
-        if (!cyclePhases || cyclePhases.length === 0) {
-            gradient.addColorStop(0, 'transparent');
-            gradient.addColorStop(1, 'transparent');
-            return gradient;
-        }
-
-        // Добавляем цветовые остановки для каждой фазы
-        let currentPosition = 0;
-        const totalDays = labels.length;
-
-        cyclePhases.forEach((phase, index) => {
-            const phaseStart = currentPosition / totalDays;
-            const phaseEnd = (currentPosition + phase.duration) / totalDays;
-
-            gradient.addColorStop(phaseStart, CYCLE_PHASE_COLORS[phase.type].bg);
-            gradient.addColorStop(phaseEnd, CYCLE_PHASE_COLORS[phase.type].bg);
-
-            currentPosition += phase.duration;
-        });
-
-        return gradient;
-    }
-
-    // Обнаруживаем фазы цикла на основе дат
-    function detectCyclePhases(dates) {
-        const phases = [];
-
-        if (!dates || dates.length === 0) return phases;
-
-        // Простая логика определения фаз для демонстрации
-        // В реальном приложении используйте данные из БД
-
-        const cycleLength = userCycleSettings?.cycle_length || 28;
-        const periodLength = userCycleSettings?.period_length || 5;
-
-        // Определяем начало цикла (последняя менструация)
-        let cycleStartDate = null;
-        if (userCycleSettings?.last_period_start) {
-            cycleStartDate = new Date(userCycleSettings.last_period_start);
-        } else {
-            // Если нет данных, используем первую дату
-            cycleStartDate = new Date(dates[0]);
-        }
-
-        // Определяем фазы для каждой даты
-        dates.forEach((dateStr, index) => {
-            const date = new Date(dateStr);
-            const daysSinceStart = Math.floor((date - cycleStartDate) / (1000 * 60 * 60 * 24)) % cycleLength;
-
-            let phaseType = 'follicular'; // По умолчанию
-
-            if (daysSinceStart < periodLength) {
-                phaseType = 'menstruation';
-            } else if (daysSinceStart >= periodLength && daysSinceStart < 13) {
-                phaseType = 'follicular';
-            } else if (daysSinceStart >= 13 && daysSinceStart < 15) {
-                phaseType = 'ovulation';
-            } else if (daysSinceStart >= 15 && daysSinceStart < 24) {
-                phaseType = 'luteal';
-            } else {
-                phaseType = 'pms';
-            }
-
-            // Группируем последовательные дни с одинаковой фазой
-            if (phases.length === 0 || phases[phases.length - 1].type !== phaseType) {
-                phases.push({
-                    type: phaseType,
-                    startIndex: index,
-                    duration: 1
-                });
-            } else {
-                phases[phases.length - 1].duration++;
-            }
-        });
-
-        return phases;
-    }
-
-    // Получаем информацию о фазе цикла для даты
-    function getCyclePhaseInfo(dateStr) {
+    function formatDateDisplay(dateStr) {
         const date = new Date(dateStr);
-        const phases = [
-            {
-                name: 'Менструация',
-                type: 'menstruation',
-                description: 'Менструальное кровотечение. Возможны спазмы, усталость.',
-                days: [1, 2, 3, 4, 5]
-            },
-            {
-                name: 'Фолликулярная фаза',
-                type: 'follicular',
-                description: 'Уровень энергии растет. Хорошее время для активностей.',
-                days: [6, 7, 8, 9, 10, 11, 12, 13]
-            },
-            {
-                name: 'Овуляция',
-                type: 'ovulation',
-                description: 'Пик фертильности. Возможна повышенная чувствительность.',
-                days: [14, 15]
-            },
-            {
-                name: 'Лютеиновая фаза',
-                type: 'luteal',
-                description: 'Уровень прогестерона повышается. Возможны перепады настроения.',
-                days: [16, 17, 18, 19, 20, 21, 22, 23]
-            },
-            {
-                name: 'Предменструальная фаза (ПМС)',
-                type: 'pms',
-                description: 'Возможны раздражительность, вздутие, усталость.',
-                days: [24, 25, 26, 27, 28]
-            }
-        ];
-
-        // Простая логика для демонстрации
-        const dayOfMonth = date.getDate();
-
-        for (const phase of phases) {
-            if (phase.days.includes(dayOfMonth % 28 || 28)) {
-                return phase;
-            }
-        }
-
-        // Возвращаем фазу по умолчанию
-        return phases[0];
-    }
-
-    // Получаем реальные данные о менструациях из календаря
-    function getMenstruationData() {
-        const menstruationData = [];
-
-        // Собираем все записи с менструациями
-        cycleData.forEach(entry => {
-            if (entry.flow_intensity && entry.flow_intensity !== 'none') {
-                const date = new Date(entry.date);
-                menstruationData.push({
-                    date: date,
-                    dateStr: entry.date,
-                    flow_intensity: entry.flow_intensity
-                });
-            }
+        return date.toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
         });
-
-        // Сортируем по дате
-        menstruationData.sort((a, b) => a.date - b.date);
-
-        // Группируем последовательные дни менструации в циклы
-        const cycles = [];
-        let currentCycle = [];
-
-        for (let i = 0; i < menstruationData.length; i++) {
-            const current = menstruationData[i];
-
-            if (currentCycle.length === 0) {
-                // Начало нового цикла
-                currentCycle.push(current);
-            } else {
-                const lastInCycle = currentCycle[currentCycle.length - 1];
-                const timeDiff = (current.date - lastInCycle.date) / (1000 * 60 * 60 * 24);
-
-                if (timeDiff === 1) {
-                    // Последовательный день - продолжение цикла
-                    currentCycle.push(current);
-                } else {
-                    // Разрыв - начинаем новый цикл
-                    if (currentCycle.length > 0) {
-                        cycles.push([...currentCycle]);
-                    }
-                    currentCycle = [current];
-                }
-            }
-        }
-
-        // Добавляем последний цикл
-        if (currentCycle.length > 0) {
-            cycles.push(currentCycle);
-        }
-
-        return {
-            allEntries: menstruationData,
-            cycles: cycles,
-            averageLength: calculateAverageCycleLength(cycles)
-        };
-    }
-
-    // Рассчитываем среднюю длительность цикла
-    function calculateAverageCycleLength(cycles) {
-        if (cycles.length < 2) return 28; // По умолчанию
-
-        let totalLength = 0;
-        let count = 0;
-
-        for (let i = 1; i < cycles.length; i++) {
-            const prevCycleStart = cycles[i - 1][0].date;
-            const currentCycleStart = cycles[i][0].date;
-            const length = (currentCycleStart - prevCycleStart) / (1000 * 60 * 60 * 24);
-            totalLength += length;
-            count++;
-        }
-
-        return Math.round(totalLength / count);
-    }
-
-    // Рассчитываем среднюю длительность менструации
-    function calculateAveragePeriodLength(cycles) {
-        if (cycles.length === 0) return 5; // По умолчанию
-
-        let totalLength = 0;
-
-        cycles.forEach(cycle => {
-            totalLength += cycle.length;
-        });
-
-        return Math.round(totalLength / cycles.length);
-    }
-
-    // Получаем фазы цикла на основе реальных данных из календаря
-    function getCyclePhasesForCurrentMonth() {
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = today.getMonth();
-
-        // Получаем данные о менструациях
-        const menstruationData = getMenstruationData();
-        const currentMonthPeriods = [];
-
-        // Находим менструации текущего месяца
-        menstruationData.allEntries.forEach(entry => {
-            if (entry.date.getFullYear() === year && entry.date.getMonth() === month) {
-                currentMonthPeriods.push(entry);
-            }
-        });
-
-        // Если есть менструации в текущем месяце, строим фазы от них
-        if (currentMonthPeriods.length > 0) {
-            return calculatePhasesFromActualPeriods(currentMonthPeriods, menstruationData);
-        }
-
-        // Если нет менструаций в текущем месяце, ищем ближайшую предыдущую
-        const allPeriods = menstruationData.allEntries;
-        if (allPeriods.length > 0) {
-            // Находим последнюю менструацию перед текущим месяцем
-            const lastPeriod = allPeriods[allPeriods.length - 1];
-            const daysSinceLastPeriod = Math.floor((today - lastPeriod.date) / (1000 * 60 * 60 * 24));
-
-            // Используем настройки пользователя или рассчитанные средние
-            const cycleLength = menstruationData.averageLength || userCycleSettings?.cycle_length || 28;
-            const periodLength = calculateAveragePeriodLength(menstruationData.cycles) || userCycleSettings?.period_length || 5;
-
-            // Рассчитываем фазы на основе дня цикла
-            const dayInCycle = (daysSinceLastPeriod % cycleLength) + 1;
-            return calculatePhasesByDayInCycle(dayInCycle, cycleLength, periodLength);
-        }
-
-        // Если совсем нет данных, используем стандартный цикл
-        return getDefaultPhases();
-    }
-
-    // Рассчитываем фазы на основе реальных дат менструаций
-    function calculatePhasesFromActualPeriods(periodEntries, menstruationData) {
-        const phases = [];
-
-        if (periodEntries.length === 0) return getDefaultPhases();
-
-        // Определяем средние значения
-        const avgCycleLength = menstruationData.averageLength || 28;
-        const avgPeriodLength = calculateAveragePeriodLength(menstruationData.cycles) || 5;
-
-        // Сортируем даты менструаций
-        periodEntries.sort((a, b) => a.date - b.date);
-
-        // Берем первую менструацию в месяце как начало цикла
-        const firstPeriodDate = periodEntries[0].date;
-        const periodStartDay = firstPeriodDate.getDate();
-
-        // Фаза 1: Менструация (реальная длительность из данных)
-        const periodDays = [];
-        let currentDate = new Date(firstPeriodDate);
-
-        // Собираем все последовательные дни менструации
-        for (let i = 0; i < periodEntries.length; i++) {
-            const entryDate = periodEntries[i].date;
-            const day = entryDate.getDate();
-
-            // Проверяем последовательность дней
-            if (i === 0 || day === periodDays[periodDays.length - 1] + 1) {
-                periodDays.push(day);
-            }
-        }
-
-        if (periodDays.length > 0) {
-            phases.push({
-                type: 'menstruation',
-                startDay: periodDays[0],
-                endDay: periodDays[periodDays.length - 1],
-                color: '#FF6B6B',
-                isActual: true, // Флаг, что это реальные данные
-                days: [...periodDays]
-            });
-        }
-
-        // Если нет реальных данных о менструации, используем средние значения
-        if (periodDays.length === 0) {
-            phases.push({
-                type: 'menstruation',
-                startDay: periodStartDay,
-                endDay: Math.min(periodStartDay + avgPeriodLength - 1, 31),
-                color: '#FF6B6B',
-                isActual: false
-            });
-        }
-
-        // Рассчитываем остальные фазы на основе средних значений
-        const daysInMonth = new Date(firstPeriodDate.getFullYear(), firstPeriodDate.getMonth() + 1, 0).getDate();
-        const menstrualEndDay = phases[0].endDay;
-
-        // Фаза 2: Фолликулярная (после менструации до овуляции)
-        const follicularStart = menstrualEndDay + 1;
-        const follicularEnd = Math.min(follicularStart + 7, daysInMonth); // Обычно 7-8 дней
-
-        phases.push({
-            type: 'follicular',
-            startDay: follicularStart,
-            endDay: follicularEnd,
-            color: '#60F4E3',
-            isActual: false
-        });
-
-        // Фаза 3: Овуляция
-        const ovulationStart = follicularEnd + 1;
-        const ovulationEnd = Math.min(ovulationStart + 1, daysInMonth);
-
-        phases.push({
-            type: 'ovulation',
-            startDay: ovulationStart,
-            endDay: ovulationEnd,
-            color: '#FF70EC',
-            isActual: false
-        });
-
-        // Фаза 4: Лютеиновая
-        const lutealStart = ovulationEnd + 1;
-        const lutealEnd = Math.min(lutealStart + 7, daysInMonth);
-
-        phases.push({
-            type: 'luteal',
-            startDay: lutealStart,
-            endDay: lutealEnd,
-            color: '#FFD166',
-            isActual: false
-        });
-
-        // Фаза 5: ПМС (последние дни перед следующей менструацией)
-        const pmsStart = lutealEnd + 1;
-        const pmsEnd = Math.min(pmsStart + 4, daysInMonth);
-
-        if (pmsStart <= daysInMonth) {
-            phases.push({
-                type: 'pms',
-                startDay: pmsStart,
-                endDay: pmsEnd,
-                color: '#B8B3E9',
-                isActual: false
-            });
-        }
-
-        return phases;
-    }
-
-    // Рассчитываем фазы по дню в цикле
-    function calculatePhasesByDayInCycle(dayInCycle, cycleLength, periodLength) {
-        const phases = [];
-
-        // Приводим к стандартному 28-дневному циклу для отображения
-        const normalizedDay = Math.round((dayInCycle / cycleLength) * 28);
-
-        const phaseDefinitions = [
-            { type: 'menstruation', start: 1, end: periodLength },
-            { type: 'follicular', start: periodLength + 1, end: 13 },
-            { type: 'ovulation', start: 14, end: 15 },
-            { type: 'luteal', start: 16, end: 23 },
-            { type: 'pms', start: 24, end: 28 }
-        ];
-
-        // Находим текущую фазу
-        let currentPhase = phaseDefinitions[0];
-        for (const phase of phaseDefinitions) {
-            if (normalizedDay >= phase.start && normalizedDay <= phase.end) {
-                currentPhase = phase;
-                break;
-            }
-        }
-
-        // Создаем фазы для отображения
-        phaseDefinitions.forEach(phase => {
-            phases.push({
-                type: phase.type,
-                startDay: phase.start,
-                endDay: phase.end,
-                color: getPhaseColorByType(phase.type),
-                isActual: false,
-                isCurrent: (phase.type === currentPhase.type)
-            });
-        });
-
-        return phases;
-    }
-
-    // Стандартные фазы (если нет данных)
-    function getDefaultPhases() {
-        return [
-            { type: 'menstruation', startDay: 1, endDay: 5, color: '#FF6B6B', isActual: false },
-            { type: 'follicular', startDay: 6, endDay: 13, color: '#60F4E3', isActual: false },
-            { type: 'ovulation', startDay: 14, endDay: 15, color: '#FF70EC', isActual: false },
-            { type: 'luteal', startDay: 16, endDay: 23, color: '#FFD166', isActual: false },
-            { type: 'pms', startDay: 24, endDay: 28, color: '#B8B3E9', isActual: false }
-        ];
-    }
-
-    // Получаем цвет для типа фазы
-    function getPhaseColorByType(phaseType) {
-        const colors = {
-            'menstruation': '#FF6B6B',
-            'follicular': '#60F4E3',
-            'ovulation': '#FF70EC',
-            'luteal': '#FFD166',
-            'pms': '#B8B3E9'
-        };
-        return colors[phaseType] || '#CCCCCC';
-    }
-
-
-    // Функция для определения фазы цикла по дате
-    function getCyclePhaseForDate(dateStr) {
-        // В реальном приложении здесь должна быть логика определения фазы
-        // на основе данных о цикле пользователя
-
-        // Для примера просто возвращаем статическую фазу
-        const phases = ['Менструация', 'Фолликулярная', 'Овуляция', 'Лютеиновая', 'ПМС'];
-
-        // Простой алгоритм для демонстрации
-        const date = new Date(dateStr);
-        const dayOfMonth = date.getDate();
-
-        if (dayOfMonth >= 1 && dayOfMonth <= 5) return 'Менструация';
-        if (dayOfMonth >= 6 && dayOfMonth <= 13) return 'Фолликулярная';
-        if (dayOfMonth >= 14 && dayOfMonth <= 15) return 'Овуляция';
-        if (dayOfMonth >= 16 && dayOfMonth <= 25) return 'Лютеиновая';
-        return 'ПМС';
-    }
-
-    // Функция для получения цвета точки на графике по значению настроения
-    function getMoodColorForValue(moodValue) {
-        if (moodValue >= 7) return '#60F4E3'; // хорошее - бирюзовый
-        if (moodValue >= 4) return '#FF70EC'; // нейтральное - розовый
-        return '#F44336'; // плохое - красный
-    }
-
-    // Получение данных для линейного графика (последние 14 дней)
-    function getMoodOverTimeData() {
-        console.log('📈 Собираю данные для линейного графика...');
-
-        // Получаем последние 14 дней
-        const labels = [];
-        const values = [];
-        const today = new Date();
-
-        for (let i = 13; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(today.getDate() - i);
-            const dateStr = formatDate(date);
-
-            // Форматируем дату для отображения
-            const displayDate = date.toLocaleDateString('ru-RU', {
-                day: 'numeric',
-                month: 'short'
-            });
-            labels.push(displayDate);
-
-            // Ищем настроение для этой даты
-            const moodEntry = moodData.find(m => m.date === dateStr);
-            if (moodEntry && moodEntry.mood !== undefined && moodEntry.mood !== null) {
-                values.push(parseFloat(moodEntry.mood.toFixed(1)));
-            } else {
-                values.push(null);
-            }
-        }
-
-        // Проверяем, есть ли хоть какие-то данные
-        const hasData = values.some(val => val !== null);
-
-        console.log('📊 Данные для линейного графика:', { labels, values, hasData });
-        return { labels, values, hasData };
-    }
-
-async function loadCycleStats() {
-    try {
-        const response = await fetch(CYCLE_STATS_API, { 
-            credentials: 'include',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        
-        if (response.redirected) {
-            console.log('⚠️ Редирект на логин в loadCycleStats');
-            return;
-        }
-        
-        if (response.ok) {
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                const stats = await response.json();
-                updateStatsDisplay(stats);
-            } else {
-                const text = await response.text();
-                console.error('❌ Ответ сервера не JSON (loadCycleStats):', text.substring(0, 100));
-            }
-        } else {
-            console.error('❌ Ошибка загрузки статистики цикла:', response.status);
-        }
-    } catch (error) {
-        console.error('❌ Ошибка загрузки статистики цикла:', error);
-    }
-}
-
-async function loadCyclePredictions() {
-    try {
-        const response = await fetch(CYCLE_PREDICTIONS_API, { credentials: 'include' });
-        if (response.ok) {
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                const predictions = await response.json();
-                updatePredictionsDisplay(predictions);
-            } else {
-                const text = await response.text();
-                console.error('Ответ сервера не JSON (loadCyclePredictions):', text);
-            }
-        } else if (response.status === 400) {
-            console.log('📅 Нет данных для прогноза цикла (нужно настроить цикл)');
-        } else {
-            console.error('Ошибка загрузки прогнозов:', response.status);
-        }
-    } catch (error) {
-        console.error('Ошибка загрузки прогнозов цикла:', error);
-    }
-}
-
-async function loadTodayMood() {
-    try {
-        const response = await fetch(TODAY_MOOD_API, { 
-            credentials: 'include',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        
-        // Проверяем, не редирект ли это на логин
-        if (response.redirected) {
-            console.log('⚠️ Редирект на логин в loadTodayMood');
-            updateTodayMoodDisplay(null);
-            return;
-        }
-        
-        if (response.ok) {
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                const todayMood = await response.json();
-                updateTodayMoodDisplay(todayMood);
-            } else {
-                const text = await response.text();
-                console.error('❌ Ответ сервера не JSON (loadTodayMood):', text.substring(0, 100));
-                updateTodayMoodDisplay(null);
-            }
-        } else if (response.status === 401) {
-            console.log('⚠️ Не авторизован в loadTodayMood');
-            updateTodayMoodDisplay(null);
-        } else {
-            console.error('❌ Ошибка загрузки сегодняшнего настроения:', response.status);
-            updateTodayMoodDisplay(null);
-        }
-    } catch (error) {
-        console.error('❌ Ошибка загрузки сегодняшнего настроения:', error);
-        updateTodayMoodDisplay(null);
-    }
-}
-
-async function loadMoodData() {
-    try {
-        console.log('📥 Загружаю данные настроения с:', MOOD_API);
-        
-        // Загружаем все записи настроения
-        const response = await fetch(MOOD_API, { 
-            credentials: 'include',
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        
-        if (response.ok) {
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-                moodData = await response.json();
-                console.log('✅ Данные настроения загружены:', moodData.length, 'записей');
-                
-                // Для отладки: покажем первые 3 записи
-                if (moodData.length > 0) {
-                    console.log('📊 Примеры записей настроения:', moodData.slice(0, 3));
-                } else {
-                    console.log('ℹ️ Нет записей настроения в базе данных');
-                    
-                    // Для теста создадим тестовые данные
-                    console.log('🧪 Создаю тестовые данные для проверки отображения...');
-                    createTestMoodData();
-                }
-            } else {
-                const text = await response.text();
-                console.error('❌ Ответ сервера не JSON:', text.substring(0, 200));
-            }
-        } else {
-            console.error('❌ Ошибка загрузки настроения. Статус:', response.status);
-            try {
-                const errorText = await response.text();
-                console.error('Текст ошибки:', errorText);
-            } catch (e) {
-                console.error('Не удалось прочитать тело ошибки');
-            }
-        }
-
-        // Загружаем остальные данные
-        await loadCycleStats();
-        await loadCyclePredictions();
-        await loadTodayMood();
-
-        console.log('✅ Все данные настроения загружены');
-    } catch (error) {
-        console.error('❌ Ошибка загрузки данных настроения:', error);
-    }
-}
-
-    // ==========================================================================
-    // ФУНКЦИИ ГРАФИКОВ
-    // ==========================================================================
-
-function initCharts() {
-    console.log('📊 Инициализирую графики...');
-    // Убеждаемся, что currentChartDate синхронизирован с currentDate
-    currentChartDate = new Date(currentDate);
-    createMoodOverTimeChart();
-    createSymptomsChart();
-}
-
-
-    function createSymptomsChart() {
-        const canvas = document.getElementById('symptomsChart');
-        if (!canvas) return;
-
-        if (symptomsChart) symptomsChart.destroy();
-
-        const symptomsDataForChart = getSymptomsChartData();
-        const noSymptomsData = document.getElementById('noSymptomsData');
-
-        if (symptomsDataForChart.hasData) {
-            if (noSymptomsData) noSymptomsData.style.display = 'none';
-
-            symptomsChart = new Chart(canvas, {
-                type: 'doughnut',
-                data: {
-                    labels: symptomsDataForChart.labels,
-                    datasets: [{
-                        data: symptomsDataForChart.values,
-                        backgroundColor: symptomsDataForChart.colors,
-                        borderColor: symptomsDataForChart.colors.map(color => color.replace('0.6', '1')),
-                        borderWidth: 2
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false, // ИЗМЕНИТЬ на false
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                boxWidth: 15,
-                                padding: 15,
-                                font: { size: 12 }
-                            }
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function (context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = symptomsDataForChart.values.reduce((a, b) => a + b, 0);
-                                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
-                                    return `${label}: ${value} раз (${percentage}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        } else {
-            if (noSymptomsData) noSymptomsData.style.display = 'flex';
-        }
-    }
-
-
-
-    function getSymptomsChartData() {
-        console.log('📊 Собираю данные для графика симптомов...');
-
-        const symptomStats = {};
-        let totalEntries = 0;
-
-        cycleData.forEach(entry => {
-            if (entry.symptoms && Array.isArray(entry.symptoms)) {
-                entry.symptoms.forEach(symptom => {
-                    symptomStats[symptom] = (symptomStats[symptom] || 0) + 1;
-                    totalEntries++;
-                });
-            }
-        });
-
-        if (totalEntries === 0) {
-            return {
-                labels: [],
-                values: [],
-                colors: [],
-                hasData: false
-            };
-        }
-
-        const sorted = Object.entries(symptomStats)
-            .sort((a, b) => b[1] - a[1])
-            .slice(0, 8); // Ограничиваем 8 симптомами
-
-        return {
-            labels: sorted.map(([symptom]) => symptom),
-            values: sorted.map(([, count]) => count),
-            colors: sorted.map(([symptom]) => getSymptomColor(symptom)),
-            hasData: sorted.length > 0
-        };
-    }
-
-    // ==========================================================================
-    // ОСТАЛЬНЫЕ ФУНКЦИИ (оставляем без изменений)
-    // ==========================================================================
-
-    function initSymptomsGrid() {
-        const symptomsGrid = document.getElementById('symptomsGrid');
-        if (!symptomsGrid) return;
-
-        const defaultSymptoms = [
-            'Головная боль', 'Спазмы', 'Усталость', 'Набухание груди',
-            'Перепады настроения', 'Тревожность', 'Вздутие', 'Акне',
-            'Тяга к сладкому', 'Бессонница', 'Тошнота', 'Боль в спине'
-        ];
-
-        symptomsGrid.innerHTML = defaultSymptoms.map(symptom => `
-            <label class="symptom-checkbox">
-                <input type="checkbox" name="symptoms" value="${symptom}">
-                ${symptom}
-            </label>
-        `).join('');
-    }
-
-   async function markMenstruationStart() {
-    const dateStr = currentSelectedDate || formatDate(new Date());
-    const existingEntry = cycleData.find(entry => entry.date === dateStr);
-    const hasMenstruation = existingEntry?.flow_intensity && existingEntry.flow_intensity !== 'none';
-
-    try {
-        showLoading(true);
-
-        const requestData = {
-            date: dateStr,
-            symptoms: existingEntry?.symptoms || [],
-            notes: existingEntry?.notes || '',
-            flow_intensity: hasMenstruation ? 'none' : 'light',
-            cycle_day: existingEntry?.cycle_day || null,
-            mood: existingEntry?.mood || null
-        };
-
-        console.log('📤 Отправка запроса на менструацию:', requestData);
-
-        const response = await fetch(CYCLE_API, {
-            method: 'POST',
-            credentials: 'include',  // ВАЖНО!
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(requestData)
-        });
-
-        // Проверяем, не редирект ли это на логин
-        if (response.redirected) {
-            console.error('❌ Редирект на логин, сессия истекла');
-            showToast('Сессия истекла, пожалуйста, войдите снова', 'error');
-            window.location.href = '/auth/login';
-            return;
-        }
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ Ошибка сервера:', response.status, errorText);
-            
-            // Если получили HTML вместо JSON
-            if (errorText.trim().startsWith('<!DOCTYPE')) {
-                showToast('Ошибка авторизации. Пожалуйста, обновите страницу', 'error');
-            } else {
-                showToast('Ошибка: ' + errorText, 'error');
-            }
-            return;
-        }
-
-        const contentType = response.headers.get('content-type');
-        if (contentType && contentType.includes('application/json')) {
-            const result = await response.json();
-            showToast(hasMenstruation ? 'Менструация убрана' : 'Менструация отмечена', 'success');
-            await refreshAllData();
-        } else {
-            const text = await response.text();
-            console.error('❌ Ответ не JSON:', text);
-            showToast('Ошибка формата ответа', 'error');
-        }
-
-    } catch (error) {
-        console.error('❌ Ошибка отметки менструации:', error);
-        showToast('Ошибка отметки менструации: ' + error.message, 'error');
-    } finally {
-        showLoading(false);
-    }
-}
-
-function renderCalendar() {
-    const calendar = document.getElementById('calendar');
-    const monthYear = document.getElementById('monthYear');
-
-    if (!calendar || !monthYear) {
-        console.error('❌ Не найдены элементы календаря');
-        return;
-    }
-
-    const monthNames = [
-        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-    ];
-    monthYear.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
-
-    calendar.innerHTML = '';
-
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-
-    let startDay = firstDay.getDay();
-    if (startDay === 0) startDay = 7;
-
-    const prevMonthDays = new Date(year, month, 0).getDate();
-    for (let i = startDay - 1; i > 0; i--) {
-        const day = createDayElement(prevMonthDays - i + 1, 'other-month', true);
-        calendar.appendChild(day);
-    }
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    for (let i = 1; i <= daysInMonth; i++) {
-        const date = new Date(year, month, i);
-        const dateStr = formatDate(date);
-        const day = createDayElement(i, '', false);
-
-        // Проверяем, является ли день сегодняшним
-        const isToday = date.getDate() === today.getDate() &&
-            date.getMonth() === today.getMonth() &&
-            date.getFullYear() === today.getFullYear();
-
-        if (isToday) {
-            day.classList.add('current-day');
-        }
-
-        const cycleEntry = cycleData.find(entry => entry && entry.date === dateStr);
-
-        if (cycleEntry) {
-            // Проверяем менструацию
-            const hasMenstruation = cycleEntry.flow_intensity &&
-                cycleEntry.flow_intensity !== 'none' &&
-                cycleEntry.flow_intensity !== '';
-
-            if (hasMenstruation) {
-                day.classList.add('menstruation');
-
-                // Добавляем индикатор менструации
-                const menstruationIndicator = document.createElement('div');
-                menstruationIndicator.className = 'menstruation-indicator';
-                menstruationIndicator.innerHTML = '<i class="fas fa-droplet"></i>';
-                day.appendChild(menstruationIndicator);
-            }
-
-            // Симптомы
-            const symptoms = cycleEntry.symptoms || [];
-            if (symptoms.length > 0) {
-                const symptomsContainer = document.createElement('div');
-                symptomsContainer.className = 'symptoms-dots-compact';
-
-                symptoms.slice(0, 6).forEach(symptom => {
-                    const dot = document.createElement('div');
-                    dot.className = 'symptom-dot-compact';
-                    dot.style.backgroundColor = getSymptomColor(symptom);
-                    dot.title = symptom;
-                    symptomsContainer.appendChild(dot);
-                });
-
-                day.appendChild(symptomsContainer);
-            }
-        }
-        
-        // ВАЖНО: ЗДЕСЬ НАЧИНАЕТСЯ addEventListener
-        day.addEventListener('click', function () {
-            if (!isValidDateForEntry(dateStr)) {
-                showToast('Нельзя редактировать будущие дни', 'error');
-                return;
-            }
-
-            document.querySelectorAll('.calendar-day.selected').forEach(day => {
-                day.classList.remove('selected');
-            });
-
-            day.classList.add('selected');
-
-            // Открываем детали дня
-            openDayDetail(dateStr);
-
-            // НЕ меняем месяц графика при клике на день
-            // График должен оставаться на текущем выбранном месяце
-        }); // <--- ЗДЕСЬ ЗАКРЫВАЕТСЯ addEventListener
-
-        calendar.appendChild(day);
-    } // <--- ЗДЕСЬ ЗАКРЫВАЕТСЯ ЦИКЛ for
-
-    const totalCells = 35;
-    const filledCells = startDay - 1 + daysInMonth;
-    if (filledCells < totalCells) {
-        for (let i = 1; i <= totalCells - filledCells; i++) {
-            const day = createDayElement(i, 'other-month', true);
-            calendar.appendChild(day);
-        }
-    }
-} // <--- ЗДЕСЬ ЗАКРЫВАЕТСЯ ФУНКЦИЯ renderCalendar
-
-function refreshMoodChart() {
-    if (moodOverTimeChart) {
-        moodOverTimeChart.destroy();
-    }
-    createMoodOverTimeChart();
-    console.log('📊 График настроения обновлен');
-}
-
-    function createDayElement(dayNumber, className, isOtherMonth) {
-        const dayElement = document.createElement('div');
-        dayElement.className = 'calendar-day';
-
-        if (className) {
-            dayElement.classList.add(className);
-        }
-
-        const numberElement = document.createElement('div');
-        numberElement.className = 'day-number';
-        numberElement.textContent = dayNumber;
-        dayElement.appendChild(numberElement);
-
-        if (isOtherMonth) {
-            dayElement.style.cursor = 'default';
-            dayElement.style.pointerEvents = 'none';
-            dayElement.style.opacity = '0.5';
-        }
-
-        return dayElement;
     }
 
     function getSymptomColor(symptom) {
@@ -3140,67 +1794,247 @@ function refreshMoodChart() {
             'Тошнота': '#00d2d3',
             'Боль в спине': '#f368e0'
         };
-
-        if (!colorMap[symptom]) {
-            let hash = 0;
-            for (let i = 0; i < symptom.length; i++) {
-                hash = symptom.charCodeAt(i) + ((hash << 5) - hash);
-            }
-
-            const colors = [
-                '#FF6B6B', '#FF70EC', '#60F4E3', '#FFD166', '#B8B3E9',
-                '#FFA502', '#2ed573', '#ff4757', '#ff9ff3', '#54a0ff'
-            ];
-
-            const index = Math.abs(hash) % colors.length;
-            return colors[index];
-        }
-
-        return colorMap[symptom];
+        return colorMap[symptom] || '#60F4E3';
     }
 
-    function formatDate(date) {
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
+    function getMoodEmoji(moodValue) {
+        if (moodValue >= 8) return '😊';
+        if (moodValue >= 5) return '😐';
+        if (moodValue >= 3) return '😕';
+        return '😞';
+    }
+
+    function getMoodColorForValue(moodValue) {
+        if (moodValue >= 7) return '#60F4E3';
+        if (moodValue >= 4) return '#FF70EC';
+        return '#F44336';
+    }
+
+    // ==========================================================================
+    // ФУНКЦИИ ДЛЯ РАБОТЫ С КАЛЕНДАРЕМ
+    // ==========================================================================
+
+    function renderCalendar() {
+        const calendar = document.getElementById('calendar');
+        const monthYear = document.getElementById('monthYear');
+
+        if (!calendar || !monthYear) {
+            console.error('❌ Не найдены элементы календаря');
+            return;
+        }
+
+        const monthNames = [
+            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+        ];
+        monthYear.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+        calendar.innerHTML = '';
+
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const lastDay = new Date(year, month + 1, 0);
+        const daysInMonth = lastDay.getDate();
+
+        let startDay = firstDay.getDay();
+        if (startDay === 0) startDay = 7;
+
+        const prevMonthDays = new Date(year, month, 0).getDate();
+        for (let i = startDay - 1; i > 0; i--) {
+            const day = createDayElement(prevMonthDays - i + 1, 'other-month', true);
+            calendar.appendChild(day);
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        for (let i = 1; i <= daysInMonth; i++) {
+            const date = new Date(year, month, i);
+            const dateStr = formatDate(date);
+            const day = createDayElement(i, '', false);
+
+            const isToday = date.getDate() === today.getDate() &&
+                date.getMonth() === today.getMonth() &&
+                date.getFullYear() === today.getFullYear();
+
+            if (isToday) day.classList.add('current-day');
+
+            const cycleEntry = cycleData.find(entry => entry && entry.date === dateStr);
+
+            if (cycleEntry) {
+                const hasMenstruation = cycleEntry.flow_intensity &&
+                    cycleEntry.flow_intensity !== 'none' &&
+                    cycleEntry.flow_intensity !== '';
+
+                if (hasMenstruation) {
+                    day.classList.add('menstruation');
+                    const menstruationIndicator = document.createElement('div');
+                    menstruationIndicator.className = 'menstruation-indicator';
+                    menstruationIndicator.innerHTML = '<i class="fas fa-droplet"></i>';
+                    day.appendChild(menstruationIndicator);
+                }
+
+                const symptoms = cycleEntry.symptoms || [];
+                if (symptoms.length > 0) {
+                    const symptomsContainer = document.createElement('div');
+                    symptomsContainer.className = 'symptoms-dots-compact';
+
+                    symptoms.slice(0, 6).forEach(symptom => {
+                        const dot = document.createElement('div');
+                        dot.className = 'symptom-dot-compact';
+                        dot.style.backgroundColor = getSymptomColor(symptom);
+                        dot.title = symptom;
+                        symptomsContainer.appendChild(dot);
+                    });
+
+                    day.appendChild(symptomsContainer);
+                }
+            }
+
+            day.addEventListener('click', function () {
+                if (!isValidDateForEntry(dateStr)) {
+                    showToast('Нельзя редактировать будущие дни', 'error');
+                    return;
+                }
+                document.querySelectorAll('.calendar-day.selected').forEach(day => {
+                    day.classList.remove('selected');
+                });
+                day.classList.add('selected');
+                openDayDetail(dateStr);
+            });
+
+            calendar.appendChild(day);
+        }
+
+        const totalCells = 35;
+        const filledCells = startDay - 1 + daysInMonth;
+        if (filledCells < totalCells) {
+            for (let i = 1; i <= totalCells - filledCells; i++) {
+                const day = createDayElement(i, 'other-month', true);
+                calendar.appendChild(day);
+            }
+        }
+    }
+
+    function createDayElement(dayNumber, className, isOtherMonth) {
+        const dayElement = document.createElement('div');
+        dayElement.className = 'calendar-day';
+
+        if (className) dayElement.classList.add(className);
+
+        const numberElement = document.createElement('div');
+        numberElement.className = 'day-number';
+        numberElement.textContent = dayNumber;
+        dayElement.appendChild(numberElement);
+
+        if (isOtherMonth) {
+            dayElement.style.cursor = 'default';
+            dayElement.style.pointerEvents = 'none';
+            dayElement.style.opacity = '0.5';
+        }
+
+        return dayElement;
     }
 
     function changeMonth(step) {
-    // Меняем месяц в календаре
-    currentDate.setMonth(currentDate.getMonth() + step);
-    renderCalendar();
-    
-    // Синхронизируем график с новым месяцем календаря
-    currentChartDate = new Date(currentDate);
-    
-    // Обновляем заголовок графика (опционально)
-    updateChartTitle();
-    
-    // Пересоздаем график с данными за новый месяц
-    if (moodOverTimeChart) {
-        moodOverTimeChart.destroy();
+        currentDate.setMonth(currentDate.getMonth() + step);
+        renderCalendar();
+        currentChartDate = new Date(currentDate);
+        updateChartTitle();
+        if (moodOverTimeChart) moodOverTimeChart.destroy();
+        createMoodOverTimeChart();
+        console.log(`📅 Переключился на месяц: ${currentChartDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}`);
     }
-    createMoodOverTimeChart();
-    
-    console.log(`📅 Переключился на месяц: ${currentChartDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}`);
-}
 
-function goToToday() {
-    currentDate = new Date();
-    currentChartDate = new Date(currentDate); // Синхронизируем график
-    
-    renderCalendar();
-    resetToToday();
-    
-    // Обновляем график
-    if (moodOverTimeChart) {
-        moodOverTimeChart.destroy();
+    function goToToday() {
+        currentDate = new Date();
+        currentChartDate = new Date(currentDate);
+        renderCalendar();
+        resetToToday();
+        if (moodOverTimeChart) moodOverTimeChart.destroy();
+        createMoodOverTimeChart();
+        showToast('Перешли к текущему месяцу', 'info');
     }
-    createMoodOverTimeChart();
-    
-    showToast('Перешли к текущему месяцу', 'info');
-}
+
+    function refreshMoodChart() {
+        if (moodOverTimeChart) moodOverTimeChart.destroy();
+        createMoodOverTimeChart();
+        console.log('📊 График настроения обновлен');
+    }
+
+    // ==========================================================================
+    // ФУНКЦИИ ДЛЯ ДЕЙСТВИЙ ПОЛЬЗОВАТЕЛЯ
+    // ==========================================================================
+
+    function goToMoodTracker() {
+        window.location.href = "/calendar";
+    }
+
+    async function markMenstruationStart() {
+        const dateStr = currentSelectedDate || formatDate(new Date());
+        const existingEntry = cycleData.find(entry => entry.date === dateStr);
+        const hasMenstruation = existingEntry?.flow_intensity && existingEntry.flow_intensity !== 'none';
+
+        try {
+            showLoading(true);
+
+            const requestData = {
+                date: dateStr,
+                symptoms: existingEntry?.symptoms || [],
+                notes: existingEntry?.notes || '',
+                flow_intensity: hasMenstruation ? 'none' : 'light',
+                cycle_day: existingEntry?.cycle_day || null,
+                mood: existingEntry?.mood || null
+            };
+
+            console.log('📤 Отправка запроса на менструацию:', requestData);
+
+            const response = await fetch(CYCLE_API, {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            if (response.redirected) {
+                console.error('❌ Редирект на логин, сессия истекла');
+                showToast('Сессия истекла, пожалуйста, войдите снова', 'error');
+                window.location.href = '/auth/login';
+                return;
+            }
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('❌ Ошибка сервера:', response.status, errorText);
+                if (errorText.trim().startsWith('<!DOCTYPE')) {
+                    showToast('Ошибка авторизации. Пожалуйста, обновите страницу', 'error');
+                } else {
+                    showToast('Ошибка: ' + errorText, 'error');
+                }
+                return;
+            }
+
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const result = await response.json();
+                showToast(hasMenstruation ? 'Менструация убрана' : 'Менструация отмечена', 'success');
+                await refreshAllData();
+            } else {
+                const text = await response.text();
+                console.error('❌ Ответ не JSON:', text);
+                showToast('Ошибка формата ответа', 'error');
+            }
+
+        } catch (error) {
+            console.error('❌ Ошибка отметки менструации:', error);
+            showToast('Ошибка отметки менструации: ' + error.message, 'error');
+        } finally {
+            showLoading(false);
+        }
+    }
 
     async function saveCycleEntry() {
         console.log('💾 Начинаю сохранение записи...');
@@ -3230,11 +2064,9 @@ function goToToday() {
 
         const notes = document.getElementById('cycleNotes').value.trim();
 
-            if (selectedSymptoms.length === 0 && !notes) {
-        if (!confirm('Сохранить пустую запись?')) {
-            return;
+        if (selectedSymptoms.length === 0 && !notes) {
+            if (!confirm('Сохранить пустую запись?')) return;
         }
-    }
 
         const existingEntry = cycleData.find(entry => entry.date === dateStr);
         const flowIntensity = existingEntry ? (existingEntry.flow_intensity || 'none') : 'none';
@@ -3253,6 +2085,7 @@ function goToToday() {
 
             const response = await fetch(CYCLE_API, {
                 method: 'POST',
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
@@ -3264,9 +2097,7 @@ function goToToday() {
                 const result = await response.json();
                 showToast(existingEntry ? 'Запись обновлена!' : 'Запись сохранена!', 'success');
                 await refreshAllData();
-                if (!currentSelectedDate) {
-                    clearForm();
-                }
+                if (!currentSelectedDate) clearForm();
             } else {
                 const errorText = await response.text();
                 console.error('❌ Ошибка сервера:', errorText);
@@ -3293,9 +2124,7 @@ function goToToday() {
             return;
         }
 
-        if (!confirm(`Удалить запись за ${formatDateDisplay(currentSelectedDate)}?`)) {
-            return;
-        }
+        if (!confirm(`Удалить запись за ${formatDateDisplay(currentSelectedDate)}?`)) return;
 
         console.log('🗑️ Удаляю запись за:', currentSelectedDate);
 
@@ -3304,9 +2133,8 @@ function goToToday() {
 
             const response = await fetch(`${CYCLE_API}/${currentSelectedDate}`, {
                 method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' }
             });
 
             if (response.ok) {
@@ -3331,21 +2159,6 @@ function goToToday() {
         }
     }
 
-function updateChartTitle() {
-    // Находим заголовок графика (можно добавить, если хотите)
-    const chartTitle = document.querySelector('.analytics-block .section-title');
-    if (chartTitle) {
-        const monthNames = [
-            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-        ];
-        const month = monthNames[currentChartDate.getMonth()];
-        const year = currentChartDate.getFullYear();
-        
-        chartTitle.innerHTML = `<i class="fas fa-chart-line"></i> Настроение за ${month} ${year}`;
-    }
-}
-
     function clearForm() {
         console.log('🧹 Очищаю форму...');
         document.querySelectorAll('input[name="symptoms"]:checked').forEach(checkbox => {
@@ -3360,7 +2173,6 @@ function updateChartTitle() {
             showToast('Сначала выберите день в календаре', 'error');
             return;
         }
-
         const existingEntry = cycleData.find(entry => entry.date === currentSelectedDate);
         if (existingEntry) {
             deleteCycleEntry();
@@ -3386,6 +2198,892 @@ function updateChartTitle() {
 
         clearForm();
         console.log('✅ Сброс выполнен');
+    }
+
+    async function openDayDetail(dateStr) {
+        if (!isValidDateForEntry(dateStr)) {
+            showToast('Нельзя редактировать будущие дни', 'error');
+            return;
+        }
+
+        console.log('📅 Открываю детали дня:', dateStr);
+        currentSelectedDate = dateStr;
+        isEditMode = true;
+
+        const existingEntry = await loadDayEntry(dateStr);
+        fillFormWithData(dateStr, existingEntry);
+
+        document.querySelector('.tracker-form').scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+        });
+
+        showToast(`Редактирование дня ${formatDateDisplay(dateStr)}`, 'info');
+    }
+
+    function fillFormWithData(dateStr, entry) {
+        console.log('📝 Заполняю форму для даты:', dateStr, 'данные:', entry);
+
+        const formTitle = document.querySelector('.tracker-form h3');
+        if (formTitle) {
+            formTitle.innerHTML = `<i class="fas fa-edit"></i> ${formatDateDisplay(dateStr)}`;
+        }
+
+        clearForm();
+
+        if (entry) {
+            if (entry.symptoms && Array.isArray(entry.symptoms)) {
+                entry.symptoms.forEach(symptom => {
+                    const checkbox = Array.from(document.querySelectorAll('input[name="symptoms"]'))
+                        .find(cb => cb.value === symptom);
+                    if (checkbox) {
+                        checkbox.checked = true;
+                        console.log('✅ Отмечен симптом:', symptom);
+                    }
+                });
+            }
+
+            updateMenstruationButton(entry.flow_intensity);
+
+            const notesTextarea = document.getElementById('cycleNotes');
+            if (notesTextarea && entry.notes) notesTextarea.value = entry.notes;
+        }
+    }
+
+    function isValidDateForEntry(dateStr) {
+        try {
+            const selectedDate = new Date(dateStr);
+            const today = new Date();
+            selectedDate.setHours(0, 0, 0, 0);
+            today.setHours(0, 0, 0, 0);
+            return selectedDate <= today;
+        } catch (error) {
+            console.error('Ошибка проверки даты:', error);
+            return false;
+        }
+    }
+
+    // ==========================================================================
+    // ФУНКЦИИ ЗАГРУЗКИ ДАННЫХ
+    // ==========================================================================
+
+    async function checkAuth() {
+        try {
+            const response = await fetch('/api/check-auth', {
+                credentials: 'include',
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log('✅ Авторизация подтверждена, user_id:', data.user_id);
+                return true;
+            } else if (response.status === 401) {
+                console.error('❌ Не авторизован, перенаправление на логин');
+                window.location.href = '/auth/login';
+                return false;
+            } else {
+                console.error('❌ Ошибка проверки авторизации:', response.status);
+                return false;
+            }
+        } catch (error) {
+            console.error('❌ Ошибка при проверке авторизации:', error);
+            return false;
+        }
+    }
+
+    async function loadUserCycleSettings() {
+        try {
+            const response = await fetch('/api/cycle_settings', {
+                credentials: 'include',
+                headers: { 'Accept': 'application/json' }
+            });
+            if (response.ok) {
+                userCycleSettings = await response.json();
+                console.log('⚙️ Настройки цикла загружены:', userCycleSettings);
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки настроек цикла:', error);
+        }
+    }
+
+    async function loadCycleData() {
+        try {
+            console.log('📊 Загружаю данные цикла...');
+            const response = await fetch(CYCLE_API, {
+                credentials: 'include',
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (response.ok) {
+                cycleData = await response.json();
+                console.log('✅ Данные цикла загружены:', cycleData.length, 'записей');
+                updateSymptomsLegend();
+            } else {
+                console.error('❌ Ошибка загрузки данных цикла:', response.status);
+                showToast('Ошибка загрузки данных цикла', 'error');
+            }
+        } catch (error) {
+            console.error('Сетевая ошибка загрузки данных цикла:', error);
+            showToast('Сетевая ошибка', 'error');
+        }
+    }
+
+    async function loadMoodData() {
+        try {
+            console.log('📥 Загружаю данные настроения с:', MOOD_API);
+
+            const response = await fetch(MOOD_API, {
+                credentials: 'include',
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (response.ok) {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    moodData = await response.json();
+                    console.log('✅ Данные настроения загружены:', moodData.length, 'записей');
+                } else {
+                    const text = await response.text();
+                    console.error('❌ Ответ сервера не JSON:', text.substring(0, 200));
+                }
+            } else {
+                console.error('❌ Ошибка загрузки настроения. Статус:', response.status);
+            }
+
+            await loadCycleStats();
+            await loadCyclePredictions();
+            await loadTodayMood();
+
+            console.log('✅ Все данные настроения загружены');
+        } catch (error) {
+            console.error('❌ Ошибка загрузки данных настроения:', error);
+        }
+    }
+
+    async function loadCycleStats() {
+        try {
+            const response = await fetch(CYCLE_STATS_API, {
+                credentials: 'include',
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (response.redirected) {
+                console.log('⚠️ Редирект на логин в loadCycleStats');
+                return;
+            }
+
+            if (response.ok) {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const stats = await response.json();
+                    updateStatsDisplay(stats);
+                } else {
+                    const text = await response.text();
+                    console.error('❌ Ответ сервера не JSON (loadCycleStats):', text.substring(0, 100));
+                }
+            } else {
+                console.error('❌ Ошибка загрузки статистики цикла:', response.status);
+            }
+        } catch (error) {
+            console.error('❌ Ошибка загрузки статистики цикла:', error);
+        }
+    }
+
+    async function loadCyclePredictions() {
+        try {
+            const response = await fetch(CYCLE_PREDICTIONS_API, { credentials: 'include' });
+            if (response.ok) {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const predictions = await response.json();
+                    updatePredictionsDisplay(predictions);
+                } else {
+                    const text = await response.text();
+                    console.error('Ответ сервера не JSON (loadCyclePredictions):', text);
+                }
+            } else if (response.status === 400) {
+                console.log('📅 Нет данных для прогноза цикла (нужно настроить цикл)');
+            } else {
+                console.error('Ошибка загрузки прогнозов:', response.status);
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки прогнозов цикла:', error);
+        }
+    }
+
+    async function loadTodayMood() {
+        try {
+            const response = await fetch(TODAY_MOOD_API, {
+                credentials: 'include',
+                headers: { 'Accept': 'application/json' }
+            });
+
+            if (response.redirected) {
+                console.log('⚠️ Редирект на логин в loadTodayMood');
+                updateTodayMoodDisplay(null);
+                return;
+            }
+
+            if (response.ok) {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    const todayMood = await response.json();
+                    updateTodayMoodDisplay(todayMood);
+                } else {
+                    const text = await response.text();
+                    console.error('❌ Ответ сервера не JSON (loadTodayMood):', text.substring(0, 100));
+                    updateTodayMoodDisplay(null);
+                }
+            } else if (response.status === 401) {
+                console.log('⚠️ Не авторизован в loadTodayMood');
+                updateTodayMoodDisplay(null);
+            } else {
+                console.error('❌ Ошибка загрузки сегодняшнего настроения:', response.status);
+                updateTodayMoodDisplay(null);
+            }
+        } catch (error) {
+            console.error('❌ Ошибка загрузки сегодняшнего настроения:', error);
+            updateTodayMoodDisplay(null);
+        }
+    }
+
+    async function loadDayEntry(dateStr) {
+        try {
+            const response = await fetch(`${CYCLE_API}?date=${dateStr}`, {
+                credentials: 'include',
+                headers: { 'Accept': 'application/json' }
+            });
+            if (response.ok) {
+                const entries = await response.json();
+                return entries.length > 0 ? entries[0] : null;
+            }
+            return null;
+        } catch (error) {
+            console.error('Ошибка загрузки записи:', error);
+            return null;
+        }
+    }
+
+    async function loadInitialData() {
+        try {
+            console.log('📥 Начинаю загрузку данных...');
+
+            const isAuth = await checkAuth();
+            if (!isAuth) return;
+
+            await loadCycleData();
+            renderCalendar();
+
+            await loadMoodData();
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            await loadCycleStats();
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            await loadTodayMood();
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            try {
+                await loadCyclePredictions();
+            } catch (error) {
+                console.log('ℹ️ Нет данных для прогнозов цикла');
+            }
+
+            initCharts();
+            console.log('✅ Все данные загружены');
+        } catch (error) {
+            console.error('❌ Ошибка загрузки данных:', error);
+            showToast('Ошибка загрузки данных', 'error');
+        }
+    }
+
+    async function refreshAllData() {
+        console.log('🔄 Обновляю все данные...');
+
+        try {
+            showLoading(true);
+
+            await loadCycleData();
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            await loadMoodData();
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            await loadCycleStats();
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            await loadCyclePredictions();
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            await loadTodayMood();
+
+            renderCalendar();
+            updateSymptomsLegend();
+            initCharts();
+
+            console.log('✅ Все данные обновлены');
+        } catch (error) {
+            console.error('❌ Ошибка при обновлении данных:', error);
+            showToast('Ошибка при обновлении данных', 'error');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    // ==========================================================================
+    // ФУНКЦИИ ДЛЯ ГРАФИКОВ
+    // ==========================================================================
+
+    function initCharts() {
+        console.log('📊 Инициализирую графики...');
+        currentChartDate = new Date(currentDate);
+        createMoodOverTimeChart();
+        createSymptomsChart();
+    }
+
+    function getMoodOverTimeDataForCurrentMonth() {
+        console.log(`📈 Собираю данные за ${currentChartDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}...`);
+        console.log('📊 moodData содержит:', moodData ? moodData.length : 0, 'записей');
+
+        const year = currentChartDate.getFullYear();
+        const month = currentChartDate.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const labels = [];
+        const values = [];
+        const dates = [];
+        let hasData = false;
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const date = new Date(year, month, day);
+            const dateStr = formatDate(date);
+            dates.push(dateStr);
+            labels.push(day.toString());
+
+            if (moodData && Array.isArray(moodData)) {
+                const moodEntry = moodData.find(m => m && m.date === dateStr);
+                if (moodEntry && moodEntry.mood !== undefined && moodEntry.mood !== null) {
+                    values.push(parseFloat(moodEntry.mood));
+                    hasData = true;
+                } else {
+                    values.push(null);
+                }
+            } else {
+                values.push(null);
+            }
+        }
+
+        console.log(`📊 Данные за ${month + 1}.${year}:`, {
+            labels,
+            values: values.filter(v => v !== null),
+            hasData,
+            count: values.filter(v => v !== null).length
+        });
+
+        return { labels, values, dates, hasData };
+    }
+
+    function createMoodOverTimeChart() {
+        const canvas = document.getElementById('moodOverTimeChart');
+        if (!canvas) {
+            console.error('❌ Canvas для линейного графика не найден');
+            return;
+        }
+
+        if (moodOverTimeChart) moodOverTimeChart.destroy();
+
+        const moodOverTimeData = getMoodOverTimeDataForCurrentMonth();
+        const noMoodTimeData = document.getElementById('noMoodTimeData');
+        const cyclePhases = getCyclePhasesForChart();
+        console.log('🔄 Фазы цикла для графика:', cyclePhases);
+
+        if (moodOverTimeData.hasData) {
+            if (noMoodTimeData) noMoodTimeData.style.display = 'none';
+
+            const ctx = canvas.getContext('2d');
+            const backgroundColors = moodOverTimeData.labels.map((_, index) => {
+                const day = index + 1;
+                const phase = cyclePhases.find(p => p.day === day);
+                return phase ? phase.color : 'rgba(200, 200, 200, 0.1)';
+            });
+
+            moodOverTimeChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: moodOverTimeData.labels,
+                    datasets: [
+                        {
+                            label: 'Фазы цикла',
+                            data: moodOverTimeData.values.map(() => 10),
+                            backgroundColor: backgroundColors,
+                            borderWidth: 0,
+                            pointRadius: 0,
+                            fill: true,
+                            order: 2,
+                            tooltip: { enabled: false }
+                        },
+                        {
+                            label: 'Настроение',
+                            data: moodOverTimeData.values,
+                            borderColor: '#60F4E3',
+                            backgroundColor: 'transparent',
+                            tension: 0.4,
+                            fill: false,
+                            pointBackgroundColor: moodOverTimeData.values.map(val =>
+                                val !== null ? getMoodColorForValue(val) : '#ccc'),
+                            pointBorderColor: '#fff',
+                            pointRadius: 6,
+                            pointHoverRadius: 8,
+                            borderWidth: 3,
+                            order: 1,
+                            spanGaps: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 10,
+                            ticks: {
+                                stepSize: 1,
+                                font: { size: 12 },
+                                callback: function (value) {
+                                    const emojis = ['', '😞', '', '', '😐', '', '', '😊', '', '🤩'];
+                                    return emojis[value] || value;
+                                }
+                            },
+                            grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                            title: {
+                                display: true,
+                                text: 'Настроение (1-10)',
+                                font: { size: 14, weight: 'bold' }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { font: { size: 11 }, maxRotation: 0 }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                filter: function (item) {
+                                    return item.datasetIndex === 1;
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                            callbacks: {
+                                title: function (tooltipItems) {
+                                    const dateStr = moodOverTimeData.dates[tooltipItems[0].dataIndex];
+                                    const date = new Date(dateStr);
+                                    return date.toLocaleDateString('ru-RU', {
+                                        weekday: 'long',
+                                        day: 'numeric',
+                                        month: 'long'
+                                    });
+                                },
+                                label: function (context) {
+                                    if (context.datasetIndex === 1) {
+                                        const value = context.raw;
+                                        if (value === null) return 'Настроение: Нет данных';
+                                        const emoji = getMoodEmoji(value);
+                                        const day = context.dataIndex + 1;
+                                        const phase = cyclePhases.find(p => p.day === day);
+                                        const phaseNames = {
+                                            'menstruation': '🩸 Менструация',
+                                            'follicular': '🌱 Фолликулярная фаза',
+                                            'ovulation': '🥚 Овуляция',
+                                            'luteal': '🌙 Лютеиновая фаза',
+                                            'pms': '💫 ПМС'
+                                        };
+                                        return [
+                                            `${emoji} Настроение: ${value.toFixed(1)}/10`,
+                                            `${phaseNames[phase?.type] || 'Неизвестно'}`
+                                        ];
+                                    }
+                                    return null;
+                                },
+                                afterLabel: function (context) {
+                                    if (context.datasetIndex === 1) {
+                                        const day = context.dataIndex + 1;
+                                        const phase = cyclePhases.find(p => p.day === day);
+                                        const descriptions = {
+                                            'menstruation': 'Отдыхай больше, возможны спазмы',
+                                            'follicular': 'Энергия растёт, время для активностей',
+                                            'ovulation': 'Пик энергии и коммуникабельности',
+                                            'luteal': 'Возможны перепады настроения',
+                                            'pms': 'Будь добрее к себе, возможна усталость'
+                                        };
+                                        return descriptions[phase?.type] || '';
+                                    }
+                                    return null;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            console.log('✅ Линейный график настроения с фазами цикла создан');
+        } else {
+            if (noMoodTimeData) noMoodTimeData.style.display = 'flex';
+            console.log('ℹ️ Нет данных для линейного графика настроения');
+        }
+    }
+
+    function getSymptomsChartData() {
+        console.log('📊 Собираю данные для графика симптомов...');
+
+        const symptomStats = {};
+        let totalEntries = 0;
+
+        cycleData.forEach(entry => {
+            if (entry.symptoms && Array.isArray(entry.symptoms)) {
+                entry.symptoms.forEach(symptom => {
+                    symptomStats[symptom] = (symptomStats[symptom] || 0) + 1;
+                    totalEntries++;
+                });
+            }
+        });
+
+        if (totalEntries === 0) {
+            return { labels: [], values: [], colors: [], hasData: false };
+        }
+
+        const sorted = Object.entries(symptomStats)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 8);
+
+        return {
+            labels: sorted.map(([symptom]) => symptom),
+            values: sorted.map(([, count]) => count),
+            colors: sorted.map(([symptom]) => getSymptomColor(symptom)),
+            hasData: sorted.length > 0
+        };
+    }
+
+    function createSymptomsChart() {
+        const canvas = document.getElementById('symptomsChart');
+        if (!canvas) return;
+
+        if (symptomsChart) symptomsChart.destroy();
+
+        const symptomsDataForChart = getSymptomsChartData();
+        const noSymptomsData = document.getElementById('noSymptomsData');
+
+        if (symptomsDataForChart.hasData) {
+            if (noSymptomsData) noSymptomsData.style.display = 'none';
+
+            symptomsChart = new Chart(canvas, {
+                type: 'doughnut',
+                data: {
+                    labels: symptomsDataForChart.labels,
+                    datasets: [{
+                        data: symptomsDataForChart.values,
+                        backgroundColor: symptomsDataForChart.colors,
+                        borderColor: symptomsDataForChart.colors.map(color => color.replace('0.6', '1')),
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: { boxWidth: 15, padding: 15, font: { size: 12 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function (context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = symptomsDataForChart.values.reduce((a, b) => a + b, 0);
+                                    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                                    return `${label}: ${value} раз (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            if (noSymptomsData) noSymptomsData.style.display = 'flex';
+        }
+    }
+
+    // ==========================================================================
+    // ФУНКЦИИ ДЛЯ ФАЗ ЦИКЛА
+    // ==========================================================================
+
+    function getCyclePhasesForChart() {
+        console.log('🔄 Получаю фазы цикла для графика...');
+        console.log('📊 cycleData:', cycleData);
+        console.log('📊 userCycleSettings:', userCycleSettings);
+
+        const year = currentChartDate.getFullYear();
+        const month = currentChartDate.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        const phasesFromEntries = calculatePhasesFromCycleEntries(year, month, daysInMonth);
+        if (phasesFromEntries) {
+            console.log('✅ Фазы рассчитаны из cycle_entries');
+            return phasesFromEntries;
+        }
+
+        if (userCycleSettings && userCycleSettings.last_period_start) {
+            const phasesFromSettings = calculatePhasesFromSettings(year, month, daysInMonth);
+            if (phasesFromSettings) {
+                console.log('✅ Фазы рассчитаны из настроек');
+                return phasesFromSettings;
+            }
+        }
+
+        console.log('⚠️ Нет данных о цикле, использую стандартные фазы');
+        return getDefaultPhasesForMonth(daysInMonth);
+    }
+
+    function calculatePhasesFromCycleEntries(year, month, daysInMonth) {
+        if (!cycleData || cycleData.length === 0) {
+            console.log('ℹ️ Нет данных cycle_entries');
+            return null;
+        }
+
+        const periodDaysInMonth = [];
+
+        cycleData.forEach(entry => {
+            const entryDate = new Date(entry.date);
+            if (entryDate.getFullYear() === year &&
+                entryDate.getMonth() === month &&
+                entry.flow_intensity &&
+                entry.flow_intensity !== 'none') {
+                periodDaysInMonth.push(entryDate.getDate());
+            }
+        });
+
+        console.log('📅 Дни с менструацией в этом месяце:', periodDaysInMonth);
+
+        if (periodDaysInMonth.length > 0) {
+            periodDaysInMonth.sort((a, b) => a - b);
+            let startDay = periodDaysInMonth[0];
+            let endDay = periodDaysInMonth[0];
+
+            for (let i = 1; i < periodDaysInMonth.length; i++) {
+                if (periodDaysInMonth[i] === periodDaysInMonth[i - 1] + 1) {
+                    endDay = periodDaysInMonth[i];
+                } else {
+                    break;
+                }
+            }
+
+            const periodLength = endDay - startDay + 1;
+            console.log(`📅 Основной период: дни ${startDay}-${endDay} (${periodLength} дней)`);
+
+            return generatePhasesFromPeriod(startDay, periodLength, daysInMonth);
+        }
+
+        return null;
+    }
+
+    function calculatePhasesFromSettings(year, month, daysInMonth) {
+        try {
+            const lastPeriod = new Date(userCycleSettings.last_period_start);
+            const cycleLength = userCycleSettings.cycle_length || 28;
+            const periodLength = userCycleSettings.period_length || 5;
+
+            let cycleStartInMonth = null;
+            let currentDate = new Date(year, month, 1);
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                const daysSinceLastPeriod = Math.floor((date - lastPeriod) / (1000 * 60 * 60 * 24));
+
+                if (daysSinceLastPeriod >= 0 && daysSinceLastPeriod < periodLength) {
+                    cycleStartInMonth = day - daysSinceLastPeriod;
+                    break;
+                }
+            }
+
+            if (cycleStartInMonth) {
+                return generatePhasesFromStartDay(cycleStartInMonth, cycleLength, periodLength, daysInMonth);
+            }
+
+            const daysSinceLastPeriod = Math.floor((new Date(year, month, 1) - lastPeriod) / (1000 * 60 * 60 * 24));
+            if (daysSinceLastPeriod > 0) {
+                const dayInCycle = (daysSinceLastPeriod % cycleLength) + 1;
+                const cycleStartDay = 1 - (dayInCycle - 1);
+                return generatePhasesFromStartDay(cycleStartDay, cycleLength, periodLength, daysInMonth);
+            }
+
+        } catch (error) {
+            console.error('❌ Ошибка расчета фаз из настроек:', error);
+        }
+
+        return null;
+    }
+
+    function generatePhasesFromStartDay(startDay, cycleLength, periodLength, daysInMonth) {
+        const phases = [];
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const cycleDay = ((day - startDay) % 28 + 28) % 28 + 1;
+            let phaseType = 'follicular';
+
+            if (cycleDay >= 1 && cycleDay <= periodLength) {
+                phaseType = 'menstruation';
+            } else if (cycleDay >= periodLength + 1 && cycleDay <= 13) {
+                phaseType = 'follicular';
+            } else if (cycleDay >= 14 && cycleDay <= 15) {
+                phaseType = 'ovulation';
+            } else if (cycleDay >= 16 && cycleDay <= 23) {
+                phaseType = 'luteal';
+            } else if (cycleDay >= 24 && cycleDay <= 28) {
+                phaseType = 'pms';
+            }
+
+            phases.push({
+                day: day,
+                type: phaseType,
+                color: getPhaseColor(phaseType, 0.2)
+            });
+        }
+
+        return phases;
+    }
+
+    function generatePhasesFromPeriod(startDay, periodLength, daysInMonth) {
+        const phases = [];
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            let phaseType = 'follicular';
+
+            if (day >= startDay && day < startDay + periodLength) {
+                phaseType = 'menstruation';
+            } else if (day >= startDay + 13 && day <= startDay + 15) {
+                phaseType = 'ovulation';
+            } else if (day >= startDay + 23 && day <= startDay + 28) {
+                phaseType = 'pms';
+            } else if (day >= startDay + 15 && day <= startDay + 23) {
+                phaseType = 'luteal';
+            }
+
+            phases.push({
+                day: day,
+                type: phaseType,
+                color: getPhaseColor(phaseType, 0.2)
+            });
+        }
+
+        return phases;
+    }
+
+    function getDefaultPhasesForMonth(daysInMonth) {
+        const phases = [];
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            if (day <= 5) {
+                phases.push({ day: day, type: 'menstruation', color: 'rgba(255, 107, 107, 0.2)' });
+            } else if (day <= 13) {
+                phases.push({ day: day, type: 'follicular', color: 'rgba(96, 244, 227, 0.2)' });
+            } else if (day <= 15) {
+                phases.push({ day: day, type: 'ovulation', color: 'rgba(255, 112, 236, 0.2)' });
+            } else if (day <= 23) {
+                phases.push({ day: day, type: 'luteal', color: 'rgba(255, 209, 102, 0.2)' });
+            } else {
+                phases.push({ day: day, type: 'pms', color: 'rgba(184, 179, 233, 0.2)' });
+            }
+        }
+
+        return phases;
+    }
+
+    function getPhaseColor(phaseType, opacity = 0.2) {
+        const colors = {
+            'menstruation': `rgba(255, 107, 107, ${opacity})`,
+            'follicular': `rgba(96, 244, 227, ${opacity})`,
+            'ovulation': `rgba(255, 112, 236, ${opacity})`,
+            'luteal': `rgba(255, 209, 102, ${opacity})`,
+            'pms': `rgba(184, 179, 233, ${opacity})`
+        };
+        return colors[phaseType] || `rgba(200, 200, 200, ${opacity})`;
+    }
+
+    // ==========================================================================
+    // ФУНКЦИИ ДЛЯ ЛЕГЕНДЫ И ИНТЕРФЕЙСА
+    // ==========================================================================
+
+    function initSymptomsGrid() {
+        const symptomsGrid = document.getElementById('symptomsGrid');
+        if (!symptomsGrid) return;
+
+        const defaultSymptoms = [
+            'Головная боль', 'Спазмы', 'Усталость', 'Набухание груди',
+            'Перепады настроения', 'Тревожность', 'Вздутие', 'Акне',
+            'Тяга к сладкому', 'Бессонница', 'Тошнота', 'Боль в спине'
+        ];
+
+        symptomsGrid.innerHTML = defaultSymptoms.map(symptom => `
+            <label class="symptom-checkbox">
+                <input type="checkbox" name="symptoms" value="${symptom}">
+                ${symptom}
+            </label>
+        `).join('');
+    }
+
+    function updateSymptomsLegend() {
+        const legendContainer = document.getElementById('symptomsLegend');
+        if (!legendContainer) return;
+
+        const symptomStats = {};
+        cycleData.forEach(entry => {
+            if (entry.symptoms && Array.isArray(entry.symptoms)) {
+                entry.symptoms.forEach(symptom => {
+                    symptomStats[symptom] = (symptomStats[symptom] || 0) + 1;
+                });
+            }
+        });
+
+        const sortedSymptoms = Object.entries(symptomStats).sort((a, b) => b[1] - a[1]);
+
+        if (sortedSymptoms.length === 0) {
+            legendContainer.innerHTML = '<p style="text-align: center; color: var(--gray);">Симптомы еще не добавлены</p>';
+            return;
+        }
+
+        legendContainer.innerHTML = sortedSymptoms.map(([symptom, count]) => `
+            <div class="legend-item">
+                <div class="legend-color" style="background: ${getSymptomColor(symptom)}"></div>
+                <div class="legend-name">${symptom}</div>
+                <div class="legend-count">${count}</div>
+            </div>
+        `).join('');
+    }
+
+    function toggleLegend() {
+        const content = document.getElementById('symptomsLegend');
+        const toggleBtn = document.querySelector('.legend-toggle i');
+
+        if (!content || !toggleBtn) return;
+
+        content.classList.toggle('collapsed');
+
+        if (content.classList.contains('collapsed')) {
+            toggleBtn.classList.remove('fa-chevron-up');
+            toggleBtn.classList.add('fa-chevron-down');
+        } else {
+            toggleBtn.classList.remove('fa-chevron-down');
+            toggleBtn.classList.add('fa-chevron-up');
+        }
     }
 
     function updateStatsDisplay(stats) {
@@ -3422,9 +3120,7 @@ function updateChartTitle() {
         const moodDisplay = document.getElementById('todayMood');
         const moodLoading = document.getElementById('moodLoading');
 
-        if (moodLoading) {
-            moodLoading.style.display = 'none';
-        }
+        if (moodLoading) moodLoading.style.display = 'none';
 
         if (moodData && moodData.mood !== undefined && moodData.mood !== null) {
             const emoji = getMoodEmoji(moodData.mood);
@@ -3440,13 +3136,6 @@ function updateChartTitle() {
                 <div class="mood-note">Настроение не отмечено</div>
             `;
         }
-    }
-
-    function getMoodEmoji(moodValue) {
-        if (moodValue >= 8) return '😊';
-        if (moodValue >= 5) return '😐';
-        if (moodValue >= 3) return '😕';
-        return '😞';
     }
 
     function updateMenstruationButton(flowIntensity) {
@@ -3466,188 +3155,34 @@ function updateChartTitle() {
         }
     }
 
-    async function openDayDetail(dateStr) {
-        if (!isValidDateForEntry(dateStr)) {
-            showToast('Нельзя редактировать будущие дни', 'error');
-            return;
-        }
+    function updateChartTitle() {
+        const chartTitle = document.querySelector('.analytics-block .section-title');
+        if (chartTitle) {
+            const monthNames = [
+                'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+            ];
+            const month = monthNames[currentChartDate.getMonth()];
+            const year = currentChartDate.getFullYear();
 
-        console.log('📅 Открываю детали дня:', dateStr);
-
-        currentSelectedDate = dateStr;
-        isEditMode = true;
-
-        const existingEntry = await loadDayEntry(dateStr);
-        fillFormWithData(dateStr, existingEntry);
-
-        document.querySelector('.tracker-form').scrollIntoView({
-            behavior: 'smooth',
-            block: 'start'
-        });
-
-        showToast(`Редактирование дня ${formatDateDisplay(dateStr)}`, 'info');
-    }
-
-async function loadDayEntry(dateStr) {
-    try {
-        const response = await fetch(`${CYCLE_API}?date=${dateStr}`, {
-            credentials: 'include',  // <--- ДОБАВЛЕНО
-            headers: {
-                'Accept': 'application/json'
-            }
-        });
-        if (response.ok) {
-            const entries = await response.json();
-            return entries.length > 0 ? entries[0] : null;
-        }
-        return null;
-    } catch (error) {
-        console.error('Ошибка загрузки записи:', error);
-        return null;
-    }
-}
-
-    function fillFormWithData(dateStr, entry) {
-        console.log('📝 Заполняю форму для даты:', dateStr, 'данные:', entry);
-
-        const formTitle = document.querySelector('.tracker-form h3');
-        if (formTitle) {
-            formTitle.innerHTML = `<i class="fas fa-edit"></i> ${formatDateDisplay(dateStr)}`;
-        }
-
-        clearForm();
-
-        if (entry) {
-            if (entry.symptoms && Array.isArray(entry.symptoms)) {
-                entry.symptoms.forEach(symptom => {
-                    const checkbox = Array.from(document.querySelectorAll('input[name="symptoms"]'))
-                        .find(cb => cb.value === symptom);
-                    if (checkbox) {
-                        checkbox.checked = true;
-                        console.log('✅ Отмечен симптом:', symptom);
-                    }
-                });
-            }
-
-            updateMenstruationButton(entry.flow_intensity);
-
-            const notesTextarea = document.getElementById('cycleNotes');
-            if (notesTextarea && entry.notes) {
-                notesTextarea.value = entry.notes;
-            }
+            chartTitle.innerHTML = `<i class="fas fa-chart-line"></i> Настроение за ${month} ${year}`;
         }
     }
 
-    function formatDateDisplay(dateStr) {
-        const date = new Date(dateStr);
-        return date.toLocaleDateString('ru-RU', {
-            day: 'numeric',
-            month: 'long',
-            year: 'numeric'
-        });
-    }
+    function debugMonthSync() {
+        console.log('🔍 Синхронизация месяцев:');
+        console.log('- Календарь:', currentDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' }));
+        console.log('- График:', currentChartDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' }));
 
-    function isValidDateForEntry(dateStr) {
-        try {
-            const selectedDate = new Date(dateStr);
-            const today = new Date();
-            selectedDate.setHours(0, 0, 0, 0);
-            today.setHours(0, 0, 0, 0);
-            return selectedDate <= today;
-        } catch (error) {
-            console.error('Ошибка проверки даты:', error);
-            return false;
-        }
-    }
+        const monthData = getMoodOverTimeDataForCurrentMonth();
+        console.log('- Данные графика:', monthData);
 
-    function goToMoodTracker() {
-        window.location.href = "/calendar";
-    }
-
-    function updateSymptomsLegend() {
-        const legendContainer = document.getElementById('symptomsLegend');
-        if (!legendContainer) return;
-
-        const symptomStats = {};
-        cycleData.forEach(entry => {
-            if (entry.symptoms && Array.isArray(entry.symptoms)) {
-                entry.symptoms.forEach(symptom => {
-                    symptomStats[symptom] = (symptomStats[symptom] || 0) + 1;
-                });
-            }
-        });
-
-        const sortedSymptoms = Object.entries(symptomStats)
-            .sort((a, b) => b[1] - a[1]);
-
-        if (sortedSymptoms.length === 0) {
-            legendContainer.innerHTML = '<p style="text-align: center; color: var(--gray);">Симптомы еще не добавлены</p>';
-            return;
-        }
-
-        legendContainer.innerHTML = sortedSymptoms.map(([symptom, count]) => `
-            <div class="legend-item">
-                <div class="legend-color" style="background: ${getSymptomColor(symptom)}"></div>
-                <div class="legend-name">${symptom}</div>
-                <div class="legend-count">${count}</div>
-            </div>
-        `).join('');
-    }
-
-    function toggleLegend() {
-        const content = document.getElementById('symptomsLegend');
-        const toggleBtn = document.querySelector('.legend-toggle i');
-
-        if (!content || !toggleBtn) return;
-
-        content.classList.toggle('collapsed');
-
-        if (content.classList.contains('collapsed')) {
-            toggleBtn.classList.remove('fa-chevron-up');
-            toggleBtn.classList.add('fa-chevron-down');
-        } else {
-            toggleBtn.classList.remove('fa-chevron-down');
-            toggleBtn.classList.add('fa-chevron-up');
-        }
+        return { calendarMonth: currentDate, chartMonth: currentChartDate, data: monthData };
     }
 
     // ==========================================================================
-    // ФУНКЦИИ ОБНОВЛЕНИЯ ДАННЫХ
+    // ФУНКЦИИ ДЛЯ ЗАГРУЗКИ И УВЕДОМЛЕНИЙ
     // ==========================================================================
-
-async function refreshAllData() {
-    console.log('🔄 Обновляю все данные...');
-
-    try {
-        showLoading(true);
-
-        // Загружаем данные последовательно с задержками
-        await loadCycleData();
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        await loadMoodData();
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        await loadCycleStats();
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        await loadCyclePredictions();
-        await new Promise(resolve => setTimeout(resolve, 300));
-        
-        await loadTodayMood();
-
-        renderCalendar();
-        updateSymptomsLegend();
-        initCharts();
-
-        console.log('✅ Все данные обновлены');
-    } catch (error) {
-        console.error('❌ Ошибка при обновлении данных:', error);
-        showToast('Ошибка при обновлении данных', 'error');
-    } finally {
-        showLoading(false);
-    }
-}
 
     function showLoading(isLoading) {
         let overlay = document.getElementById('loading-overlay');
@@ -3784,246 +3319,18 @@ async function refreshAllData() {
     `;
     document.head.appendChild(style);
 
-function debugMonthSync() {
-    console.log('🔍 Синхронизация месяцев:');
-    console.log('- Календарь:', currentDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' }));
-    console.log('- График:', currentChartDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' }));
-    
-    const monthData = getMoodOverTimeDataForCurrentMonth();
-    console.log('- Данные графика:', monthData);
-    
-    return {
-        calendarMonth: currentDate,
-        chartMonth: currentChartDate,
-        data: monthData
-    };
-}
+    // ==========================================================================
+    // ИНИЦИАЛИЗАЦИЯ (В САМОМ КОНЦЕ)
+    // ==========================================================================
+    document.addEventListener('DOMContentLoaded', async function () {
+        console.log('🚀 Инициализация дневника цикла...');
 
-// ==========================================================================
-// ФУНКЦИИ ДЛЯ ФАЗ ЦИКЛА
-// ==========================================================================
+        const isAuth = await checkAuth();
+        if (!isAuth) return;
 
-// Получаем фазы цикла для отображения на графике
-function getCyclePhasesForChart() {
-    console.log('🔄 Получаю фазы цикла для графика...');
-    console.log('📊 cycleData:', cycleData);
-    console.log('📊 userCycleSettings:', userCycleSettings);
-    
-    const year = currentChartDate.getFullYear();
-    const month = currentChartDate.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
-    // Сначала проверяем реальные данные из cycle_entries
-    const phasesFromEntries = calculatePhasesFromCycleEntries(year, month, daysInMonth);
-    if (phasesFromEntries) {
-        console.log('✅ Фазы рассчитаны из cycle_entries');
-        return phasesFromEntries;
-    }
-    
-    // Если нет данных в cycle_entries, пробуем из настроек
-    if (userCycleSettings && userCycleSettings.last_period_start) {
-        const phasesFromSettings = calculatePhasesFromSettings(year, month, daysInMonth);
-        if (phasesFromSettings) {
-            console.log('✅ Фазы рассчитаны из настроек');
-            return phasesFromSettings;
-        }
-    }
-    
-    // Если совсем нет данных, возвращаем стандартные фазы для демонстрации
-    console.log('⚠️ Нет данных о цикле, использую стандартные фазы');
-    return getDefaultPhasesForMonth(daysInMonth);
-}
-
-// Рассчитываем фазы из данных cycle_entries
-function calculatePhasesFromCycleEntries(year, month, daysInMonth) {
-    if (!cycleData || cycleData.length === 0) {
-        console.log('ℹ️ Нет данных cycle_entries');
-        return null;
-    }
-    
-    // Собираем все дни с менструацией в текущем месяце
-    const periodDaysInMonth = [];
-    
-    cycleData.forEach(entry => {
-        const entryDate = new Date(entry.date);
-        if (entryDate.getFullYear() === year && 
-            entryDate.getMonth() === month && 
-            entry.flow_intensity && 
-            entry.flow_intensity !== 'none') {
-            periodDaysInMonth.push(entryDate.getDate());
-        }
+        initSymptomsGrid();
+        await loadUserCycleSettings();
+        await loadInitialData();
     });
-    
-    console.log('📅 Дни с менструацией в этом месяце:', periodDaysInMonth);
-    
-    // Если есть дни менструации в этом месяце
-    if (periodDaysInMonth.length > 0) {
-        periodDaysInMonth.sort((a, b) => a - b);
-        
-        // Ищем последовательные дни менструации (период)
-        let startDay = periodDaysInMonth[0];
-        let endDay = periodDaysInMonth[0];
-        
-        for (let i = 1; i < periodDaysInMonth.length; i++) {
-            if (periodDaysInMonth[i] === periodDaysInMonth[i-1] + 1) {
-                endDay = periodDaysInMonth[i];
-            } else {
-                break;
-            }
-        }
-        
-        const periodLength = endDay - startDay + 1;
-        
-        console.log(`📅 Основной период: дни ${startDay}-${endDay} (${periodLength} дней)`);
-        
-        // Генерируем фазы на основе реальной менструации
-        return generatePhasesFromPeriod(startDay, periodLength, daysInMonth);
-    }
-    
-    return null;
-}
-
-// Рассчитываем фазы из настроек цикла
-function calculatePhasesFromSettings(year, month, daysInMonth) {
-    try {
-        const lastPeriod = new Date(userCycleSettings.last_period_start);
-        const cycleLength = userCycleSettings.cycle_length || 28;
-        const periodLength = userCycleSettings.period_length || 5;
-        
-        // Находим начало цикла в текущем месяце
-        let cycleStartInMonth = null;
-        let currentDate = new Date(year, month, 1);
-        
-        // Ищем день, который является началом цикла (менструация)
-        for (let day = 1; day <= daysInMonth; day++) {
-            const date = new Date(year, month, day);
-            const daysSinceLastPeriod = Math.floor((date - lastPeriod) / (1000 * 60 * 60 * 24));
-            
-            // Если это день менструации (в пределах periodLength от последней даты)
-            if (daysSinceLastPeriod >= 0 && daysSinceLastPeriod < periodLength) {
-                cycleStartInMonth = day - daysSinceLastPeriod;
-                break;
-            }
-        }
-        
-        // Если нашли начало цикла в этом месяце
-        if (cycleStartInMonth) {
-            return generatePhasesFromStartDay(cycleStartInMonth, cycleLength, periodLength, daysInMonth);
-        }
-        
-        // Если не нашли, пробуем найти предыдущий цикл
-        const daysSinceLastPeriod = Math.floor((new Date(year, month, 1) - lastPeriod) / (1000 * 60 * 60 * 24));
-        if (daysSinceLastPeriod > 0) {
-            const dayInCycle = (daysSinceLastPeriod % cycleLength) + 1;
-            const cycleStartDay = 1 - (dayInCycle - 1);
-            return generatePhasesFromStartDay(cycleStartDay, cycleLength, periodLength, daysInMonth);
-        }
-        
-    } catch (error) {
-        console.error('❌ Ошибка расчета фаз из настроек:', error);
-    }
-    
-    return null;
-}
-
-// Генерируем фазы от дня начала менструации
-function generatePhasesFromStartDay(startDay, cycleLength, periodLength, daysInMonth) {
-    const phases = [];
-    
-    for (let day = 1; day <= daysInMonth; day++) {
-        // Вычисляем день цикла для этого дня
-        const cycleDay = ((day - startDay) % 28 + 28) % 28 + 1;
-        
-        let phaseType = 'follicular';
-        
-        if (cycleDay >= 1 && cycleDay <= periodLength) {
-            phaseType = 'menstruation';
-        } else if (cycleDay >= periodLength + 1 && cycleDay <= 13) {
-            phaseType = 'follicular';
-        } else if (cycleDay >= 14 && cycleDay <= 15) {
-            phaseType = 'ovulation';
-        } else if (cycleDay >= 16 && cycleDay <= 23) {
-            phaseType = 'luteal';
-        } else if (cycleDay >= 24 && cycleDay <= 28) {
-            phaseType = 'pms';
-        }
-        
-        phases.push({
-            day: day,
-            type: phaseType,
-            color: getPhaseColor(phaseType, 0.2)
-        });
-    }
-    
-    return phases;
-}
-
-// Генерируем фазы от реального периода менструации
-function generatePhasesFromPeriod(startDay, periodLength, daysInMonth) {
-    const phases = [];
-    
-    for (let day = 1; day <= daysInMonth; day++) {
-        let phaseType = 'follicular';
-        
-        // Дни менструации
-        if (day >= startDay && day < startDay + periodLength) {
-            phaseType = 'menstruation';
-        } 
-        // Овуляция (примерно 14 день от начала цикла)
-        else if (day >= startDay + 13 && day <= startDay + 15) {
-            phaseType = 'ovulation';
-        }
-        // ПМС (примерно 24-28 дни)
-        else if (day >= startDay + 23 && day <= startDay + 28) {
-            phaseType = 'pms';
-        }
-        // Лютеиновая (16-23 дни)
-        else if (day >= startDay + 15 && day <= startDay + 23) {
-            phaseType = 'luteal';
-        }
-        
-        phases.push({
-            day: day,
-            type: phaseType,
-            color: getPhaseColor(phaseType, 0.2)
-        });
-    }
-    
-    return phases;
-}
-
-// Стандартные фазы для демонстрации (если нет данных)
-function getDefaultPhasesForMonth(daysInMonth) {
-    const phases = [];
-    
-    for (let day = 1; day <= daysInMonth; day++) {
-        // Делим месяц на примерные фазы для демонстрации
-        if (day <= 5) {
-            phases.push({ day: day, type: 'menstruation', color: 'rgba(255, 107, 107, 0.2)' });
-        } else if (day <= 13) {
-            phases.push({ day: day, type: 'follicular', color: 'rgba(96, 244, 227, 0.2)' });
-        } else if (day <= 15) {
-            phases.push({ day: day, type: 'ovulation', color: 'rgba(255, 112, 236, 0.2)' });
-        } else if (day <= 23) {
-            phases.push({ day: day, type: 'luteal', color: 'rgba(255, 209, 102, 0.2)' });
-        } else {
-            phases.push({ day: day, type: 'pms', color: 'rgba(184, 179, 233, 0.2)' });
-        }
-    }
-    
-    return phases;
-}
-
-// Получаем цвет для фазы (с прозрачностью)
-function getPhaseColor(phaseType, opacity = 0.2) {
-    const colors = {
-        'menstruation': `rgba(255, 107, 107, ${opacity})`,
-        'follicular': `rgba(96, 244, 227, ${opacity})`,
-        'ovulation': `rgba(255, 112, 236, ${opacity})`,
-        'luteal': `rgba(255, 209, 102, ${opacity})`,
-        'pms': `rgba(184, 179, 233, ${opacity})`
-    };
-    return colors[phaseType] || `rgba(200, 200, 200, ${opacity})`;
-}
-
+</script>
 {% endblock %}

@@ -765,6 +765,23 @@ def cycle_diary():
     
     return render_template('cycle_diary.html')
 
+@main.route('/api/pool-status')
+@login_required
+def pool_status():
+    """Проверка статуса пула соединений"""
+    try:
+        from app import mysql_pool
+        if mysql_pool:
+            return jsonify({
+                'status': 'active',
+                'pool_name': mysql_pool.pool_name,
+                'pool_size': mysql_pool.pool_size
+            })
+        else:
+            return jsonify({'status': 'not_initialized'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'error': str(e)})
+
 
 # ================== API МАРШРУТЫ ДЛЯ НАСТРОЕНИЯ ==================
 

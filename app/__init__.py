@@ -14,96 +14,85 @@ login_manager = LoginManager()
 login_manager.login_view = 'auth.login'
 login_manager.login_message_category = 'info'
 
-def get_db():
-    """Получение нового соединения с базой данных"""
+# Глобальная переменная для пула
+mysql_pool = None
+
+def init_db():
+    """Инициализация пула соединений"""
+    global mysql_pool
     try:
         mysql_url = os.getenv('MYSQL_URL')
-        print(f"🔄 DEBUG: MYSQL_URL = {mysql_url}")
+        print(f"🔄 Инициализация пула соединений...")
         
         if mysql_url and mysql_url.strip() and mysql_url != 'mysql://':
-            print("✅ DEBUG: MYSQL_URL найден, парсим...")
-            
             from urllib.parse import urlparse
             parsed = urlparse(mysql_url)
-            
-            print(f"🔄 DEBUG parsed: scheme={parsed.scheme}, hostname={parsed.hostname}, username={parsed.username}, path={parsed.path}, port={parsed.port}")
             
             hostname = parsed.hostname
             username = parsed.username or 'root'
             password = parsed.password or ''
-            
             database = parsed.path
             if database.startswith('/'):
                 database = database[1:]
             if not database:
                 database = 'railway'
-                
             port = parsed.port or 3306
             
-            print(f"🔄 DEBUG подключение: host={hostname}, user={username}, db={database}, port={port}")
-            
-            # ✅ ГЛАВНОЕ ИЗМЕНЕНИЕ - ДОБАВЛЕН ТАЙМАУТ!
-            conn = mysql.connector.connect(
+            # СОЗДАЕМ ПУЛ, А НЕ ОДНО СОЕДИНЕНИЕ
+            mysql_pool = mysql.connector.pooling.MySQLConnectionPool(
+                pool_name="lumi_pool",
+                pool_size=5,
+                pool_reset_session=True,
                 host=hostname,
                 user=username,
                 password=password,
                 database=database,
                 port=port,
                 autocommit=True,
-                connection_timeout=5,  # 👈 5 секунд таймаут!
-                pool_size=1
+                connection_timeout=10
             )
-            print(f"✅ Подключено к Railway MySQL: {hostname}")
-            return conn
-            
-        else:
-            print("⚠ DEBUG: MYSQL_URL не найден, проверяем отдельные переменные...")
-            
-            db_host = os.getenv('DB_HOST')
-            db_user = os.getenv('DB_USER')
-            db_password = os.getenv('DB_PASSWORD')
-            db_name = os.getenv('DB_NAME')
-            db_port = os.getenv('DB_PORT', 3306)
-            
-            print(f"🔄 DEBUG: DB_HOST={db_host}, DB_USER={db_user}, DB_NAME={db_name}, DB_PORT={db_port}")
-            
-            if db_host:
-                conn = mysql.connector.connect(
-                    host=db_host,
-                    user=db_user or 'root',
-                    password=db_password or '',
-                    database=db_name or 'railway',
-                    port=int(db_port),
-                    autocommit=True,
-                    connection_timeout=5  # 👈 И ЗДЕСЬ ТОЖЕ ТАЙМАУТ!
-                )
-                print(f"✅ Подключено к MySQL: {db_host}")
-                return conn
-            else:
-                print("❌ DEBUG: Не найдены параметры подключения к БД")
-                return None
-                
+            print(f"✅ Пул соединений создан для {hostname}")
+            return True
     except Error as e:
-        print(f"❌ Ошибка подключения к БД: {e}")
-        print(f"❌ Подробности ошибки: {e.msg}")
+        print(f"❌ Ошибка создания пула: {e}")
+        return False
+
+def get_db():
+    """Получение соединения из пула"""
+    global mysql_pool
+    try:
+        if mysql_pool is None:
+            print("🔄 Пул не инициализирован, создаем...")
+            init_db()
+            
+        if mysql_pool:
+            conn = mysql_pool.get_connection()
+            print(f"✅ Соединение получено из пула")
+            return conn
+        else:
+            print("❌ Не удалось создать пул соединений")
+            return None
+    except Error as e:
+        print(f"❌ Ошибка получения соединения из пула: {e}")
         return None
 
 def close_db(conn):
-    """Закрытие соединения с базой данных"""
+    """Возврат соединения в пул"""
     if conn and conn.is_connected():
         try:
             conn.close()
+            print("✅ Соединение возвращено в пул")
         except Error as e:
-            print(f"Ошибка закрытия соединения: {e}")
+            print(f"⚠️ Ошибка при возврате соединения: {e}")
 
 def create_app():
     """Фабрика приложения Flask"""
     app = Flask(__name__)
     print("🚀 CREATE_APP началась")
     
-    # Проверяем все переменные окружения (для отладки)
+    # Проверяем переменные окружения
     print("🔄 Проверяем переменные окружения...")
-    env_vars = ['MYSQL_URL', 'DB_HOST', 'DB_USER', 'DB_NAME', 'DB_PORT']
+    env_vars = ['MYSQL_URL', 'DB_HOST', 'DB_USER', 'DB_NAME', 'DB_PORT', 'SECRET_KEY']
     for var in env_vars:
         value = os.getenv(var)
         if value:
@@ -113,7 +102,7 @@ def create_app():
     
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev-secret-key-change-in-production')
     
-    # Конфигурация базы данных (для совместимости)
+    # Конфигурация базы данных
     app.config['MYSQL_HOST'] = os.getenv('DB_HOST', 'localhost')
     app.config['MYSQL_USER'] = os.getenv('DB_USER', 'root')
     app.config['MYSQL_PASSWORD'] = os.getenv('DB_PASSWORD', '')
@@ -122,6 +111,11 @@ def create_app():
     # Инициализация расширений
     bcrypt.init_app(app)
     login_manager.init_app(app)
+    
+    # Инициализация пула соединений
+    with app.app_context():
+        init_db()
+        print("✅ Пул соединений инициализирован")
     
     from app.models import User
     

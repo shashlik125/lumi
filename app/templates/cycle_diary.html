@@ -1854,17 +1854,20 @@ async function loadInitialData() {
         const isAuth = await checkAuth();
         if (!isAuth) return;
         
+        // Загружаем данные ПОСЛЕДОВАТЕЛЬНО, а не параллельно
         await loadCycleData();
         renderCalendar();
 
-        // Загружаем остальные данные
-        await Promise.all([
-            loadMoodData(),
-            loadCycleStats(),
-            loadTodayMood()
-        ]);
+        await loadMoodData();
+        await new Promise(resolve => setTimeout(resolve, 300)); // задержка 300мс
+        
+        await loadCycleStats();
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        await loadTodayMood();
+        await new Promise(resolve => setTimeout(resolve, 300));
 
-        // Загружаем прогнозы с обработкой ошибки 400
+        // Загружаем прогнозы
         try {
             await loadCyclePredictions();
         } catch (error) {
@@ -3874,12 +3877,19 @@ async function refreshAllData() {
     try {
         showLoading(true);
 
-        // Загружаем данные последовательно, а не параллельно
-        // чтобы не перегружать соединения с БД
+        // Загружаем данные последовательно с задержками
         await loadCycleData();
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
         await loadMoodData();
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
         await loadCycleStats();
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
         await loadCyclePredictions();
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
         await loadTodayMood();
 
         renderCalendar();

@@ -2132,58 +2132,6 @@ function createMoodOverTimeChart() {
     }
 }
 
-    // Получаем данные за текущий месяц
-    function getMoodOverTimeDataForMonth() {
-        console.log('📈 Собираю данные за текущий месяц...');
-
-        const today = new Date();
-        const year = today.getFullYear();
-        const month = today.getMonth();
-
-        const labels = [];
-        const values = [];
-        const dates = [];
-        let hasData = false;
-
-        // Получаем количество дней в текущем месяце
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-        for (let day = 1; day <= daysInMonth; day++) {
-            const date = new Date(year, month, day);
-            const dateStr = formatDate(date);
-            dates.push(dateStr);
-
-            // Форматируем дату для отображения (только число)
-            labels.push(day.toString());
-
-            // Ищем настроение для этой даты
-            const moodEntry = moodData.find(m => m.date === dateStr);
-            if (moodEntry && moodEntry.mood !== undefined && moodEntry.mood !== null) {
-                values.push(parseFloat(moodEntry.mood.toFixed(1)));
-                hasData = true;
-            } else {
-                values.push(null);
-            }
-        }
-
-        console.log('📊 Данные за месяц:', { labels, values, hasData });
-        return { labels, values, dates, hasData };
-    }   
-
-
-    
-    // Получаем цвет для фазы
-    function getPhaseColor(phaseType, opacity = 1) {
-        const colors = {
-            'menstruation': `rgba(255, 107, 107, ${opacity})`,
-            'follicular': `rgba(96, 244, 227, ${opacity})`,
-            'ovulation': `rgba(255, 112, 236, ${opacity})`,
-            'luteal': `rgba(255, 209, 102, ${opacity})`,
-            'pms': `rgba(184, 179, 233, ${opacity})`
-        };
-        return colors[phaseType] || `rgba(100, 100, 100, ${opacity})`;
-    }
-
     // Создаем градиент для фона с фазами цикла
     function createCyclePhaseGradient(ctx, canvas, cyclePhases, labels) {
         const width = canvas.width;
@@ -2642,45 +2590,6 @@ function createMoodOverTimeChart() {
         if (dayOfMonth >= 14 && dayOfMonth <= 15) return 'Овуляция';
         if (dayOfMonth >= 16 && dayOfMonth <= 25) return 'Лютеиновая';
         return 'ПМС';
-    }
-
-    // Обновите функцию getMoodOverTimeData, чтобы возвращать даты
-    function getMoodOverTimeData() {
-        console.log('📈 Собираю данные для линейного графика...');
-
-        // Получаем последние 14 дней
-        const labels = [];
-        const values = [];
-        const dates = []; // ДОБАВЛЯЕМ МАССИВ ДАТ
-        const today = new Date();
-
-        for (let i = 13; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(today.getDate() - i);
-            const dateStr = formatDate(date);
-            dates.push(dateStr); // СОХРАНЯЕМ ДАТУ
-
-            // Форматируем дату для отображения
-            const displayDate = date.toLocaleDateString('ru-RU', {
-                day: 'numeric',
-                month: 'short'
-            });
-            labels.push(displayDate);
-
-            // Ищем настроение для этой даты
-            const moodEntry = moodData.find(m => m.date === dateStr);
-            if (moodEntry && moodEntry.mood !== undefined && moodEntry.mood !== null) {
-                values.push(parseFloat(moodEntry.mood.toFixed(1)));
-            } else {
-                values.push(null);
-            }
-        }
-
-        // Проверяем, есть ли хоть какие-то данные
-        const hasData = values.some(val => val !== null);
-
-        console.log('📊 Данные для линейного графика:', { labels, values, dates, hasData });
-        return { labels, values, dates, hasData };
     }
 
     // Функция для получения цвета точки на графике по значению настроения

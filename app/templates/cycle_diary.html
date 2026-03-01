@@ -1674,6 +1674,37 @@
     let isEditMode = false;
     let userCycleSettings = null; // Добавляем для хранения настроек цикла
 
+// ==========================================================================
+// ПРОВЕРКА АВТОРИЗАЦИИ
+// ==========================================================================
+async function checkAuth() {
+    try {
+        const response = await fetch('/api/check-auth', {
+            credentials: 'include',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            console.log('✅ Авторизация подтверждена, user_id:', data.user_id);
+            return true;
+        } else if (response.status === 401) {
+            console.error('❌ Не авторизован, перенаправление на логин');
+            window.location.href = '/auth/login';
+            return false;
+        } else {
+            console.error('❌ Ошибка проверки авторизации:', response.status);
+            return false;
+        }
+    } catch (error) {
+        console.error('❌ Ошибка при проверке авторизации:', error);
+        return false;
+    }
+}
+
+
     // ==========================================================================
     // ИНИЦИАЛИЗАЦИЯ
     // ==========================================================================
@@ -1725,36 +1756,40 @@ async function loadDayEntry(dateStr) {
     // ==========================================================================
     // ОСНОВНЫЕ ФУНКЦИИ ЗАГРУЗКИ
     // ==========================================================================
-    async function loadInitialData() {
+async function loadInitialData() {
+    try {
+        console.log('📥 Начинаю загрузку данных...');
+        
+        // Проверяем авторизацию
+        const isAuth = await checkAuth();
+        if (!isAuth) return;
+        
+        await loadCycleData();
+        renderCalendar();
+
+        // Загружаем остальные данные
+        await Promise.all([
+            loadMoodData(),
+            loadCycleStats(),
+            loadTodayMood()
+        ]);
+
+        // Загружаем прогнозы с обработкой ошибки 400
         try {
-            console.log('📥 Начинаю загрузку данных...');
-            await loadCycleData();
-            renderCalendar();
-
-            // Загружаем остальные данные
-            await Promise.all([
-                loadMoodData(),
-                loadCycleStats(),
-                loadTodayMood()
-            ]);
-
-            // Загружаем прогнозы с обработкой ошибки 400
-            try {
-                await loadCyclePredictions();
-            } catch (error) {
-                console.log('ℹ️ Нет данных для прогнозов цикла');
-                // Это нормально, если нет настроек цикла
-            }
-
-            // Инициализируем графики
-            initCharts();
-
-            console.log('✅ Все данные загружены');
+            await loadCyclePredictions();
         } catch (error) {
-            console.error('Ошибка загрузки данных:', error);
-            showToast('Ошибка загрузки данных', 'error');
+            console.log('ℹ️ Нет данных для прогнозов цикла');
         }
+
+        // Инициализируем графики
+        initCharts();
+
+        console.log('✅ Все данные загружены');
+    } catch (error) {
+        console.error('❌ Ошибка загрузки данных:', error);
+        showToast('Ошибка загрузки данных', 'error');
     }
+}
 
 async function loadCycleData() {
     try {
@@ -2940,47 +2975,74 @@ function initCharts() {
         `).join('');
     }
 
-    async function markMenstruationStart() {
-        const dateStr = currentSelectedDate || formatDate(new Date());
-        const existingEntry = cycleData.find(entry => entry.date === dateStr);
-        const hasMenstruation = existingEntry?.flow_intensity && existingEntry.flow_intensity !== 'none';
+   async function markMenstruationStart() {
+    const dateStr = currentSelectedDate || formatDate(new Date());
+    const existingEntry = cycleData.find(entry => entry.date === dateStr);
+    const hasMenstruation = existingEntry?.flow_intensity && existingEntry.flow_intensity !== 'none';
 
-        try {
-            showLoading(true);
+    try {
+        showLoading(true);
 
-            const requestData = {
-                date: dateStr,
-                symptoms: existingEntry?.symptoms || [],
-                notes: existingEntry?.notes || '',
-                flow_intensity: hasMenstruation ? 'none' : 'light',
-                cycle_day: existingEntry?.cycle_day || null,
-                mood: existingEntry?.mood || null
-            };
+        const requestData = {
+            date: dateStr,
+            symptoms: existingEntry?.symptoms || [],
+            notes: existingEntry?.notes || '',
+            flow_intensity: hasMenstruation ? 'none' : 'light',
+            cycle_day: existingEntry?.cycle_day || null,
+            mood: existingEntry?.mood || null
+        };
 
-            const response = await fetch(CYCLE_API, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(requestData)
-            });
+        console.log('📤 Отправка запроса на менструацию:', requestData);
 
-            if (response.ok) {
-                const result = await response.json();
-                showToast(hasMenstruation ? 'Менструация убрана' : 'Менструация отмечена', 'success');
-                await refreshAllData();
+        const response = await fetch(CYCLE_API, {
+            method: 'POST',
+            credentials: 'include',  // ВАЖНО!
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(requestData)
+        });
+
+        // Проверяем, не редирект ли это на логин
+        if (response.redirected) {
+            console.error('❌ Редирект на логин, сессия истекла');
+            showToast('Сессия истекла, пожалуйста, войдите снова', 'error');
+            window.location.href = '/auth/login';
+            return;
+        }
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('❌ Ошибка сервера:', response.status, errorText);
+            
+            // Если получили HTML вместо JSON
+            if (errorText.trim().startsWith('<!DOCTYPE')) {
+                showToast('Ошибка авторизации. Пожалуйста, обновите страницу', 'error');
             } else {
-                const errorText = await response.text();
                 showToast('Ошибка: ' + errorText, 'error');
             }
-        } catch (error) {
-            console.error('Ошибка отметки менструации:', error);
-            showToast('Ошибка отметки менструации', 'error');
-        } finally {
-            showLoading(false);
+            return;
         }
+
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+            const result = await response.json();
+            showToast(hasMenstruation ? 'Менструация убрана' : 'Менструация отмечена', 'success');
+            await refreshAllData();
+        } else {
+            const text = await response.text();
+            console.error('❌ Ответ не JSON:', text);
+            showToast('Ошибка формата ответа', 'error');
+        }
+
+    } catch (error) {
+        console.error('❌ Ошибка отметки менструации:', error);
+        showToast('Ошибка отметки менструации: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
     }
+}
 
 function renderCalendar() {
     const calendar = document.getElementById('calendar');

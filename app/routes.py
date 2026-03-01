@@ -849,6 +849,15 @@ def delete_mood_entry(conn, mood_id):
         return jsonify({'error': str(e)}), 500
 
 
+@main.route('/api/check-auth')
+@login_required
+def check_auth():
+    return jsonify({
+        'authenticated': True,
+        'user_id': current_user.id,
+        'username': current_user.username
+    })
+
 # ================== HOURLY MOODS ==================
 @main.route('/api/hourly_moods', methods=['GET', 'POST'])
 @login_required

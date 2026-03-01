@@ -1664,6 +1664,7 @@
     // ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
     // ==========================================================================
     let currentDate = new Date();
+    let currentChartDate = new Date();
     let cycleData = [];
     let moodData = [];
     let moodChart = null;
@@ -1730,6 +1731,21 @@
         }
     }
 
+document.addEventListener('DOMContentLoaded', async function () {
+    console.log('🚀 Инициализация дневника цикла...');
+    
+    // Инициализируем обе переменные одним значением
+    currentDate = new Date();
+    currentChartDate = new Date(currentDate);
+    
+    initSymptomsGrid();
+    await loadUserCycleSettings();
+    await loadInitialData();
+    
+    // Для отладки покажем синхронизацию
+    setTimeout(debugMonthSync, 3000);
+});
+
     async function loadCycleData() {
         try {
             console.log('📊 Загружаю данные цикла...');
@@ -1750,23 +1766,22 @@
     }
 
 
-// Получаем данные за текущий месяц для графика настроения
+// Получаем данные для графика настроения за выбранный месяц
 function getMoodOverTimeDataForCurrentMonth() {
-    console.log('📈 Собираю данные за текущий месяц...');
+    console.log(`📈 Собираю данные за ${currentChartDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}...`);
     console.log('📊 moodData содержит:', moodData ? moodData.length : 0, 'записей');
 
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
+    const year = currentChartDate.getFullYear();
+    const month = currentChartDate.getMonth();
 
     const labels = [];
     const values = [];
     const dates = [];
     let hasData = false;
 
-    // Получаем количество дней в текущем месяце
+    // Получаем количество дней в выбранном месяце
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    console.log(`📅 Дней в текущем месяце: ${daysInMonth}`);
+    console.log(`📅 Дней в выбранном месяце: ${daysInMonth}`);
 
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
@@ -1788,10 +1803,11 @@ function getMoodOverTimeDataForCurrentMonth() {
         }
     }
 
-    console.log('📊 Данные за месяц:', { 
+    console.log(`📊 Данные за ${month+1}.${year}:`, { 
         labels, 
         values: values.filter(v => v !== null), 
-        hasData 
+        hasData,
+        count: values.filter(v => v !== null).length 
     });
     
     return { labels, values, dates, hasData };
@@ -2786,12 +2802,13 @@ async function loadMoodData() {
     // ФУНКЦИИ ГРАФИКОВ
     // ==========================================================================
 
-    function initCharts() {
-        console.log('📊 Инициализирую графики...');
-        createMoodOverTimeChart(); // НОВЫЙ линейный график
-        createSymptomsChart();     // Круговая диаграмма симптомов
-    }
-
+function initCharts() {
+    console.log('📊 Инициализирую графики...');
+    // Убеждаемся, что currentChartDate синхронизирован с currentDate
+    currentChartDate = new Date(currentDate);
+    createMoodOverTimeChart();
+    createSymptomsChart();
+}
 
 
     function createSymptomsChart() {
@@ -3034,7 +3051,6 @@ async function loadMoodData() {
                     day.appendChild(symptomsContainer);
                 }
             }
-
             day.addEventListener('click', function () {
                 if (!isValidDateForEntry(dateStr)) {
                     showToast('Нельзя редактировать будущие дни', 'error');
@@ -3046,11 +3062,13 @@ async function loadMoodData() {
                 });
 
                 day.classList.add('selected');
+    
+                // Открываем детали дня
                 openDayDetail(dateStr);
-            });
 
-            calendar.appendChild(day);
-        }
+    // НЕ меняем месяц графика при клике на день
+    // График должен оставаться на текущем выбранном месяце
+});
 
         const totalCells = 35;
         const filledCells = startDay - 1 + daysInMonth;
@@ -3061,6 +3079,14 @@ async function loadMoodData() {
             }
         }
     }
+
+function refreshMoodChart() {
+    if (moodOverTimeChart) {
+        moodOverTimeChart.destroy();
+    }
+    createMoodOverTimeChart();
+    console.log('📊 График настроения обновлен');
+}
 
     function createDayElement(dayNumber, className, isOtherMonth) {
         const dayElement = document.createElement('div');
@@ -3126,16 +3152,40 @@ async function loadMoodData() {
     }
 
     function changeMonth(step) {
-        currentDate.setMonth(currentDate.getMonth() + step);
-        renderCalendar();
+    // Меняем месяц в календаре
+    currentDate.setMonth(currentDate.getMonth() + step);
+    renderCalendar();
+    
+    // Синхронизируем график с новым месяцем календаря
+    currentChartDate = new Date(currentDate);
+    
+    // Обновляем заголовок графика (опционально)
+    updateChartTitle();
+    
+    // Пересоздаем график с данными за новый месяц
+    if (moodOverTimeChart) {
+        moodOverTimeChart.destroy();
     }
+    createMoodOverTimeChart();
+    
+    console.log(`📅 Переключился на месяц: ${currentChartDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' })}`);
+}
 
-    function goToToday() {
-        currentDate = new Date();
-        renderCalendar();
-        resetToToday();
-        showToast('Перешли к текущему месяцу', 'info');
+function goToToday() {
+    currentDate = new Date();
+    currentChartDate = new Date(currentDate); // Синхронизируем график
+    
+    renderCalendar();
+    resetToToday();
+    
+    // Обновляем график
+    if (moodOverTimeChart) {
+        moodOverTimeChart.destroy();
     }
+    createMoodOverTimeChart();
+    
+    showToast('Перешли к текущему месяцу', 'info');
+}
 
     async function saveCycleEntry() {
         console.log('💾 Начинаю сохранение записи...');
@@ -3265,6 +3315,21 @@ async function loadMoodData() {
             showLoading(false);
         }
     }
+
+function updateChartTitle() {
+    // Находим заголовок графика (можно добавить, если хотите)
+    const chartTitle = document.querySelector('.analytics-block .section-title');
+    if (chartTitle) {
+        const monthNames = [
+            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+        ];
+        const month = monthNames[currentChartDate.getMonth()];
+        const year = currentChartDate.getFullYear();
+        
+        chartTitle.innerHTML = `<i class="fas fa-chart-line"></i> Настроение за ${month} ${year}`;
+    }
+}
 
     function clearForm() {
         console.log('🧹 Очищаю форму...');
@@ -3691,6 +3756,20 @@ async function loadMoodData() {
     `;
     document.head.appendChild(style);
 
+function debugMonthSync() {
+    console.log('🔍 Синхронизация месяцев:');
+    console.log('- Календарь:', currentDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' }));
+    console.log('- График:', currentChartDate.toLocaleString('ru-RU', { month: 'long', year: 'numeric' }));
+    
+    const monthData = getMoodOverTimeDataForCurrentMonth();
+    console.log('- Данные графика:', monthData);
+    
+    return {
+        calendarMonth: currentDate,
+        chartMonth: currentChartDate,
+        data: monthData
+    };
+}
 
 
 // ВРЕМЕННАЯ ОТЛАДКА - удалите после исправления

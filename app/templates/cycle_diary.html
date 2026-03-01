@@ -2967,118 +2967,123 @@ function initCharts() {
         }
     }
 
-    function renderCalendar() {
-        const calendar = document.getElementById('calendar');
-        const monthYear = document.getElementById('monthYear');
+function renderCalendar() {
+    const calendar = document.getElementById('calendar');
+    const monthYear = document.getElementById('monthYear');
 
-        if (!calendar || !monthYear) {
-            console.error('❌ Не найдены элементы календаря');
-            return;
+    if (!calendar || !monthYear) {
+        console.error('❌ Не найдены элементы календаря');
+        return;
+    }
+
+    const monthNames = [
+        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+        'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
+    ];
+    monthYear.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+
+    calendar.innerHTML = '';
+
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+
+    let startDay = firstDay.getDay();
+    if (startDay === 0) startDay = 7;
+
+    const prevMonthDays = new Date(year, month, 0).getDate();
+    for (let i = startDay - 1; i > 0; i--) {
+        const day = createDayElement(prevMonthDays - i + 1, 'other-month', true);
+        calendar.appendChild(day);
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let i = 1; i <= daysInMonth; i++) {
+        const date = new Date(year, month, i);
+        const dateStr = formatDate(date);
+        const day = createDayElement(i, '', false);
+
+        // Проверяем, является ли день сегодняшним
+        const isToday = date.getDate() === today.getDate() &&
+            date.getMonth() === today.getMonth() &&
+            date.getFullYear() === today.getFullYear();
+
+        if (isToday) {
+            day.classList.add('current-day');
         }
 
-        const monthNames = [
-            'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
-            'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'
-        ];
-        monthYear.textContent = `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+        const cycleEntry = cycleData.find(entry => entry && entry.date === dateStr);
 
-        calendar.innerHTML = '';
+        if (cycleEntry) {
+            // Проверяем менструацию
+            const hasMenstruation = cycleEntry.flow_intensity &&
+                cycleEntry.flow_intensity !== 'none' &&
+                cycleEntry.flow_intensity !== '';
 
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const daysInMonth = lastDay.getDate();
+            if (hasMenstruation) {
+                day.classList.add('menstruation');
 
-        let startDay = firstDay.getDay();
-        if (startDay === 0) startDay = 7;
-
-        const prevMonthDays = new Date(year, month, 0).getDate();
-        for (let i = startDay - 1; i > 0; i--) {
-            const day = createDayElement(prevMonthDays - i + 1, 'other-month', true);
-            calendar.appendChild(day);
-        }
-
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        for (let i = 1; i <= daysInMonth; i++) {
-            const date = new Date(year, month, i);
-            const dateStr = formatDate(date);
-            const day = createDayElement(i, '', false);
-
-            // Проверяем, является ли день сегодняшним
-            const isToday = date.getDate() === today.getDate() &&
-                date.getMonth() === today.getMonth() &&
-                date.getFullYear() === today.getFullYear();
-
-            if (isToday) {
-                day.classList.add('current-day');
+                // Добавляем индикатор менструации
+                const menstruationIndicator = document.createElement('div');
+                menstruationIndicator.className = 'menstruation-indicator';
+                menstruationIndicator.innerHTML = '<i class="fas fa-droplet"></i>';
+                day.appendChild(menstruationIndicator);
             }
 
-            const cycleEntry = cycleData.find(entry => entry && entry.date === dateStr);
+            // Симптомы
+            const symptoms = cycleEntry.symptoms || [];
+            if (symptoms.length > 0) {
+                const symptomsContainer = document.createElement('div');
+                symptomsContainer.className = 'symptoms-dots-compact';
 
-            if (cycleEntry) {
-                // Проверяем менструацию
-                const hasMenstruation = cycleEntry.flow_intensity &&
-                    cycleEntry.flow_intensity !== 'none' &&
-                    cycleEntry.flow_intensity !== '';
-
-                if (hasMenstruation) {
-                    day.classList.add('menstruation');
-
-                    // Добавляем индикатор менструации
-                    const menstruationIndicator = document.createElement('div');
-                    menstruationIndicator.className = 'menstruation-indicator';
-                    menstruationIndicator.innerHTML = '<i class="fas fa-droplet"></i>';
-                    day.appendChild(menstruationIndicator);
-                }
-
-                // Симптомы
-                const symptoms = cycleEntry.symptoms || [];
-                if (symptoms.length > 0) {
-                    const symptomsContainer = document.createElement('div');
-                    symptomsContainer.className = 'symptoms-dots-compact';
-
-                    symptoms.slice(0, 6).forEach(symptom => {
-                        const dot = document.createElement('div');
-                        dot.className = 'symptom-dot-compact';
-                        dot.style.backgroundColor = getSymptomColor(symptom);
-                        dot.title = symptom;
-                        symptomsContainer.appendChild(dot);
-                    });
-
-                    day.appendChild(symptomsContainer);
-                }
-            }
-            day.addEventListener('click', function () {
-                if (!isValidDateForEntry(dateStr)) {
-                    showToast('Нельзя редактировать будущие дни', 'error');
-                    return;
-                }
-
-                document.querySelectorAll('.calendar-day.selected').forEach(day => {
-                    day.classList.remove('selected');
+                symptoms.slice(0, 6).forEach(symptom => {
+                    const dot = document.createElement('div');
+                    dot.className = 'symptom-dot-compact';
+                    dot.style.backgroundColor = getSymptomColor(symptom);
+                    dot.title = symptom;
+                    symptomsContainer.appendChild(dot);
                 });
 
-                day.classList.add('selected');
-    
-                // Открываем детали дня
-                openDayDetail(dateStr);
-
-    // НЕ меняем месяц графика при клике на день
-    // График должен оставаться на текущем выбранном месяце
-});
-
-        const totalCells = 35;
-        const filledCells = startDay - 1 + daysInMonth;
-        if (filledCells < totalCells) {
-            for (let i = 1; i <= totalCells - filledCells; i++) {
-                const day = createDayElement(i, 'other-month', true);
-                calendar.appendChild(day);
+                day.appendChild(symptomsContainer);
             }
         }
+        
+        // ВАЖНО: ЗДЕСЬ НАЧИНАЕТСЯ addEventListener
+        day.addEventListener('click', function () {
+            if (!isValidDateForEntry(dateStr)) {
+                showToast('Нельзя редактировать будущие дни', 'error');
+                return;
+            }
+
+            document.querySelectorAll('.calendar-day.selected').forEach(day => {
+                day.classList.remove('selected');
+            });
+
+            day.classList.add('selected');
+
+            // Открываем детали дня
+            openDayDetail(dateStr);
+
+            // НЕ меняем месяц графика при клике на день
+            // График должен оставаться на текущем выбранном месяце
+        }); // <--- ЗДЕСЬ ЗАКРЫВАЕТСЯ addEventListener
+
+        calendar.appendChild(day);
+    } // <--- ЗДЕСЬ ЗАКРЫВАЕТСЯ ЦИКЛ for
+
+    const totalCells = 35;
+    const filledCells = startDay - 1 + daysInMonth;
+    if (filledCells < totalCells) {
+        for (let i = 1; i <= totalCells - filledCells; i++) {
+            const day = createDayElement(i, 'other-month', true);
+            calendar.appendChild(day);
+        }
     }
+} // <--- ЗДЕСЬ ЗАКРЫВАЕТСЯ ФУНКЦИЯ renderCalendar
 
 function refreshMoodChart() {
     if (moodOverTimeChart) {

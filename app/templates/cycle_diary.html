@@ -4062,24 +4062,81 @@ function debugMonthSync() {
 // Получаем фазы цикла для отображения на графике
 function getCyclePhasesForChart() {
     console.log('🔄 Получаю фазы цикла для графика...');
+    console.log('📊 cycleData:', cycleData);
+    console.log('📊 userCycleSettings:', userCycleSettings);
     
     const year = currentChartDate.getFullYear();
     const month = currentChartDate.getMonth();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     
-    // Если есть настройки цикла и дата последней менструации
+    // Сначала проверяем реальные данные из cycle_entries
+    const phasesFromEntries = calculatePhasesFromCycleEntries(year, month, daysInMonth);
+    if (phasesFromEntries) {
+        console.log('✅ Фазы рассчитаны из cycle_entries');
+        return phasesFromEntries;
+    }
+    
+    // Если нет данных в cycle_entries, пробуем из настроек
     if (userCycleSettings && userCycleSettings.last_period_start) {
-        return calculatePhasesFromSettings(year, month, daysInMonth);
+        const phasesFromSettings = calculatePhasesFromSettings(year, month, daysInMonth);
+        if (phasesFromSettings) {
+            console.log('✅ Фазы рассчитаны из настроек');
+            return phasesFromSettings;
+        }
     }
     
-    // Если есть данные из cycle_entries, используем их
-    if (cycleData && cycleData.length > 0) {
-        return calculatePhasesFromCycleData(year, month, daysInMonth);
-    }
-    
-    // Если нет данных, возвращаем стандартные фазы для демонстрации
+    // Если совсем нет данных, возвращаем стандартные фазы для демонстрации
     console.log('⚠️ Нет данных о цикле, использую стандартные фазы');
     return getDefaultPhasesForMonth(daysInMonth);
+}
+
+// Рассчитываем фазы из данных cycle_entries
+function calculatePhasesFromCycleEntries(year, month, daysInMonth) {
+    if (!cycleData || cycleData.length === 0) {
+        console.log('ℹ️ Нет данных cycle_entries');
+        return null;
+    }
+    
+    // Собираем все дни с менструацией в текущем месяце
+    const periodDaysInMonth = [];
+    
+    cycleData.forEach(entry => {
+        const entryDate = new Date(entry.date);
+        if (entryDate.getFullYear() === year && 
+            entryDate.getMonth() === month && 
+            entry.flow_intensity && 
+            entry.flow_intensity !== 'none') {
+            periodDaysInMonth.push(entryDate.getDate());
+        }
+    });
+    
+    console.log('📅 Дни с менструацией в этом месяце:', periodDaysInMonth);
+    
+    // Если есть дни менструации в этом месяце
+    if (periodDaysInMonth.length > 0) {
+        periodDaysInMonth.sort((a, b) => a - b);
+        
+        // Ищем последовательные дни менструации (период)
+        let startDay = periodDaysInMonth[0];
+        let endDay = periodDaysInMonth[0];
+        
+        for (let i = 1; i < periodDaysInMonth.length; i++) {
+            if (periodDaysInMonth[i] === periodDaysInMonth[i-1] + 1) {
+                endDay = periodDaysInMonth[i];
+            } else {
+                break;
+            }
+        }
+        
+        const periodLength = endDay - startDay + 1;
+        
+        console.log(`📅 Основной период: дни ${startDay}-${endDay} (${periodLength} дней)`);
+        
+        // Генерируем фазы на основе реальной менструации
+        return generatePhasesFromPeriod(startDay, periodLength, daysInMonth);
+    }
+    
+    return null;
 }
 
 // Рассчитываем фазы из настроек цикла
@@ -4122,81 +4179,29 @@ function calculatePhasesFromSettings(year, month, daysInMonth) {
         console.error('❌ Ошибка расчета фаз из настроек:', error);
     }
     
-    return getDefaultPhasesForMonth(daysInMonth);
-}
-
-// Рассчитываем фазы из данных cycle_entries
-function calculatePhasesFromCycleData(year, month, daysInMonth) {
-    try {
-        // Собираем все дни с менструацией
-        const periodDays = [];
-        
-        cycleData.forEach(entry => {
-            const entryDate = new Date(entry.date);
-            if (entryDate.getFullYear() === year && 
-                entryDate.getMonth() === month && 
-                entry.flow_intensity && 
-                entry.flow_intensity !== 'none') {
-                periodDays.push(entryDate.getDate());
-            }
-        });
-        
-        if (periodDays.length > 0) {
-            periodDays.sort((a, b) => a - b);
-            
-            // Ищем последовательные дни менструации
-            let startDay = periodDays[0];
-            let endDay = periodDays[0];
-            
-            for (let i = 1; i < periodDays.length; i++) {
-                if (periodDays[i] === periodDays[i-1] + 1) {
-                    endDay = periodDays[i];
-                } else {
-                    break;
-                }
-            }
-            
-            const periodLength = endDay - startDay + 1;
-            
-            // Генерируем фазы на основе реальной менструации
-            return generatePhasesFromPeriod(startDay, periodLength, daysInMonth);
-        }
-        
-    } catch (error) {
-        console.error('❌ Ошибка расчета фаз из данных цикла:', error);
-    }
-    
-    return getDefaultPhasesForMonth(daysInMonth);
+    return null;
 }
 
 // Генерируем фазы от дня начала менструации
 function generatePhasesFromStartDay(startDay, cycleLength, periodLength, daysInMonth) {
     const phases = [];
     
-    // Приводим startDay к диапазону 1-28 для расчета
-    const normalizedStartDay = ((startDay - 1) % 28) + 1;
-    
-    // Определяем границы фаз относительно начала цикла
-    const phaseDefinitions = [
-        { type: 'menstruation', start: 1, end: periodLength, color: 'rgba(255, 107, 107, 0.2)' },
-        { type: 'follicular', start: periodLength + 1, end: 13, color: 'rgba(96, 244, 227, 0.2)' },
-        { type: 'ovulation', start: 14, end: 15, color: 'rgba(255, 112, 236, 0.2)' },
-        { type: 'luteal', start: 16, end: 23, color: 'rgba(255, 209, 102, 0.2)' },
-        { type: 'pms', start: 24, end: 28, color: 'rgba(184, 179, 233, 0.2)' }
-    ];
-    
-    // Для каждого дня месяца определяем фазу
     for (let day = 1; day <= daysInMonth; day++) {
         // Вычисляем день цикла для этого дня
         const cycleDay = ((day - startDay) % 28 + 28) % 28 + 1;
         
-        let phaseType = 'follicular'; // по умолчанию
+        let phaseType = 'follicular';
         
-        for (const phase of phaseDefinitions) {
-            if (cycleDay >= phase.start && cycleDay <= phase.end) {
-                phaseType = phase.type;
-                break;
-            }
+        if (cycleDay >= 1 && cycleDay <= periodLength) {
+            phaseType = 'menstruation';
+        } else if (cycleDay >= periodLength + 1 && cycleDay <= 13) {
+            phaseType = 'follicular';
+        } else if (cycleDay >= 14 && cycleDay <= 15) {
+            phaseType = 'ovulation';
+        } else if (cycleDay >= 16 && cycleDay <= 23) {
+            phaseType = 'luteal';
+        } else if (cycleDay >= 24 && cycleDay <= 28) {
+            phaseType = 'pms';
         }
         
         phases.push({
@@ -4212,7 +4217,6 @@ function generatePhasesFromStartDay(startDay, cycleLength, periodLength, daysInM
 // Генерируем фазы от реального периода менструации
 function generatePhasesFromPeriod(startDay, periodLength, daysInMonth) {
     const phases = [];
-    const cycleLength = userCycleSettings?.cycle_length || 28;
     
     for (let day = 1; day <= daysInMonth; day++) {
         let phaseType = 'follicular';
@@ -4278,31 +4282,4 @@ function getPhaseColor(phaseType, opacity = 0.2) {
     return colors[phaseType] || `rgba(200, 200, 200, ${opacity})`;
 }
 
-// ВРЕМЕННАЯ ОТЛАДКА - удалите после исправления
-setTimeout(() => {
-    console.log('🔍 ДИАГНОСТИКА:');
-    console.log('- moodData:', moodData);
-    console.log('- cycleData:', cycleData);
-    console.log('- userCycleSettings:', userCycleSettings);
-    
-    // Проверяем, есть ли настроение за последние 30 дней
-    const today = new Date();
-    const last30Days = [];
-    for (let i = 0; i < 30; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() - i);
-        const dateStr = formatDate(date);
-        const mood = moodData.find(m => m.date === dateStr);
-        if (mood) {
-            last30Days.push({ date: dateStr, mood: mood.mood });
-        }
-    }
-    console.log('📊 Настроение за последние 30 дней:', last30Days);
-    
-    // Проверяем данные за текущий месяц
-    const monthData = getMoodOverTimeDataForCurrentMonth();
-    console.log('📅 Данные за текущий месяц:', monthData);
-}, 2000);
-
-</script>
 {% endblock %}

@@ -2732,7 +2732,18 @@ function createMoodOverTimeChart() {
 
 async function loadCycleStats() {
     try {
-        const response = await fetch(CYCLE_STATS_API, { credentials: 'include' });
+        const response = await fetch(CYCLE_STATS_API, { 
+            credentials: 'include',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (response.redirected) {
+            console.log('⚠️ Редирект на логин в loadCycleStats');
+            return;
+        }
+        
         if (response.ok) {
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
@@ -2740,13 +2751,13 @@ async function loadCycleStats() {
                 updateStatsDisplay(stats);
             } else {
                 const text = await response.text();
-                console.error('Ответ сервера не JSON (loadCycleStats):', text);
+                console.error('❌ Ответ сервера не JSON (loadCycleStats):', text.substring(0, 100));
             }
         } else {
-            console.error('Ошибка загрузки статистики цикла:', response.status);
+            console.error('❌ Ошибка загрузки статистики цикла:', response.status);
         }
     } catch (error) {
-        console.error('Ошибка загрузки статистики цикла:', error);
+        console.error('❌ Ошибка загрузки статистики цикла:', error);
     }
 }
 
@@ -2774,7 +2785,20 @@ async function loadCyclePredictions() {
 
 async function loadTodayMood() {
     try {
-        const response = await fetch(TODAY_MOOD_API, { credentials: 'include' });
+        const response = await fetch(TODAY_MOOD_API, { 
+            credentials: 'include',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        // Проверяем, не редирект ли это на логин
+        if (response.redirected) {
+            console.log('⚠️ Редирект на логин в loadTodayMood');
+            updateTodayMoodDisplay(null);
+            return;
+        }
+        
         if (response.ok) {
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
@@ -2782,15 +2806,18 @@ async function loadTodayMood() {
                 updateTodayMoodDisplay(todayMood);
             } else {
                 const text = await response.text();
-                console.error('Ответ сервера не JSON (loadTodayMood):', text);
+                console.error('❌ Ответ сервера не JSON (loadTodayMood):', text.substring(0, 100));
                 updateTodayMoodDisplay(null);
             }
+        } else if (response.status === 401) {
+            console.log('⚠️ Не авторизован в loadTodayMood');
+            updateTodayMoodDisplay(null);
         } else {
-            console.error('Ошибка загрузки сегодняшнего настроения:', response.status);
+            console.error('❌ Ошибка загрузки сегодняшнего настроения:', response.status);
             updateTodayMoodDisplay(null);
         }
     } catch (error) {
-        console.error('Ошибка загрузки сегодняшнего настроения:', error);
+        console.error('❌ Ошибка загрузки сегодняшнего настроения:', error);
         updateTodayMoodDisplay(null);
     }
 }
@@ -3682,31 +3709,32 @@ async function loadDayEntry(dateStr) {
     // ФУНКЦИИ ОБНОВЛЕНИЯ ДАННЫХ
     // ==========================================================================
 
-    async function refreshAllData() {
-        console.log('🔄 Обновляю все данные...');
+async function refreshAllData() {
+    console.log('🔄 Обновляю все данные...');
 
-        try {
-            showLoading(true);
+    try {
+        showLoading(true);
 
-            await Promise.all([
-                loadCycleData(),
-                loadMoodData(),
-                loadCycleStats(),
-                loadCyclePredictions(),
-                loadTodayMood()
-            ]);
+        // Загружаем данные последовательно, а не параллельно
+        // чтобы не перегружать соединения с БД
+        await loadCycleData();
+        await loadMoodData();
+        await loadCycleStats();
+        await loadCyclePredictions();
+        await loadTodayMood();
 
-            renderCalendar();
-            updateSymptomsLegend();
-            initCharts(); // Обновляем графики
+        renderCalendar();
+        updateSymptomsLegend();
+        initCharts();
 
-            console.log('✅ Все данные обновлены');
-        } catch (error) {
-            console.error('❌ Ошибка при обновлении данных:', error);
-        } finally {
-            showLoading(false);
-        }
+        console.log('✅ Все данные обновлены');
+    } catch (error) {
+        console.error('❌ Ошибка при обновлении данных:', error);
+        showToast('Ошибка при обновлении данных', 'error');
+    } finally {
+        showLoading(false);
     }
+}
 
     function showLoading(isLoading) {
         let overlay = document.getElementById('loading-overlay');

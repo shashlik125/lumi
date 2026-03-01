@@ -17,18 +17,27 @@ main = Blueprint('main', __name__)
 def with_db_connection(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        conn = get_db()
-        if conn is None:
-            return jsonify({'error': 'Database connection failed'}), 500
-            
+        conn = None
         try:
+            conn = get_db()
+            if conn is None:
+                return jsonify({'error': 'Database connection failed'}), 500
+            
             result = f(conn, *args, **kwargs)
             return result
         except Error as e:
-            print(f"Database error in {f.__name__}: {e}")
+            print(f"❌ Database error in {f.__name__}: {e}")
+            return jsonify({'error': str(e)}), 500
+        except Exception as e:
+            print(f"❌ Unexpected error in {f.__name__}: {e}")
             return jsonify({'error': str(e)}), 500
         finally:
-            close_db(conn)
+            if conn:
+                try:
+                    close_db(conn)
+                    print(f"✅ Connection closed in {f.__name__}")
+                except Exception as e:
+                    print(f"⚠️ Error closing connection in {f.__name__}: {e}")
     return decorated_function
 
 # ================== ФУНКЦИИ АНАЛИЗА ==================
@@ -1673,13 +1682,19 @@ def cycle_stats(conn):
 @with_db_connection
 def cycle_predictions(conn):
     try:
-        cursor = conn.cursor(dictionary=True)
+        cursor = None
         try:
+            cursor = conn.cursor(dictionary=True)
             # Получаем настройки цикла пользователя
             cursor.execute("SELECT * FROM cycle_settings WHERE user_id = %s", (current_user.id,))
             settings = cursor.fetchone()
+        except Error as e:
+            print(f"Database error in cycle_predictions: {e}")
+            return jsonify({'error': str(e)}), 500
         finally:
-            cursor.close()
+            if cursor:
+                cursor.close()
+                print("✅ Курсор cycle_predictions закрыт")
 
         # Проверка наличия данных
         if not settings:
@@ -1721,7 +1736,6 @@ def cycle_predictions(conn):
     except Exception as e:
         print(f"Unexpected error in cycle_predictions: {e}")
         return jsonify({'error': str(e)}), 500
-
 
 # ================== УМНЫЙ ЧАТ-БОТ С ИНТЕГРИРОВАННЫМ АНАЛИЗОМ ==================
 
@@ -1993,8 +2007,12 @@ def generate_deep_analysis(user_id):
             cursor.close()
             
         finally:
+            if cursor:
+                cursor.close()
+                print("✅ Курсор generate_deep_analysis закрыт")
             close_db(conn)
-        
+            print("✅ Соединение generate_deep_analysis закрыто")
+
         # Формируем данные для промпта
         analysis_data = {
             "mood_stats": mood_stats,
@@ -2202,7 +2220,12 @@ def analyze_patterns(user_id, user_message):
             cursor.close()
             
         finally:
+            if cursor:
+                cursor.close()
+                print("✅ Курсор analyze_patterns закрыт")
             close_db(conn)
+            print("✅ Соединение analyze_patterns закрыто")
+
         
         # Получаем ключи API
         api_key = os.environ.get('YANDEX_API_KEY')
@@ -2381,7 +2404,11 @@ def analyze_notes(user_id, user_message):
             cursor.close()
             
         finally:
+            if cursor:
+                cursor.close()
+                print("✅ Курсор analyze_notes закрыт")
             close_db(conn)
+            print("✅ Соединение analyze_notes закрыто")
         
         if not all_notes or len(all_notes) == 0:
             return jsonify({
@@ -2515,6 +2542,7 @@ def analyze_notes(user_id, user_message):
             'reply': 'Не могу проанализировать заметки сейчас. Попробуй позже! 📝',
             'success': False
         })
+
 def analyze_joys(user_id):
     """Анализ радостей пользователя"""
     try:
@@ -2527,6 +2555,7 @@ def analyze_joys(user_id):
                 'success': False
             })
         
+        cursor = None
         try:
             cursor = conn.cursor(dictionary=True)
             
@@ -2544,10 +2573,20 @@ def analyze_joys(user_id):
             """, (user_id,))
             recent_joys = cursor.fetchall()
             
-            cursor.close()
-            
+        except Exception as e:
+            print(f"❌ Ошибка при получении данных: {e}")
+            return jsonify({
+                'reply': 'Не могу получить данные о радостях. Попробуй позже! 🔄',
+                'success': False
+            })
         finally:
+            if cursor:
+                cursor.close()
+                print("✅ Курсор analyze_joys закрыт")
             close_db(conn)
+            print("✅ Соединение analyze_joys закрыто")
+        
+
         
         # Формируем ответ
         if joys_count == 0:

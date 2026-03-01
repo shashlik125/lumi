@@ -2597,7 +2597,6 @@ function createMoodOverTimeChart() {
     const moodOverTimeData = getMoodOverTimeDataForCurrentMonth();
     const noMoodTimeData = document.getElementById('noMoodTimeData');
     
-    // ПОЛУЧАЕМ ФАЗЫ ЦИКЛА ДЛЯ ТЕКУЩЕГО МЕСЯЦА
     const cyclePhases = getCyclePhasesForChart();
     console.log('🔄 Фазы цикла для графика:', cyclePhases);
 
@@ -2606,41 +2605,11 @@ function createMoodOverTimeChart() {
 
         const ctx = canvas.getContext('2d');
 
-        // СОЗДАЕМ ЦВЕТА ФОНА ДЛЯ КАЖДОГО ДНЯ
-        const backgroundColors = [];
-        
-        for (let i = 0; i < moodOverTimeData.labels.length; i++) {
-            const day = i + 1;
-            const phase = cyclePhases.find(p => p && p.day === day);
-            
-            if (phase) {
-                // Используем цвет из фазы
-                backgroundColors.push(phase.color);
-                console.log(`День ${day}: фаза ${phase.type}, цвет ${phase.color}`);
-            } else {
-                // Если фаза не найдена - серый фон
-                backgroundColors.push('rgba(200, 200, 200, 0.1)');
-                console.log(`День ${day}: фаза не найдена, серый фон`);
-            }
-        }
-
-        console.log('🎨 Цвета фона:', backgroundColors);
-
         moodOverTimeChart = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: moodOverTimeData.labels,
                 datasets: [
-                    {
-                        label: 'Фазы цикла',
-                        data: moodOverTimeData.values.map(() => 10),
-                        backgroundColor: backgroundColors,
-                        borderWidth: 0,
-                        pointRadius: 0,
-                        fill: true,
-                        order: 2,
-                        tooltip: { enabled: false }
-                    },
                     {
                         label: 'Настроение',
                         data: moodOverTimeData.values,
@@ -2648,11 +2617,24 @@ function createMoodOverTimeChart() {
                         backgroundColor: 'transparent',
                         tension: 0.4,
                         fill: false,
-                        pointBackgroundColor: moodOverTimeData.values.map(val =>
-                            val !== null ? getMoodColorForValue(val) : '#ccc'),
+                        pointBackgroundColor: moodOverTimeData.values.map((val, index) => {
+                            if (val === null) return '#ccc';
+                            const day = index + 1;
+                            const phase = cyclePhases.find(p => p && p.day === day);
+                            
+                            // Возвращаем цвет в зависимости от фазы
+                            switch(phase?.type) {
+                                case 'menstruation': return '#FF6B6B';
+                                case 'follicular': return '#60F4E3';
+                                case 'ovulation': return '#FF70EC';
+                                case 'luteal': return '#FFD166';
+                                case 'pms': return '#B8B3E9';
+                                default: return getMoodColorForValue(val);
+                            }
+                        }),
                         pointBorderColor: '#fff',
-                        pointRadius: 6,
-                        pointHoverRadius: 8,
+                        pointRadius: 8,
+                        pointHoverRadius: 10,
                         borderWidth: 3,
                         order: 1,
                         spanGaps: false
@@ -2688,15 +2670,7 @@ function createMoodOverTimeChart() {
                     }
                 },
                 plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            filter: function (item) {
-                                return item.datasetIndex === 1;
-                            }
-                        }
-                    },
+                    legend: { display: true, position: 'top' },
                     tooltip: {
                         mode: 'index',
                         intersect: false,
@@ -2712,40 +2686,22 @@ function createMoodOverTimeChart() {
                                 });
                             },
                             label: function (context) {
-                                if (context.datasetIndex === 1) {
-                                    const value = context.raw;
-                                    if (value === null) return 'Настроение: Нет данных';
-                                    const emoji = getMoodEmoji(value);
-                                    const day = context.dataIndex + 1;
-                                    const phase = cyclePhases.find(p => p && p.day === day);
-                                    const phaseNames = {
-                                        'menstruation': '🩸 Менструация',
-                                        'follicular': '🌱 Фолликулярная фаза',
-                                        'ovulation': '🥚 Овуляция',
-                                        'luteal': '🌙 Лютеиновая фаза',
-                                        'pms': '💫 ПМС'
-                                    };
-                                    return [
-                                        `${emoji} Настроение: ${value.toFixed(1)}/10`,
-                                        `${phaseNames[phase?.type] || 'Неизвестно'}`
-                                    ];
-                                }
-                                return null;
-                            },
-                            afterLabel: function (context) {
-                                if (context.datasetIndex === 1) {
-                                    const day = context.dataIndex + 1;
-                                    const phase = cyclePhases.find(p => p && p.day === day);
-                                    const descriptions = {
-                                        'menstruation': 'Отдыхай больше, возможны спазмы',
-                                        'follicular': 'Энергия растёт, время для активностей',
-                                        'ovulation': 'Пик энергии и коммуникабельности',
-                                        'luteal': 'Возможны перепады настроения',
-                                        'pms': 'Будь добрее к себе, возможна усталость'
-                                    };
-                                    return descriptions[phase?.type] || '';
-                                }
-                                return null;
+                                const value = context.raw;
+                                if (value === null) return 'Настроение: Нет данных';
+                                const emoji = getMoodEmoji(value);
+                                const day = context.dataIndex + 1;
+                                const phase = cyclePhases.find(p => p && p.day === day);
+                                const phaseNames = {
+                                    'menstruation': '🩸 Менструация',
+                                    'follicular': '🌱 Фолликулярная фаза',
+                                    'ovulation': '🥚 Овуляция',
+                                    'luteal': '🌙 Лютеиновая фаза',
+                                    'pms': '💫 ПМС'
+                                };
+                                return [
+                                    `${emoji} Настроение: ${value.toFixed(1)}/10`,
+                                    `${phaseNames[phase?.type] || 'Неизвестно'}`
+                                ];
                             }
                         }
                     }

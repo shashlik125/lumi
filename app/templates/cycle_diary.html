@@ -1677,25 +1677,50 @@
     // ==========================================================================
     // ИНИЦИАЛИЗАЦИЯ
     // ==========================================================================
-    document.addEventListener('DOMContentLoaded', async function () {
-        console.log('🚀 Инициализация дневника цикла...');
-        initSymptomsGrid();
-        await loadUserCycleSettings(); // Загружаем настройки цикла
-        await loadInitialData();
-    });
+document.addEventListener('DOMContentLoaded', async function () {
+    console.log('🚀 Инициализация дневника цикла...');
+    
+    // Проверяем авторизацию
+    const isAuth = await checkAuth();
+    if (!isAuth) return;
+    
+    initSymptomsGrid();
+    await loadUserCycleSettings();
+    await loadInitialData();
+});
 
-    // Загружаем настройки цикла пользователя
-    async function loadUserCycleSettings() {
-        try {
-            const response = await fetch('/api/cycle_settings');
-            if (response.ok) {
-                userCycleSettings = await response.json();
-                console.log('⚙️ Настройки цикла загружены:', userCycleSettings);
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки настроек цикла:', error);
+async function loadUserCycleSettings() {
+    try {
+        const response = await fetch('/api/cycle_settings', {  // <--- ДОБАВЛЕНО
+            credentials: 'include'                              // <--- ДОБАВЛЕНО
+        });
+        if (response.ok) {
+            userCycleSettings = await response.json();
+            console.log('⚙️ Настройки цикла загружены:', userCycleSettings);
         }
+    } catch (error) {
+        console.error('Ошибка загрузки настроек цикла:', error);
     }
+}
+
+async function loadDayEntry(dateStr) {
+    try {
+        const response = await fetch(`${CYCLE_API}?date=${dateStr}`, {
+            credentials: 'include',  // <--- ДОБАВЛЕНО
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        if (response.ok) {
+            const entries = await response.json();
+            return entries.length > 0 ? entries[0] : null;
+        }
+        return null;
+    } catch (error) {
+        console.error('Ошибка загрузки записи:', error);
+        return null;
+    }
+}
 
     // ==========================================================================
     // ОСНОВНЫЕ ФУНКЦИИ ЗАГРУЗКИ
@@ -1731,39 +1756,29 @@
         }
     }
 
-document.addEventListener('DOMContentLoaded', async function () {
-    console.log('🚀 Инициализация дневника цикла...');
-    
-    // Инициализируем обе переменные одним значением
-    currentDate = new Date();
-    currentChartDate = new Date(currentDate);
-    
-    initSymptomsGrid();
-    await loadUserCycleSettings();
-    await loadInitialData();
-    
-    // Для отладки покажем синхронизацию
-    setTimeout(debugMonthSync, 3000);
-});
-
-    async function loadCycleData() {
-        try {
-            console.log('📊 Загружаю данные цикла...');
-            const response = await fetch(CYCLE_API);
-
-            if (response.ok) {
-                cycleData = await response.json();
-                console.log('✅ Данные цикла загружены:', cycleData.length, 'записей');
-                updateSymptomsLegend();
-            } else {
-                console.error('❌ Ошибка загрузки данных цикла:', response.status);
-                showToast('Ошибка загрузки данных цикла', 'error');
+async function loadCycleData() {
+    try {
+        console.log('📊 Загружаю данные цикла...');
+        const response = await fetch(CYCLE_API, {  // <--- ДОБАВЛЕНО
+            credentials: 'include',                 // <--- ДОБАВЛЕНО
+            headers: {
+                'Accept': 'application/json'
             }
-        } catch (error) {
-            console.error('Сетевая ошибка загрузки данных цикла:', error);
-            showToast('Сетевая ошибка', 'error');
+        });
+
+        if (response.ok) {
+            cycleData = await response.json();
+            console.log('✅ Данные цикла загружены:', cycleData.length, 'записей');
+            updateSymptomsLegend();
+        } else {
+            console.error('❌ Ошибка загрузки данных цикла:', response.status);
+            showToast('Ошибка загрузки данных цикла', 'error');
         }
+    } catch (error) {
+        console.error('Сетевая ошибка загрузки данных цикла:', error);
+        showToast('Сетевая ошибка', 'error');
     }
+}
 
 
 // Получаем данные для графика настроения за выбранный месяц
@@ -3478,19 +3493,24 @@ function updateChartTitle() {
         showToast(`Редактирование дня ${formatDateDisplay(dateStr)}`, 'info');
     }
 
-    async function loadDayEntry(dateStr) {
-        try {
-            const response = await fetch(`${CYCLE_API}?date=${dateStr}`);
-            if (response.ok) {
-                const entries = await response.json();
-                return entries.length > 0 ? entries[0] : null;
+async function loadDayEntry(dateStr) {
+    try {
+        const response = await fetch(`${CYCLE_API}?date=${dateStr}`, {
+            credentials: 'include',  // <--- ДОБАВЛЕНО
+            headers: {
+                'Accept': 'application/json'
             }
-            return null;
-        } catch (error) {
-            console.error('Ошибка загрузки записи:', error);
-            return null;
+        });
+        if (response.ok) {
+            const entries = await response.json();
+            return entries.length > 0 ? entries[0] : null;
         }
+        return null;
+    } catch (error) {
+        console.error('Ошибка загрузки записи:', error);
+        return null;
     }
+}
 
     function fillFormWithData(dateStr, entry) {
         console.log('📝 Заполняю форму для даты:', dateStr, 'данные:', entry);

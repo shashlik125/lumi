@@ -2170,64 +2170,6 @@ function createMoodOverTimeChart() {
         return { labels, values, dates, hasData };
     }
 
-    // Получаем фазы цикла для текущего месяца
-    function getCyclePhasesForCurrentMonth() {
-        const phases = [];
-
-        // Используем настройки цикла пользователя или значения по умолчанию
-        const cycleLength = userCycleSettings?.cycle_length || 28;
-        const periodLength = userCycleSettings?.period_length || 5;
-        const lastPeriodStart = userCycleSettings?.last_period_start
-            ? new Date(userCycleSettings.last_period_start)
-            : new Date(); // Если нет данных, начинаем с сегодняшнего дня
-
-        // Определяем фазы для стандартного 28-дневного цикла
-        const phaseDefinitions = [
-            { type: 'menstruation', startDay: 1, endDay: 5, color: '#FF6B6B' },
-            { type: 'follicular', startDay: 6, endDay: 13, color: '#60F4E3' },
-            { type: 'ovulation', startDay: 14, endDay: 15, color: '#FF70EC' },
-            { type: 'luteal', startDay: 16, endDay: 23, color: '#FFD166' },
-            { type: 'pms', startDay: 24, endDay: 28, color: '#B8B3E9' }
-        ];
-
-        return phaseDefinitions;
-    }
-
-    // Создаем градиент для фона с фазами цикла с учетом реальных данных
-    function createCyclePhaseGradientForMonth(ctx, canvas, phases) {
-        const width = canvas.width;
-        const gradient = ctx.createLinearGradient(0, 0, width, 0);
-
-        const daysInMonth = 31; // Максимальное количество дней для отображения
-
-        // Сначала добавляем прозрачный фон для дней до первой фазы
-        if (phases.length > 0 && phases[0].startDay > 1) {
-            const beforePhasePercent = (phases[0].startDay - 1) / daysInMonth;
-            gradient.addColorStop(0, 'transparent');
-            gradient.addColorStop(beforePhasePercent, 'transparent');
-        }
-
-        // Добавляем цвета для каждой фазы
-        phases.forEach(phase => {
-            // Проверяем, попадает ли фаза в текущий месяц
-            if (phase.endDay >= 1 && phase.startDay <= daysInMonth) {
-                const startPercent = Math.max(phase.startDay - 1, 0) / daysInMonth;
-                const endPercent = Math.min(phase.endDay, daysInMonth) / daysInMonth;
-
-                // Для реальных данных менструации делаем более насыщенный цвет
-                const opacity = (phase.type === 'menstruation' && phase.isActual) ? 0.25 : 0.15;
-                const color = getPhaseColor(phase.type, opacity);
-
-                gradient.addColorStop(startPercent, color);
-                gradient.addColorStop(endPercent, color);
-
-                // Добавляем плавные переходы между фазами
-                if (phase.endDay < daysInMonth) {
-                    const nextPhaseStart = endPercent + 0.001;
-                    gradient.addColorStop(nextPhaseStart, 'transparent');
-                }
-            }
-        });
 
         // Добавляем прозрачный фон для дней после последней фазы
         if (phases.length > 0) {
@@ -2240,103 +2182,9 @@ function createMoodOverTimeChart() {
         }
 
         return gradient;
-    }
 
-    // Создаем подписи для фаз цикла с учетом реальных данных
-    function createPhaseLabels(phases) {
-        const labels = [];
 
-        phases.forEach(phase => {
-            // Показываем только фазы, которые попадают в текущий месяц
-            if (phase.endDay >= 1 && phase.startDay <= 31) {
-                // Ограничиваем фазы границами месяца
-                const startDay = Math.max(phase.startDay, 1);
-                const endDay = Math.min(phase.endDay, 31);
-
-                if (startDay <= endDay) {
-                    // Вычисляем середину фазы для размещения подписи
-                    const middleDay = Math.floor((startDay + endDay) / 2);
-
-                    // Формируем название фазы
-                    let phaseName = getPhaseDisplayName(phase.type);
-
-                    // Если это реальные данные менструации, добавляем иконку
-                    if (phase.type === 'menstruation' && phase.isActual) {
-                        phaseName = '🩸 ' + phaseName;
-                    }
-
-                    // Если это текущая фаза, выделяем ее
-                    if (phase.isCurrent) {
-                        phaseName = '→ ' + phaseName;
-                    }
-
-                    labels.push({
-                        day: middleDay,
-                        name: phaseName,
-                        phaseType: phase.type,
-                        isActual: phase.isActual,
-                        isCurrent: phase.isCurrent,
-                        startDay: startDay,
-                        endDay: endDay
-                    });
-                }
-            }
-        });
-
-        return labels;
-    }
-
-    // Получаем фазу цикла для конкретного дня на основе реальных данных
-    function getCyclePhaseForDay(dayOfMonth) {
-        const phases = getCyclePhasesForCurrentMonth();
-
-        for (const phase of phases) {
-            if (dayOfMonth >= phase.startDay && dayOfMonth <= phase.endDay) {
-                return {
-                    type: phase.type,
-                    name: getPhaseDisplayName(phase.type),
-                    isActual: phase.isActual || false,
-                    days: phase.days || [],
-                    description: getPhaseDescription(phase.type, dayOfMonth, phase.isActual)
-                };
-            }
-        }
-
-        return {
-            type: 'unknown',
-            name: 'Неизвестно',
-            isActual: false,
-            description: 'Не удалось определить фазу цикла'
-        };
-    }
-
-    // Получаем описание фазы
-    function getPhaseDescription(phaseType, day, isActual) {
-        const descriptions = {
-            'menstruation': isActual
-                ? 'День менструации (реальные данные)'
-                : 'Предполагаемый день менструации',
-            'follicular': 'Фолликулярная фаза: уровень энергии растёт',
-            'ovulation': 'Овуляция: пик фертильности',
-            'luteal': 'Лютеиновая фаза: повышение прогестерона',
-            'pms': 'Предменструальная фаза: возможны симптомы ПМС'
-        };
-
-        return descriptions[phaseType] || 'Фаза цикла';
-    }
-
-    // Получаем отображаемое название фазы
-    function getPhaseDisplayName(phaseType) {
-        const names = {
-            'menstruation': 'Менструация',
-            'follicular': 'Фолликулярная',
-            'ovulation': 'Овуляция',
-            'luteal': 'Лютеиновая',
-            'pms': 'ПМС'
-        };
-        return names[phaseType] || phaseType;
-    }
-
+    
     // Получаем цвет для фазы
     function getPhaseColor(phaseType, opacity = 1) {
         const colors = {

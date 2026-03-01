@@ -2168,20 +2168,7 @@ function createMoodOverTimeChart() {
 
         console.log('📊 Данные за месяц:', { labels, values, hasData });
         return { labels, values, dates, hasData };
-    }
-
-
-        // Добавляем прозрачный фон для дней после последней фазы
-        if (phases.length > 0) {
-            const lastPhase = phases[phases.length - 1];
-            if (lastPhase.endDay < daysInMonth) {
-                const afterPhasePercent = lastPhase.endDay / daysInMonth;
-                gradient.addColorStop(afterPhasePercent, 'transparent');
-                gradient.addColorStop(1, 'transparent');
-            }
-        }
-
-        return gradient;
+    }   
 
 
     

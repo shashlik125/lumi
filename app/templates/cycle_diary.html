@@ -2955,31 +2955,83 @@ function debugCyclePhases() {
         return phases;
     }
 
-    function generatePhasesFromPeriod(startDay, periodLength, daysInMonth) {
-        const phases = [];
-
-        for (let day = 1; day <= daysInMonth; day++) {
-            let phaseType = 'follicular';
-
-            if (day >= startDay && day < startDay + periodLength) {
-                phaseType = 'menstruation';
-            } else if (day >= startDay + 13 && day <= startDay + 15) {
-                phaseType = 'ovulation';
-            } else if (day >= startDay + 23 && day <= startDay + 28) {
-                phaseType = 'pms';
-            } else if (day >= startDay + 15 && day <= startDay + 23) {
-                phaseType = 'luteal';
-            }
-
-            phases.push({
-                day: day,
-                type: phaseType,
-                color: getPhaseColor(phaseType, 0.2)
-            });
+function generatePhasesFromPeriod(startDay, periodLength, daysInMonth) {
+    const phases = [];
+    const cycleLength = 28; // стандартная длина цикла
+    
+    console.log(`🔄 Генерация фаз от дня ${startDay}, длительность менструации ${periodLength} дней`);
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+        let phaseType = 'follicular';
+        
+        // Дни менструации
+        if (day >= startDay && day < startDay + periodLength) {
+            phaseType = 'menstruation';
+        } 
+        // Овуляция (14-15 день от начала цикла)
+        else if (day >= startDay + 13 && day <= startDay + 14) {
+            phaseType = 'ovulation';
         }
-
-        return phases;
+        // Лютеиновая фаза (16-23 дни от начала цикла)
+        else if (day >= startDay + 15 && day <= startDay + 22) {
+            phaseType = 'luteal';
+        }
+        // ПМС (24-28 дни от начала цикла)
+        else if (day >= startDay + 23 && day <= startDay + 27) {
+            phaseType = 'pms';
+        }
+        // Фолликулярная фаза (все остальные дни)
+        else {
+            phaseType = 'follicular';
+        }
+        
+        phases.push({
+            day: day,
+            type: phaseType,
+            color: getPhaseColor(phaseType, 0.2)
+        });
     }
+    
+    return phases;
+}
+
+function testPhaseCalculation() {
+    console.log('🔍 ТЕСТ РАСЧЕТА ФАЗ:');
+    console.log('📊 Текущие данные:');
+    console.log('- cycleData:', cycleData);
+    console.log('- userCycleSettings:', userCycleSettings);
+    console.log('- currentChartDate:', currentChartDate);
+    
+    // Получаем фазы для текущего месяца
+    const phases = getCyclePhasesForChart();
+    console.log('\n📅 Фазы для текущего месяца:');
+    
+    // Группируем по дням для наглядности
+    const phasesByDay = {};
+    phases.forEach(p => {
+        phasesByDay[p.day] = p.type;
+    });
+    
+    // Выводим первые 10 дней для примера
+    console.log('Первые 10 дней:');
+    for (let day = 1; day <= 10; day++) {
+        console.log(`  День ${day}: ${phasesByDay[day] || 'не определено'}`);
+    }
+    
+    // Находим дни с менструацией
+    const menstruationDays = phases.filter(p => p.type === 'menstruation').map(p => p.day);
+    console.log(`\n🩸 Дни менструации: ${menstruationDays.join(', ') || 'нет'}`);
+    
+    // Находим дни с овуляцией
+    const ovulationDays = phases.filter(p => p.type === 'ovulation').map(p => p.day);
+    console.log(`🥚 Дни овуляции: ${ovulationDays.join(', ') || 'нет'}`);
+    
+    // Находим дни с ПМС
+    const pmsDays = phases.filter(p => p.type === 'pms').map(p => p.day);
+    console.log(`💫 Дни ПМС: ${pmsDays.join(', ') || 'нет'}`);
+    
+    return phases;
+}
 
     function getDefaultPhasesForMonth(daysInMonth) {
         const phases = [];

@@ -2801,32 +2801,35 @@ function createMoodOverTimeChart() {
     // ФУНКЦИИ ДЛЯ ФАЗ ЦИКЛА
     // ==========================================================================
 
-    function getCyclePhasesForChart() {
-        console.log('🔄 Получаю фазы цикла для графика...');
-        console.log('📊 cycleData:', cycleData);
-        console.log('📊 userCycleSettings:', userCycleSettings);
+function getCyclePhasesForChart() {
+    console.log('🔄 Получаю фазы цикла для графика...');
+    console.log('📊 cycleData:', cycleData);
+    console.log('📊 userCycleSettings:', userCycleSettings);
 
-        const year = currentChartDate.getFullYear();
-        const month = currentChartDate.getMonth();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const year = currentChartDate.getFullYear();
+    const month = currentChartDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-        const phasesFromEntries = calculatePhasesFromCycleEntries(year, month, daysInMonth);
-        if (phasesFromEntries) {
-            console.log('✅ Фазы рассчитаны из cycle_entries');
-            return phasesFromEntries;
-        }
-
-        if (userCycleSettings && userCycleSettings.last_period_start) {
-            const phasesFromSettings = calculatePhasesFromSettings(year, month, daysInMonth);
-            if (phasesFromSettings) {
-                console.log('✅ Фазы рассчитаны из настроек');
-                return phasesFromSettings;
-            }
-        }
-
-        console.log('⚠️ Нет данных о цикле, использую стандартные фазы');
-        return getDefaultPhasesForMonth(daysInMonth);
+    // Сначала проверяем реальные данные из cycle_entries
+    const phasesFromEntries = calculatePhasesFromCycleEntries(year, month, daysInMonth);
+    if (phasesFromEntries) {
+        console.log('✅ Фазы рассчитаны из cycle_entries');
+        return phasesFromEntries;
     }
+
+    // Если есть настройки цикла, используем их для расчета предполагаемых фаз
+    if (userCycleSettings && userCycleSettings.last_period_start) {
+        const phasesFromSettings = calculatePhasesFromSettings(year, month, daysInMonth);
+        if (phasesFromSettings) {
+            console.log('✅ Фазы рассчитаны из настроек (предполагаемые)');
+            return phasesFromSettings;
+        }
+    }
+
+    // Если совсем нет данных, возвращаем "нейтральные" фазы (все фолликулярная)
+    console.log('⚠️ Нет данных о цикле, использую нейтральные фазы');
+    return getNeutralPhasesForMonth(daysInMonth);
+}
 
 // Добавьте после функции getCyclePhasesForChart()
 function debugCyclePhases() {
@@ -2964,31 +2967,64 @@ function generatePhasesFromPeriod(startDay, periodLength, daysInMonth) {
     for (let day = 1; day <= daysInMonth; day++) {
         let phaseType = 'follicular';
         
-        // Дни менструации
-        if (day >= startDay && day < startDay + periodLength) {
+        // Рассчитываем день цикла относительно начала менструации
+        // День начала менструации = день 1 цикла
+        let cycleDay = day - startDay + 1;
+        
+        // Если день меньше начала менструации, значит это дни после ПМС из следующего цикла
+        if (cycleDay < 1) {
+            cycleDay = cycleDay + 28; // Добавляем 28 дней для перехода к следующему циклу
+        }
+        
+        // Определяем фазу по дню цикла (стандартный 28-дневный цикл)
+        if (cycleDay >= 1 && cycleDay <= periodLength) {
+            // Дни менструации (1-5 дни цикла)
             phaseType = 'menstruation';
         } 
-        // Овуляция (14-15 день от начала цикла)
-        else if (day >= startDay + 13 && day <= startDay + 14) {
+        else if (cycleDay >= periodLength + 1 && cycleDay <= 13) {
+            // Фолликулярная фаза (после менструации до овуляции)
+            phaseType = 'follicular';
+        }
+        else if (cycleDay >= 14 && cycleDay <= 15) {
+            // Овуляция (14-15 дни цикла)
             phaseType = 'ovulation';
         }
-        // Лютеиновая фаза (16-23 дни от начала цикла)
-        else if (day >= startDay + 15 && day <= startDay + 22) {
+        else if (cycleDay >= 16 && cycleDay <= 23) {
+            // Лютеиновая фаза (16-23 дни цикла)
             phaseType = 'luteal';
         }
-        // ПМС (24-28 дни от начала цикла)
-        else if (day >= startDay + 23 && day <= startDay + 27) {
+        else if (cycleDay >= 24 && cycleDay <= 28) {
+            // ПМС (24-28 дни цикла)
             phaseType = 'pms';
-        }
-        // Фолликулярная фаза (все остальные дни)
-        else {
-            phaseType = 'follicular';
         }
         
         phases.push({
             day: day,
             type: phaseType,
             color: getPhaseColor(phaseType, 0.2)
+        });
+        
+        // Отладка для первых 5 дней и дней вокруг менструации
+        if (day <= 5 || (day >= startDay - 2 && day <= startDay + 10)) {
+            console.log(`День ${day}: cycleDay=${cycleDay}, фаза=${phaseType}`);
+        }
+    }
+    
+    return phases;
+}
+
+// Нейтральные фазы, когда нет данных о цикле
+function getNeutralPhasesForMonth(daysInMonth) {
+    const phases = [];
+    
+    console.log('🔄 Генерация нейтральных фаз (без менструации)');
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+        // По умолчанию все дни - фолликулярная фаза (нейтральная)
+        phases.push({
+            day: day,
+            type: 'follicular',
+            color: getPhaseColor('follicular', 0.2)
         });
     }
     

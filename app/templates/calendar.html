@@ -1306,15 +1306,20 @@ async function loadAllNotes() {
 // Загрузка всех целей
 async function loadAllGoals() {
     try {
-        // Получаем все цели (без фильтра по дате)
+        // Получаем все цели БЕЗ фильтра по дате
         const response = await fetch(GOALS_API);
         if (!response.ok) throw new Error('Ошибка загрузки целей');
         
         const goals = await response.json();
+        console.log('✅ Загружены цели:', goals);
         
         // Сортируем по дате (сначала новые) и берем последние 10
         const recentGoals = goals
-            .sort((a, b) => new Date(b.created_at || b.date) - new Date(a.created_at || a.date))
+            .sort((a, b) => {
+                const dateA = new Date(a.created_at || a.date || 0);
+                const dateB = new Date(b.created_at || b.date || 0);
+                return dateB - dateA;
+            })
             .slice(0, 10);
         
         renderGoalsList(recentGoals);
@@ -1327,14 +1332,47 @@ async function loadAllGoals() {
 // Загрузка всех радостей
 async function loadAllJoys() {
     try {
+        // Получаем все радости БЕЗ фильтра по дате
         const response = await fetch(JOYS_API);
         if (!response.ok) throw new Error('Ошибка загрузки радостей');
         
         const joys = await response.json();
+        console.log('✅ Загружены радости:', joys);
         
         // Сортируем по дате (сначала новые) и берем последние 10
         const recentJoys = joys
-            .sort((a, b) => new Date(b.created_at || b.date) - new Date(a.created_at || a.date))
+            .sort((a, b) => {
+                const dateA = new Date(a.created_at || a.date || 0);
+                const dateB = new Date(b.created_at || b.date || 0);
+                return dateB - dateA;
+            })
+            .slice(0, 10);
+        
+        renderJoysList(recentJoys);
+    } catch (error) {
+        console.error('❌ Ошибка загрузки радостей:', error);
+        document.getElementById('joysList').innerHTML = '<div class="empty-list">Ошибка загрузки радостей</div>';
+    }
+}
+
+
+// Загрузка всех радостей
+async function loadAllJoys() {
+    try {
+        // Получаем все радости БЕЗ фильтра по дате
+        const response = await fetch(JOYS_API);
+        if (!response.ok) throw new Error('Ошибка загрузки радостей');
+        
+        const joys = await response.json();
+        console.log('✅ Загружены радости:', joys);
+        
+        // Сортируем по дате (сначала новые) и берем последние 10
+        const recentJoys = joys
+            .sort((a, b) => {
+                const dateA = new Date(a.created_at || a.date || 0);
+                const dateB = new Date(b.created_at || b.date || 0);
+                return dateB - dateA;
+            })
             .slice(0, 10);
         
         renderJoysList(recentJoys);

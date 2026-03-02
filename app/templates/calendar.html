@@ -385,6 +385,226 @@ h1:after {
     background: #2196F3;
 }
 
+/* ==========================================================================
+   БЛОКИ С ЗАМЕТКАМИ, ЦЕЛЯМИ И РАДОСТЯМИ
+   ========================================================================== */
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.content-card {
+    background: var(--white);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 20px;
+    transition: var(--transition);
+    border: 2px solid transparent;
+    display: flex;
+    flex-direction: column;
+    max-height: 400px;
+}
+
+.content-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--primary);
+}
+
+.content-card h3 {
+    font-size: 18px;
+    color: var(--dark);
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.content-card h3 i {
+    color: var(--primary);
+}
+
+.content-list {
+    overflow-y: auto;
+    flex: 1;
+    padding-right: 5px;
+    max-height: 320px;
+}
+
+/* Стили для заметок */
+.note-item {
+    background: rgba(96, 244, 227, 0.05);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-left: 3px solid var(--primary);
+    transition: var(--transition);
+}
+
+.note-item:hover {
+    background: rgba(96, 244, 227, 0.1);
+    transform: translateX(3px);
+}
+
+.note-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.note-date {
+    color: var(--gray);
+    font-weight: 500;
+}
+
+.note-mood {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.mood-badge-good {
+    background: rgba(96, 244, 227, 0.2);
+    color: #2c7a6b;
+}
+
+.mood-badge-neutral {
+    background: rgba(255, 112, 236, 0.2);
+    color: #b34d9e;
+}
+
+.mood-badge-bad {
+    background: rgba(244, 67, 54, 0.2);
+    color: #b33a31;
+}
+
+.note-text {
+    font-size: 14px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Стили для целей */
+.goal-item {
+    background: rgba(255, 112, 236, 0.05);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-left: 3px solid var(--secondary);
+    transition: var(--transition);
+}
+
+.goal-item:hover {
+    background: rgba(255, 112, 236, 0.1);
+    transform: translateX(3px);
+}
+
+.goal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.goal-date {
+    color: var(--gray);
+    font-weight: 500;
+}
+
+.goal-status {
+    font-size: 14px;
+}
+
+.goal-completed {
+    opacity: 0.8;
+    background: rgba(76, 175, 80, 0.1);
+    border-left-color: var(--success);
+}
+
+.goal-completed .goal-text {
+    text-decoration: line-through;
+    color: var(--gray);
+}
+
+.goal-text {
+    font-size: 14px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Стили для радостей */
+.joy-item {
+    background: rgba(255, 112, 236, 0.05);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border-left: 3px solid #FFB347;
+    transition: var(--transition);
+}
+
+.joy-item:hover {
+    background: rgba(255, 180, 71, 0.1);
+    transform: translateX(3px);
+}
+
+.joy-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+
+.joy-icon {
+    font-size: 16px;
+}
+
+.joy-date {
+    color: var(--gray);
+    font-weight: 500;
+}
+
+.joy-text {
+    font-size: 14px;
+    line-height: 1.5;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.empty-list {
+    text-align: center;
+    padding: 30px 20px;
+    color: var(--gray);
+    font-style: italic;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 900px) {
+    .content-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 600px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .content-card {
+        max-height: 350px;
+    }
+}
+
 /* МОБИЛЬНАЯ АДАПТИВНОСТЬ - ТОЛЬКО ЗДЕСЬ МЕНЯЕМ */
 
 @media (max-width: 768px) {
@@ -641,34 +861,34 @@ h1:after {
 {% block content %}
 
 <main>
-  <div class="page-header">
-    <h1>Календарь настроения</h1>
-  </div>
+    <div class="page-header">
+        <h1>Календарь настроения</h1>
+    </div>
 
-  <div class="calendar-container">
+    <div class="calendar-container">
     <div class="calendar-header">
-      <div class="calendar-title" id="monthYear"></div>
-      <div class="calendar-controls">
+        <div class="calendar-title" id="monthYear"></div>
+        <div class="calendar-controls">
         <button class="calendar-btn" onclick="changeMonth(-1)">
-          <i class="bi bi-chevron-left"></i>
+            <i class="bi bi-chevron-left"></i>
         </button>
         <button class="today-btn" onclick="goToToday()">
-          Сегодня
+            Сегодня
         </button>
         <button class="calendar-btn" onclick="changeMonth(1)">
-          <i class="bi bi-chevron-right"></i>
+            <i class="bi bi-chevron-right"></i>
         </button>
-      </div>
+        </div>
     </div>
 
     <div class="weekdays">
-      <div class="weekday">Пн</div>
-      <div class="weekday">Вт</div>
-      <div class="weekday">Ср</div>
-      <div class="weekday">Чт</div>
-      <div class="weekday">Пт</div>
-      <div class="weekday">Сб</div>
-      <div class="weekday">Вс</div>
+    <div class="weekday">Пн</div>
+    <div class="weekday">Вт</div>
+    <div class="weekday">Ср</div>
+    <div class="weekday">Чт</div>
+    <div class="weekday">Пт</div>
+    <div class="weekday">Сб</div>
+    <div class="weekday">Вс</div>
     </div>
 
     <div class="calendar-grid" id="calendar"></div>
@@ -704,6 +924,34 @@ h1:after {
     </div>
   </div>
   
+
+  <!-- ТРИ КОЛОНКИ: ЗАМЕТКИ, ЦЕЛИ, РАДОСТИ -->
+  <div class="content-grid">
+    <!-- БЛОК ЗАМЕТОК -->
+    <div class="content-card">
+      <h3><i class="fas fa-sticky-note"></i> Общие заметки</h3>
+      <div class="content-list" id="notesList">
+        <div class="empty-list">Загрузка заметок...</div>
+      </div>
+    </div>
+    
+    <!-- БЛОК ЦЕЛЕЙ -->
+    <div class="content-card">
+      <h3><i class="fas fa-bullseye"></i> Ваши цели</h3>
+      <div class="content-list" id="goalsList">
+        <div class="empty-list">Загрузка целей...</div>
+      </div>
+    </div>
+    
+    <!-- БЛОК РАДОСТЕЙ -->
+    <div class="content-card">
+      <h3><i class="fas fa-sun"></i> Ваши радости</h3>
+      <div class="content-list" id="joysList">
+        <div class="empty-list">Загрузка радостей...</div>
+      </div>
+    </div>
+  </div>
+
   <!-- УБИРАЕМ ПОСЛЕДНЮЮ ПЛАШКУ "Что порадовало сегодня" - ЕЁ ЗДЕСЬ НЕТ -->
 </main>
 {% endblock %}
@@ -1024,6 +1272,216 @@ async function refreshCalendarData() {
     renderCalendar();
     updateStats();
 }
+
+
+// ==========================================================================
+// ФУНКЦИИ ДЛЯ ЗАГРУЗКИ ЗАМЕТОК, ЦЕЛЕЙ И РАДОСТЕЙ
+// ==========================================================================
+
+const NOTES_API = "{{ url_for('main.mood_entries') }}";
+const GOALS_API = "{{ url_for('main.goals') }}";
+const JOYS_API = "{{ url_for('main.joys') }}";
+
+// Загрузка всех заметок
+async function loadAllNotes() {
+    try {
+        const response = await fetch(NOTES_API);
+        if (!response.ok) throw new Error('Ошибка загрузки заметок');
+        
+        const entries = await response.json();
+        
+        // Фильтруем только те записи, где есть заметки
+        const notesWithText = entries
+            .filter(entry => entry.note && entry.note.trim() !== '')
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .slice(0, 10); // Последние 10 заметок
+        
+        renderNotesList(notesWithText);
+    } catch (error) {
+        console.error('❌ Ошибка загрузки заметок:', error);
+        document.getElementById('notesList').innerHTML = '<div class="empty-list">Ошибка загрузки заметок</div>';
+    }
+}
+
+// Загрузка всех целей
+async function loadAllGoals() {
+    try {
+        // Получаем все цели (без фильтра по дате)
+        const response = await fetch(GOALS_API);
+        if (!response.ok) throw new Error('Ошибка загрузки целей');
+        
+        const goals = await response.json();
+        
+        // Сортируем по дате (сначала новые) и берем последние 10
+        const recentGoals = goals
+            .sort((a, b) => new Date(b.created_at || b.date) - new Date(a.created_at || a.date))
+            .slice(0, 10);
+        
+        renderGoalsList(recentGoals);
+    } catch (error) {
+        console.error('❌ Ошибка загрузки целей:', error);
+        document.getElementById('goalsList').innerHTML = '<div class="empty-list">Ошибка загрузки целей</div>';
+    }
+}
+
+// Загрузка всех радостей
+async function loadAllJoys() {
+    try {
+        const response = await fetch(JOYS_API);
+        if (!response.ok) throw new Error('Ошибка загрузки радостей');
+        
+        const joys = await response.json();
+        
+        // Сортируем по дате (сначала новые) и берем последние 10
+        const recentJoys = joys
+            .sort((a, b) => new Date(b.created_at || b.date) - new Date(a.created_at || a.date))
+            .slice(0, 10);
+        
+        renderJoysList(recentJoys);
+    } catch (error) {
+        console.error('❌ Ошибка загрузки радостей:', error);
+        document.getElementById('joysList').innerHTML = '<div class="empty-list">Ошибка загрузки радостей</div>';
+    }
+}
+
+// Функция для получения эмодзи по настроению
+function getMoodEmojiFromValue(moodValue) {
+    if (moodValue >= 8) return '😊';
+    if (moodValue >= 5) return '😐';
+    if (moodValue >= 3) return '😕';
+    return '😞';
+}
+
+// Функция для получения цвета настроения
+function getMoodColorClass(moodValue) {
+    if (moodValue >= 7) return 'mood-badge-good';
+    if (moodValue >= 4) return 'mood-badge-neutral';
+    return 'mood-badge-bad';
+}
+
+// Отрисовка списка заметок
+function renderNotesList(notes) {
+    const container = document.getElementById('notesList');
+    
+    if (!notes || notes.length === 0) {
+        container.innerHTML = '<div class="empty-list">📝 Пока нет заметок</div>';
+        return;
+    }
+    
+    container.innerHTML = notes.map(note => {
+        const date = new Date(note.date + 'T00:00:00');
+        const formattedDate = date.toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'long'
+        });
+        const emoji = getMoodEmojiFromValue(note.mood);
+        const moodClass = getMoodColorClass(note.mood);
+        
+        return `
+            <div class="note-item">
+                <div class="note-header">
+                    <span class="note-date">${formattedDate}</span>
+                    <span class="note-mood ${moodClass}">${emoji} ${note.mood}/10</span>
+                </div>
+                <div class="note-text">${note.note}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Отрисовка списка целей
+function renderGoalsList(goals) {
+    const container = document.getElementById('goalsList');
+    
+    if (!goals || goals.length === 0) {
+        container.innerHTML = '<div class="empty-list">🎯 Пока нет целей</div>';
+        return;
+    }
+    
+    container.innerHTML = goals.map(goal => {
+        const date = new Date(goal.created_at || goal.date);
+        const formattedDate = date.toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'long'
+        });
+        const statusClass = goal.completed ? 'goal-completed' : 'goal-pending';
+        const statusIcon = goal.completed ? '✅' : '⭕';
+        
+        return `
+            <div class="goal-item ${statusClass}">
+                <div class="goal-header">
+                    <span class="goal-date">${formattedDate}</span>
+                    <span class="goal-status">${statusIcon}</span>
+                </div>
+                <div class="goal-text">${goal.text}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Отрисовка списка радостей
+function renderJoysList(joys) {
+    const container = document.getElementById('joysList');
+    
+    if (!joys || joys.length === 0) {
+        container.innerHTML = '<div class="empty-list">✨ Пока нет радостей</div>';
+        return;
+    }
+    
+    container.innerHTML = joys.map(joy => {
+        const date = new Date(joy.created_at || joy.date);
+        const formattedDate = date.toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'long',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        
+        return `
+            <div class="joy-item">
+                <div class="joy-header">
+                    <span class="joy-icon">🌟</span>
+                    <span class="joy-date">${formattedDate}</span>
+                </div>
+                <div class="joy-text">${joy.text}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Обновить все данные
+async function refreshAllData() {
+    await Promise.all([
+        loadAllNotes(),
+        loadAllGoals(),
+        loadAllJoys()
+    ]);
+}
+
+// Добавить в инициализацию загрузку новых данных
+document.addEventListener('DOMContentLoaded', async function() {
+    try {
+        console.log('🚀 Инициализация страницы календаря...');
+        
+        // Загружаем данные
+        const loaded = await loadMoodData();
+        console.log('✅ Настроения загружены:', moods.length, 'записей');
+        
+        // Отрисовываем календарь
+        renderCalendar();
+        
+        // Обновляем статистику
+        updateStats();
+        
+        // Загружаем заметки, цели и радости
+        await refreshAllData();
+        
+        // Очищаем будущие записи в фоне
+        cleanupFutureEntries();
+    } catch (error) {
+        console.error('❌ Ошибка инициализации:', error);
+    }
+});
 
 // Делаем функцию глобальной
 window.refreshCalendarData = refreshCalendarData;

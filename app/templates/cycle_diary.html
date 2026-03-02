@@ -4,9 +4,10 @@
 
 {% block extra_css %}
 <style>
-    /* ==========================================================================
+
+/* ==========================================================================
 Глобальные стили и переменные
-   ========================================================================== */
+========================================================================== */
     * {
         font-family: 'Montserrat', sans-serif !important;
         box-sizing: border-box;
@@ -89,15 +90,58 @@
     }
 
     /* ==========================================================================
-   Статистика цикла
+   ДВЕ КОЛОНКИ: КАЛЕНДАРЬ СЛЕВА, СТАТИСТИКА СПРАВА
    ========================================================================== */
-    .cycle-stats {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 20px;
+    .two-column-layout {
+        display: flex;
+        gap: 25px;
         margin-bottom: 30px;
     }
 
+    .left-column {
+        flex: 1.5; /* Календарь занимает больше места */
+        min-width: 0; /* Предотвращает переполнение */
+    }
+
+    .right-column {
+        flex: 1; /* Статистика занимает меньше места */
+        min-width: 0;
+    }
+
+    .stats-vertical {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .stats-vertical .stat-card {
+        margin: 0;
+        width: 100%;
+        text-align: left;
+        padding: 20px;
+    }
+
+    /* Скрываем старую сетку статистики */
+    .cycle-stats {
+        display: none;
+    }
+
+    /* Адаптивность для планшетов */
+    @media (max-width: 900px) {
+        .two-column-layout {
+            flex-direction: column;
+        }
+        
+        .stats-vertical {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+    }
+
+    /* ==========================================================================
+   Статистика цикла (стили для карточек)
+   ========================================================================== */
     .stat-card {
         background: var(--white);
         border-radius: var(--border-radius);
@@ -133,14 +177,17 @@
     }
 
     /* ==========================================================================
-   Календарь цикла
+    Календарь цикла
    ========================================================================== */
     .cycle-calendar-container {
         background: var(--white);
         border-radius: var(--border-radius);
         box-shadow: var(--shadow);
-        padding: 25px;
-        margin-bottom: 30px;
+        padding: 20px;
+        margin-bottom: 0; /* Убираем нижний отступ, так как он в two-column-layout */
+        max-width: 100%;
+        margin-left: 0;
+        margin-right: 0;
     }
 
     .calendar-header {
@@ -203,21 +250,22 @@
         grid-template-columns: repeat(7, 1fr);
         text-align: center;
         font-weight: 600;
-        margin-bottom: 10px;
+        margin-bottom: 8px;
         color: var(--gray);
         background: rgba(96, 244, 227, 0.1);
-        border-radius: 10px;
-        padding: 10px 0;
+        border-radius: 8px;
+        padding: 6px 0;
     }
 
     .weekday {
-        padding: 10px;
+        padding: 5px;
+        font-size: 14px;
     }
 
     .calendar-grid {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
-        gap: 6px;
+        gap: 4px;
     }
 
     /* ==========================================================================
@@ -225,8 +273,8 @@
    ========================================================================== */
     .calendar-day {
         aspect-ratio: 1/1;
-        min-height: 6cqi;
-        border-radius: 10px;
+        min-height: 45px;
+        border-radius: 8px;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -235,12 +283,12 @@
         background: var(--light);
         transition: var(--transition);
         position: relative;
-        padding: 6px 3px 3px 3px;
+        padding: 4px 2px 2px 2px;
         border: 2px solid transparent;
         font-weight: 600;
         overflow: hidden;
     }
-
+    
     .calendar-day:hover {
         transform: translateY(-3px);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -248,8 +296,8 @@
     }
 
     .day-number {
-        font-size: 16px;
-        margin-bottom: 3px;
+        font-size: 14px;
+        margin-bottom: 2px;
         position: relative;
         z-index: 2;
     }
@@ -674,18 +722,6 @@
         flex-direction: column;
     }
 
-    .analytics-block .chart-container {
-        position: relative;
-        background: var(--white);
-        border-radius: 12px;
-        padding: 20px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        height: 300px;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-
     .analytics-block .no-data {
         display: flex;
         flex-direction: column;
@@ -700,14 +736,12 @@
     /* ==========================================================================
    УБИРАЕМ ОГРАНИЧЕНИЯ ДЛЯ ГРАФИКОВ
    ========================================================================== */
-
     .chartjs-render-monitor {
         width: 100% !important;
         height: auto !important;
         aspect-ratio: 16/9;
     }
 
-    /* Обертка для canvas */
     .chart-container canvas {
         max-width: 100%;
         height: auto !important;
@@ -1001,8 +1035,7 @@
         z-index: 10;
     }
 
-
-        /* ==========================================================================
+    /* ==========================================================================
    ЛЕГЕНДА ФАЗ ЦИКЛА
    ========================================================================== */
     .cycle-phase-legend {
@@ -1036,6 +1069,447 @@
     .phase-text {
         font-size: 13px;
         font-weight: 500;
+    }
+
+    /* ==========================================================================
+   МОБИЛЬНАЯ ВЕРСИЯ (оставлена без изменений)
+   ========================================================================== */
+    @media (max-width: 1024px) {
+        main {
+            padding: 25px 15px;
+        }
+
+        .tracker-container {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        .charts-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        body {
+            padding-top: 60px;
+        }
+
+        nav a.active {
+            color: var(--dark);
+        }
+
+        @media (hover: hover) {
+            nav a:hover::after {
+                width: 100%;
+            }
+        }
+
+        .user span {
+            display: none;
+        }
+
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+        }
+
+        main {
+            padding: 20px 12px;
+        }
+
+        .page-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            padding-bottom: 8px;
+        }
+
+        h1:after {
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+        }
+
+        .cycle-stats {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            padding: 15px;
+            border-radius: 14px;
+        }
+
+        .stat-title {
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+        }
+
+        .stat-change {
+            font-size: 13px;
+        }
+
+        .cycle-calendar-container {
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+        }
+
+        .calendar-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .calendar-title {
+            font-size: 18px;
+        }
+
+        .calendar-controls {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .today-btn {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+
+        .calendar-btn {
+            width: 36px;
+            height: 36px;
+        }
+
+        .weekdays {
+            padding: 8px 0;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .weekday {
+            padding: 8px 2px;
+            font-size: 13px;
+        }
+
+        .calendar-grid {
+            gap: 6px;
+        }
+
+        .calendar-day {
+            min-height: 45px;
+            border-radius: 10px;
+            padding: 4px;
+        }
+
+        .day-number {
+            font-size: 14px;
+            margin-bottom: 3px;
+        }
+
+        .cycle-phase-dot {
+            width: 6px;
+            height: 6px;
+        }
+
+        .tracker-form {
+            padding: 20px;
+            border-radius: 14px;
+        }
+
+        .mood-integration {
+            padding: 20px;
+            border-radius: 14px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .symptoms-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .symptom-checkbox {
+            padding: 8px;
+            font-size: 13px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 10px 12px;
+            font-size: 14px;
+            border-radius: 10px;
+        }
+
+        .mood-display {
+            padding: 12px;
+        }
+
+        .mood-value {
+            font-size: 28px;
+        }
+
+        .mood-emoji {
+            font-size: 40px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 10px;
+        }
+
+        .analytics-container {
+            padding: 20px;
+            border-radius: 14px;
+            margin-bottom: 25px;
+        }
+
+        .chart-container {
+            height: 250px;
+            padding: 15px;
+        }
+
+        .chart-title {
+            font-size: 15px;
+            margin-bottom: 12px;
+        }
+
+        .toast {
+            top: 70px;
+            right: 10px;
+            left: 10px;
+            max-width: none;
+            text-align: center;
+            font-size: 13px;
+            padding: 12px 16px;
+        }
+
+        .calendar-day:hover,
+        .stat-card:hover,
+        .symptom-checkbox:hover,
+        .btn:hover {
+            transform: none;
+            box-shadow: none;
+            border-color: transparent;
+        }
+
+        .stat-card:hover {
+            border-color: transparent;
+        }
+
+        .chart-container {
+            height: 200px !important;
+            padding: 10px;
+        }
+
+        #symptomsChart {
+            overflow-x: auto;
+        }
+
+        .chart-title {
+            font-size: 14px !important;
+            text-align: center;
+        }
+
+        #moodPhaseChart+.chartjs-render-monitor,
+        #symptomsChart+.chartjs-render-monitor {
+            max-width: 100% !important;
+        }
+
+        .legend-content {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        #symptomsChartContainer {
+            height: 280px;
+        }
+
+        #symptomsChart {
+            height: 250px !important;
+        }
+
+        .chart-container {
+            height: 280px;
+            padding: 15px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        body {
+            padding-top: 55px;
+        }
+
+        main {
+            padding: 15px 10px;
+        }
+
+        h1 {
+            font-size: 22px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .cycle-stats {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .stat-card {
+            padding: 12px;
+        }
+
+        .stat-title {
+            font-size: 13px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+        }
+
+        .cycle-calendar-container {
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .calendar-title {
+            font-size: 16px;
+        }
+
+        .today-btn {
+            padding: 5px 10px;
+            font-size: 13px;
+        }
+
+        .calendar-btn {
+            width: 32px;
+            height: 32px;
+        }
+
+        .calendar-btn i {
+            font-size: 12px;
+        }
+
+        .weekday {
+            padding: 6px 1px;
+            font-size: 12px;
+        }
+
+        .calendar-grid {
+            gap: 4px;
+        }
+
+        .calendar-day {
+            min-height: 40px;
+            border-radius: 8px;
+            padding: 3px;
+        }
+
+        .day-number {
+            font-size: 13px;
+        }
+
+        .tracker-form,
+        .mood-integration {
+            padding: 15px;
+        }
+
+        .symptoms-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .section-title {
+            font-size: 15px;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        .analytics-container {
+            padding: 15px;
+        }
+
+        .chart-container {
+            height: 220px;
+            padding: 12px;
+        }
+
+        .chart-container {
+            height: 180px !important;
+        }
+
+        .chartjs-size-monitor,
+        .chartjs-render-monitor {
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .chart-title {
+            font-size: 13px !important;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .calendar-day {
+            min-height: 35px;
+        }
+
+        .day-number {
+            font-size: 12px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+        }
+
+        .mood-value {
+            font-size: 24px;
+        }
+
+        .mood-emoji {
+            font-size: 36px;
+        }
+    }
+
+    @media (max-height: 500px) and (orientation: landscape) {
+        .cycle-stats {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .calendar-day {
+            min-height: 35px;
+        }
+
+        .chart-container {
+            height: 200px;
+        }
     }
 
     /* Адаптивность для мобильных */
@@ -1547,59 +2021,68 @@
         <h1>Дневник цикла</h1>
     </div>
 
-    <!-- Статистика цикла -->
-    <div class="cycle-stats">
-        <div class="stat-card">
-            <div class="stat-title">Текущий цикл</div>
-            <div class="stat-value" id="cycleLength">28 дней</div>
-            <div class="stat-change" id="cycleTrend">+2 дня к прошлому</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title">Следующая менструация</div>
-            <div class="stat-value" id="nextPeriod">через 12 дней</div>
-            <div class="stat-change" id="periodPrediction">Прогноз точный</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title">Фертильное окно</div>
-            <div class="stat-value" id="fertileWindow">через 5 дней</div>
-            <div class="stat-change" id="fertileStatus">Начинается</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-title">Среднее настроение</div>
-            <div class="stat-value" id="avgMoodCycle">7.2/10</div>
-            <div class="stat-change" id="moodTrend">Лучше на 0.5</div>
-        </div>
-    </div>
+    <!-- ДВЕ КОЛОНКИ: СЛЕВА КАЛЕНДАРЬ, СПРАВА СТАТИСТИКА -->
+    <div class="two-column-layout">
+        <!-- ЛЕВАЯ КОЛОНКА - КАЛЕНДАРЬ -->
+        <div class="left-column">
+            <!-- Календарь цикла -->
+            <div class="cycle-calendar-container">
+                <div class="calendar-header">
+                    <div class="calendar-title" id="monthYear">Декабрь 2024</div>
+                    <div class="calendar-controls">
+                        <button class="calendar-btn" onclick="changeMonth(-1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="today-btn" onclick="goToToday()">
+                            Сегодня
+                        </button>
+                        <button class="calendar-btn" onclick="changeMonth(1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
 
-    <!-- Календарь цикла -->
-    <div class="cycle-calendar-container">
-        <div class="calendar-header">
-            <div class="calendar-title" id="monthYear">Декабрь 2024</div>
-            <div class="calendar-controls">
-                <button class="calendar-btn" onclick="changeMonth(-1)">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="today-btn" onclick="goToToday()">
-                    Сегодня
-                </button>
-                <button class="calendar-btn" onclick="changeMonth(1)">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
+                <div class="weekdays">
+                    <div class="weekday">Пн</div>
+                    <div class="weekday">Вт</div>
+                    <div class="weekday">Ср</div>
+                    <div class="weekday">Чт</div>
+                    <div class="weekday">Пт</div>
+                    <div class="weekday">Сб</div>
+                    <div class="weekday">Вс</div>
+                </div>
+
+                <div class="calendar-grid" id="calendar">
+                    <!-- Календарь будет заполнен JavaScript -->
+                </div>
             </div>
         </div>
 
-        <div class="weekdays">
-            <div class="weekday">Пн</div>
-            <div class="weekday">Вт</div>
-            <div class="weekday">Ср</div>
-            <div class="weekday">Чт</div>
-            <div class="weekday">Пт</div>
-            <div class="weekday">Сб</div>
-            <div class="weekday">Вс</div>
-        </div>
-
-        <div class="calendar-grid" id="calendar">
-            <!-- Календарь будет заполнен JavaScript -->
+        <!-- ПРАВАЯ КОЛОНКА - СТАТИСТИКА -->
+        <div class="right-column">
+            <!-- Статистика цикла -->
+            <div class="stats-vertical">
+                <div class="stat-card">
+                    <div class="stat-title">Текущий цикл</div>
+                    <div class="stat-value" id="cycleLength">28 дней</div>
+                    <div class="stat-change" id="cycleTrend">+2 дня к прошлому</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Следующая менструация</div>
+                    <div class="stat-value" id="nextPeriod">через 12 дней</div>
+                    <div class="stat-change" id="periodPrediction">Прогноз точный</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Фертильное окно</div>
+                    <div class="stat-value" id="fertileWindow">через 5 дней</div>
+                    <div class="stat-change" id="fertileStatus">Начинается</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-title">Среднее настроение</div>
+                    <div class="stat-value" id="avgMoodCycle">7.2/10</div>
+                    <div class="stat-change" id="moodTrend">Лучше на 0.5</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -1659,43 +2142,43 @@
 
     <!-- РАЗДЕЛЕННЫЕ БЛОКИ АНАЛИТИКИ -->
     <div class="analytics-grid">
-<!-- ПЕРВЫЙ блок: Настроение по дням (ЛИНЕЙНЫЙ ГРАФИК) -->
-<div class="analytics-block">
-    <h3 class="section-title"><i class="fas fa-chart-line"></i> Настроение по дням</h3>
-    <div class="chart-container" style="height: 320px;">
-        <canvas id="moodOverTimeChart"></canvas>
-        <div class="no-data" id="noMoodTimeData" style="display: none;">
-            <i class="fas fa-chart-line" style="font-size: 40px; color: var(--gray); margin-bottom: 10px;"></i>
-            <p>Недостаточно данных для графика</p>
-            <p style="font-size: 12px;">Добавьте записи настроения</p>
-        </div>
-    </div>
-    
-    <!-- ЛЕГЕНДА ФАЗ ЦИКЛА -->
-    <div class="cycle-phase-legend" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 20px; padding: 12px; background: rgba(255,255,255,0.7); border-radius: 12px; border: 1px solid rgba(0,0,0,0.05);">
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 20px; height: 20px; background: rgba(255, 107, 107, 0.3); border-radius: 4px; border: 1px solid #FF6B6B;"></div>
-            <span style="font-size: 13px; font-weight: 500;">Менструация</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 20px; height: 20px; background: rgba(96, 244, 227, 0.3); border-radius: 4px; border: 1px solid #60F4E3;"></div>
-            <span style="font-size: 13px; font-weight: 500;">Фолликулярная</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 20px; height: 20px; background: rgba(255, 112, 236, 0.3); border-radius: 4px; border: 1px solid #FF70EC;"></div>
-            <span style="font-size: 13px; font-weight: 500;">Овуляция</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 20px; height: 20px; background: rgba(255, 209, 102, 0.3); border-radius: 4px; border: 1px solid #FFD166;"></div>
-            <span style="font-size: 13px; font-weight: 500;">Лютеиновая</span>
-        </div>
-        <div style="display: flex; align-items: center; gap: 6px;">
-            <div style="width: 20px; height: 20px; background: rgba(184, 179, 233, 0.3); border-radius: 4px; border: 1px solid #B8B3E9;"></div>
-            <span style="font-size: 13px; font-weight: 500;">ПМС</span>
-        </div>
-    </div>
-    
-</div> <!-- закрытие analytics-block -->
+        <!-- ПЕРВЫЙ блок: Настроение по дням (ЛИНЕЙНЫЙ ГРАФИК) -->
+        <div class="analytics-block">
+            <h3 class="section-title"><i class="fas fa-chart-line"></i> Настроение по дням</h3>
+            <div class="chart-container" style="height: 320px;">
+                <canvas id="moodOverTimeChart"></canvas>
+                <div class="no-data" id="noMoodTimeData" style="display: none;">
+                    <i class="fas fa-chart-line" style="font-size: 40px; color: var(--gray); margin-bottom: 10px;"></i>
+                    <p>Недостаточно данных для графика</p>
+                    <p style="font-size: 12px;">Добавьте записи настроения</p>
+                </div>
+            </div>
+            
+            <!-- ЛЕГЕНДА ФАЗ ЦИКЛА -->
+            <div class="cycle-phase-legend" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-top: 20px; padding: 12px; background: rgba(255,255,255,0.7); border-radius: 12px; border: 1px solid rgba(0,0,0,0.05);">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <div style="width: 20px; height: 20px; background: rgba(255, 107, 107, 0.3); border-radius: 4px; border: 1px solid #FF6B6B;"></div>
+                    <span style="font-size: 13px; font-weight: 500;">Менструация</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <div style="width: 20px; height: 20px; background: rgba(96, 244, 227, 0.3); border-radius: 4px; border: 1px solid #60F4E3;"></div>
+                    <span style="font-size: 13px; font-weight: 500;">Фолликулярная</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <div style="width: 20px; height: 20px; background: rgba(255, 112, 236, 0.3); border-radius: 4px; border: 1px solid #FF70EC;"></div>
+                    <span style="font-size: 13px; font-weight: 500;">Овуляция</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <div style="width: 20px; height: 20px; background: rgba(255, 209, 102, 0.3); border-radius: 4px; border: 1px solid #FFD166;"></div>
+                    <span style="font-size: 13px; font-weight: 500;">Лютеиновая</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <div style="width: 20px; height: 20px; background: rgba(184, 179, 233, 0.3); border-radius: 4px; border: 1px solid #B8B3E9;"></div>
+                    <span style="font-size: 13px; font-weight: 500;">ПМС</span>
+                </div>
+            </div>
+            
+        </div> <!-- закрытие analytics-block -->
 
         <!-- ВТОРОЙ блок: Распределение симптомов -->
         <div class="analytics-block">

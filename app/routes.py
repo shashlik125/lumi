@@ -1129,10 +1129,16 @@ def goals(conn):
         try:
             cursor = conn.cursor(dictionary=True, buffered=True)
             date = request.args.get('date')
-            cursor.execute(
-                "SELECT id, user_id, text, completed, created_at FROM goals WHERE user_id = %s AND date = %s ORDER BY created_at DESC",
-                (current_user.id, date)
-            )
+            if date:
+                cursor.execute(
+                    "SELECT id, user_id, text, completed, created_at FROM goals WHERE user_id = %s AND date = %s ORDER BY created_at DESC",
+                    (current_user.id, date)
+                )
+            else:
+                cursor.execute(
+                    "SELECT id, user_id, text, completed, created_at FROM goals WHERE user_id = %s ORDER BY created_at DESC",
+                    (current_user.id,)
+                )
             goals_data = cursor.fetchall()
             
             # Преобразуем даты в ISO-формат
@@ -1147,7 +1153,7 @@ def goals(conn):
         finally:
             if cursor:
                 cursor.close()
-            
+    
     elif request.method == 'POST':
         cursor = None
         try:
@@ -1247,22 +1253,26 @@ def delete_goal(conn, goal_id):
         if cursor:
             cursor.close()
 
-
 # ================== API МАРШРУТЫ ДЛЯ РАДОСТЕЙ ==================
-
 @main.route('/api/joys', methods=['GET', 'POST'])
 @login_required
 @with_db_connection
 def joys(conn):
-    cursor = None
     if request.method == 'GET':
+        cursor = None
         try:
             cursor = conn.cursor(dictionary=True, buffered=True)
             date = request.args.get('date')
-            cursor.execute(
-                "SELECT id, user_id, text, created_at FROM joys WHERE user_id = %s AND date = %s ORDER BY created_at DESC",
-                (current_user.id, date)
-            )
+            if date:
+                cursor.execute(
+                    "SELECT id, user_id, text, created_at FROM joys WHERE user_id = %s AND date = %s ORDER BY created_at DESC",
+                    (current_user.id, date)
+                )
+            else:
+                cursor.execute(
+                    "SELECT id, user_id, text, created_at FROM joys WHERE user_id = %s ORDER BY created_at DESC",
+                    (current_user.id,)
+                )
             joys_data = cursor.fetchall()
             
             # Преобразуем даты в ISO-формат
@@ -1279,6 +1289,7 @@ def joys(conn):
                 cursor.close()
     
     elif request.method == 'POST':
+        cursor = None
         try:
             data = request.get_json()
             if not data:
@@ -1308,7 +1319,6 @@ def joys(conn):
         finally:
             if cursor:
                 cursor.close()
-
 
 @main.route('/api/joys/<int:joy_id>', methods=['DELETE'])
 @login_required

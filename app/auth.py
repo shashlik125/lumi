@@ -31,30 +31,57 @@ def register():
         username = request.form.get('username')
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
-        gender = request.form.get('gender')  # Пол пользователя
+        gender = request.form.get('gender')
+        accept_tos = request.form.get('accept_tos')  # ← ДОБАВЛЯЕМ ПРОВЕРКУ ЧЕКБОКСА
 
         # ======== ВАЛИДАЦИЯ ДАННЫХ =========
+        # Проверка согласия с условиями
+        if not accept_tos:
+            flash('Вы должны согласиться с условиями использования и политикой конфиденциальности', 'error')
+            return render_template('register.html', 
+                                 first_name=first_name, 
+                                 last_name=last_name,
+                                 username=username,
+                                 gender=gender)
+
         if password != confirm_password:
             flash('Пароли не совпадают', 'error')
-            return render_template('register.html')
+            return render_template('register.html', 
+                                 first_name=first_name, 
+                                 last_name=last_name,
+                                 username=username,
+                                 gender=gender)
 
         if len(password) < 8:
             flash('Пароль должен содержать не менее 8 символов', 'error')
-            return render_template('register.html')
+            return render_template('register.html', 
+                                 first_name=first_name, 
+                                 last_name=last_name,
+                                 username=username,
+                                 gender=gender)
 
         if len(username) < 3:
             flash('Логин должен содержать не менее 3 символов', 'error')
-            return render_template('register.html')
+            return render_template('register.html', 
+                                 first_name=first_name, 
+                                 last_name=last_name,
+                                 gender=gender)
         
         if gender not in ['male', 'female']:
             flash('Пожалуйста, выберите ваш пол', 'error')
-            return render_template('register.html')
+            return render_template('register.html', 
+                                 first_name=first_name, 
+                                 last_name=last_name,
+                                 username=username)
 
         # ======== ПРОВЕРКА, СУЩЕСТВУЕТ ЛИ ПОЛЬЗОВАТЕЛЬ =========
         existing_user = User.get_by_username(username)
         if existing_user:
             flash('Пользователь с таким логином уже существует', 'error')
-            return render_template('register.html')
+            return render_template('register.html', 
+                                 first_name=first_name, 
+                                 last_name=last_name,
+                                 gender=gender)
 
         # ======== СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ =========
         user = User.create(
@@ -66,9 +93,10 @@ def register():
         )
         
         if user:
-            # ======== СОЗДАНИЕ DEFOLT CYCLE_SETTINGS ДЛЯ ЖЕНЩИН =========
+            # ======== СОЗДАНИЕ DEFAULT CYCLE_SETTINGS ДЛЯ ЖЕНЩИН =========
             if user.gender == 'female':
-                conn = get_db()  # Получаем соединение с базой
+                conn = get_db()
+                cursor = None
                 try:
                     cursor = conn.cursor()
                     cursor.execute("""
@@ -77,11 +105,14 @@ def register():
                         VALUES (%s, %s, %s, %s, %s)
                     """, (user.id, 28, 5, True, True))
                     conn.commit()
-                    cursor.close()
                 except Error as e:
                     print(f"Database error while creating cycle_settings: {e}")
+                    flash('Ошибка при создании настроек цикла', 'error')
+                    return render_template('register.html')
                 finally:
-                    close_db(conn)  # Закрываем соединение
+                    if cursor:
+                        cursor.close()
+                    close_db(conn)
 
             # ======== ВХОД ПОЛЬЗОВАТЕЛЯ =========
             login_user(user)

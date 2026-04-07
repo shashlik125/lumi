@@ -725,6 +725,13 @@ const firstNameInput = document.getElementById('first_name');
 if (firstNameInput) {
     firstNameInput.focus();
 }
+// Дополнительная страховка: привязываем обработчики после загрузки DOM
+document.addEventListener('DOMContentLoaded', function() {
+    const termsLink = document.querySelector('a[onclick*="showTermsModal"]');
+    const privacyLink = document.querySelector('a[onclick*="showPrivacyModal"]');
+    if (termsLink) termsLink.onclick = function(e) { e.preventDefault(); showTermsModal(); };
+    if (privacyLink) privacyLink.onclick = function(e) { e.preventDefault(); showPrivacyModal(); };
+});
 </script>
 
 </body>

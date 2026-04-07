@@ -3,508 +3,575 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lumi</title>
+    <title>Lumi - Регистрация</title>
 
-    <!-- ВСТАВЬТЕ ЭТИ 2 СТРОКИ СЮДА ↓ -->
     <link rel="icon" href="/static/favicon.ico?v=999" type="image/x-icon">
     <link rel="shortcut icon" href="/static/favicon.ico?v=999">
 
-    <!-- Далее идёт ваш CSS -->
+    <style>
+    * {
+      font-family: 'Montserrat', sans-serif !important;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(to right, #60F4E3 0%, #FFEFFD 50%, #FF70EC 100%);
+      color: #264653;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 0 20px 40px;
+      font-size: 18px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Фоновый контейнер для смайликов */
+    .background-emojis {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .emoji-container {
+      position: absolute;
+      z-index: 1;
+    }
+
+    .emoji-image {
+      max-width: 300px !important;
+      height: auto;
+      filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+      animation: float 3s ease-in-out infinite;
+      opacity: 0.7;
+    }
+
+    .emoji-container.second-emoji {
+      top: 15%;
+      left: 5%;
+    }
+
+    .emoji-container.second-emoji .emoji-image {
+      max-width: 230px;
+      animation: float 3.5s ease-in-out infinite;
+      animation-delay: 0.5s;
+    }
+
+    .emoji-container.third-emoji {
+      top: 60%;
+      right: 5%;
+    }
+
+    .emoji-container.fourth-emoji {
+      top: 25%;
+      left: 25%;
+    }
+
+    .emoji-container.fifth-emoji {
+      top: 10%;
+      left: 75%;
+    }
+
+    .emoji-container.sixth-emoji {
+      top: 40%;
+      left: 85%;
+    }
+
+    .emoji-container.eighth-emoji {
+      top: 70%;
+      left: 10%;
+    }
+
+    .emoji-container.ninth-emoji {
+      top: 85%;
+      left: 5%;
+    }
+
+    .emoji-container.tenth-emoji {
+      top: 15%;
+      left: -5%;
+    }
+
+    .emoji-container.eleventh-emoji {
+      top: 10%;
+      right: -5%;
+    }
+
+    .emoji-container.twelfth-emoji {
+      top: 80%;
+      right: 10%;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    header {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 20px !important;
+      position: relative;
+      margin: 0 auto;
+      user-select: none;
+      margin-bottom: 50px;
+      z-index: 100;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 28px;
+      color: white;
+      letter-spacing: 1px;
+      margin: 0;
+      margin-right: auto;
+    }
+
+    nav {
+      margin-left: auto;
+    }
+
+    nav a {
+      font-weight: 600;
+      text-decoration: none;
+      color: white;
+      white-space: nowrap;
+      margin: 0;
+      padding: 10px 15px;
+    }
+
+    .main-content {
+      max-width: 1200px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 80px;
+      margin: 0 auto;
+      margin-top: 50px;
+      margin-bottom: 100px;
+      padding: 0 20px;
+      box-sizing: border-box;
+      position: relative;
+      z-index: 10;
+    }
+
+    .welcome-text {
+      max-width: 100%;
+      padding: 50px 60px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      text-align: center;
+      animation: fadeIn 1.2s ease;
+      box-sizing: border-box;
+      backdrop-filter: blur(10px);
+      position: relative;
+      z-index: 10;
+    }
+
+    h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 42px;
+      color: #000000;
+      margin: 0 0 24px;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .welcome-text p {
+      font-size: 22px;
+      line-height: 1.6;
+      margin: 0 auto 30px;
+      max-width: 600px;
+    }
+
+    .register-form {
+      max-width: 500px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: left;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      font-size: 16px;
+      color: #264653;
+    }
+
+    .form-input {
+      padding: 16px 20px;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: white;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .form-input:focus {
+      border-color: #60F4E3;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(96, 244, 227, 0.2);
+    }
+
+    .password-strength {
+      margin-top: 5px;
+      font-size: 12px;
+    }
+
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-wrapper .form-input {
+      width: 100%;
+      padding-right: 50px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 5px;
+      color: #6c757d;
+      transition: color 0.3s ease;
+      z-index: 2;
+    }
+
+    .toggle-password:hover {
+      color: #FF70EC;
+    }
+
+    .strength-bar {
+      height: 4px;
+      background: #e9ecef;
+      border-radius: 2px;
+      margin-top: 5px;
+      overflow: hidden;
+    }
+
+    .strength-fill {
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 2px;
+    }
+
+    .strength-weak { background: #ff4757; width: 33%; }
+    .strength-medium { background: #ffa502; width: 66%; }
+    .strength-strong { background: #2ed573; width: 100%; }
+
+    .terms-agreement {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: #6c757d;
+      margin: 10px 0;
+      text-align: left;
+    }
+
+    .terms-agreement input {
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .terms-agreement a {
+      color: #FF70EC;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .terms-agreement a:hover {
+      color: #60F4E3;
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      text-align: center;
+      border: none;
+      cursor: pointer;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .btn.primary {
+      background: #FF70EC;
+      color: white;
+    }
+
+    .btn.primary:hover {
+      background: #e15cd2;
+      transform: translateY(-2px);
+    }
+
+    .register-footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #6c757d;
+      font-size: 16px;
+    }
+
+    .register-footer a {
+      color:#60F4E3 ;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .register-footer a:hover {
+      color:#FF70EC ;
+    }
+
+    .flash-messages {
+      margin-bottom: 20px;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .alert-error {
+      background: #ffe6e6;
+      color: #d63031;
+      border: 1px solid #ffcccc;
+    }
+
+    .alert-success {
+      background: #e6f7e6;
+      color: #27ae60;
+      border: 1px solid #ccffcc;
+    }
+
+    .features-preview {
+      margin-top: 40px;
+      padding: 25px;
+      background: rgba(96, 244, 227, 0.1);
+      border-radius: 16px;
+      text-align: left;
+    }
+
+    .features-preview h3 {
+      font-size: 18px;
+      margin-bottom: 15px;
+      color: #264653;
+      text-align: center;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+      font-size: 14px;
+    }
+
+    .feature-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .feature-icon {
+      color: #FF70EC;
+      font-weight: bold;
+    }
+
+    /* Стили для модальных окон */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 5% auto;
+      padding: 0;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateY(-50px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    .close-modal {
+      color: #aaa;
+      float: right;
+      font-size: 35px;
+      font-weight: bold;
+      cursor: pointer;
+      padding: 10px 20px;
+      align-self: flex-end;
+      line-height: 1;
+    }
+
+    .close-modal:hover {
+      color: #FF70EC;
+    }
+
+    .modal-content h2 {
+      padding: 20px 25px 0 25px;
+      margin: 0;
+      color: #264653;
+      font-size: 24px;
+    }
+
+    .modal-body {
+      padding: 20px 25px 25px 25px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-body h3 {
+      color: #FF70EC;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 18px;
+    }
+
+    .modal-body h3:first-child {
+      margin-top: 0;
+    }
+
+    .modal-body p, .modal-body ul {
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 15px;
+    }
+
+    .modal-body ul {
+      padding-left: 20px;
+    }
+
+    .modal-body li {
+      margin-bottom: 8px;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 28px;
+        white-space: nowrap;
+        text-align: center;
+        margin: 0 auto 24px;
+      }
+      .welcome-text {
+        padding: 30px 40px;
+        text-align: center;
+      }
+      .welcome-text p {
+        font-size: 18px;
+      }
+      .btn {
+        font-size: 16px;
+        padding: 12px 20px;
+      }
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+      .features-preview {
+        padding: 20px;
+      }
+      .background-emojis {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .welcome-text {
+        padding: 20px 25px;
+      }
+      h1 {
+        font-size: 24px;
+        white-space: nowrap;
+      }
+      .welcome-text {
+        text-align: center;
+      }
+      .actions {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .btn {
+        width: 100%;
+      }
+      .features-preview {
+        padding: 15px;
+      }
+    }
+    </style>
 </head>
 <body>
 
-{% block extra_css %}
-<style>
-* {
-  font-family: 'Montserrat', sans-serif !important;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: 'Montserrat', sans-serif;
-  background: linear-gradient(to right, #60F4E3 0%, #FFEFFD 50%, #FF70EC 100%);
-  color: #264653;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  padding: 0 20px 40px;
-  font-size: 18px;
-  position: relative;
-  overflow-x: hidden;
-}
-
-/* Фоновый контейнер для смайликов */
-.background-emojis {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.emoji-container {
-  position: absolute;
-  z-index: 1;
-}
-
-.emoji-image {
-  max-width: 300px !important;
-  height: auto;
-  filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
-  animation: float 3s ease-in-out infinite;
-  opacity: 0.7;
-}
-
-.emoji-container.second-emoji {
-  top: 15%;
-  left: 5%;
-}
-
-.emoji-container.second-emoji .emoji-image {
-  max-width: 230px;
-  animation: float 3.5s ease-in-out infinite;
-  animation-delay: 0.5s;
-}
-
-.emoji-container.third-emoji {
-  top: 60%;
-  right: 5%;
-}
-
-.emoji-container.fourth-emoji {
-  top: 25%;
-  left: 25%;
-}
-
-.emoji-container.fifth-emoji {
-  top: 10%;
-  left: 75%;
-}
-
-.emoji-container.sixth-emoji {
-  top: 40%;
-  left: 85%;
-}
-
-.emoji-container.eighth-emoji {
-  top: 70%;
-  left: 10%;
-}
-
-.emoji-container.ninth-emoji {
-  top: 85%;
-  left: 5%;
-}
-
-.emoji-container.tenth-emoji {
-  top: 15%;
-  left: -5%;
-}
-
-.emoji-container.eleventh-emoji {
-  top: 10%;
-  right: -5%;
-}
-
-.emoji-container.twelfth-emoji {
-  top: 80%;
-  right: 10%;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-
-header {
-  width: 100%;
-  max-width: 1100px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 15px 20px !important;
-  position: relative;
-  margin: 0 auto;
-  user-select: none;
-  margin-bottom: 50px;
-  z-index: 100;
-}
-
-.logo {
-  font-weight: 700;
-  font-size: 28px;
-  color: white;
-  letter-spacing: 1px;
-  margin: 0;
-  margin-right: auto;
-}
-
-nav {
-  margin-left: auto;
-}
-
-nav a {
-  font-weight: 600;
-  text-decoration: none;
-  color: white;
-  white-space: nowrap;
-  margin: 0;
-  padding: 10px 15px;
-}
-
-.main-content {
-  max-width: 1200px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 80px;
-  margin: 0 auto;
-  margin-top: 50px;
-  margin-bottom: 100px;
-  padding: 0 20px;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 10;
-}
-
-.welcome-text {
-  max-width: 100%;
-  padding: 50px 60px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  text-align: center;
-  animation: fadeIn 1.2s ease;
-  box-sizing: border-box;
-  backdrop-filter: blur(10px);
-  position: relative;
-  z-index: 10;
-}
-
-h1 {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 900;
-  font-size: 42px;
-  color: #000000;
-  margin: 0 0 24px;
-  line-height: 1.1;
-  white-space: nowrap;
-}
-
-.welcome-text p {
-  font-size: 22px;
-  line-height: 1.6;
-  margin: 0 auto 30px;
-  max-width: 600px;
-}
-
-.register-form {
-  max-width: 500px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 15px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  text-align: left;
-}
-
-.form-group.full-width {
-  grid-column: 1 / -1;
-}
-
-.form-group label {
-  font-weight: 600;
-  font-size: 16px;
-  color: #264653;
-}
-
-.form-input {
-  padding: 16px 20px;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  font-size: 16px;
-  transition: all 0.3s ease;
-  background: white;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.form-input:focus {
-  border-color: #60F4E3;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(96, 244, 227, 0.2);
-}
-
-.password-strength {
-  margin-top: 5px;
-  font-size: 12px;
-}
-
-.password-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.password-wrapper .form-input {
-  width: 100%;
-  padding-right: 50px; /* Место для кнопки */
-}
-
-.toggle-password {
-  position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-  padding: 5px;
-  color: #6c757d;
-  transition: color 0.3s ease;
-  z-index: 2;
-}
-
-.toggle-password:hover {
-  color: #FF70EC;
-}
-
-.strength-bar {
-  height: 4px;
-  background: #e9ecef;
-  border-radius: 2px;
-  margin-top: 5px;
-  overflow: hidden;
-}
-
-.strength-fill {
-  height: 100%;
-  width: 0%;
-  transition: width 0.3s ease;
-  border-radius: 2px;
-}
-
-.strength-weak { background: #ff4757; width: 33%; }
-.strength-medium { background: #ffa502; width: 66%; }
-.strength-strong { background: #2ed573; width: 100%; }
-
-.terms-agreement {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 14px;
-  color: #6c757d;
-  margin: 10px 0;
-  text-align: left;
-}
-
-.terms-agreement input {
-  margin-top: 2px;
-  flex-shrink: 0;
-}
-
-.terms-agreement a {
-  color: #FF70EC;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.terms-agreement a:hover {
-  color: #60F4E3;
-}
-
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-top: 30px;
-}
-
-.btn {
-  display: inline-block;
-  padding: 14px 28px;
-  border-radius: 14px;
-  font-size: 18px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-  text-align: center;
-  border: none;
-  cursor: pointer;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.btn.primary {
-  background: #FF70EC;
-  color: white;
-}
-
-.btn.primary:hover {
-  background: #e15cd2;
-  transform: translateY(-2px);
-}
-
-.register-footer {
-  text-align: center;
-  margin-top: 30px;
-  color: #6c757d;
-  font-size: 16px;
-}
-
-.register-footer a {
-  color:#60F4E3 ;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.register-footer a:hover {
-  color:#FF70EC ;
-}
-
-.flash-messages {
-  margin-bottom: 20px;
-}
-
-.alert {
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.alert-error {
-  background: #ffe6e6;
-  color: #d63031;
-  border: 1px solid #ffcccc;
-}
-
-.alert-success {
-  background: #e6f7e6;
-  color: #27ae60;
-  border: 1px solid #ccffcc;
-}
-
-.features-preview {
-  margin-top: 40px;
-  padding: 25px;
-  background: rgba(96, 244, 227, 0.1);
-  border-radius: 16px;
-  text-align: left;
-}
-
-.features-preview h3 {
-  font-size: 18px;
-  margin-bottom: 15px;
-  color: #264653;
-  text-align: center;
-}
-
-.feature-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-  font-size: 14px;
-}
-
-.feature-item:last-child {
-  margin-bottom: 0;
-}
-
-.feature-icon {
-  color: #FF70EC;
-  font-weight: bold;
-}
-
-@keyframes fadeIn {
-  from {opacity: 0; transform: translateY(20px);}
-  to {opacity: 1; transform: translateY(0);}
-}
-
-@media (max-width: 768px) {
-  h1 {
-  font-size: 28px; /* было 36px */
-  white-space: nowrap; /* было normal */
-  text-align: center; /* добавь */
-  margin: 0 auto 24px; /* добавь */
-}
-  .welcome-text {
-    padding: 30px 40px;
-    text-align: center;
-  }
-
-  .welcome-text p {
-    font-size: 18px;
-  }
-
-  .btn {
-    font-size: 16px;
-    padding: 12px 20px;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .features-preview {
-    padding: 20px;
-  }
-
-  /* Адаптация смайликов для мобильных */
-  .background-emojis {
-    display: none; /* Скрываем на мобильных для лучшей производительности */
-  }
-}
-
-@media (max-width: 480px) {
-  .welcome-text {
-    padding: 20px 25px;
-  }
-
-  h1 {
-    font-size: 24px;
-    text-align: nowrap;
-    white-space: nowrap;
-  }
-
-  .welcome-text {
-  text-align: center;
-}
-
-  .actions {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .btn {
-    width: 100%;
-  }
-
-  .features-preview {
-    padding: 15px;
-  }
-}
-</style>
-{% endblock %}
-
-{% block content %}
 <div class="background-emojis">
   <div class="emoji-container">
     <img src="{{ url_for('static', filename='images/😜.png') }}" alt="Emoji" class="emoji-image" />
@@ -568,56 +635,54 @@ h1 {
         </div>
       </div>
 
-      <!-- Добавьте этот блок после form-row с именем/фамилией -->
-<div class="form-group full-width">
-    <label>Пол</label>
-    <div style="display: flex; gap: 30px; margin-top: 5px;">
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+      <div class="form-group full-width">
+        <label>Пол</label>
+        <div style="display: flex; gap: 30px; margin-top: 5px;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
             <input type="radio" name="gender" value="female" required>
             <span>Женский</span>
-        </label>
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          </label>
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
             <input type="radio" name="gender" value="male">
             <span>Мужской</span>
-        </label>
-    </div>
-</div>
+          </label>
+        </div>
+      </div>
 
       <div class="form-group">
         <label for="username">Логин</label>
         <input type="text" id="username" name="username" class="form-input" placeholder="Придумайте логин" required>
       </div>
 
-      <!-- Для основного пароля -->
-<div class="form-group">
-  <label for="password">Пароль</label>
-  <div class="password-wrapper">
-    <input type="password" id="password" name="password" class="form-input" placeholder="Создайте пароль" required>
-    <button type="button" class="toggle-password" aria-label="Показать/скрыть пароль" data-target="password">
-      👁️
-    </button>
-  </div>
-  <div class="password-strength">
-    <div class="strength-bar">
-      <div class="strength-fill" id="strengthFill"></div>
-    </div>
-  </div>
-</div>
+      <div class="form-group">
+        <label for="password">Пароль</label>
+        <div class="password-wrapper">
+          <input type="password" id="password" name="password" class="form-input" placeholder="Создайте пароль" required>
+          <button type="button" class="toggle-password" aria-label="Показать/скрыть пароль" data-target="password">
+            👁️
+          </button>
+        </div>
+        <div class="password-strength">
+          <div class="strength-bar">
+            <div class="strength-fill" id="strengthFill"></div>
+          </div>
+        </div>
+      </div>
 
-<!-- Для подтверждения пароля -->
-<div class="form-group">
-  <label for="confirm_password">Подтвердите пароль</label>
-  <div class="password-wrapper">
-    <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="Повторите пароль" required>
-    <button type="button" class="toggle-password" aria-label="Показать/скрыть пароль" data-target="confirm_password">
-      👁️
-    </button>
-  </div>
-</div>
+      <div class="form-group">
+        <label for="confirm_password">Подтвердите пароль</label>
+        <div class="password-wrapper">
+          <input type="password" id="confirm_password" name="confirm_password" class="form-input" placeholder="Повторите пароль" required>
+          <button type="button" class="toggle-password" aria-label="Показать/скрыть пароль" data-target="confirm_password">
+            👁️
+          </button>
+        </div>
+      </div>
+
       <div class="terms-agreement">
         <input type="checkbox" id="accept_tos" name="accept_tos" required>
         <label for="accept_tos">
-          Я соглашаюсь с <a href="#">условиями использования</a> и <a href="#">политикой конфиденциальности</a>
+          Я соглашаюсь с <a href="#" id="termsLink">условиями использования</a> и <a href="#" id="privacyLink">политикой конфиденциальности</a>
         </label>
       </div>
 
@@ -648,8 +713,71 @@ h1 {
   </div>
 </div>
 
+<!-- Модальные окна (ДОБАВИТЬ ПЕРЕД </body>) -->
+<div id="termsModal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal" data-modal="termsModal">&times;</span>
+    <h2>Условия использования Lumi</h2>
+    <div class="modal-body">
+      <h3>1. Общие положения</h3>
+      <p>Используя сервис Lumi, вы соглашаетесь с данными условиями. Если вы не согласны с условиями, пожалуйста, не используйте наш сервис.</p>
+      
+      <h3>2. Конфиденциальность данных</h3>
+      <p>Мы серьезно относимся к защите ваших персональных данных. Вся информация о вашем настроении и здоровье хранится в зашифрованном виде.</p>
+      
+      <h3>3. Использование сервиса</h3>
+      <p>Lumi предоставляется для личного некоммерческого использования. Вы несете ответственность за достоверность предоставляемых данных.</p>
+      
+      <h3>4. Ограничение ответственности</h3>
+      <p>Lumi не является медицинским приложением. Информация предоставляется в ознакомительных целях. При проблемах со здоровьем обращайтесь к врачу.</p>
+      
+      <h3>5. Изменение условий</h3>
+      <p>Мы оставляем право изменять условия использования в любое время. Продолжая использовать сервис, вы принимаете обновленные условия.</p>
+      
+      <h3>6. Контакты</h3>
+      <p>По всем вопросам: support@lumi.com</p>
+    </div>
+  </div>
+</div>
+
+<div id="privacyModal" class="modal">
+  <div class="modal-content">
+    <span class="close-modal" data-modal="privacyModal">&times;</span>
+    <h2>Политика конфиденциальности Lumi</h2>
+    <div class="modal-body">
+      <h3>Какие данные мы собираем?</h3>
+      <ul>
+        <li>Имя, фамилия и логин</li>
+        <li>Пол (для персонализации рекомендаций)</li>
+        <li>Данные о настроении и эмоциональном состоянии</li>
+        <li>Для женщин - данные о менструальном цикле (при использовании соответствующей функции)</li>
+      </ul>
+      
+      <h3>Как мы используем ваши данные?</h3>
+      <ul>
+        <li>Для создания персонализированных графиков и аналитики</li>
+        <li>Для предоставления рекомендаций по улучшению настроения</li>
+        <li>Для улучшения работы сервиса</li>
+      </ul>
+      
+      <h3>Защита данных</h3>
+      <p>Все данные хранятся на защищенных серверах. Мы используем шифрование и современные методы защиты информации.</p>
+      
+      <h3>Передача данных третьим лицам</h3>
+      <p>Мы не передаем ваши персональные данные третьим лицам без вашего явного согласия.</p>
+      
+      <h3>Ваши права</h3>
+      <p>Вы имеете право на доступ, исправление и удаление ваших данных.</p>
+      
+      <h3>Контакты</h3>
+      <p>По вопросам конфиденциальности: privacy@lumi.com</p>
+    </div>
+  </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Индикатор силы пароля
   const passwordInput = document.getElementById('password');
   const strengthFill = document.getElementById('strengthFill');
 
@@ -674,28 +802,80 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-});
 
-// Функция для показа/скрытия пароля
-document.querySelectorAll('.toggle-password').forEach(button => {
-  button.addEventListener('click', function() {
-    const targetId = this.getAttribute('data-target');
-    const passwordField = document.getElementById(targetId);
+  // Показать/скрыть пароль
+  document.querySelectorAll('.toggle-password').forEach(button => {
+    button.addEventListener('click', function() {
+      const targetId = this.getAttribute('data-target');
+      const passwordField = document.getElementById(targetId);
 
-    if (passwordField) {
-      const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
-      passwordField.setAttribute('type', type);
+      if (passwordField) {
+        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordField.setAttribute('type', type);
+        this.textContent = type === 'password' ? '👁️' : '🙈';
+      }
+    });
+  });
 
-      // Меняем иконку
-      this.textContent = type === 'password' ? '👁️' : '🙈';
+  // Модальные окна
+  const termsLink = document.getElementById('termsLink');
+  const privacyLink = document.getElementById('privacyLink');
+  const termsModal = document.getElementById('termsModal');
+  const privacyModal = document.getElementById('privacyModal');
+
+  if (termsLink && termsModal) {
+    termsLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      termsModal.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    });
+  }
+
+  if (privacyLink && privacyModal) {
+    privacyLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      privacyModal.style.display = 'block';
+      document.body.style.overflow = 'hidden';
+    });
+  }
+
+  // Закрытие модальных окон
+  document.querySelectorAll('.close-modal').forEach(closeBtn => {
+    closeBtn.addEventListener('click', function() {
+      const modalId = this.getAttribute('data-modal');
+      const modal = document.getElementById(modalId);
+      if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+    });
+  });
+
+  window.addEventListener('click', function(event) {
+    if (event.target.classList.contains('modal')) {
+      event.target.style.display = 'none';
+      document.body.style.overflow = 'auto';
     }
   });
-});
 
-// Автофокус на поле имени
-const firstNameInput = document.getElementById('first_name');
-if (firstNameInput) {
-  firstNameInput.focus();
-}
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+      document.querySelectorAll('.modal').forEach(modal => {
+        if (modal.style.display === 'block') {
+          modal.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+      });
+    }
+  });
+
+  // Автофокус
+  const firstNameInput = document.getElementById('first_name');
+  if (firstNameInput) {
+    firstNameInput.focus();
+  }
+});
 </script>
-{% endblock %}
+
+</body>
+</html>

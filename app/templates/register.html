@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lumi</title>
+    <title>Lumi - Регистрация</title>
 
-    <!-- ВСТАВЬТЕ ЭТИ 2 СТРОКИ СЮДА ↓ -->
     <link rel="icon" href="/static/favicon.ico?v=999" type="image/x-icon">
     <link rel="shortcut icon" href="/static/favicon.ico?v=999">
 
@@ -30,7 +29,6 @@
       overflow-x: hidden;
     }
 
-    /* Фоновый контейнер для смайликов */
     .background-emojis {
       position: fixed;
       top: 0;
@@ -317,6 +315,7 @@
       color: #FF70EC;
       text-decoration: none;
       font-weight: 600;
+      cursor: pointer;
     }
 
     .terms-agreement a:hover {
@@ -373,29 +372,6 @@
       color:#FF70EC ;
     }
 
-    .flash-messages {
-      margin-bottom: 20px;
-    }
-
-    .alert {
-      padding: 12px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-    }
-
-    .alert-error {
-      background: #ffe6e6;
-      color: #d63031;
-      border: 1px solid #ffcccc;
-    }
-
-    .alert-success {
-      background: #e6f7e6;
-      color: #27ae60;
-      border: 1px solid #ccffcc;
-    }
-
     .features-preview {
       margin-top: 40px;
       padding: 25px;
@@ -426,91 +402,6 @@
     .feature-icon {
       color: #FF70EC;
       font-weight: bold;
-    }
-
-    /* Стили для модальных окон */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.5);
-      backdrop-filter: blur(5px);
-    }
-
-    .modal-content {
-      background-color: white;
-      margin: 5% auto;
-      padding: 0;
-      border-radius: 20px;
-      width: 90%;
-      max-width: 600px;
-      max-height: 80vh;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 5px 30px rgba(0,0,0,0.3);
-      animation: slideIn 0.3s ease;
-    }
-
-    @keyframes slideIn {
-      from { transform: translateY(-50px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .close-modal {
-      color: #aaa;
-      float: right;
-      font-size: 35px;
-      font-weight: bold;
-      cursor: pointer;
-      padding: 10px 20px;
-      align-self: flex-end;
-      line-height: 1;
-    }
-
-    .close-modal:hover {
-      color: #FF70EC;
-    }
-
-    .modal-content h2 {
-      padding: 20px 25px 0 25px;
-      margin: 0;
-      color: #264653;
-      font-size: 24px;
-    }
-
-    .modal-body {
-      padding: 20px 25px 25px 25px;
-      overflow-y: auto;
-      flex: 1;
-    }
-
-    .modal-body h3 {
-      color: #FF70EC;
-      margin-top: 20px;
-      margin-bottom: 10px;
-      font-size: 18px;
-    }
-
-    .modal-body h3:first-child {
-      margin-top: 0;
-    }
-
-    .modal-body p, .modal-body ul {
-      color: #555;
-      line-height: 1.6;
-      margin-bottom: 15px;
-    }
-
-    .modal-body ul {
-      padding-left: 20px;
-    }
-
-    .modal-body li {
-      margin-bottom: 8px;
     }
 
     @keyframes fadeIn {
@@ -683,7 +574,7 @@
       <div class="terms-agreement">
         <input type="checkbox" id="accept_tos" name="accept_tos" required>
         <label for="accept_tos">
-          Я соглашаюсь с <a href="#" id="termsLink">условиями использования</a> и <a href="#" id="privacyLink">политикой конфиденциальности</a>
+          Я соглашаюсь с <a href="#" onclick="showTermsModal(); return false;">условиями использования</a> и <a href="#" onclick="showPrivacyModal(); return false;">политикой конфиденциальности</a>
         </label>
       </div>
 
@@ -715,167 +606,125 @@
 </div>
 
 <!-- Модальные окна -->
-<div id="termsModal" class="modal">
-  <div class="modal-content">
-    <span class="close-modal" data-modal="termsModal">&times;</span>
-    <h2>Условия использования Lumi</h2>
-    <div class="modal-body">
-      <h3>1. Общие положения</h3>
-      <p>Используя сервис Lumi, вы соглашаетесь с данными условиями. Если вы не согласны с условиями, пожалуйста, не используйте наш сервис.</p>
-      
-      <h3>2. Конфиденциальность данных</h3>
-      <p>Мы серьезно относимся к защите ваших персональных данных. Вся информация о вашем настроении и здоровье хранится в зашифрованном виде.</p>
-      
-      <h3>3. Использование сервиса</h3>
-      <p>Lumi предоставляется для личного некоммерческого использования. Вы несете ответственность за достоверность предоставляемых данных.</p>
-      
-      <h3>4. Ограничение ответственности</h3>
-      <p>Lumi не является медицинским приложением. Информация предоставляется в ознакомительных целях. При проблемах со здоровьем обращайтесь к врачу.</p>
-      
-      <h3>5. Изменение условий</h3>
-      <p>Мы оставляем право изменять условия использования в любое время. Продолжая использовать сервис, вы принимаете обновленные условия.</p>
-      
-      <h3>6. Контакты</h3>
-      <p>По всем вопросам: support@lumi.com</p>
+<div id="termsModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:25px; border-radius:20px; z-index:10000; max-width:500px; width:90%; box-shadow:0 0 100px rgba(0,0,0,0.3);">
+    <h2 style="color:#FF70EC; margin-top:0;">📋 Условия использования</h2>
+    <div style="max-height:400px; overflow-y:auto; margin:20px 0;">
+        <p><strong>Используя сервис Lumi, вы соглашаетесь с данными условиями.</strong></p>
+        <h3>1. Общие положения</h3>
+        <p>Сервис предоставляется для личного некоммерческого использования.</p>
+        <h3>2. Конфиденциальность</h3>
+        <p>Мы серьезно относимся к защите ваших данных и не передаем их третьим лицам.</p>
+        <h3>3. Ответственность</h3>
+        <p>Lumi не является медицинским приложением. При проблемах со здоровьем обращайтесь к врачу.</p>
+        <h3>4. Изменение условий</h3>
+        <p>Мы оставляем право изменять условия использования в любое время.</p>
+        <h3>5. Контакты</h3>
+        <p>По всем вопросам: <strong>support@lumi.com</strong></p>
     </div>
-  </div>
+    <button onclick="closeModals()" style="width:100%; padding:12px; background:#FF70EC; color:white; border:none; border-radius:10px; cursor:pointer; font-size:16px; font-weight:600;">Закрыть</button>
 </div>
 
-<div id="privacyModal" class="modal">
-  <div class="modal-content">
-    <span class="close-modal" data-modal="privacyModal">&times;</span>
-    <h2>Политика конфиденциальности Lumi</h2>
-    <div class="modal-body">
-      <h3>Какие данные мы собираем?</h3>
-      <ul>
-        <li>Имя, фамилия и логин</li>
-        <li>Пол (для персонализации рекомендаций)</li>
-        <li>Данные о настроении и эмоциональном состоянии</li>
-        <li>Для женщин - данные о менструальном цикле (при использовании соответствующей функции)</li>
-      </ul>
-      
-      <h3>Как мы используем ваши данные?</h3>
-      <ul>
-        <li>Для создания персонализированных графиков и аналитики</li>
-        <li>Для предоставления рекомендаций по улучшению настроения</li>
-        <li>Для улучшения работы сервиса</li>
-      </ul>
-      
-      <h3>Защита данных</h3>
-      <p>Все данные хранятся на защищенных серверах. Мы используем шифрование и современные методы защиты информации.</p>
-      
-      <h3>Передача данных третьим лицам</h3>
-      <p>Мы не передаем ваши персональные данные третьим лицам без вашего явного согласия.</p>
-      
-      <h3>Ваши права</h3>
-      <p>Вы имеете право на доступ, исправление и удаление ваших данных.</p>
-      
-      <h3>Контакты</h3>
-      <p>По вопросам конфиденциальности: privacy@lumi.com</p>
+<div id="privacyModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:25px; border-radius:20px; z-index:10000; max-width:500px; width:90%; box-shadow:0 0 100px rgba(0,0,0,0.3);">
+    <h2 style="color:#FF70EC; margin-top:0;">🔒 Политика конфиденциальности</h2>
+    <div style="max-height:400px; overflow-y:auto; margin:20px 0;">
+        <p><strong>Мы собираем только необходимые данные для работы сервиса.</strong></p>
+        <h3>Какие данные мы собираем?</h3>
+        <ul>
+            <li>✓ Имя и фамилия</li>
+            <li>✓ Логин</li>
+            <li>✓ Пол (для персонализации)</li>
+            <li>✓ Данные о настроении</li>
+        </ul>
+        <h3>Как мы используем данные?</h3>
+        <p>Для создания персонализированных графиков, аналитики и улучшения сервиса.</p>
+        <h3>Защита данных</h3>
+        <p>Все данные хранятся на защищенных серверах и шифруются.</p>
+        <h3>Ваши права</h3>
+        <p>Вы имеете право на доступ, исправление и удаление ваших данных.</p>
+        <h3>Контакты</h3>
+        <p><strong>privacy@lumi.com</strong></p>
     </div>
-  </div>
+    <button onclick="closeModals()" style="width:100%; padding:12px; background:#FF70EC; color:white; border:none; border-radius:10px; cursor:pointer; font-size:16px; font-weight:600;">Закрыть</button>
 </div>
+
+<div id="overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;"></div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  // Индикатор силы пароля
-  const passwordInput = document.getElementById('password');
-  const strengthFill = document.getElementById('strengthFill');
+// Функции для модальных окон
+function showTermsModal() {
+    document.getElementById('termsModal').style.display = 'block';
+    document.getElementById('overlay').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
 
-  if (passwordInput && strengthFill) {
-    passwordInput.addEventListener('input', function() {
-      const password = this.value;
-      let strength = 0;
+function showPrivacyModal() {
+    document.getElementById('privacyModal').style.display = 'block';
+    document.getElementById('overlay').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
 
-      if (password.length >= 6) strength += 1;
-      if (password.length >= 8) strength += 1;
-      if (/[A-Z]/.test(password)) strength += 1;
-      if (/[0-9]/.test(password)) strength += 1;
-      if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+function closeModals() {
+    document.getElementById('termsModal').style.display = 'none';
+    document.getElementById('privacyModal').style.display = 'none';
+    document.getElementById('overlay').style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
 
-      strengthFill.className = 'strength-fill';
-      if (strength <= 2) {
-        strengthFill.classList.add('strength-weak');
-      } else if (strength <= 4) {
-        strengthFill.classList.add('strength-medium');
-      } else {
-        strengthFill.classList.add('strength-strong');
-      }
-    });
-  }
+// Закрытие по клику на оверлей
+document.getElementById('overlay').onclick = closeModals;
 
-  // Показать/скрыть пароль
-  document.querySelectorAll('.toggle-password').forEach(button => {
-    button.addEventListener('click', function() {
-      const targetId = this.getAttribute('data-target');
-      const passwordField = document.getElementById(targetId);
-
-      if (passwordField) {
-        const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
-        passwordField.setAttribute('type', type);
-        this.textContent = type === 'password' ? '👁️' : '🙈';
-      }
-    });
-  });
-
-  // Модальные окна - ЭТО ГЛАВНОЕ, ЧТО МЫ ДОБАВЛЯЕМ!
-  const termsLink = document.getElementById('termsLink');
-  const privacyLink = document.getElementById('privacyLink');
-  const termsModal = document.getElementById('termsModal');
-  const privacyModal = document.getElementById('privacyModal');
-
-  if (termsLink && termsModal) {
-    termsLink.addEventListener('click', function(e) {
-      e.preventDefault();
-      termsModal.style.display = 'block';
-      document.body.style.overflow = 'hidden';
-    });
-  }
-
-  if (privacyLink && privacyModal) {
-    privacyLink.addEventListener('click', function(e) {
-      e.preventDefault();
-      privacyModal.style.display = 'block';
-      document.body.style.overflow = 'hidden';
-    });
-  }
-
-  // Закрытие модальных окон
-  document.querySelectorAll('.close-modal').forEach(closeBtn => {
-    closeBtn.addEventListener('click', function() {
-      const modalId = this.getAttribute('data-modal');
-      const modal = document.getElementById(modalId);
-      if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-      }
-    });
-  });
-
-  window.addEventListener('click', function(event) {
-    if (event.target.classList.contains('modal')) {
-      event.target.style.display = 'none';
-      document.body.style.overflow = 'auto';
+// Закрытие по ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeModals();
     }
-  });
-
-  document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-      document.querySelectorAll('.modal').forEach(modal => {
-        if (modal.style.display === 'block') {
-          modal.style.display = 'none';
-          document.body.style.overflow = 'auto';
-        }
-      });
-    }
-  });
-
-  // Автофокус
-  const firstNameInput = document.getElementById('first_name');
-  if (firstNameInput) {
-    firstNameInput.focus();
-  }
 });
+
+// Индикатор силы пароля
+const passwordInput = document.getElementById('password');
+const strengthFill = document.getElementById('strengthFill');
+
+if (passwordInput && strengthFill) {
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        let strength = 0;
+
+        if (password.length >= 6) strength += 1;
+        if (password.length >= 8) strength += 1;
+        if (/[A-Z]/.test(password)) strength += 1;
+        if (/[0-9]/.test(password)) strength += 1;
+        if (/[^A-Za-z0-9]/.test(password)) strength += 1;
+
+        strengthFill.className = 'strength-fill';
+        if (strength <= 2) {
+            strengthFill.classList.add('strength-weak');
+        } else if (strength <= 4) {
+            strengthFill.classList.add('strength-medium');
+        } else {
+            strengthFill.classList.add('strength-strong');
+        }
+    });
+}
+
+// Показать/скрыть пароль
+document.querySelectorAll('.toggle-password').forEach(button => {
+    button.addEventListener('click', function() {
+        const targetId = this.getAttribute('data-target');
+        const passwordField = document.getElementById(targetId);
+
+        if (passwordField) {
+            const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordField.setAttribute('type', type);
+            this.textContent = type === 'password' ? '👁️' : '🙈';
+        }
+    });
+});
+
+// Автофокус
+const firstNameInput = document.getElementById('first_name');
+if (firstNameInput) {
+    firstNameInput.focus();
+}
 </script>
 
 </body>

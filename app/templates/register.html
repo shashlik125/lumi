@@ -299,7 +299,8 @@
     .terms-agreement {
       display: flex;
       align-items: flex-start;
-      gap: 10px;
+      flex-wrap: wrap;
+      gap: 5px;
       font-size: 14px;
       color: #6c757d;
       margin: 10px 0;
@@ -311,11 +312,16 @@
       flex-shrink: 0;
     }
 
+    .terms-agreement label {
+      margin-right: 5px;
+    }
+
     .terms-agreement a {
       color: #FF70EC;
       text-decoration: none;
       font-weight: 600;
       cursor: pointer;
+      margin: 0 2px;
     }
 
     .terms-agreement a:hover {
@@ -571,11 +577,13 @@
         </div>
       </div>
 
+      <!-- ИСПРАВЛЕННЫЙ БЛОК ЧЕКБОКСА И ССЫЛОК -->
       <div class="terms-agreement">
         <input type="checkbox" id="accept_tos" name="accept_tos" required>
-        <label for="accept_tos">
-          Я соглашаюсь с <a href="#" onclick="showTermsModal(); return false;">условиями использования</a> и <a href="#" onclick="showPrivacyModal(); return false;">политикой конфиденциальности</a>
-        </label>
+        <label for="accept_tos">Я соглашаюсь с</label>
+        <a href="#" onclick="showTermsModal(); return false;">условиями использования</a>
+        <span>и</span>
+        <a href="#" onclick="showPrivacyModal(); return false;">политикой конфиденциальности</a>
       </div>
 
       <div class="actions">
@@ -605,7 +613,7 @@
   </div>
 </div>
 
-<!-- Модальные окна -->
+<!-- МОДАЛЬНЫЕ ОКНА -->
 <div id="termsModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:25px; border-radius:20px; z-index:10000; max-width:500px; width:90%; box-shadow:0 0 100px rgba(0,0,0,0.3);">
     <h2 style="color:#FF70EC; margin-top:0;">📋 Условия использования</h2>
     <div style="max-height:400px; overflow-y:auto; margin:20px 0;">
@@ -725,13 +733,6 @@ const firstNameInput = document.getElementById('first_name');
 if (firstNameInput) {
     firstNameInput.focus();
 }
-// Дополнительная страховка: привязываем обработчики после загрузки DOM
-document.addEventListener('DOMContentLoaded', function() {
-    const termsLink = document.querySelector('a[onclick*="showTermsModal"]');
-    const privacyLink = document.querySelector('a[onclick*="showPrivacyModal"]');
-    if (termsLink) termsLink.onclick = function(e) { e.preventDefault(); showTermsModal(); };
-    if (privacyLink) privacyLink.onclick = function(e) { e.preventDefault(); showPrivacyModal(); };
-});
 </script>
 
 </body>

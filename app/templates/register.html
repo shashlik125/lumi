@@ -577,13 +577,13 @@
         </div>
       </div>
 
-      <!-- ИСПРАВЛЕННЫЙ БЛОК ЧЕКБОКСА И ССЫЛОК -->
+      <!-- ИСПРАВЛЕННЫЙ БЛОК: ссылки без прокрутки -->
       <div class="terms-agreement">
         <input type="checkbox" id="accept_tos" name="accept_tos" required>
         <label for="accept_tos">Я соглашаюсь с</label>
-        <a href="#" onclick="showTermsModal(); return false;">условиями использования</a>
+        <a href="javascript:void(0)" onclick="showTermsModal(); return false;">условиями использования</a>
         <span>и</span>
-        <a href="#" onclick="showPrivacyModal(); return false;">политикой конфиденциальности</a>
+        <a href="javascript:void(0)" onclick="showPrivacyModal(); return false;">политикой конфиденциальности</a>
       </div>
 
       <div class="actions">

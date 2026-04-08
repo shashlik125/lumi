@@ -1147,10 +1147,10 @@ function renderCalendar() {
         if (isToday) {
             day.classList.add("current-day");
             
-            const todayDot = document.createElement("div");
-            todayDot.className = "today-dot";
-            todayDot.title = "Сегодня";
-            day.appendChild(todayDot);
+             //const todayDot = document.createElement("div");
+             //todayDot.className = "today-dot";
+             //todayDot.title = "Сегодня";
+             //day.appendChild(todayDot);
         }
 
         const dayMoods = moods.filter(entry => entry.date === dateKey);
@@ -1198,79 +1198,51 @@ function goToToday() {
 
 async function updateStats() {
     try {
-        console.log('📊 Обновление статистики...');
-        console.log('📅 Текущий месяц:', currentDate.getMonth() + 1, currentDate.getFullYear());
-        console.log('🎭 Всего настроений:', moods.length);
-        
-        // Фильтруем настроения за текущий месяц
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-        
-        // Получаем настроения за текущий месяц
-        const monthlyMoods = moods.filter(entry => {
-            const entryDate = new Date(entry.date + 'T00:00:00');
-            return entryDate.getFullYear() === year && 
-                   entryDate.getMonth() === month;
+
+        // Группируем записи по дням
+        const dailyMoods = new Map(); // ключ: "YYYY-MM-DD", значение: массив mood
+
+        moods.forEach(entry => {
+            const date = entry.date;
+            if (!dailyMoods.has(date)) dailyMoods.set(date, []);
+            dailyMoods.get(date).push(entry.mood);
         });
-        
-        console.log('🎭 Настроений в этом месяце:', monthlyMoods.length);
-        
-        // Рассчитываем статистику
+
+        // Фильтруем только дни текущего месяца
         let goodDaysCount = 0;
-        let totalMood = 0;
+        let totalMoodSum = 0;
+        let daysWithMood = 0;
         const filledDates = new Set();
-        
-        monthlyMoods.forEach(entry => {
-            filledDates.add(entry.date);
-            totalMood += entry.mood;
-            
-            if (entry.mood >= 7) {
-                goodDaysCount++;
+
+        for (const [date, moodValues] of dailyMoods.entries()) {
+            const entryDate = new Date(date + 'T00:00:00');
+            if (entryDate.getFullYear() === year && entryDate.getMonth() === month) {
+                filledDates.add(date);
+                const avgMood = moodValues.reduce((a, b) => a + b, 0) / moodValues.length;
+                totalMoodSum += avgMood;
+                daysWithMood++;
+                if (avgMood >= 7) goodDaysCount++;
             }
-        });
-        
-        const filledDaysCount = filledDates.size;
-        const avgMoodValue = filledDaysCount > 0 ? (totalMood / filledDaysCount).toFixed(1) : "0.0";
-        
-        console.log('📈 Статистика:', {
-            хорошихДней: goodDaysCount,
-            среднееНастроение: avgMoodValue,
-            заполненныхДней: filledDaysCount
-        });
-        
-        // Обновляем DOM
-        const goodDaysElement = document.getElementById("goodDays");
-        const avgMoodElement = document.getElementById("avgMood");
-        const filledDaysElement = document.getElementById("filledDays");
-        
-        if (goodDaysElement) goodDaysElement.textContent = goodDaysCount;
-        if (avgMoodElement) avgMoodElement.textContent = avgMoodValue;
-        if (filledDaysElement) filledDaysElement.textContent = `${filledDaysCount}/${daysInMonth}`;
-        
+        }
+
+        const avgMoodValue = daysWithMood > 0 ? (totalMoodSum / daysWithMood).toFixed(1) : "0.0";
+
+        document.getElementById("goodDays").textContent = goodDaysCount;
+        document.getElementById("avgMood").textContent = avgMoodValue;
+        document.getElementById("filledDays").textContent = `${filledDates.size}/${daysInMonth}`;
+
     } catch (error) {
-        console.error('❌ Ошибка обновления статистики:', error);
-        
-        // Устанавливаем значения по умолчанию при ошибке
+        console.error('Ошибка обновления статистики:', error);
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
-        
-        const goodDaysElement = document.getElementById("goodDays");
-        const avgMoodElement = document.getElementById("avgMood");
-        const filledDaysElement = document.getElementById("filledDays");
-        
-        if (goodDaysElement) goodDaysElement.textContent = "0";
-        if (avgMoodElement) avgMoodElement.textContent = "0.0";
-        if (filledDaysElement) filledDaysElement.textContent = `0/${daysInMonth}`;
+        document.getElementById("goodDays").textContent = "0";
+        document.getElementById("avgMood").textContent = "0.0";
+        document.getElementById("filledDays").textContent = `0/${daysInMonth}`;
     }
-}
-// Принудительная перезагрузка данных календаря
-async function refreshCalendarData() {
-    console.log('🔄 Принудительная перезагрузка данных календаря...');
-    await loadMoodData();
-    renderCalendar();
-    updateStats();
 }
 
 
@@ -1329,31 +1301,6 @@ async function loadAllGoals() {
     }
 }
 
-// Загрузка всех радостей
-async function loadAllJoys() {
-    try {
-        // Получаем все радости БЕЗ фильтра по дате
-        const response = await fetch(JOYS_API);
-        if (!response.ok) throw new Error('Ошибка загрузки радостей');
-        
-        const joys = await response.json();
-        console.log('✅ Загружены радости:', joys);
-        
-        // Сортируем по дате (сначала новые) и берем последние 10
-        const recentJoys = joys
-            .sort((a, b) => {
-                const dateA = new Date(a.created_at || a.date || 0);
-                const dateB = new Date(b.created_at || b.date || 0);
-                return dateB - dateA;
-            })
-            .slice(0, 10);
-        
-        renderJoysList(recentJoys);
-    } catch (error) {
-        console.error('❌ Ошибка загрузки радостей:', error);
-        document.getElementById('joysList').innerHTML = '<div class="empty-list">Ошибка загрузки радостей</div>';
-    }
-}
 
 
 // Загрузка всех радостей

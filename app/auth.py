@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session  # добавили session
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models import User
 from app import get_db, close_db, bcrypt
@@ -8,6 +8,10 @@ auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
+    # При GET-запросе очищаем все flash-сообщения, чтобы они не висели
+    if request.method == 'GET':
+        session.pop('_flashes', None)
+
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -32,10 +36,9 @@ def register():
         password = request.form.get('password')
         confirm_password = request.form.get('confirm_password')
         gender = request.form.get('gender')
-        accept_tos = request.form.get('accept_tos')  # ← ДОБАВЛЯЕМ ПРОВЕРКУ ЧЕКБОКСА
+        accept_tos = request.form.get('accept_tos')
 
         # ======== ВАЛИДАЦИЯ ДАННЫХ =========
-        # Проверка согласия с условиями
         if not accept_tos:
             flash('Вы должны согласиться с условиями использования и политикой конфиденциальности', 'error')
             return render_template('register.html', 
@@ -74,7 +77,6 @@ def register():
                                  last_name=last_name,
                                  username=username)
 
-        # ======== ПРОВЕРКА, СУЩЕСТВУЕТ ЛИ ПОЛЬЗОВАТЕЛЬ =========
         existing_user = User.get_by_username(username)
         if existing_user:
             flash('Пользователь с таким логином уже существует', 'error')
@@ -83,7 +85,6 @@ def register():
                                  last_name=last_name,
                                  gender=gender)
 
-        # ======== СОЗДАНИЕ ПОЛЬЗОВАТЕЛЯ =========
         user = User.create(
             username=username,
             password=password,
@@ -93,7 +94,6 @@ def register():
         )
         
         if user:
-            # ======== СОЗДАНИЕ DEFAULT CYCLE_SETTINGS ДЛЯ ЖЕНЩИН =========
             if user.gender == 'female':
                 conn = get_db()
                 cursor = None
@@ -114,7 +114,6 @@ def register():
                         cursor.close()
                     close_db(conn)
 
-            # ======== ВХОД ПОЛЬЗОВАТЕЛЯ =========
             login_user(user)
             flash('Регистрация прошла успешно!', 'success')
             return redirect(url_for('main.dashboard'))

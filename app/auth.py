@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, flash, redirect, url_for, session  # добавили session
+from flask import Blueprint, render_template, request, flash, redirect, url_for, session
 from flask_login import login_user, logout_user, login_required, current_user
 from app.models import User
 from app import get_db, close_db, bcrypt
@@ -8,7 +8,11 @@ auth = Blueprint('auth', __name__)
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
-    # При GET-запросе очищаем все flash-сообщения, чтобы они не висели
+    # Если пользователь уже авторизован, отправляем на дашборд
+    if current_user.is_authenticated:
+        return redirect(url_for('main.dashboard'))
+
+    # Полная очистка flash-сообщений перед любым GET
     if request.method == 'GET':
         session.pop('_flashes', None)
 
@@ -25,6 +29,7 @@ def login():
             flash('Неверный логин или пароль', 'error')
     
     return render_template('login.html')
+
 
 @auth.route('/register', methods=['GET', 'POST'])
 def register():

@@ -4,7 +4,6 @@
 
 {% block extra_css %}
 <style>
-/* ========== ОСНОВНЫЕ ПЕРЕМЕННЫЕ ========== */
 :root {
   --primary: #60F4E3;
   --primary-dark: #48cbbd;
@@ -18,7 +17,6 @@
   --shadow: 0 6px 16px rgba(0,0,0,0.1);
   --transition: all 0.3s ease;
 }
-
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
 body {
   margin: 0;
@@ -144,21 +142,9 @@ h1:after { content: ''; position: absolute; bottom: 0; left: 0; width: 60px; hei
 
 {% block extra_js %}
 <script>
-// ======================== 1. НАСТРОЙКА ПОЛЕЙ ДЛЯ ВАШЕЙ БД ========================
-// Укажите здесь реальные имена колонок из таблиц goals и joys
-const FIELD_MAP = {
-  goal: {
-    dateField: 'date',        // может быть 'created_at' или 'date'
-    textField: 'text',
-    completedField: 'completed'
-  },
-  joy: {
-    dateField: 'date',        // может быть 'created_at' или 'date'
-    textField: 'text'
-  }
-};
+// ======================== УНИВЕРСАЛЬНЫЙ МОДУЛЬ РАБОТЫ С ДАННЫМИ ========================
+// Автоматически определяет поля date/text/completed в ответах API
 
-// ======================== 2. ДАТЫ (единый модуль) ========================
 const DateUtils = {
   formatDate(date, options = { day: 'numeric', month: 'long' }) {
     return new Intl.DateTimeFormat('ru-RU', options).format(date);
@@ -180,23 +166,48 @@ const DateUtils = {
     const today = new Date();
     return date.toDateString() === today.toDateString();
   },
-  getDateValue(obj, type) {
-    // получаем дату из объекта цели или радости (поле может называться date или created_at)
-    const field = FIELD_MAP[type].dateField;
-    if (obj[field]) return new Date(obj[field]);
-    if (obj.created_at) return new Date(obj.created_at);
-    if (obj.date) return new Date(obj.date);
+  // Универсальное получение даты из объекта (ищет поля date, created_at, updated_at)
+  getDateFromObject(obj) {
+    if (!obj) return new Date();
+    const possibleFields = ['date', 'created_at', 'updated_at', 'createdAt', 'updatedAt'];
+    for (let field of possibleFields) {
+      if (obj[field]) return new Date(obj[field]);
+    }
     return new Date();
+  },
+  // Универсальное получение текста (ищет text, content, description)
+  getTextFromObject(obj) {
+    if (!obj) return '';
+    const possibleFields = ['text', 'content', 'description', 'title', 'name'];
+    for (let field of possibleFields) {
+      if (obj[field]) return obj[field];
+    }
+    return '';
+  },
+  // Универсальное получение статуса completed (ищет completed, is_completed, done)
+  getCompletedFromObject(obj) {
+    if (!obj) return false;
+    const possibleFields = ['completed', 'is_completed', 'done', 'status'];
+    for (let field of possibleFields) {
+      if (obj[field] !== undefined) {
+        const val = obj[field];
+        if (typeof val === 'boolean') return val;
+        if (typeof val === 'number') return val === 1;
+        if (typeof val === 'string') return val === 'true' || val === '1' || val === 'completed';
+        return !!val;
+      }
+    }
+    return false;
   }
 };
 
-// ======================== 3. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ========================
+// ======================== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ========================
 let currentDate = new Date();
 let moods = [];
 let goals = [];
 let joys = [];
 
-// ======================== 4. УВЕДОМЛЕНИЯ ========================
+// ======================== УВЕДОМЛЕНИЯ ========================
 function showToast(message, type = 'success') {
   document.querySelectorAll('.toast').forEach(t => t.remove());
   const toast = document.createElement('div');
@@ -207,7 +218,7 @@ function showToast(message, type = 'success') {
   setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
 }
 
-// ======================== 5. API ВЫЗОВЫ ========================
+// ======================== API ВЫЗОВЫ ========================
 const API_MOOD = "{{ url_for('main.mood_entries') }}";
 const API_GOALS = "{{ url_for('main.goals') }}";
 const API_JOYS = "{{ url_for('main.joys') }}";
@@ -232,7 +243,8 @@ async function loadAllGoals() {
   try {
     const resp = await fetch(API_GOALS);
     if (!resp.ok) throw new Error();
-    goals = await resp.json();
+    const data = await resp.json();
+    goals = Array.isArray(data) ? data : [];
     renderGoalsList();
   } catch(e) {
     console.error('Ошибка загрузки целей:', e);
@@ -244,7 +256,8 @@ async function loadAllJoys() {
   try {
     const resp = await fetch(API_JOYS);
     if (!resp.ok) throw new Error();
-    joys = await resp.json();
+    const data = await resp.json();
+    joys = Array.isArray(data) ? data : [];
     renderJoysList();
   } catch(e) {
     console.error('Ошибка загрузки радостей:', e);
@@ -265,7 +278,7 @@ async function loadAllNotes() {
   }
 }
 
-// ======================== 6. ОТРИСОВКА ========================
+// ======================== ОТРИСОВКА ========================
 function renderNotesList(notes) {
   const container = document.getElementById('notesList');
   if (!notes.length) { container.innerHTML = '<div class="empty-list">📝 Пока нет заметок</div>'; return; }
@@ -281,10 +294,12 @@ function renderGoalsList() {
   const container = document.getElementById('goalsList');
   if (!goals.length) { container.innerHTML = '<div class="empty-list">🎯 Пока нет целей. Нажмите "+ Новая цель"</div>'; return; }
   container.innerHTML = goals.map(g => {
-    const date = DateUtils.getDateValue(g, 'goal');
+    const date = DateUtils.getDateFromObject(g);
     const formatted = DateUtils.formatDate(date);
-    const completed = g[FIELD_MAP.goal.completedField] === true;
-    return `<div class="goal-item ${completed ? 'goal-completed' : ''}" data-id="${g.id}"><div class="goal-header"><span class="goal-date">${formatted}</span><button class="goal-toggle" data-id="${g.id}" data-completed="${completed}" style="background:none; border:none; cursor:pointer; font-size:18px;">${completed ? '✅' : '◻️'}</button></div><div class="goal-text">${escapeHtml(g[FIELD_MAP.goal.textField])}</div></div>`;
+    const completed = DateUtils.getCompletedFromObject(g);
+    const text = DateUtils.getTextFromObject(g);
+    const goalId = g.id;
+    return `<div class="goal-item ${completed ? 'goal-completed' : ''}" data-id="${goalId}"><div class="goal-header"><span class="goal-date">${formatted}</span><button class="goal-toggle" data-id="${goalId}" data-completed="${completed}" style="background:none; border:none; cursor:pointer; font-size:18px;">${completed ? '✅' : '◻️'}</button></div><div class="goal-text">${escapeHtml(text)}</div></div>`;
   }).join('');
   document.querySelectorAll('.goal-toggle').forEach(btn => {
     btn.removeEventListener('click', handleGoalToggle);
@@ -302,7 +317,7 @@ async function handleGoalToggle(e) {
     const resp = await fetch(`${API_GOALS}/${goalId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ [FIELD_MAP.goal.completedField]: newCompleted })
+      body: JSON.stringify({ completed: newCompleted })
     });
     if (!resp.ok) throw new Error();
     showToast(newCompleted ? 'Цель выполнена!' : 'Цель отмечена как невыполненная', 'success');
@@ -317,13 +332,14 @@ function renderJoysList() {
   const container = document.getElementById('joysList');
   if (!joys.length) { container.innerHTML = '<div class="empty-list">✨ Пока нет радостей. Нажмите "+ Новая радость"</div>'; return; }
   container.innerHTML = joys.map(j => {
-    const date = DateUtils.getDateValue(j, 'joy');
+    const date = DateUtils.getDateFromObject(j);
     const formatted = DateUtils.formatDate(date, { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' });
-    return `<div class="joy-item"><div class="joy-header"><span class="joy-icon">🌟</span><span class="joy-date">${formatted}</span></div><div class="joy-text">${escapeHtml(j[FIELD_MAP.joy.textField])}</div></div>`;
+    const text = DateUtils.getTextFromObject(j);
+    return `<div class="joy-item"><div class="joy-header"><span class="joy-icon">🌟</span><span class="joy-date">${formatted}</span></div><div class="joy-text">${escapeHtml(text)}</div></div>`;
   }).join('');
 }
 
-// ======================== 7. КАЛЕНДАРЬ ========================
+// ======================== КАЛЕНДАРЬ ========================
 function renderCalendar() {
   const grid = document.getElementById('calendar');
   if (!grid) return;
@@ -399,7 +415,7 @@ function openDayDetail(dateKey, event) {
 function changeMonth(step) { currentDate.setMonth(currentDate.getMonth() + step); renderCalendar(); updateStats(); }
 function goToToday() { currentDate = new Date(); renderCalendar(); updateStats(); }
 
-// ======================== 8. СТАТИСТИКА ========================
+// ======================== СТАТИСТИКА ========================
 async function updateStats() {
   try {
     const year = currentDate.getFullYear();
@@ -425,13 +441,13 @@ async function updateStats() {
   } catch(e) { console.error('Ошибка статистики:', e); }
 }
 
-// ======================== 9. ДОБАВЛЕНИЕ ЦЕЛИ И РАДОСТИ ========================
+// ======================== ДОБАВЛЕНИЕ ЦЕЛИ И РАДОСТИ ========================
 async function createGoal(text) {
   try {
     const resp = await fetch(API_GOALS, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ [FIELD_MAP.goal.textField]: text })
+      body: JSON.stringify({ text: text })
     });
     if (!resp.ok) throw new Error();
     showToast('Цель добавлена!', 'success');
@@ -444,7 +460,7 @@ async function createJoy(text) {
     const resp = await fetch(API_JOYS, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ [FIELD_MAP.joy.textField]: text })
+      body: JSON.stringify({ text: text })
     });
     if (!resp.ok) throw new Error();
     showToast('Радость добавлена!', 'success');
@@ -452,7 +468,7 @@ async function createJoy(text) {
   } catch(e) { showToast('Не удалось добавить радость', 'error'); }
 }
 
-// ======================== 10. МОДАЛЬНЫЕ ОКНА ========================
+// ======================== МОДАЛЬНЫЕ ОКНА ========================
 let activeModal = null;
 function openModal(modalId) { if (activeModal) closeModal(); document.getElementById(modalId).style.display = 'block'; document.getElementById('overlay').style.display = 'block'; activeModal = modalId; }
 function closeModal() { if (activeModal) { document.getElementById(activeModal).style.display = 'none'; document.getElementById('overlay').style.display = 'none'; activeModal = null; } }
@@ -476,10 +492,10 @@ document.getElementById('saveJoyBtn').addEventListener('click', async () => {
   document.getElementById('joyText').value = '';
 });
 
-// ======================== 11. ЗАЩИТА ОТ XSS ========================
+// ======================== ЗАЩИТА ОТ XSS ========================
 function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
 
-// ======================== 12. ИНИЦИАЛИЗАЦИЯ ========================
+// ======================== ИНИЦИАЛИЗАЦИЯ ========================
 document.addEventListener('DOMContentLoaded', async () => {
   try {
     await loadMoodData();

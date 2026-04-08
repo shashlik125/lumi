@@ -3,498 +3,427 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lumi</title>
+    <title>Lumi - Вход</title>
 
-    <!-- ВСТАВЬТЕ ЭТИ 2 СТРОКИ СЮДА ↓ -->
     <link rel="icon" href="/static/favicon.ico?v=999" type="image/x-icon">
     <link rel="shortcut icon" href="/static/favicon.ico?v=999">
 
-    <!-- Далее идёт ваш CSS -->
+    <style>
+    * {
+      font-family: 'Montserrat', sans-serif !important;
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(to right, #60F4E3 0%, #FFEFFD 50%, #FF70EC 100%);
+      color: #264653;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 0 20px 40px;
+      font-size: 18px;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    .background-emojis {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .emoji-container {
+      position: absolute;
+      z-index: 1;
+    }
+
+    .emoji-image {
+      max-width: 300px !important;
+      height: auto;
+      filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
+      animation: float 3s ease-in-out infinite;
+      opacity: 0.7;
+    }
+
+    .emoji-container.second-emoji {
+      top: 15%;
+      left: 5%;
+    }
+
+    .emoji-container.second-emoji .emoji-image {
+      max-width: 230px;
+      animation: float 3.5s ease-in-out infinite;
+      animation-delay: 0.5s;
+    }
+
+    .emoji-container.third-emoji {
+      top: 60%;
+      right: 5%;
+    }
+
+    .emoji-container.fourth-emoji {
+      top: 25%;
+      left: 25%;
+    }
+
+    .emoji-container.fifth-emoji {
+      top: 10%;
+      left: 75%;
+    }
+
+    .emoji-container.sixth-emoji {
+      top: 40%;
+      left: 85%;
+    }
+
+    .emoji-container.eighth-emoji {
+      top: 70%;
+      left: 10%;
+    }
+
+    .emoji-container.ninth-emoji {
+      top: 85%;
+      left: 5%;
+    }
+
+    .emoji-container.tenth-emoji {
+      top: 15%;
+      left: -5%;
+    }
+
+    .emoji-container.eleventh-emoji {
+      top: 10%;
+      right: -5%;
+    }
+
+    .emoji-container.twelfth-emoji {
+      top: 80%;
+      right: 10%;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+
+    header {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 0 !important;
+      position: relative;
+      margin: 0 auto;
+      user-select: none;
+      margin-bottom: 50px;
+      z-index: 100;
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 28px;
+      color: white;
+      letter-spacing: 1px;
+      margin: 0;
+    }
+
+    nav {
+      display: flex;
+      gap: 15px;
+    }
+
+    nav a {
+      font-weight: 600;
+      text-decoration: none;
+      color: white;
+      white-space: nowrap;
+      margin: 0;
+      padding: 10px 15px;
+    }
+
+    .main-content {
+      max-width: 1200px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 80px;
+      margin: 0 auto;
+      margin-top: 50px;
+      margin-bottom: 100px;
+      padding: 0 20px;
+      box-sizing: border-box;
+      position: relative;
+      z-index: 10;
+    }
+
+    .welcome-text {
+      max-width: 100%;
+      padding: 50px 60px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      text-align: center;
+      animation: fadeIn 1.2s ease;
+      box-sizing: border-box;
+      backdrop-filter: blur(10px);
+      position: relative;
+      z-index: 10;
+    }
+
+    h1 {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      font-size: 42px;
+      color: #000000;
+      margin: 0 0 24px;
+      line-height: 1.1;
+      white-space: nowrap;
+    }
+
+    .welcome-text p {
+      font-size: 22px;
+      line-height: 1.6;
+      margin: 0 auto 30px;
+      max-width: 600px;
+    }
+
+    .login-form {
+      max-width: 400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      text-align: left;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      font-size: 16px;
+      color: #264653;
+    }
+
+    .form-input {
+      padding: 16px 20px;
+      border: 2px solid #e9ecef;
+      border-radius: 12px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: white;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-wrapper .form-input {
+      width: 100%;
+      padding-right: 50px;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      padding: 5px;
+      color: #6c757d;
+      transition: color 0.3s ease;
+      z-index: 2;
+    }
+
+    .toggle-password:hover {
+      color: #FF70EC;
+    }
+
+    .form-input:focus {
+      border-color: #60F4E3;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(96, 244, 227, 0.2);
+    }
+
+    .actions {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 14px 28px;
+      border-radius: 14px;
+      font-size: 18px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      text-align: center;
+      border: none;
+      cursor: pointer;
+      font-family: 'Montserrat', sans-serif;
+    }
+
+    .btn.primary {
+      background: #FF70EC;
+      color: white;
+    }
+
+    .btn.primary:hover {
+      background: #e15cd2;
+      transform: translateY(-2px);
+    }
+
+    .login-footer {
+      text-align: center;
+      margin-top: 30px;
+      color: #6c757d;
+      font-size: 16px;
+    }
+
+    .login-footer a {
+      color: #60F4E3;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .login-footer a:hover {
+      color: #FF70EC;
+    }
+
+    .flash-messages {
+      margin-bottom: 20px;
+    }
+
+    .alert {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 10px;
+      text-align: center;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .alert-error {
+      background: #ffe6e6;
+      color: #d63031;
+      border: 1px solid #ffcccc;
+    }
+
+    .alert-success {
+      background: #e6f7e6;
+      color: #27ae60;
+      border: 1px solid #ccffcc;
+    }
+
+    .flash-messages:empty {
+      display: none;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        text-align: center;
+        white-space: nowrap;
+        font-size: 28px;
+        margin: 0 auto 24px;
+      }
+      .welcome-text {
+        text-align: center;
+      }
+      .welcome-text p {
+        font-size: 18px;
+      }
+      .btn {
+        font-size: 16px;
+        padding: 12px 20px;
+      }
+      .background-emojis {
+        display: none;
+      }
+      header {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0 !important;
+      }
+      nav {
+        display: flex;
+        gap: 10px;
+        flex-wrap: nowrap;
+      }
+      nav a {
+        padding: 8px 12px;
+        font-size: 14px;
+        white-space: nowrap;
+      }
+      .logo {
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .welcome-text {
+        padding: 20px 25px;
+      }
+      h1 {
+        font-size: 24px;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .welcome-text p {
+        font-size: 16px;
+      }
+      .actions {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .btn {
+        width: 100%;
+      }
+      nav a {
+        padding: 6px 8px;
+        font-size: 13px;
+      }
+      .logo {
+        font-size: 22px;
+      }
+      @media (max-width: 360px) {
+        nav a:first-child {
+          display: none;
+        }
+      }
+    }
+    </style>
 </head>
 <body>
 
-{% block extra_css %}
-<style>
-* {
-  font-family: 'Montserrat', sans-serif !important;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  font-family: 'Montserrat', sans-serif;
-  background: linear-gradient(to right, #60F4E3 0%, #FFEFFD 50%, #FF70EC 100%);
-  color: #264653;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-height: 100vh;
-  padding: 0 20px 40px;
-  font-size: 18px;
-  position: relative;
-  overflow-x: hidden;
-}
-
-/* Фоновый контейнер для смайликов */
-.background-emojis {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.emoji-container {
-  position: absolute;
-  z-index: 1;
-}
-
-.emoji-image {
-  max-width: 300px !important;
-  height: auto;
-  filter: drop-shadow(0 5px 10px rgba(0,0,0,0.2));
-  animation: float 3s ease-in-out infinite;
-  opacity: 0.7;
-}
-
-.emoji-container.second-emoji {
-  top: 15%;
-  left: 5%;
-}
-
-.emoji-container.second-emoji .emoji-image {
-  max-width: 230px;
-  animation: float 3.5s ease-in-out infinite;
-  animation-delay: 0.5s;
-}
-
-.emoji-container.third-emoji {
-  top: 60%;
-  right: 5%;
-}
-
-.emoji-container.fourth-emoji {
-  top: 25%;
-  left: 25%;
-}
-
-.emoji-container.fifth-emoji {
-  top: 10%;
-  left: 75%;
-}
-
-.emoji-container.sixth-emoji {
-  top: 40%;
-  left: 85%;
-}
-
-.emoji-container.eighth-emoji {
-  top: 70%;
-  left: 10%;
-}
-
-.emoji-container.ninth-emoji {
-  top: 85%;
-  left: 5%;
-}
-
-.emoji-container.tenth-emoji {
-  top: 15%;
-  left: -5%;
-}
-
-.emoji-container.eleventh-emoji {
-  top: 10%;
-  right: -5%;
-}
-
-.emoji-container.twelfth-emoji {
-  top: 80%;
-  right: 10%;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-
-header {
-  width: 100%;
-  max-width: 1100px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 15px 0 !important; /* Убрал горизонтальные отступы */
-  position: relative;
-  margin: 0 auto;
-  user-select: none;
-  margin-bottom: 50px;
-  z-index: 100;
-}
-
-.logo {
-  font-weight: 700;
-  font-size: 28px;
-  color: white;
-  letter-spacing: 1px;
-  margin: 0;
-  /* Убрал margin-right: auto */
-}
-
-nav {
-  display: flex;
-  gap: 15px; /* Добавил отступ между ссылками */
-}
-
-nav a {
-  font-weight: 600;
-  text-decoration: none;
-  color: white;
-  white-space: nowrap;
-  margin: 0;
-  padding: 10px 15px;
-}
-
-.main-content {
-  max-width: 1200px;
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 80px;
-  margin: 0 auto;
-  margin-top: 50px;
-  margin-bottom: 100px;
-  padding: 0 20px;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 10;
-}
-
-.welcome-text {
-  max-width: 100%;
-  padding: 50px 60px;
-  border-radius: 20px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.85) 100%);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-  text-align: center;
-  animation: fadeIn 1.2s ease;
-  box-sizing: border-box;
-  backdrop-filter: blur(10px);
-  position: relative;
-  z-index: 10;
-}
-
-h1 {
-  font-family: 'Montserrat', sans-serif;
-  font-weight: 900;
-  font-size: 42px;
-  color: #000000;
-  margin: 0 0 24px;
-  line-height: 1.1;
-  white-space: nowrap;
-}
-
-.welcome-text p {
-  font-size: 22px;
-  line-height: 1.6;
-  margin: 0 auto 30px;
-  max-width: 600px;
-}
-
-.login-form {
-  max-width: 400px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  text-align: left;
-}
-
-.form-group label {
-  font-weight: 600;
-  font-size: 16px;
-  color: #264653;
-}
-
-.form-input {
-  padding: 16px 20px;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  font-size: 16px;
-  transition: all 0.3s ease;
-  background: white;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.password-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-
-.password-wrapper .form-input {
-  width: 100%;
-  padding-right: 50px; /* Место для кнопки */
-}
-
-.toggle-password {
-  position: absolute;
-  right: 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 18px;
-  padding: 5px;
-  color: #6c757d;
-  transition: color 0.3s ease;
-  z-index: 2;
-}
-
-.toggle-password:hover {
-  color: #FF70EC;
-}
-
-.form-input:focus {
-  border-color: #60F4E3;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(96, 244, 227, 0.2);
-}
-
-.form-options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 10px 0;
-}
-
-.remember-me {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-}
-
-.remember-me input {
-  width: 16px;
-  height: 16px;
-}
-
-.forgot-password {
-  color: #FF70EC;
-  text-decoration: none;
-  font-size: 14px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.forgot-password:hover {
-  color: #60F4E3;
-}
-
-.actions {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  margin-top: 30px;
-}
-
-.btn {
-  display: inline-block;
-  padding: 14px 28px;
-  border-radius: 14px;
-  font-size: 18px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-  text-align: center;
-  border: none;
-  cursor: pointer;
-  font-family: 'Montserrat', sans-serif;
-}
-
-.btn.primary {
-  background: #FF70EC;
-  color: white;
-}
-
-.btn.primary:hover {
-  background: #e15cd2;
-  transform: translateY(-2px);
-}
-
-.login-footer {
-  text-align: center;
-  margin-top: 30px;
-  color: #6c757d;
-  font-size: 16px;
-}
-
-.login-footer a {
-  color:  #60F4E3;
-  text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.login-footer a:hover {
-  color: #FF70EC;
-}
-
-/* Flash сообщения - ИСПРАВЛЕНИЕ ПРОБЛЕМЫ 3 */
-.flash-messages {
-  margin-bottom: 20px;
-}
-
-.alert {
-  padding: 12px 16px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  margin-bottom: 10px;
-  text-align: center;
-  animation: fadeIn 0.3s ease;
-}
-
-
-.alert-error {
-  background: #ffe6e6;
-  color: #d63031;
-  border: 1px solid #ffcccc;
-}
-
-.alert-success {
-  background: #e6f7e6;
-  color: #27ae60;
-  border: 1px solid #ccffcc;
-}
-
-.flash-messages:empty {
-  display: none;
-}
-
-@keyframes fadeIn {
-  from {opacity: 0; transform: translateY(20px);}
-  to {opacity: 1; transform: translateY(0);}
-}
-
-/* МОБИЛЬНАЯ ВЕРСИЯ */
-@media (max-width: 768px) {
-  h1 {
-  text-align: center;
-  white-space: nowrap;
-  font-size: 28px;
-  margin: 0 auto 24px;
-  display: block;
-  width: 100%;
-}
-
-  .welcome-text {
-    text-align: center;
-  }
-
-  .welcome-text p {
-    font-size: 18px;
-  }
-
-  .btn {
-    font-size: 16px;
-    padding: 12px 20px;
-  }
-
-  .form-options {
-    flex-direction: column;
-    gap: 15px;
-    align-items: flex-start;
-  }
-
-  /* Адаптация смайликов для мобильных */
-  .background-emojis {
-    display: none; /* Скрываем на мобильных для лучшей производительности */
-  }
-
-  /* ПРОБЛЕМА 1: исправляем навигацию для мобильных */
-  header {
-    flex-direction: row; /* Оставляем в строке */
-    justify-content: space-between; /* Распределяем по краям */
-    align-items: center;
-    padding: 15px 0 !important;
-  }
-
-  nav {
-    display: flex;
-    gap: 10px; /* Уменьшаем отступ на мобильных */
-    flex-wrap: nowrap; /* Запрещаем перенос на новую строку */
-  }
-
-  nav a {
-    padding: 8px 12px;
-    font-size: 14px; /* Чуть уменьшаем шрифт на мобильных */
-    white-space: nowrap; /* Запрещаем перенос текста */
-  }
-
-  .logo {
-    font-size: 24px; /* Уменьшаем логотип на мобильных */
-  }
-}
-
-@media (max-width: 480px) {
-  .welcome-text {
-    padding: 20px 25px;
-  }
-
-  h1 {
-  font-size: 24px;
-  text-align: center;
-  white-space: nowrap;
-}
-
-  .welcome-text p {
-    font-size: 16px;
-  }
-
-  .actions {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .btn {
-    width: 100%;
-  }
-
-  /* Дополнительные правки для очень маленьких экранов */
-  nav a {
-    padding: 6px 8px;
-    font-size: 13px;
-  }
-
-  .logo {
-    font-size: 22px;
-  }
-
-  /* Если все еще не помещается, скрываем "Главная" на очень маленьких экранах */
-  @media (max-width: 360px) {
-    nav a:first-child {
-      display: none; /* Скрываем "Главная" на очень маленьких экранах */
-    }
-  }
-}
-</style>
-{% endblock %}
-
-{% block content %}
-<!-- Фоновые смайлики -->
 <div class="background-emojis">
   <div class="emoji-container">
     <img src="{{ url_for('static', filename='images/😜.png') }}" alt="Emoji" class="emoji-image" />
@@ -542,10 +471,8 @@ h1 {
 <div class="main-content">
   <div class="welcome-text gradient-box">
     <h1>С возвращением!</h1>
-    <p>
-      Войдите в ваш аккаунт Lumi чтобы продолжить отслеживать ваше настроение
-    </p>
- <!-- Блок для отображения flash-сообщений -->
+    <p>Войдите в ваш аккаунт Lumi чтобы продолжить отслеживать ваше настроение</p>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="flash-messages">
@@ -562,18 +489,15 @@ h1 {
         <input type="text" id="username" name="username" class="form-input" placeholder="Введите ваш логин" required>
       </div>
 
-<div class="form-group">
-  <label for="password">Пароль</label>
-  <div class="password-wrapper">
-    <input type="password" id="password" name="password" class="form-input password-input" placeholder="Введите ваш пароль" required>
-    <button type="button" class="toggle-password" aria-label="Показать/скрыть пароль">
-      👁️
-    </button>
-  </div>
-</div>
-      <div class="form-options">
-        <a href="#" class="forgot-password">Забыли пароль?</a>
+      <div class="form-group">
+        <label for="password">Пароль</label>
+        <div class="password-wrapper">
+          <input type="password" id="password" name="password" class="form-input password-input" placeholder="Введите ваш пароль" required>
+          <button type="button" class="toggle-password" aria-label="Показать/скрыть пароль">👁️</button>
+        </div>
       </div>
+
+      <!-- Ссылка "Забыли пароль?" удалена, так как функционал не реализован -->
 
       <div class="actions">
         <button type="submit" class="btn primary">Войти в аккаунт</button>
@@ -585,12 +509,9 @@ h1 {
     </div>
   </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Функция показа и скрытия пароля
   const togglePassword = document.querySelector('.toggle-password');
   const passwordInput = document.querySelector('.password-input');
 
@@ -598,17 +519,16 @@ document.addEventListener('DOMContentLoaded', function() {
     togglePassword.addEventListener('click', function() {
       const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
       passwordInput.setAttribute('type', type);
-
-      // Меняем иконку
       this.textContent = type === 'password' ? '👁️' : '🙈';
     });
   }
 
-  // Автофокус на поле логина
   const usernameInput = document.getElementById('username');
   if (usernameInput) {
     usernameInput.focus();
   }
 });
 </script>
-{% endblock %}
+
+</body>
+</html>

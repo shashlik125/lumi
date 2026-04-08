@@ -21,7 +21,6 @@
   --danger: #F44336;
   --white: #ffffff;
   
-  /* Дополнительные переменные для страницы календаря */
   --primary: #60F4E3;
   --primary-dark: #48cbbd;
   --secondary: #FF70EC;
@@ -47,7 +46,7 @@ body {
   color: var(--dark);
   line-height: 1.6;
   min-height: 100vh;
-  padding-top: 80px; /* Отступ для фиксированного хедера */
+  padding-top: 80px;
 }
 
 @keyframes fadeIn {
@@ -327,7 +326,6 @@ h1:after {
   border-radius: 50%;
 }
 
-/* Точка для сегодняшнего дня */
 .today-dot {
     position: absolute;
     top: 6px;
@@ -347,10 +345,9 @@ h1:after {
     20%, 40%, 60%, 80% { transform: translateX(3px); }
 }
 
-/* Стили для уведомлений */
 .toast {
     position: fixed;
-    top: 90px; /* Под хедером */
+    top: 90px;
     right: 20px;
     background: var(--danger);
     color: white;
@@ -385,9 +382,6 @@ h1:after {
     background: #2196F3;
 }
 
-/* ==========================================================================
-   БЛОКИ С ЗАМЕТКАМИ, ЦЕЛЯМИ И РАДОСТЯМИ
-   ========================================================================== */
 .content-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -434,7 +428,6 @@ h1:after {
     max-height: 320px;
 }
 
-/* Стили для заметок */
 .note-item {
     background: rgba(96, 244, 227, 0.05);
     border-radius: 10px;
@@ -491,7 +484,6 @@ h1:after {
     overflow-wrap: break-word;
 }
 
-/* Стили для целей */
 .goal-item {
     background: rgba(255, 112, 236, 0.05);
     border-radius: 10px;
@@ -541,7 +533,6 @@ h1:after {
     overflow-wrap: break-word;
 }
 
-/* Стили для радостей */
 .joy-item {
     background: rgba(255, 112, 236, 0.05);
     border-radius: 10px;
@@ -587,147 +578,117 @@ h1:after {
     font-style: italic;
 }
 
-/* Адаптивность для планшетов */
 @media (max-width: 900px) {
     .content-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
 
-/* Адаптивность для мобильных */
 @media (max-width: 600px) {
     .content-grid {
         grid-template-columns: 1fr;
     }
-    
     .content-card {
         max-height: 350px;
     }
 }
 
-/* МОБИЛЬНАЯ АДАПТИВНОСТЬ - ТОЛЬКО ЗДЕСЬ МЕНЯЕМ */
-
 @media (max-width: 768px) {
-    /* Компактный хедер для планшетов и телефонов */
     body {
-        padding-top: 60px; /* Уменьшили отступ */
+        padding-top: 60px;
     }
-
     nav a.active::after {
-    display: block !important; /* Восстанавливаем подчеркивание */
-    width: 100% !important;
-    height: 2px;
-    background: var(--accent-pink);
-    bottom: 0;
-}
-    
-    
-    .user span {
-        display: none; /* Скрываем имя пользователя */
+        display: block !important;
+        width: 100% !important;
+        height: 2px;
+        background: var(--accent-pink);
+        bottom: 0;
     }
-    
-    /* Остальные стили для мобильных */
+    .user span {
+        display: none;
+    }
     main {
         padding: 20px 15px;
     }
-    
     h1 {
         font-size: 24px;
         padding-bottom: 8px;
     }
-    
     .calendar-container {
         padding: 20px;
         border-radius: 18px;
         margin-bottom: 25px;
     }
-    
     .calendar-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 15px;
         margin-bottom: 15px;
     }
-    
     .calendar-title {
         font-size: 18px;
     }
-    
     .calendar-controls {
         width: 100%;
         justify-content: space-between;
     }
-    
     .today-btn {
         padding: 8px 16px;
         font-size: 14px;
     }
-    
     .calendar-btn {
         width: 36px;
         height: 36px;
     }
-    
     .weekdays {
         padding: 8px 0;
         font-size: 14px;
         margin-bottom: 8px;
     }
-    
     .weekday {
         padding: 6px 2px;
         font-size: 13px;
     }
-    
     .calendar-grid {
         gap: 6px;
     }
-    
     .calendar-day {
         min-height: 45px;
         border-radius: 10px;
         padding: 4px;
     }
-    
     .day-number {
         font-size: 14px;
         margin-bottom: 3px;
     }
-    
     .mood-indicator {
         width: 16px;
         height: 16px;
         bottom: 4px;
         right: 4px;
     }
-    
     .today-dot {
         top: 4px;
         right: 4px;
         width: 6px;
         height: 6px;
     }
-    
     .stats-container {
         grid-template-columns: 1fr;
         gap: 15px;
         margin-top: 25px;
     }
-    
     .stat-card {
         padding: 15px;
         border-radius: 16px;
     }
-    
     .stat-title {
         font-size: 14px;
         margin-bottom: 8px;
     }
-    
     .stat-value {
         font-size: 24px;
     }
-    
     .mood-legend {
         padding: 12px;
         border-radius: 16px;
@@ -736,20 +697,16 @@ h1:after {
         flex-direction: column;
         align-items: center;
     }
-    
     .legend-item {
         font-size: 13px;
         padding: 6px 10px;
         width: 100%;
         justify-content: center;
     }
-    
     .legend-color {
         width: 12px;
         height: 12px;
     }
-    
-    /* Уведомления на мобильных */
     .toast {
         top: 70px;
         right: 10px;
@@ -758,8 +715,6 @@ h1:after {
         text-align: center;
         font-size: 13px;
     }
-    
-    /* Убираем hover-эффекты для тач-устройств */
     .calendar-day:hover,
     .stat-card:hover {
         transform: none;
@@ -769,88 +724,70 @@ h1:after {
 }
 
 @media (max-width: 480px) {
-    /* Еще более компактный для маленьких телефонов */
     body {
         padding-top: 55px;
     }
-
     main {
         padding: 15px 10px;
     }
-    
     h1 {
         font-size: 22px;
     }
-    
     .calendar-container {
         padding: 15px;
         margin-bottom: 20px;
         border-radius: 16px;
     }
-    
     .calendar-title {
         font-size: 16px;
     }
-    
     .today-btn {
         padding: 6px 12px;
         font-size: 13px;
     }
-    
     .calendar-btn {
         width: 32px;
         height: 32px;
     }
-    
     .calendar-btn i {
         font-size: 12px;
     }
-    
     .weekday {
         padding: 5px 1px;
         font-size: 12px;
     }
-    
     .calendar-grid {
         gap: 4px;
     }
-    
     .calendar-day {
         min-height: 40px;
         border-radius: 8px;
         padding: 3px;
     }
-    
     .day-number {
         font-size: 12px;
     }
-    
     .mood-indicator {
         width: 14px;
         height: 14px;
         bottom: 3px;
         right: 3px;
     }
-    
     .today-dot {
         top: 3px;
         right: 3px;
         width: 5px;
         height: 5px;
     }
-    
     .stat-title {
         font-size: 13px;
     }
-    
     .stat-value {
         font-size: 22px;
     }
 }
 
-/* Ландшафтная ориентация */
 @media (max-height: 500px) and (orientation: landscape) {
-
     .calendar-day {
         min-height: 35px;
     }
@@ -859,329 +796,218 @@ h1:after {
 {% endblock %}
 
 {% block content %}
-
 <main>
     <div class="page-header">
         <h1>Календарь настроения</h1>
     </div>
 
     <div class="calendar-container">
-    <div class="calendar-header">
-        <div class="calendar-title" id="monthYear"></div>
-        <div class="calendar-controls">
-        <button class="calendar-btn" onclick="changeMonth(-1)">
-            <i class="bi bi-chevron-left"></i>
-        </button>
-        <button class="today-btn" onclick="goToToday()">
-            Сегодня
-        </button>
-        <button class="calendar-btn" onclick="changeMonth(1)">
-            <i class="bi bi-chevron-right"></i>
-        </button>
+        <div class="calendar-header">
+            <div class="calendar-title" id="monthYear"></div>
+            <div class="calendar-controls">
+                <button class="calendar-btn" onclick="changeMonth(-1)">←</button>
+                <button class="today-btn" onclick="goToToday()">Сегодня</button>
+                <button class="calendar-btn" onclick="changeMonth(1)">→</button>
+            </div>
+        </div>
+        <div class="weekdays">
+            <div class="weekday">Пн</div><div class="weekday">Вт</div><div class="weekday">Ср</div>
+            <div class="weekday">Чт</div><div class="weekday">Пт</div><div class="weekday">Сб</div><div class="weekday">Вс</div>
+        </div>
+        <div class="calendar-grid" id="calendar"></div>
+    </div>
+
+    <div class="mood-legend">
+        <div class="legend-item"><div class="legend-color" style="background: var(--primary);"></div><span>Хорошее настроение</span></div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--secondary);"></div><span>Нейтральное настроение</span></div>
+        <div class="legend-item"><div class="legend-color" style="background: var(--danger);"></div><span>Плохое настроение</span></div>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-card"><div class="stat-title">Хороших дней в этом месяце</div><div class="stat-value" id="goodDays">0</div></div>
+        <div class="stat-card"><div class="stat-title">Средний показатель настроения</div><div class="stat-value" id="avgMood">0.0</div></div>
+        <div class="stat-card"><div class="stat-title">Заполненных дней</div><div class="stat-value" id="filledDays">0/30</div></div>
+    </div>
+
+    <div class="content-grid">
+        <!-- ЗАМЕТКИ -->
+        <div class="content-card">
+            <h3><i class="fas fa-sticky-note"></i> Общие заметки</h3>
+            <div class="content-list" id="notesList"><div class="empty-list">Загрузка заметок...</div></div>
+        </div>
+        <!-- ЦЕЛИ -->
+        <div class="content-card">
+            <h3><i class="fas fa-bullseye"></i> Ваши цели</h3>
+            <button id="addGoalBtn" style="background: var(--primary); border: none; padding: 8px 12px; border-radius: 20px; margin-bottom: 15px; cursor: pointer; font-weight: 600; width: 100%;">+ Новая цель</button>
+            <div class="content-list" id="goalsList"><div class="empty-list">Загрузка целей...</div></div>
+        </div>
+        <!-- РАДОСТИ -->
+        <div class="content-card">
+            <h3><i class="fas fa-sun"></i> Ваши радости</h3>
+            <div class="content-list" id="joysList"><div class="empty-list">Загрузка радостей...</div></div>
         </div>
     </div>
-
-    <div class="weekdays">
-    <div class="weekday">Пн</div>
-    <div class="weekday">Вт</div>
-    <div class="weekday">Ср</div>
-    <div class="weekday">Чт</div>
-    <div class="weekday">Пт</div>
-    <div class="weekday">Сб</div>
-    <div class="weekday">Вс</div>
-    </div>
-
-    <div class="calendar-grid" id="calendar"></div>
-  </div>
-
-  <div class="mood-legend">
-    <div class="legend-item">
-      <div class="legend-color" style="background: var(--primary);"></div>
-      <span>Хорошее настроение</span>
-    </div>
-    <div class="legend-item">
-      <div class="legend-color" style="background: var(--secondary);"></div>
-      <span>Нейтральное настроение</span>
-    </div>
-    <div class="legend-item">
-      <div class="legend-color" style="background: var(--danger);"></div>
-      <span>Плохое настроение</span>
-    </div>
-  </div>
-
-  <div class="stats-container">
-    <div class="stat-card">
-      <div class="stat-title">Хороших дней в этом месяце</div>
-      <div class="stat-value" id="goodDays">0</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-title">Средний показатель настроения</div>
-      <div class="stat-value" id="avgMood">0.0</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-title">Заполненных дней</div>
-      <div class="stat-value" id="filledDays">0/30</div>
-    </div>
-  </div>
-  
-
-  <!-- ТРИ КОЛОНКИ: ЗАМЕТКИ, ЦЕЛИ, РАДОСТИ -->
-  <div class="content-grid">
-    <!-- БЛОК ЗАМЕТОК -->
-    <div class="content-card">
-      <h3><i class="fas fa-sticky-note"></i> Общие заметки</h3>
-      <div class="content-list" id="notesList">
-        <div class="empty-list">Загрузка заметок...</div>
-      </div>
-    </div>
-    
-    <!-- БЛОК ЦЕЛЕЙ -->
-    <div class="content-card">
-      <h3><i class="fas fa-bullseye"></i> Ваши цели</h3>
-      <div class="content-list" id="goalsList">
-        <div class="empty-list">Загрузка целей...</div>
-      </div>
-    </div>
-    
-    <!-- БЛОК РАДОСТЕЙ -->
-    <div class="content-card">
-      <h3><i class="fas fa-sun"></i> Ваши радости</h3>
-      <div class="content-list" id="joysList">
-        <div class="empty-list">Загрузка радостей...</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- УБИРАЕМ ПОСЛЕДНЮЮ ПЛАШКУ "Что порадовало сегодня" - ЕЁ ЗДЕСЬ НЕТ -->
 </main>
 {% endblock %}
 
 {% block extra_js %}
-
 <script>
-const API_BASE = "{{ url_for('main.mood_entries') }}";
-const STATS_API = "{{ url_for('main.stats') }}";
+// ======================== 1. ДАТЫ (единый модуль) ========================
+const DateUtils = {
+    formatDate(date, options = { day: 'numeric', month: 'long' }) {
+        return new Intl.DateTimeFormat('ru-RU', options).format(date);
+    },
+    formatISO(year, month, day) {
+        return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    },
+    parseISO(str) {
+        const [y, m, d] = str.split("-").map(Number);
+        return new Date(y, m - 1, d);
+    },
+    getDaysInMonth(year, month) {
+        return new Date(year, month + 1, 0).getDate();
+    },
+    isSameMonth(date1, date2) {
+        return date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth();
+    },
+    isToday(date) {
+        const today = new Date();
+        return date.getDate() === today.getDate() &&
+               date.getMonth() === today.getMonth() &&
+               date.getFullYear() === today.getFullYear();
+    }
+};
 
-// Глобальные переменные
+// ======================== 2. ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ========================
 let currentDate = new Date();
 let moods = [];
 
-// Функция для уведомлений
+// ======================== 3. УВЕДОМЛЕНИЯ ========================
 function showToast(message, type = 'success') {
-    const existingToasts = document.querySelectorAll('.toast');
-    existingToasts.forEach(toast => toast.remove());
-    
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    
-    document.body.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.classList.add('show');
-    }, 10);
-    
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    try {
+        document.querySelectorAll('.toast').forEach(t => t.remove());
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 10);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    } catch (e) { console.error('Toast error:', e); }
 }
 
-// Функция загрузки данных настроения
+// ======================== 4. ЗАГРУЗКА ДАННЫХ НАСТРОЕНИЙ ========================
+const API_BASE = "{{ url_for('main.mood_entries') }}";
+
 async function loadMoodData() {
     try {
-        console.log('📡 Запрос настроений с API:', API_BASE);
         const response = await fetch(API_BASE);
-        
-        console.log('📡 Ответ сервера:', response.status);
-        
-        if (response.ok) {
-            let allMoods = await response.json();
-            console.log('✅ Получено настроений:', allMoods.length);
-            
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            moods = allMoods.filter(entry => {
-                const entryDate = new Date(entry.date + 'T00:00:00');
-                const isPastOrToday = entryDate <= today;
-                
-                if (!isPastOrToday) {
-                    console.log('⏩ Пропущено будущее настроение:', entry.date);
-                }
-                
-                return isPastOrToday;
-            });
-            
-            console.log('✅ Актуальных настроений:', moods.length);
-            console.log('📋 Примеры настроений:', moods.slice(0, 3));
-            
-            return true;
-        } else {
-            console.error('❌ Ошибка загрузки:', response.status);
-            moods = [];
-            return false;
-        }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const allMoods = await response.json();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        moods = allMoods.filter(entry => {
+            const entryDate = DateUtils.parseISO(entry.date);
+            return entryDate <= today;
+        });
+        return true;
     } catch (error) {
-        console.error('❌ Ошибка загрузки настроений:', error);
+        console.error('Ошибка загрузки настроений:', error);
+        showToast('Не удалось загрузить данные настроения', 'error');
         moods = [];
         return false;
     }
 }
 
-// Очистка будущих записей
-async function cleanupFutureEntries() {
-    const today = new Date().toISOString().split('T')[0];
-    
-    try {
-        const response = await fetch(API_BASE);
-        if (!response.ok) return;
-        
-        const allEntries = await response.json();
-        const futureEntries = allEntries.filter(entry => entry.date > today);
-        
-        if (futureEntries.length > 0) {
-            for (const entry of futureEntries) {
-                await fetch(`${API_BASE}/${entry.id}`, {
-                    method: 'DELETE',
-                });
-            }
-            
-            await loadMoodData();
-        }
-    } catch (error) {
-        console.error('Ошибка очистки будущих записей:', error);
+// ======================== 5. КАЛЕНДАРЬ ========================
+function renderCalendar() {
+    const calendarEl = document.getElementById("calendar");
+    if (!calendarEl) return;
+    calendarEl.innerHTML = "";
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    document.getElementById("monthYear").textContent = DateUtils.formatDate(currentDate, { month: 'long', year: 'numeric' });
+
+    const firstDay = new Date(year, month, 1);
+    let startDay = firstDay.getDay();
+    if (startDay === 0) startDay = 7;
+    const daysInMonth = DateUtils.getDaysInMonth(year, month);
+    const prevMonthDays = DateUtils.getDaysInMonth(year, month - 1);
+
+    // дни предыдущего месяца
+    for (let i = startDay - 1; i > 0; i--) {
+        const dayNum = prevMonthDays - i + 1;
+        const day = createDayElement(dayNum, "other-month", true);
+        calendarEl.appendChild(day);
     }
-}
 
-// Основные функции календаря
-const calendar = document.getElementById("calendar");
-const monthYear = document.getElementById("monthYear");
+    const todayDate = new Date();
+    for (let i = 1; i <= daysInMonth; i++) {
+        const dateKey = DateUtils.formatISO(year, month + 1, i);
+        const day = createDayElement(i, "", false);
+        const isToday = DateUtils.isToday(new Date(year, month, i));
+        if (isToday) {
+            day.classList.add("current-day");
+            // точка "сегодня" закомментирована (убрали по желанию)
+            // const todayDot = document.createElement("div");
+            // todayDot.className = "today-dot";
+            // todayDot.title = "Сегодня";
+            // day.appendChild(todayDot);
+        }
+        const dayMoods = moods.filter(entry => entry.date === dateKey);
+        if (dayMoods.length > 0) {
+            const avgMood = dayMoods.reduce((s, m) => s + m.mood, 0) / dayMoods.length;
+            if (avgMood >= 7) day.classList.add("mood-good");
+            else if (avgMood >= 4) day.classList.add("mood-neutral");
+            else day.classList.add("mood-bad");
+            const indicator = document.createElement("div");
+            indicator.classList.add("mood-indicator");
+            day.appendChild(indicator);
+        }
+        day.addEventListener('click', (e) => openDayDetail(dateKey, e));
+        calendarEl.appendChild(day);
+    }
 
-function formatISO(year, month, day) {
-    return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-}
-
-function parseDateISO(str) {
-    const [y, m, d] = str.split("-").map(Number);
-    return new Date(y, m - 1, d);
+    // дни следующего месяца (до 35 ячеек)
+    const totalCells = 35;
+    const filled = startDay - 1 + daysInMonth;
+    for (let i = 1; i <= totalCells - filled; i++) {
+        const day = createDayElement(i, "other-month", true);
+        calendarEl.appendChild(day);
+    }
 }
 
 function createDayElement(dayNumber, className, isOtherMonth) {
-    const dayElement = document.createElement("div");
-    dayElement.classList.add("calendar-day");
-
-    if (className) dayElement.classList.add(className);
-
-    const numberElement = document.createElement("div");
-    numberElement.classList.add("day-number");
-    numberElement.textContent = dayNumber;
-
-    dayElement.appendChild(numberElement);
-
+    const day = document.createElement("div");
+    day.classList.add("calendar-day");
+    if (className) day.classList.add(className);
+    const numberSpan = document.createElement("div");
+    numberSpan.classList.add("day-number");
+    numberSpan.textContent = dayNumber;
+    day.appendChild(numberSpan);
     if (isOtherMonth) {
-        dayElement.style.cursor = 'default';
-        dayElement.style.pointerEvents = 'none';
+        day.style.cursor = 'default';
+        day.style.pointerEvents = 'none';
     }
-
-    return dayElement;
+    return day;
 }
 
 function openDayDetail(dateKey, event) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
-    const selectedDate = new Date(dateKey + 'T00:00:00');
-    
+    const selectedDate = DateUtils.parseISO(dateKey);
     if (selectedDate > today) {
-        showToast('❌ Дата в будущем', 'error');
-        
-        const dayElement = event.target.closest('.calendar-day');
-        if (dayElement && !dayElement.classList.contains('other-month')) {
-            dayElement.style.animation = 'shake 0.5s';
-            setTimeout(() => {
-                dayElement.style.animation = '';
-            }, 500);
+        showToast('❌ Нельзя выбрать дату в будущем', 'error');
+        const dayEl = event.target.closest('.calendar-day');
+        if (dayEl && !dayEl.classList.contains('other-month')) {
+            dayEl.style.animation = 'shake 0.5s';
+            setTimeout(() => dayEl.style.animation = '', 500);
         }
-        
         return;
     }
-    
     window.location.href = `/calendar/day/${dateKey}`;
-}
-
-// Основная функция отрисовки календаря
-function renderCalendar() {
-    if (!calendar) return;
-    
-    calendar.innerHTML = "";
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-
-    monthYear.textContent = currentDate.toLocaleString("ru-RU", { 
-        month: "long", year: "numeric" 
-    });
-
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    const daysInMonth = lastDay.getDate();
-    
-    let startDay = firstDay.getDay();
-    if (startDay === 0) startDay = 7;
-
-    const prevMonthDays = new Date(year, month, 0).getDate();
-    for (let i = startDay - 1; i > 0; i--) {
-        const day = createDayElement(prevMonthDays - i + 1, "other-month", true);
-        calendar.appendChild(day);
-    }
-
-    const today = new Date();
-
-    for (let i = 1; i <= daysInMonth; i++) {
-        const dateKey = formatISO(year, month + 1, i);
-        const day = createDayElement(i, "", false);
-
-        const isToday = today.getDate() === i && 
-                today.getMonth() === month && 
-                today.getFullYear() === year;
-        if (isToday) {
-            day.classList.add("current-day");
-            
-             //const todayDot = document.createElement("div");
-             //todayDot.className = "today-dot";
-             //todayDot.title = "Сегодня";
-             //day.appendChild(todayDot);
-        }
-
-        const dayMoods = moods.filter(entry => entry.date === dateKey);
-        if (dayMoods.length > 0) {
-            const avgMood = dayMoods.reduce((s, m) => s + m.mood, 0) / dayMoods.length;
-
-            if (avgMood >= 7) day.classList.add("mood-good");
-            else if (avgMood >= 4) day.classList.add("mood-neutral");
-            else day.classList.add("mood-bad");
-
-            const indicator = document.createElement("div");
-            indicator.classList.add("mood-indicator");
-            day.appendChild(indicator);
-        }
-
-        day.addEventListener('click', function(event) {
-            openDayDetail(dateKey, event);
-        });
-
-        calendar.appendChild(day);
-    }
-
-    const totalCells = 35;
-    const filledCells = startDay - 1 + daysInMonth;
-
-    if (filledCells < totalCells) {
-        for (let i = 1; i <= totalCells - filledCells; i++) {
-            const day = createDayElement(i, "other-month", true);
-            calendar.appendChild(day);
-        }
-    }
 }
 
 function changeMonth(step) {
@@ -1196,307 +1022,290 @@ function goToToday() {
     updateStats();
 }
 
+// ======================== 6. СТАТИСТИКА (исправлена) ========================
 async function updateStats() {
     try {
         const year = currentDate.getFullYear();
         const month = currentDate.getMonth();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-        // Группируем записи по дням
-        const dailyMoods = new Map(); // ключ: "YYYY-MM-DD", значение: массив mood
-
+        const daysInMonth = DateUtils.getDaysInMonth(year, month);
+        const dailyMoods = new Map();
         moods.forEach(entry => {
             const date = entry.date;
             if (!dailyMoods.has(date)) dailyMoods.set(date, []);
             dailyMoods.get(date).push(entry.mood);
         });
-
-        // Фильтруем только дни текущего месяца
-        let goodDaysCount = 0;
-        let totalMoodSum = 0;
-        let daysWithMood = 0;
+        let goodDaysCount = 0, totalMoodSum = 0, daysWithMood = 0;
         const filledDates = new Set();
-
         for (const [date, moodValues] of dailyMoods.entries()) {
-            const entryDate = new Date(date + 'T00:00:00');
+            const entryDate = DateUtils.parseISO(date);
             if (entryDate.getFullYear() === year && entryDate.getMonth() === month) {
                 filledDates.add(date);
-                const avgMood = moodValues.reduce((a, b) => a + b, 0) / moodValues.length;
+                const avgMood = moodValues.reduce((a,b)=>a+b,0) / moodValues.length;
                 totalMoodSum += avgMood;
                 daysWithMood++;
                 if (avgMood >= 7) goodDaysCount++;
             }
         }
-
         const avgMoodValue = daysWithMood > 0 ? (totalMoodSum / daysWithMood).toFixed(1) : "0.0";
-
         document.getElementById("goodDays").textContent = goodDaysCount;
         document.getElementById("avgMood").textContent = avgMoodValue;
         document.getElementById("filledDays").textContent = `${filledDates.size}/${daysInMonth}`;
-
     } catch (error) {
-        console.error('Ошибка обновления статистики:', error);
-        const year = currentDate.getFullYear();
-        const month = currentDate.getMonth();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        console.error('Ошибка статистики:', error);
+        const year = currentDate.getFullYear(), month = currentDate.getMonth();
+        const daysInMonth = DateUtils.getDaysInMonth(year, month);
         document.getElementById("goodDays").textContent = "0";
         document.getElementById("avgMood").textContent = "0.0";
         document.getElementById("filledDays").textContent = `0/${daysInMonth}`;
     }
 }
 
-
-// ==========================================================================
-// ФУНКЦИИ ДЛЯ ЗАГРУЗКИ ЗАМЕТОК, ЦЕЛЕЙ И РАДОСТЕЙ
-// ==========================================================================
-
+// ======================== 7. ЗАМЕТКИ, ЦЕЛИ, РАДОСТИ ========================
 const NOTES_API = "{{ url_for('main.mood_entries') }}";
 const GOALS_API = "{{ url_for('main.goals') }}";
 const JOYS_API = "{{ url_for('main.joys') }}";
 
-// Загрузка всех заметок
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+function getMoodEmojiFromValue(v) {
+    if (v >= 8) return '😊';
+    if (v >= 5) return '😐';
+    if (v >= 3) return '😕';
+    return '😞';
+}
+
+function getMoodColorClass(v) {
+    if (v >= 7) return 'mood-badge-good';
+    if (v >= 4) return 'mood-badge-neutral';
+    return 'mood-badge-bad';
+}
+
+// ЗАМЕТКИ
 async function loadAllNotes() {
     try {
-        const response = await fetch(NOTES_API);
-        if (!response.ok) throw new Error('Ошибка загрузки заметок');
-        
-        const entries = await response.json();
-        
-        // Фильтруем только те записи, где есть заметки
+        const resp = await fetch(NOTES_API);
+        if (!resp.ok) throw new Error();
+        const entries = await resp.json();
         const notesWithText = entries
-            .filter(entry => entry.note && entry.note.trim() !== '')
-            .sort((a, b) => new Date(b.date) - new Date(a.date))
-            .slice(0, 10); // Последние 10 заметок
-        
+            .filter(e => e.note && e.note.trim() !== '')
+            .sort((a,b) => new Date(b.date) - new Date(a.date))
+            .slice(0,10);
         renderNotesList(notesWithText);
     } catch (error) {
-        console.error('❌ Ошибка загрузки заметок:', error);
+        console.error('Ошибка загрузки заметок:', error);
         document.getElementById('notesList').innerHTML = '<div class="empty-list">Ошибка загрузки заметок</div>';
     }
 }
 
-// Загрузка всех целей
-async function loadAllGoals() {
-    try {
-        // Получаем все цели БЕЗ фильтра по дате
-        const response = await fetch(GOALS_API);
-        if (!response.ok) throw new Error('Ошибка загрузки целей');
-        
-        const goals = await response.json();
-        console.log('✅ Загружены цели:', goals);
-        
-        // Сортируем по дате (сначала новые) и берем последние 10
-        const recentGoals = goals
-            .sort((a, b) => {
-                const dateA = new Date(a.created_at || a.date || 0);
-                const dateB = new Date(b.created_at || b.date || 0);
-                return dateB - dateA;
-            })
-            .slice(0, 10);
-        
-        renderGoalsList(recentGoals);
-    } catch (error) {
-        console.error('❌ Ошибка загрузки целей:', error);
-        document.getElementById('goalsList').innerHTML = '<div class="empty-list">Ошибка загрузки целей</div>';
-    }
-}
-
-
-
-// Загрузка всех радостей
-async function loadAllJoys() {
-    try {
-        // Получаем все радости БЕЗ фильтра по дате
-        const response = await fetch(JOYS_API);
-        if (!response.ok) throw new Error('Ошибка загрузки радостей');
-        
-        const joys = await response.json();
-        console.log('✅ Загружены радости:', joys);
-        
-        // Сортируем по дате (сначала новые) и берем последние 10
-        const recentJoys = joys
-            .sort((a, b) => {
-                const dateA = new Date(a.created_at || a.date || 0);
-                const dateB = new Date(b.created_at || b.date || 0);
-                return dateB - dateA;
-            })
-            .slice(0, 10);
-        
-        renderJoysList(recentJoys);
-    } catch (error) {
-        console.error('❌ Ошибка загрузки радостей:', error);
-        document.getElementById('joysList').innerHTML = '<div class="empty-list">Ошибка загрузки радостей</div>';
-    }
-}
-
-// Функция для получения эмодзи по настроению
-function getMoodEmojiFromValue(moodValue) {
-    if (moodValue >= 8) return '😊';
-    if (moodValue >= 5) return '😐';
-    if (moodValue >= 3) return '😕';
-    return '😞';
-}
-
-// Функция для получения цвета настроения
-function getMoodColorClass(moodValue) {
-    if (moodValue >= 7) return 'mood-badge-good';
-    if (moodValue >= 4) return 'mood-badge-neutral';
-    return 'mood-badge-bad';
-}
-
-// Отрисовка списка заметок
 function renderNotesList(notes) {
     const container = document.getElementById('notesList');
-    
-    if (!notes || notes.length === 0) {
+    if (!notes.length) {
         container.innerHTML = '<div class="empty-list">📝 Пока нет заметок</div>';
         return;
     }
-    
-    container.innerHTML = notes.map(note => {
-        const date = new Date(note.date + 'T00:00:00');
-        const formattedDate = date.toLocaleDateString('ru-RU', {
-            day: 'numeric',
-            month: 'long'
-        });
-        const emoji = getMoodEmojiFromValue(note.mood);
-        const moodClass = getMoodColorClass(note.mood);
-        
+    container.innerHTML = notes.map(n => {
+        const date = DateUtils.parseISO(n.date);
+        const formattedDate = DateUtils.formatDate(date);
+        const emoji = getMoodEmojiFromValue(n.mood);
+        const moodClass = getMoodColorClass(n.mood);
         return `
             <div class="note-item">
                 <div class="note-header">
                     <span class="note-date">${formattedDate}</span>
-                    <span class="note-mood ${moodClass}">${emoji} ${note.mood}/10</span>
+                    <span class="note-mood ${moodClass}">${emoji} ${n.mood}/10</span>
                 </div>
-                <div class="note-text">${note.note}</div>
+                <div class="note-text">${escapeHtml(n.note)}</div>
             </div>
         `;
     }).join('');
 }
 
-// Отрисовка списка целей
+// ЦЕЛИ
+async function loadAllGoals() {
+    try {
+        const resp = await fetch(GOALS_API);
+        if (!resp.ok) throw new Error();
+        const goals = await resp.json();
+        const recent = goals.sort((a,b) => new Date(b.created_at || b.date || 0) - new Date(a.created_at || a.date || 0)).slice(0,10);
+        renderGoalsList(recent);
+    } catch (error) {
+        console.error('Ошибка загрузки целей:', error);
+        document.getElementById('goalsList').innerHTML = '<div class="empty-list">Ошибка загрузки целей</div>';
+    }
+}
+
 function renderGoalsList(goals) {
     const container = document.getElementById('goalsList');
-    
-    if (!goals || goals.length === 0) {
-        container.innerHTML = '<div class="empty-list">🎯 Пока нет целей</div>';
+    if (!goals.length) {
+        container.innerHTML = '<div class="empty-list">🎯 Пока нет целей. Нажмите "+ Новая цель"</div>';
         return;
     }
-    
-    container.innerHTML = goals.map(goal => {
-        const date = new Date(goal.created_at || goal.date);
-        const formattedDate = date.toLocaleDateString('ru-RU', {
-            day: 'numeric',
-            month: 'long'
-        });
-        const statusClass = goal.completed ? 'goal-completed' : 'goal-pending';
-        const statusIcon = goal.completed ? '✅' : '⭕';
-        
+    container.innerHTML = goals.map(g => {
+        const date = new Date(g.created_at || g.date);
+        const formattedDate = DateUtils.formatDate(date);
+        const completed = g.completed === true;
+        const statusIcon = completed ? '✅' : '◻️';
         return `
-            <div class="goal-item ${statusClass}">
+            <div class="goal-item ${completed ? 'goal-completed' : ''}" data-id="${g.id}">
                 <div class="goal-header">
                     <span class="goal-date">${formattedDate}</span>
-                    <span class="goal-status">${statusIcon}</span>
+                    <button class="goal-toggle" data-id="${g.id}" data-completed="${completed}" style="background:none; border:none; cursor:pointer; font-size:18px;">${statusIcon}</button>
                 </div>
-                <div class="goal-text">${goal.text}</div>
+                <div class="goal-text">${escapeHtml(g.text)}</div>
             </div>
         `;
     }).join('');
+    // обработчики для кнопок выполнения
+    document.querySelectorAll('.goal-toggle').forEach(btn => {
+        btn.removeEventListener('click', handleGoalToggle);
+        btn.addEventListener('click', handleGoalToggle);
+    });
 }
 
-// Отрисовка списка радостей
+async function handleGoalToggle(e) {
+    e.stopPropagation();
+    const btn = e.currentTarget;
+    const goalId = btn.dataset.id;
+    const currentCompleted = btn.dataset.completed === 'true';
+    const newCompleted = !currentCompleted;
+    try {
+        const resp = await fetch(`${GOALS_API}/${goalId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ completed: newCompleted })
+        });
+        if (!resp.ok) throw new Error();
+        showToast(newCompleted ? 'Цель выполнена!' : 'Цель отмечена как невыполненная', 'success');
+        await loadAllGoals();
+    } catch (error) {
+        console.error('Ошибка обновления цели:', error);
+        showToast('Не удалось обновить цель', 'error');
+    }
+}
+
+// РАДОСТИ
+async function loadAllJoys() {
+    try {
+        const resp = await fetch(JOYS_API);
+        if (!resp.ok) throw new Error();
+        const joys = await resp.json();
+        const recent = joys.sort((a,b) => new Date(b.created_at || b.date || 0) - new Date(a.created_at || a.date || 0)).slice(0,10);
+        renderJoysList(recent);
+    } catch (error) {
+        console.error('Ошибка загрузки радостей:', error);
+        document.getElementById('joysList').innerHTML = '<div class="empty-list">Ошибка загрузки радостей</div>';
+    }
+}
+
 function renderJoysList(joys) {
     const container = document.getElementById('joysList');
-    
-    if (!joys || joys.length === 0) {
+    if (!joys.length) {
         container.innerHTML = '<div class="empty-list">✨ Пока нет радостей</div>';
         return;
     }
-    
-    container.innerHTML = joys.map(joy => {
-        const date = new Date(joy.created_at || joy.date);
-        const formattedDate = date.toLocaleDateString('ru-RU', {
-            day: 'numeric',
-            month: 'long',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        
+    container.innerHTML = joys.map(j => {
+        const date = new Date(j.created_at || j.date);
+        const formattedDate = DateUtils.formatDate(date, { day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
         return `
             <div class="joy-item">
                 <div class="joy-header">
                     <span class="joy-icon">🌟</span>
                     <span class="joy-date">${formattedDate}</span>
                 </div>
-                <div class="joy-text">${joy.text}</div>
+                <div class="joy-text">${escapeHtml(j.text)}</div>
             </div>
         `;
     }).join('');
 }
 
-// Обновить все данные
-async function refreshAllData() {
-    await Promise.all([
-        loadAllNotes(),
-        loadAllGoals(),
-        loadAllJoys()
-    ]);
+// ======================== 8. ДОБАВЛЕНИЕ НОВОЙ ЦЕЛИ (модальное окно) ========================
+function initGoalModal() {
+    const modal = document.getElementById('newGoalModal');
+    const overlay = document.getElementById('goalOverlay');
+    const addBtn = document.getElementById('addGoalBtn');
+    const saveBtn = document.getElementById('saveGoalBtn');
+    const cancelBtn = document.getElementById('cancelGoalBtn');
+    const textarea = document.getElementById('goalText');
+    if (!modal || !addBtn) return;
+    const open = () => { modal.style.display = 'block'; overlay.style.display = 'block'; textarea.value = ''; textarea.focus(); };
+    const close = () => { modal.style.display = 'none'; overlay.style.display = 'none'; };
+    addBtn.onclick = open;
+    if (cancelBtn) cancelBtn.onclick = close;
+    if (overlay) overlay.onclick = close;
+    if (saveBtn) {
+        saveBtn.onclick = async () => {
+            const text = textarea.value.trim();
+            if (!text) { showToast('Введите текст цели', 'error'); return; }
+            try {
+                const resp = await fetch(GOALS_API, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text })
+                });
+                if (!resp.ok) throw new Error();
+                showToast('Цель добавлена!', 'success');
+                close();
+                await loadAllGoals();
+            } catch (error) {
+                console.error('Ошибка создания цели:', error);
+                showToast('Не удалось добавить цель', 'error');
+            }
+        };
+    }
 }
 
-// Добавить в инициализацию загрузку новых данных
-document.addEventListener('DOMContentLoaded', async function() {
+// ======================== 9. ИНИЦИАЛИЗАЦИЯ (ЕДИНСТВЕННЫЙ DOMContentLoaded) ========================
+document.addEventListener('DOMContentLoaded', async () => {
     try {
-        console.log('🚀 Инициализация страницы календаря...');
-        
-        // Загружаем данные
-        const loaded = await loadMoodData();
-        console.log('✅ Настроения загружены:', moods.length, 'записей');
-        
-        // Отрисовываем календарь
+        console.log('🚀 Инициализация календаря...');
+        await loadMoodData();
         renderCalendar();
-        
-        // Обновляем статистику
         updateStats();
-        
-        // Загружаем заметки, цели и радости
-        await refreshAllData();
-        
-        // Очищаем будущие записи в фоне
-        cleanupFutureEntries();
-    } catch (error) {
-        console.error('❌ Ошибка инициализации:', error);
+        await Promise.all([loadAllNotes(), loadAllGoals(), loadAllJoys()]);
+        initGoalModal();
+        cleanupFutureEntries(); // фоновая очистка будущих записей
+    } catch (err) {
+        console.error('❌ Критическая ошибка инициализации:', err);
+        showToast('Ошибка загрузки страницы, перезагрузите', 'error');
     }
 });
 
-// Делаем функцию глобальной
-window.refreshCalendarData = refreshCalendarData;
-// Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', async function() {
+async function cleanupFutureEntries() {
+    const today = new Date().toISOString().split('T')[0];
     try {
-        console.log('🚀 Инициализация страницы календаря...');
-        
-        // Загружаем данные
-        const loaded = await loadMoodData();
-        console.log('✅ Настроения загружены:', moods.length, 'записей');
-        
-        // Отрисовываем календарь
-        renderCalendar();
-        
-        // Обновляем статистику
-        updateStats();
-        
-        // Очищаем будущие записи в фоне
-        cleanupFutureEntries();
-    } catch (error) {
-        console.error('❌ Ошибка инициализации:', error);
-    }
-});
+        const resp = await fetch(API_BASE);
+        if (!resp.ok) return;
+        const all = await resp.json();
+        const future = all.filter(e => e.date > today);
+        for (const e of future) {
+            await fetch(`${API_BASE}/${e.id}`, { method: 'DELETE' });
+        }
+        if (future.length) await loadMoodData();
+    } catch (err) { console.warn('Очистка будущих записей не удалась:', err); }
+}
 
-// Делаем функции глобальными для использования в HTML
+// глобальные функции для HTML-кнопок
 window.changeMonth = changeMonth;
 window.goToToday = goToToday;
 window.showToast = showToast;
-window.renderCalendar = renderCalendar;
-window.updateStats = updateStats;
 </script>
+
+<!-- Модальное окно для новой цели -->
+<div id="newGoalModal" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:white; padding:25px; border-radius:20px; z-index:10000; width:90%; max-width:400px; box-shadow:0 0 100px rgba(0,0,0,0.3);">
+    <h3 style="margin-top:0; color:#FF70EC;">Новая цель</h3>
+    <textarea id="goalText" rows="3" style="width:100%; padding:10px; border-radius:12px; border:1px solid #ddd; margin:15px 0; resize:vertical;" placeholder="Что вы хотите достичь?"></textarea>
+    <div style="display:flex; gap:10px;">
+        <button id="saveGoalBtn" style="flex:1; background:#FF70EC; color:white; border:none; padding:10px; border-radius:12px; cursor:pointer;">Сохранить</button>
+        <button id="cancelGoalBtn" style="flex:1; background:#ccc; color:#333; border:none; padding:10px; border-radius:12px; cursor:pointer;">Отмена</button>
+    </div>
+</div>
+<div id="goalOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999;"></div>
 {% endblock %}

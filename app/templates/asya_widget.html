@@ -1,6 +1,5 @@
-<!-- Виджет Аси - поддерживающий чат с ИНТЕГРИРОВАННОЙ аналитикой -->
+<!-- Виджет Аси - стабильная версия -->
 <div id="asya-widget">
-  <!-- КРУТАЯ Иконка -->
   <div id="asya-icon" class="asya-icon">
     <div class="icon-avatar">
       <div class="avatar-face">
@@ -10,51 +9,27 @@
       </div>
     </div>
     <div class="asya-name-badge">Ася</div>
-    <div class="notification-badge" id="notification-badge" style="display: none;">!</div>
-    <div class="analytics-badge" id="analytics-badge" title="Доступна аналитика" style="display: none;">📊</div>
-    <div class="pulse-ring"></div>
+    <div class="analytics-badge" id="analytics-badge" style="display:none;">📊</div>
   </div>
-  
-  <!-- Чат -->
+
   <div id="asya-chat" class="asya-chat">
     <div class="chat-header">
-      <div class="header-left">
-        <div class="header-avatar">
-          <div class="eye"></div>
-          <div class="eye"></div>
-          <div class="smile"></div>
-        </div>
-        <div>
-          <span id="asya-name">Ася • аналитик настроения</span>
-          <div class="typing-indicator" id="typing-indicator" style="display: none;">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-        </div>
-      </div>
-      <div class="header-right">
-        <button id="asya-analytics" class="analytics-btn" title="Полный анализ">
-          📈
-        </button>
-        <button id="asya-close" class="close-btn">✕</button>
+      <span>Ася • эмоциональный помощник</span>
+      <div>
+        <button id="asya-analytics">📈</button>
+        <button id="asya-close">✕</button>
       </div>
     </div>
+
     <div class="chat-body">
       <div id="asya-messages">
         <div class="message asya-message">
-          <strong>Привет! Я Ася — твой цифровой помощник.</strong><br><br>
-          Я анализирую не только твои сообщения, но и записи из дневника настроения, чтобы дать полную картину твоего состояния. Расскажи, как твой день?
+          Привет! Я Ася 💫 Расскажи, как прошёл твой день?
         </div>
       </div>
+
       <div class="chat-input">
-        <input
-          type="text"
-          id="asya-input"
-          placeholder="Расскажи Асе о своём дне..."
-          maxlength="500"
-          autocomplete="off"
-        >
+        <input id="asya-input" placeholder="Напиши сообщение..." maxlength="500">
         <button id="asya-send">➤</button>
       </div>
     </div>
@@ -62,32 +37,29 @@
 </div>
 
 <style>
-
 #asya-widget {
   position: fixed;
   bottom: 25px;
   right: 25px;
   z-index: 9000;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
-/* ===== ИКОНКА ===== */
 .asya-icon {
   width: 70px;
   height: 70px;
-  background: linear-gradient(135deg, #667eea, #764ba2);
   border-radius: 50%;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
   cursor: pointer;
   position: relative;
-  box-shadow: 0 10px 30px rgba(102,126,234,.4);
-  transition: .4s cubic-bezier(.175,.885,.32,1.275);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
 }
-
 .asya-icon:hover {
-  transform: scale(1.15) rotate(5deg);
+  transform: scale(1.05);
 }
 
 .icon-avatar {
@@ -95,7 +67,6 @@
   height: 40px;
   position: relative;
 }
-
 .eye {
   position: absolute;
   width: 8px;
@@ -104,10 +75,8 @@
   border-radius: 50%;
   top: 35%;
 }
-
 .eye.left { left: 8px; }
 .eye.right { right: 8px; }
-
 .smile {
   position: absolute;
   width: 16px;
@@ -119,32 +88,16 @@
   left: 12px;
 }
 
-/* ===== БЕЙДЖИ ===== */
 .asya-name-badge {
   position: absolute;
   top: -5px;
   right: -5px;
-  background: linear-gradient(135deg,#FF70EC,#60F4E3);
+  background: linear-gradient(135deg, #FF70EC, #60F4E3);
   padding: 2px 8px;
   font-size: 10px;
   border-radius: 12px;
   font-weight: 700;
 }
-
-.notification-badge {
-  position: absolute;
-  top: 0;
-  left: 0;
-  background: #FF4757;
-  color: white;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-
 .analytics-badge {
   position: absolute;
   bottom: -8px;
@@ -152,590 +105,247 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg,#FFD93D,#FF6B6B);
+  background: linear-gradient(135deg, #FFD93D, #FF6B6B);
   display: none;
   align-items: center;
   justify-content: center;
+  font-size: 14px;
 }
 
-/* ===== ЧАТ ===== */
 .asya-chat {
   display: none;
   flex-direction: column;
-  width: 600px;
-  height: 650px;
-  background: linear-gradient(135deg,rgba(255,255,255,.95),rgba(255,249,252,.98));
-  border-radius: 24px;   /* ← ВЕРНУЛИ СКРУГЛЕНИЕ */
-  box-shadow: 0 25px 50px rgba(0,0,0,.15);
+  width: 420px;
+  height: 600px;
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
   margin-bottom: 15px;
-  overflow: hidden;     /* ← КРИТИЧЕСКИ ВАЖНО для углов */
-  transform: translateY(20px) scale(.95);
-  opacity: 0;
-  transition: .4s cubic-bezier(.175,.885,.32,1.275);
 }
-
 .asya-chat.open {
   display: flex;
-  transform: none;
-  opacity: 1;
 }
 
-/* ===== ХЕДЕР ===== */
 .chat-header {
-  background: linear-gradient(135deg,#667eea,#764ba2);
-  padding: 18px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  padding: 15px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-weight: 600;
+}
+.chat-header button {
+  background: rgba(255,255,255,0.2);
+  border: none;
   color: white;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-.header-avatar {
-  width: 42px;
-  height: 42px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.3);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.analytics-btn, .close-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.3);
-  background: rgba(255,255,255,.2);
-  color: white;
   cursor: pointer;
+  margin-left: 8px;
+  transition: background 0.2s;
+}
+.chat-header button:hover {
+  background: rgba(255,255,255,0.4);
 }
 
-/* ===== ТЕЛО ===== */
 .chat-body {
   display: flex;
   flex-direction: column;
   flex: 1;
-  min-height: 0;   /* ← чтобы сообщения не сжимали инпут */
-  background: linear-gradient(180deg,#f8f9ff,#fff5f9);
+  overflow: hidden;
 }
 
 #asya-messages {
   flex: 1;
-  padding: 20px;
+  padding: 15px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
-  gap: 15px;
-}
-/* ===== СООБЩЕНИЯ ===== */
-.message {
-  padding: 14px 18px;
-  border-radius: 20px;
-  max-width: 85%;
+  gap: 10px;
 }
 
+.message {
+  padding: 10px 14px;
+  border-radius: 18px;
+  max-width: 80%;
+  word-wrap: break-word;
+  line-height: 1.4;
+}
 .user-message {
-  background: linear-gradient(135deg,#667eea,#764ba2);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   align-self: flex-end;
+  border-bottom-right-radius: 4px;
 }
-
 .asya-message {
-  background: white;
+  background: #f0f0f0;
+  color: #333;
   align-self: flex-start;
+  border-bottom-left-radius: 4px;
 }
 
-/* ===== ВВОД ===== */
 .chat-input {
-  padding: 14px 16px;   /* ← нормальная высота */
   display: flex;
-  gap: 12px;
+  padding: 12px;
+  border-top: 1px solid #eee;
   background: white;
-  border-top: 1px solid #ffd6e7;
-  flex-shrink: 0;       /* ← НЕ даём сжиматься */
+  gap: 10px;
 }
-
 #asya-input {
   flex: 1;
-  padding: 12px 16px;   /* ← ВОТ ЭТО решает "узкое поле" */
-  border-radius: 20px;
-  border: 2px solid #ffd6e7;
+  padding: 10px 15px;
+  border-radius: 25px;
+  border: 1px solid #ddd;
   font-size: 14px;
-  min-height: 42px;     /* ← КРИТИЧЕСКИ */
+  outline: none;
+  transition: border 0.2s;
 }
-
+#asya-input:focus {
+  border-color: #667eea;
+}
 #asya-send {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg,#ff6b9d,#c779d0);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   border: none;
+  cursor: pointer;
+  font-size: 18px;
+  transition: transform 0.2s;
+}
+#asya-send:hover {
+  transform: scale(1.05);
 }
 
-/* ====== МОБИЛЬНАЯ ВЕРСИЯ ====== */
 @media (max-width: 768px) {
-
-  /* Основной виджет */
-  #asya-widget {
-    bottom: 20px;
-    right: 20px;
-    left: auto;
-    width: auto;
-    height: auto;
-    background: transparent;
-    z-index: 10000;
-  }
-
-  /* Иконка Аси */
-  .asya-icon {
-    width: 65px;
-    height: 65px;
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 10001;
-    transition: all 0.3s ease;
-  }
-
-  /* Иконка при открытом чате */
-  body.asya-chat-open .asya-icon {
-    bottom: auto !important;
-    top: 16px !important;
-    left: 16px !important;
-    right: auto !important;
-    transform: scale(0.8) !important;
-    z-index: 10010 !important;
-  }
-
-  /* Основное окно чата */
   .asya-chat {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    max-width: 100vw !important;
-    max-height: 100vh !important;
-    border-radius: 0 !important;
-    margin: 0 !important;
-    z-index: 9999 !important;
-    transform: translateY(100%);
-    transition: transform 0.4s ease-out;
-    padding-top: 60px !important; /* подняли вплотную к хедеру дашборда */
-    box-shadow: none !important;
-    border: none !important;
-    background: linear-gradient(to bottom, 
-      transparent 0px, 
-      transparent 60px, 
-      rgba(255, 249, 252, 0.98) 60px, 
-      rgba(255, 249, 252, 0.98) 100%
-    ) !important;
-  }
-
-  /* Открытый чат */
-  .asya-chat.open {
-    display: flex !important;
-    transform: translateY(0) !important;
-  }
-
-  /* Блокировка скролла дашборда */
-  body.asya-chat-open {
-    overflow: hidden !important;
-  }
-
-  /* Хедер Аси */
-  .chat-header {
-    position: sticky !important;
-    top: 0 !important;
-    min-height: 60px;
-    padding: 12px 14px;
-    z-index: 10 !important;
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     border-radius: 0;
-    flex-shrink: 0;
-    background: linear-gradient(135deg, #4f63e0, #6a45b8) !important;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    margin-top: -60px !important; /* вплотную к хедеру дашборда */
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    margin: 0;
   }
-
-  /* Тело чата */
-  .chat-body {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    padding-top: env(safe-area-inset-top);
-    padding-top: constant(safe-area-inset-top);
-    padding-bottom: calc(env(safe-area-inset-bottom) + 80px) !important; /* подняли выше нижней панели */
-    padding-bottom: calc(constant(safe-area-inset-bottom) + 80px) !important;
-    height: calc(100vh - 60px) !important;
-    max-height: calc(100vh - 60px) !important;
-    background: linear-gradient(180deg, #f8f9ff 0%, #fff5f9 100%) !important;
+  .asya-icon {
+    width: 55px;
+    height: 55px;
   }
-
-  /* Контейнер сообщений */
-  #asya-messages {
-    flex: 1;
-    padding: 20px 16px 140px !important;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    min-height: 0;
-    background: transparent !important;
-  }
-
-  /* Поле ввода */
-  .chat-input {
-    position: fixed !important;
-    bottom: 40px !important;
-    left: 0 !important;
-    right: 0 !important;
-    background: white;
-    padding: 16px 16px;
-    border-top: 2px solid rgba(255, 214, 231, 0.8);
-    z-index: 100 !important;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
-    padding-bottom: calc(max(16px, env(safe-area-inset-bottom)) + 20px) !important; /* подняли выше нижней панели */
-  }
-
-  #asya-input {
-    padding: 14px 18px;
-    font-size: 16px;
-    height: auto;
-    min-height: 50px;
-    flex: 1;
-    padding-left: max(18px, env(safe-area-inset-left));
-    padding-left: max(18px, constant(safe-area-inset-left));
-    padding-right: max(18px, env(safe-area-inset-right));
-    padding-right: max(18px, constant(safe-area-inset-right));
-  }
-
-  #asya-send {
-    width: 50px;
-    height: 50px;
-    font-size: 20px;
-    flex-shrink: 0;
-    margin-right: env(safe-area-inset-right);
-    margin-right: constant(safe-area-inset-right);
-  }
-
-  /* Текст хедера */
-  #asya-name {
-    color: white !important;
-    font-weight: 600 !important;
-    font-size: 14px !important;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
-  }
-
-  /* Сообщения */
-  .message {
-    max-width: 85%;
-    font-size: 15px;
-    line-height: 1.4;
-    padding: 12px 16px;
-    margin-bottom: 10px;
-  }
-
-  .user-message {
-    max-width: 80%;
+  .icon-avatar {
+    width: 30px;
+    height: 30px;
   }
 }
-
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('🚀 Чат-бот Ася запускается...');
-  
+(function() {
   const icon = document.getElementById('asya-icon');
   const chat = document.getElementById('asya-chat');
   const closeBtn = document.getElementById('asya-close');
   const input = document.getElementById('asya-input');
   const sendBtn = document.getElementById('asya-send');
   const messages = document.getElementById('asya-messages');
-  const typingIndicator = document.getElementById('typing-indicator');
-  const notificationBadge = document.getElementById('notification-badge');
   const analyticsBtn = document.getElementById('asya-analytics');
-  
-  let lastReply = '';
 
-  if (!icon || !chat) {
-    console.error('❌ Ошибка: элементы чата не найдены!');
-    return;
-  }
-  
-  console.log('✅ Все элементы найдены');
-  
-  // === ОСНОВНЫЕ ФУНКЦИИ ===
-  function updateAnalyticsBadge() {
-    const userMessages = document.querySelectorAll('.message.user-message');
-    if (userMessages.length >= 2) {
-      document.getElementById('analytics-badge').style.display = 'flex';
-    }
-  }
-  
-  function saveChatHistory() {
-    const messageElements = messages.querySelectorAll('.message.user-message, .message.asya-message');
-    const history = Array.from(messageElements).map(el => ({
+  if (!icon || !chat) return;
+
+  let chatHistory = JSON.parse(localStorage.getItem('asya_chat_history') || '[]');
+
+  function saveHistory() {
+    const history = Array.from(messages.querySelectorAll('.message')).map(el => ({
       text: el.textContent,
-      sender: el.dataset.sender || (el.classList.contains('user-message') ? 'user' : 'asya'),
-      timestamp: el.dataset.time || new Date().toISOString()
+      sender: el.classList.contains('user-message') ? 'user' : 'asya',
+      timestamp: new Date().toISOString()
     }));
-    
     localStorage.setItem('asya_chat_history', JSON.stringify(history));
-    console.log('💾 История сохранена:', history.length, 'сообщений');
+    chatHistory = history;
   }
-  
-  function addMessage(text, sender, save = true) {
+
+  function addMessage(text, sender) {
     const div = document.createElement('div');
     div.className = `message ${sender}-message`;
     div.textContent = text;
-    div.dataset.time = new Date().toISOString();
-    div.dataset.sender = sender;
-    
     messages.appendChild(div);
-    
-    setTimeout(() => {
-      messages.scrollTop = messages.scrollHeight;
-    }, 50);
-    
-    if (save) saveChatHistory();
-    
-    console.log(`💬 ${sender === 'user' ? 'Вы' : 'Ася'}: "${text.substring(0, 30)}${text.length > 30 ? '...' : ''}"`);
+    messages.scrollTop = messages.scrollHeight;
+    saveHistory();
   }
-  
+
+  // Восстановление истории
+  if (chatHistory.length > 0 && messages.children.length === 1) {
+    messages.innerHTML = '';
+    chatHistory.forEach(msg => {
+      const div = document.createElement('div');
+      div.className = `message ${msg.sender === 'user' ? 'user-message' : 'asya-message'}`;
+      div.textContent = msg.text;
+      messages.appendChild(div);
+    });
+  }
+
   async function sendMessage() {
     const text = input.value.trim();
     if (!text) return;
-    
-    console.log('📤 Отправка пользователя:', text);
-    
+
     addMessage(text, 'user');
     input.value = '';
-    
-    typingIndicator.style.display = 'flex';
-    
+
+    // Индикатор печати
+    const typingDiv = document.createElement('div');
+    typingDiv.className = 'message asya-message';
+    typingDiv.textContent = 'Ася печатает...';
+    messages.appendChild(typingDiv);
+    messages.scrollTop = messages.scrollHeight;
+
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: text
+          message: text,
+          history: chatHistory.slice(-10)
         })
       });
-      
-      console.log('📥 Статус ответа:', response.status);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      
+
       const data = await response.json();
-      
-      console.log('✅ Данные ответа:', {
-        success: data.success,
-        has_analysis: data.has_analysis,
-        reply_length: data.reply?.length || 0
-      });
-      
-      typingIndicator.style.display = 'none';
-      
-      if (data.success) {
+      typingDiv.remove();
+
+      if (data && data.reply) {
         addMessage(data.reply, 'asya');
-        console.log('🤖 Ответ от YandexGPT:', data.reply.substring(0, 100) + '...');
       } else {
-        const fallbackReplies = [
-          'Кажется, у меня временные технические сложности. Но я здесь для тебя! 🌸',
-          'Ой, что-то пошло не так. Попробуй сказать мне что-нибудь ещё? 💫',
-          'Извини, возникла небольшая проблема. Я все равно слушаю тебя! 🤗'
-        ];
-        const reply = fallbackReplies[Math.floor(Math.random() * fallbackReplies.length)];
-        addMessage(reply, 'asya');
+        addMessage('Ошибка ответа сервера 😕', 'asya');
       }
-      
     } catch (error) {
-      console.error('❌ Ошибка при отправке сообщения:', error);
-      typingIndicator.style.display = 'none';
-      
-      const networkReplies = [
-        'Кажется, проблемы с интернет-соединением. Проверь подключение! 🌐',
-        'Не могу подключиться к серверу. Убедись, что есть интернет! 📡',
-        'Ой, потеряно соединение. Попробуй перезагрузить страницу! 🔄'
-      ];
-      
-      const reply = networkReplies[Math.floor(Math.random() * networkReplies.length)];
-      addMessage(reply, 'asya');
-    }
-    
-    saveChatHistory();
-    updateAnalyticsBadge();
-  }
-  
-  // === ОБРАБОТЧИК ОТКРЫТИЯ/ЗАКРЫТИЯ ЧАТА ===
-  function toggleChat(e) {
-    if (e) {
-      e.stopPropagation();
-      e.preventDefault();
-    }
-    
-    const wasOpen = chat.classList.contains('open');
-    chat.classList.toggle('open');
-    
-    if (!wasOpen) {
-      // Открытие чата
-      notificationBadge.style.display = 'none';
-      
-      if (window.innerWidth <= 768) {
-        // На мобильных скрываем иконку и фиксируем body
-        icon.style.display = 'none';
-        icon.style.opacity = '0';
-        icon.style.visibility = 'hidden';
-        icon.style.pointerEvents = 'none';
-        document.body.classList.add('asya-chat-open');
-        
-        // Плавная фокусировка
-        setTimeout(() => {
-          messages.scrollTop = messages.scrollHeight;
-          setTimeout(() => {
-            input.focus({preventScroll: false});
-          }, 200);
-        }, 300);
-      } else {
-        // На десктопе
-        setTimeout(() => {
-          input.focus();
-          messages.scrollTop = messages.scrollHeight;
-        }, 100);
-      }
-      
-    } else {
-      // Закрытие чата
-      if (window.innerWidth <= 768) {
-        // На мобильных показываем иконку обратно
-        input.blur();
-        setTimeout(() => {
-          icon.style.display = 'flex';
-          icon.style.opacity = '1';
-          icon.style.visibility = 'visible';
-          icon.style.pointerEvents = 'all';
-          document.body.classList.remove('asya-chat-open');
-        }, 300);
-      }
+      typingDiv.remove();
+      const fallbacks = ['Нет соединения 🌐 Попробуй позже', 'Сервер недоступен 😕', 'Ошибка сети 🔄'];
+      addMessage(fallbacks[Math.floor(Math.random() * fallbacks.length)], 'asya');
     }
   }
-  
-  // === ИНИЦИАЛИЗАЦИЯ ИСТОРИИ ===
-  const chatHistory = JSON.parse(localStorage.getItem('asya_chat_history')) || [];
-  
-  if (chatHistory.length > 0) {
-    messages.innerHTML = '';
-    chatHistory.forEach(msg => {
-      addMessage(msg.text, msg.sender, false);
-    });
-    updateAnalyticsBadge();
-  }
-  
-  console.log('✅ История чата загружена:', chatHistory.length, 'сообщений');
-  
-  // === ОБРАБОТЧИКИ СОБЫТИЙ ===
-  icon.addEventListener('click', toggleChat);
-  
-  closeBtn.addEventListener('click', (e) => {
-    chat.classList.remove('open');
-    typingIndicator.style.display = 'none';
-    
-    if (window.innerWidth <= 768) {
-      input.blur();
-      // Показываем иконку
-      setTimeout(() => {
-        icon.style.display = 'flex';
-        icon.style.opacity = '1';
-        icon.style.visibility = 'visible';
-        icon.style.pointerEvents = 'all';
-        document.body.classList.remove('asya-chat-open');
-      }, 300);
-    }
-  });
-  
-  sendBtn.addEventListener('click', sendMessage);
-  
-  input.addEventListener('keydown', e => {
-    if (e.key === 'Enter') sendMessage();
-  });
-  
-  input.addEventListener('focus', () => {
-    if (window.innerWidth <= 768 && chat.classList.contains('open')) {
-      setTimeout(() => {
-        messages.scrollTop = messages.scrollHeight;
-      }, 200);
-    }
-  });
-  
-  // === АНАЛИТИКА ===
-  analyticsBtn.addEventListener('click', async () => {
+
+  async function getAnalytics() {
     try {
       const response = await fetch('/api/ai_insights');
       const data = await response.json();
-      
       if (data.success) {
-        const analysisDiv = document.createElement('div');
-        analysisDiv.className = 'message analysis-message';
-        analysisDiv.innerHTML = `
-          <strong>📊 AI-Анализ ваших данных</strong><br><br>
-          <strong>📈 Статистика настроения:</strong><br>
-          • Среднее настроение: ${data.stats_summary.avg_mood}/10<br>
-          • Общий балл: ${data.stats_summary.mood_score}/100<br>
-          • Тренд: ${data.stats_summary.trend === 'improving' ? 'Улучшение 📈' : data.stats_summary.trend === 'declining' ? 'Снижение 📉' : 'Стабильно 📊'}<br>
-          • Хороших дней: ${data.stats_summary.good_days}<br>
-          • Всего записей: ${data.stats_summary.total_entries}<br><br>
-          <strong>💡 AI-Рекомендации:</strong><br>
-          ${data.insights.replace(/\n/g, '<br>• ')}<br><br>
-          <em>Анализ сгенерирован с помощью YandexGPT</em>
-        `;
-        
-        messages.appendChild(analysisDiv);
-        setTimeout(() => {
-          messages.scrollTop = messages.scrollHeight;
-        }, 100);
+        addMessage("📊 Анализ:\n" + data.insights, 'asya');
       } else {
-        addMessage('Пока недостаточно данных для анализа. Заполни календарь настроения! 📅', 'asya');
+        addMessage('Недостаточно данных для анализа. Заполни календарь настроения! 📅', 'asya');
       }
-    } catch (error) {
-      console.error('Ошибка получения анализа:', error);
-      addMessage('Не удалось получить анализ. Попробуй позже! 🔄', 'asya');
-    }
-  });
-  
-  // === МОБИЛЬНЫЕ ОСОБЕННОСТИ ===
-  function initMobileFeatures() {
-    if (window.innerWidth <= 768) {
-      console.log('📱 Инициализация мобильных функций');
-      
-      // Убедимся, что при загрузке иконка видна
-      if (!chat.classList.contains('open')) {
-        setTimeout(() => {
-          icon.style.display = 'flex';
-          icon.style.opacity = '1';
-          icon.style.visibility = 'visible';
-          icon.style.pointerEvents = 'all';
-        }, 100);
-      }
+    } catch {
+      addMessage('Ошибка получения аналитики 🔄', 'asya');
     }
   }
-  
-  // Инициализация
-  initMobileFeatures();
-  
-  console.log('🎉 Чат-бот Ася готов к работе!)');
-});
+
+  // Обработчики событий
+  icon.onclick = () => chat.classList.toggle('open');
+  closeBtn.onclick = () => chat.classList.remove('open');
+  sendBtn.onclick = sendMessage;
+  analyticsBtn.onclick = getAnalytics;
+  input.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendMessage(); });
+})();
 </script>

@@ -24,7 +24,12 @@
   --transition: all 0.3s ease;
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Montserrat', sans-serif;
+}
 
 body { 
   margin: 0; 
@@ -46,89 +51,525 @@ header {
   min-height: 60px;
 }
 
-.logo { font-weight: 700; font-size: 20px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; white-space: nowrap; }
-.user-info { display: flex; align-items: center; gap: 8px; font-weight: 500; color: var(--dark); flex-shrink: 0; }
-.user-avatar { width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 2px solid var(--white); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+.logo {
+  font-weight: 700;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
 
-nav { display: flex; gap: 10px; align-items: center; flex-shrink: 1; min-width: 0; }
-.nav-link { color: var(--dark); text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 8px; transition: var(--transition); font-size: 14px; white-space: nowrap; overflow: hidden; }
-.nav-link:hover { background: rgba(96, 244, 227, 0.1); }
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: var(--dark);
+  flex-shrink: 0;
+}
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--white);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
 
-main { padding: 30px 20px; max-width: 800px; margin: 0 auto; }
-.day-header { text-align: center; margin-bottom: 30px; background: rgba(255, 255, 255, 0.9); padding: 25px; border-radius: var(--border-radius); box-shadow: var(--shadow); }
-.day-title { font-size: 24px; font-weight: 700; color: var(--dark); margin-bottom: 10px; }
-.back-btn { background: var(--white); color: var(--dark); border: 2px solid var(--primary); padding: 10px 20px; border-radius: 12px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: var(--transition); margin: 0 auto; }
-.back-btn:hover { background: var(--primary); transform: translateY(-2px); }
+nav {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 1;
+  min-width: 0;
+}
+.nav-link {
+  color: var(--dark);
+  text-decoration: none;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: var(--transition);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+}
 
-.mood-section { background: var(--white); border-radius: var(--border-radius); box-shadow: var(--shadow); padding: 15px 25px; margin-bottom: 20px; }
-.section-title { font-size: 18px; margin-bottom: 15px; color: var(--dark); text-align: center; font-weight: 700; }
-.mood-display { text-align: center; margin-bottom: 15px; }
-.mood-value { font-size: 36px; font-weight: 700; margin-bottom: 8px; color: var(--primary); }
-.mood-emoji { font-size: 48px; margin-bottom: 10px; }
-.mood-note { background: var(--light); padding: 10px 15px; border-radius: 12px; margin-top: 10px; text-align: left; border-left: 4px solid var(--primary); }
-.mood-note p { margin: 0; color: var(--dark); line-height: 1.5; }
-.no-mood { text-align: center; padding: 40px; color: var(--gray); }
-.no-mood i { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
-.add-mood-section { background: var(--accent); border-radius: var(--border-radius); padding: 15px 25px; margin-bottom: 20px; border: 2px solid var(--primary); }
-.mood-slider-container { margin: 20px 0; }
-.mood-slider { width: 100%; height: 20px; border-radius: 10px; background: linear-gradient(to right, var(--danger), var(--warning), var(--success)); outline: none; -webkit-appearance: none; appearance: none; }
-.mood-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 28px; height: 28px; border-radius: 50%; background: var(--white); border: 3px solid var(--primary); cursor: pointer; box-shadow: 0 2px 6px rgba(0,0,0,0.2); transition: var(--transition); }
-.mood-slider::-webkit-slider-thumb:hover { transform: scale(1.1); }
-.mood-labels { display: flex; justify-content: space-between; margin-top: 10px; font-size: 12px; color: var(--gray); font-weight: 600; }
-.mood-preview { text-align: center; margin: 15px 0; font-size: 18px; font-weight: 600; padding: 10px; background: rgba(255, 255, 255, 0.7); border-radius: 10px; }
-.note-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(96, 244, 227, 0.3); }
-.form-actions { display: flex; justify-content: center; gap: 10px; margin-top: 20px; }
-.btn { padding: 12px 25px; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 8px; font-size: 14px; }
-.btn-primary { background: var(--primary); color: var(--dark); }
-.btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
-.btn-danger { background: var(--danger); color: var(--white); }
-.btn-danger:hover { background: #d32f2f; transform: translateY(-2px); }
+.nav-link:hover {
+  background: rgba(96, 244, 227, 0.1);
+}
 
-.positive-things { background: var(--white); border-radius: var(--border-radius); box-shadow: var(--shadow); padding: 25px; margin-bottom: 20px; }
-.input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-.positive-input { flex: 1; padding: 12px 15px; border: 2px solid var(--primary); border-radius: 12px; font-family: 'Montserrat', sans-serif; font-size: 14px; transition: var(--transition); }
-.positive-input:focus { outline: none; border-color: var(--secondary); box-shadow: 0 0 0 3px rgba(255, 112, 236, 0.2); }
-.positive-list { display: grid; gap: 10px; }
-.positive-item { background: rgba(96, 244, 227, 0.1); padding: 15px; border-radius: 8px; border-left: 4px solid var(--primary); display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; animation: slideIn 0.3s ease; transition: var(--transition); }
-.positive-item:hover { transform: translateX(5px); background: rgba(96, 244, 227, 0.2); }
-.positive-item-content { flex: 1; word-wrap: break-word; overflow-wrap: break-word; }
-.positive-item-actions { display: flex; gap: 5px; flex-shrink: 0; }
-.positive-item-btn { background: none; border: none; cursor: pointer; padding: 5px; border-radius: 4px; transition: var(--transition); color: var(--gray); }
-.positive-item-btn:hover { background: rgba(0,0,0,0.1); color: var(--dark); }
-.delete-btn:hover { color: var(--danger); }
-.empty-positive { text-align: center; padding: 40px 20px; color: var(--gray); }
-.empty-positive i { font-size: 48px; margin-bottom: 15px; opacity: 0.5; }
+main { 
+  padding: 30px 20px; 
+  max-width: 800px; 
+  margin: 0 auto; 
+}
 
-.hourly-mood-section { background: var(--white); border-radius: var(--border-radius); box-shadow: var(--shadow); padding: 25px; margin-bottom: 20px; }
-.hours-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-top: 15px; }
-.hour-item { background: var(--light); border: 2px solid transparent; border-radius: 8px; padding: 8px 4px; text-align: center; cursor: pointer; transition: var(--transition); min-height: 70px; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
-.hour-item:hover { border-color: var(--primary); transform: translateY(-2px); }
-.hour-time { font-size: 11px; font-weight: 600; margin-bottom: 4px; }
-.hour-mood { font-size: 16px; margin-bottom: 2px; }
-.time-note { font-size: 9px; opacity: 0.7; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; line-height: 1.2; padding: 0 2px; }
-.hour-item.mood-good { background: rgba(96, 244, 227, 0.3); border-color: var(--primary); }
-.hour-item.mood-neutral { background: rgba(255, 112, 236, 0.2); border-color: var(--secondary); }
-.hour-item.mood-bad { background: rgba(244, 67, 54, 0.2); border-color: var(--danger); }
+.day-header {
+  text-align: center;
+  margin-bottom: 30px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 25px;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+}
 
-@keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.day-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 10px;
+}
 
-.toast { position: fixed; top: 20px; right: 20px; background: var(--success); color: white; padding: 15px 20px; border-radius: 8px; box-shadow: var(--shadow); z-index: 1000; font-weight: 600; transform: translateX(100%); transition: transform 0.3s ease; }
-.toast.show { transform: translateX(0); }
-.toast.error { background: var(--danger); }
-.user-name { font-size: 14px; }
+.back-btn {
+  background: var(--white);
+  color: var(--dark);
+  border: 2px solid var(--primary);
+  padding: 10px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: var(--transition);
+  margin: 0 auto;
+}
 
-@media (max-width: 768px) { header { padding: 8px 12px; min-height: 56px; } .logo { font-size: 18px; } .nav-link { padding: 5px 8px; font-size: 13px; } .user-name { display: none; } .user-avatar { width: 32px; height: 32px; } .day-title { font-size: 20px; } .day-header { padding: 15px; } }
-@media (max-width: 480px) { header { padding: 6px 10px; min-height: 52px; } .logo { font-size: 16px; } .nav-link { padding: 4px 6px; font-size: 12px; } .user-avatar { width: 28px; height: 28px; } .day-title { font-size: 18px; } .day-header { padding: 12px; } }
-@media (max-width: 360px) { .day-title { font-size: 16px; } .logo { font-size: 15px; } .user-avatar { width: 26px; height: 26px; } }
+.back-btn:hover {
+  background: var(--primary);
+  transform: translateY(-2px);
+}
+
+.mood-section {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 15px 25px;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: var(--dark);
+  text-align: center;
+  font-weight: 700;
+}
+
+.mood-display {
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.mood-value {
+  font-size: 36px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--primary);
+}
+
+.mood-emoji {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.mood-note {
+  background: var(--light);
+  padding: 10px 15px;
+  border-radius: 12px;
+  margin-top: 10px;
+  text-align: left;
+  border-left: 4px solid var(--primary);
+}
+
+.mood-note p {
+  margin: 0;
+  color: var(--dark);
+  line-height: 1.5;
+}
+
+.no-mood {
+  text-align: center;
+  padding: 40px;
+  color: var(--gray);
+}
+
+.no-mood i {
+  font-size: 48px;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.add-mood-section {
+  background: var(--accent);
+  border-radius: var(--border-radius);
+  padding: 15px 25px;
+  margin-bottom: 20px;
+  border: 2px solid var(--primary);
+}
+
+.mood-slider-container {
+  margin: 20px 0;
+}
+
+.mood-slider {
+  width: 100%;
+  height: 20px;
+  border-radius: 10px;
+  background: linear-gradient(to right, var(--danger), var(--warning), var(--success));
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.mood-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 3px solid var(--primary);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  transition: var(--transition);
+}
+
+.mood-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.mood-slider::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--white);
+  border: 3px solid var(--primary);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.mood-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--gray);
+  font-weight: 600;
+}
+
+.mood-preview {
+  text-align: center;
+  margin: 15px 0;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+}
+
+.note-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(96, 244, 227, 0.3);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.btn {
+  padding: 12px 25px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: var(--dark);
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: var(--white);
+}
+
+.btn-danger:hover {
+  background: #d32f2f;
+  transform: translateY(-2px);
+}
+
+.positive-things {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 25px;
+  margin-bottom: 20px;
+}
+
+.input-group {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.positive-input {
+  flex: 1;
+  padding: 12px 15px;
+  border: 2px solid var(--primary);
+  border-radius: 12px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 14px;
+  transition: var(--transition);
+}
+
+.positive-input:focus {
+  outline: none;
+  border-color: var(--secondary);
+  box-shadow: 0 0 0 3px rgba(255, 112, 236, 0.2);
+}
+
+.positive-list {
+  display: grid;
+  gap: 10px;
+}
+
+.positive-item {
+  background: rgba(96, 244, 227, 0.1);
+  padding: 15px;
+  border-radius: 8px;
+  border-left: 4px solid var(--primary);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  animation: slideIn 0.3s ease;
+  transition: var(--transition);
+}
+
+.positive-item:hover {
+  transform: translateX(5px);
+  background: rgba(96, 244, 227, 0.2);
+}
+
+.positive-item-content {
+  flex: 1;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.positive-item-actions {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.positive-item-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: var(--transition);
+  color: var(--gray);
+}
+
+.positive-item-btn:hover {
+  background: rgba(0,0,0,0.1);
+  color: var(--dark);
+}
+
+.delete-btn:hover {
+  color: var(--danger);
+}
+
+.empty-positive {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--gray);
+}
+
+.empty-positive i {
+  font-size: 48px;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}
+
+.hourly-mood-section {
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 25px;
+  margin-bottom: 20px;
+}
+
+.hours-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.hour-item {
+  background: var(--light);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 8px 4px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.hour-item:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+
+.hour-time {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.hour-mood {
+  font-size: 16px;
+  margin-bottom: 2px;
+}
+
+.time-note {
+  font-size: 9px;
+  opacity: 0.7;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+  padding: 0 2px;
+}
+
+.hour-item.mood-good {
+  background: rgba(96, 244, 227, 0.3);
+  border-color: var(--primary);
+}
+
+.hour-item.mood-neutral {
+  background: rgba(255, 112, 236, 0.2);
+  border-color: var(--secondary);
+}
+
+.hour-item.mood-bad {
+  background: rgba(244, 67, 54, 0.2);
+  border-color: var(--danger);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: var(--success);
+  color: white;
+  padding: 15px 20px;
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  z-index: 1000;
+  font-weight: 600;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.toast.show {
+  transform: translateX(0);
+}
+
+.toast.error {
+  background: var(--danger);
+}
+
+.user-name {
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  header { padding: 8px 12px; min-height: 56px; }
+  .logo { font-size: 18px; }
+  .nav-link { padding: 5px 8px; font-size: 13px; }
+  .user-name { display: none; }
+  .user-avatar { width: 32px; height: 32px; }
+  .day-title { font-size: 20px; }
+  .day-header { padding: 15px; }
+}
+
+@media (max-width: 480px) {
+  header { padding: 6px 10px; min-height: 52px; }
+  .logo { font-size: 16px; }
+  .nav-link { padding: 4px 6px; font-size: 12px; }
+  .user-avatar { width: 28px; height: 28px; }
+  .day-title { font-size: 18px; }
+  .day-header { padding: 12px; }
+}
+
+@media (max-width: 360px) {
+  .day-title { font-size: 16px; }
+  .logo { font-size: 15px; }
+  .user-avatar { width: 26px; height: 26px; }
+}
     </style>
 </head>
 <body>
 <header>
   <div class="logo"><span>Lumi</span></div>
   <nav>
-    <a href="{{ url_for('main.calendar') }}" class="nav-link"><i class="fas fa-arrow-left"></i> <span class="nav-text">Назад к календарю</span></a>
+    <a href="{{ url_for('main.calendar') }}" class="nav-link">
+      <i class="fas fa-arrow-left"></i> 
+      <span class="nav-text">Назад к календарю</span>
+    </a>
     <div class="user-info">
-      <span class="user-name">{% if current_user.is_authenticated %}{{ current_user.first_name or current_user.username }}{% else %}Пользователь{% endif %}</span>
+      <span class="user-name">
+        {% if current_user.is_authenticated %}
+          {{ current_user.first_name or current_user.username }}
+        {% else %}
+          Пользователь
+        {% endif %}
+      </span>
       {% if current_user.avatar_path %}
         <img src="{{ url_for('static', filename=current_user.avatar_path) }}" alt="Аватар" class="user-avatar">
       {% else %}
@@ -138,56 +579,93 @@ main { padding: 30px 20px; max-width: 800px; margin: 0 auto; }
   </nav>
 </header>
 <main>
-  <div class="day-header"><h2 class="day-title" id="dayTitle">Загрузка...</h2></div>
+  <div class="day-header">
+    <h2 class="day-title" id="dayTitle">Загрузка...</h2>
+  </div>
+
   <div class="mood-section">
     <h3 class="section-title">Настроение дня</h3>
     <div id="moodDisplay">
-      <div class="no-mood" id="noMood"><i class="fas fa-cloud"></i><h4>Настроение не отмечено</h4><p>Добавьте ваше настроение ниже</p></div>
+      <div class="no-mood" id="noMood">
+        <i class="fas fa-cloud"></i>
+        <h4>Настроение не отмечено</h4>
+        <p>Добавьте ваше настроение ниже</p>
+      </div>
       <div class="mood-display" id="moodDisplayContent" style="display: none;">
         <div class="mood-value" id="moodValue">0/10</div>
         <div class="mood-emoji" id="moodEmoji">😐</div>
-        <div class="mood-note" id="moodNoteDisplay"><p id="moodNoteText">Нет заметки</p></div>
-        <div class="form-actions"><button class="btn btn-danger" onclick="deleteMood()"><i class="fas fa-trash"></i> Удалить</button></div>
+        <div class="mood-note" id="moodNoteDisplay">
+          <p id="moodNoteText">Нет заметки</p>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-danger" onclick="deleteMood()">
+            <i class="fas fa-trash"></i> Удалить
+          </button>
+        </div>
       </div>
     </div>
   </div>
+
   <div class="add-mood-section">
     <h3 class="section-title">Оцените настроение</h3>
     <div class="mood-slider-container">
       <input type="range" min="1" max="10" value="5" class="mood-slider" id="moodSlider" oninput="updateMoodPreview()">
-      <div class="mood-labels"><span>😞 Плохо</span><span>😐 Нормально</span><span>😊 Отлично</span></div>
+      <div class="mood-labels">
+        <span>😞 Плохо</span>
+        <span>😐 Нормально</span>
+        <span>😊 Отлично</span>
+      </div>
     </div>
     <div class="mood-preview" id="moodPreview">5/10 - Нормально 😐</div>
-    <div class="form-actions"><button class="btn btn-primary" onclick="saveMood()"><i class="fas fa-save"></i> Сохранить настроение</button></div>
+    <div class="form-actions">
+      <button class="btn btn-primary" onclick="saveMood()">
+        <i class="fas fa-save"></i> Сохранить настроение
+      </button>
+    </div>
   </div>
+
   <div class="hourly-mood-section">
     <h3 class="section-title">Настроение по часам (24 часа)</h3>
     <div class="hours-grid" id="hoursGrid"></div>
   </div>
+
   <div class="positive-things">
     <h3 class="section-title">Как настроение повлияло на ваш день?</h3>
     <div class="input-group">
       <textarea id="dayNoteInput" class="note-input positive-input" placeholder="Опишите, как настроение повлияло на день..."></textarea>
-      <button class="btn btn-primary" onclick="saveDayNote()"><i class="fas fa-save"></i> Сохранить</button>
+      <button class="btn btn-primary" onclick="saveDayNote()">
+        <i class="fas fa-save"></i> Сохранить
+      </button>
     </div>
   </div>
+
   <div class="positive-things">
     <h3 class="section-title">Расскажите о своих радостях</h3>
     <div class="input-group">
       <input type="text" id="joyInput" class="positive-input" placeholder="Что сегодня вас порадовало?">
-      <button class="btn btn-primary" onclick="addJoy()"><i class="fas fa-plus"></i> Добавить</button>
+      <button class="btn btn-primary" onclick="addJoy()">
+        <i class="fas fa-plus"></i> Добавить
+      </button>
     </div>
     <div id="joyList" class="positive-list"></div>
   </div>
+
   <div class="positive-things">
     <h3 class="section-title">Какие цели у вас есть?</h3>
     <div class="input-group">
       <input type="text" id="goalInput" class="positive-input" placeholder="Введите цель на день...">
-      <button class="btn btn-primary" onclick="addGoal()"><i class="fas fa-plus"></i> Добавить</button>
+      <button class="btn btn-primary" onclick="addGoal()">
+        <i class="fas fa-plus"></i> Добавить
+      </button>
     </div>
     <div id="goalList" class="positive-list"></div>
   </div>
-  <div style="text-align: center; margin-top: 20px;"><button class="back-btn" onclick="goBack()"><i class="fas fa-arrow-left"></i> Назад к календарю</button></div>
+
+  <div style="text-align: center; margin-top: 20px;">
+    <button class="back-btn" onclick="goBack()">
+      <i class="fas fa-arrow-left"></i> Назад к календарю
+    </button>
+  </div>
 </main>
 
 <script>
@@ -201,32 +679,15 @@ let currentMood = null;
 let hourlyMoods = {};
 let isSaving = false;
 let hourPromptOpen = false;
-let hourlyInitialized = false;
-let renderScheduled = false;
-const hourElements = {};
 
-// ======================== КЭШ ========================
-const cache = {
-  moods: {},
-  hourly: {},
-  goals: {},
-  joys: {}
-};
-
-// ======================== ФУНКЦИЯ ДЛЯ НОРМАЛИЗАЦИИ ДАТЫ (FIX ЧАСОВОГО ПОЯСА) ========================
-function toLocalDateString(dateStr) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return dateStr.split('T')[0] || '';
-  return d.getFullYear() + '-' +
-    String(d.getMonth() + 1).padStart(2, '0') + '-' +
-    String(d.getDate()).padStart(2, '0');
-}
-
-// ======================== ESCAPE HTML ========================
+// ======================== ESCAPE HTML (XSS защита) ========================
 function escapeHtml(str) {
   if (!str) return '';
-  return str.replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m]));
+  return str.replace(/[&<>]/g, m => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;'
+  }[m]));
 }
 
 // ======================== УВЕДОМЛЕНИЯ ========================
@@ -237,7 +698,10 @@ function showToast(message, type = 'info') {
   toast.textContent = message;
   document.body.appendChild(toast);
   setTimeout(() => toast.classList.add('show'), 10);
-  setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 3000);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
 }
 
 // ======================== ДАТА ========================
@@ -252,17 +716,10 @@ async function loadDayData() {
   const date = getDateFromUrl();
   if (!date) { showError('Дата не найдена'); return; }
   currentDate = date;
-  
-  if (cache.moods[currentDate]) {
-    updateDayView(cache.moods[currentDate]);
-    return;
-  }
-  
   try {
     const response = await fetch(`${API_BASE}?date=${date}`);
     if (response.ok) {
       const dayMoods = await response.json();
-      cache.moods[currentDate] = dayMoods;
       updateDayView(dayMoods);
     } else throw new Error('Ошибка загрузки данных');
   } catch (error) {
@@ -285,7 +742,6 @@ function updateDayView(dayMoods) {
   } else {
     showNoMood();
   }
-  initHourlyIfNeeded();
   updateHourlyMoods();
 }
 
@@ -341,15 +797,7 @@ function updateMoodPreview() {
   document.getElementById('moodPreview').textContent = `${moodValue}/10 - ${text} ${emoji}`;
 }
 
-function debounce(fn, delay = 400) {
-  let t;
-  return (...args) => {
-    clearTimeout(t);
-    t = setTimeout(() => fn(...args), delay);
-  };
-}
-
-const saveMoodDebounced = debounce(async function() {
+async function saveMood() {
   if (isSaving) return;
   isSaving = true;
   
@@ -368,6 +816,9 @@ const saveMoodDebounced = debounce(async function() {
     }
     const data = await response.json();
     
+    // ❌ УДАЛЯЕМ ОШИБОЧНЫЙ ПОЧАСОВОЙ ЗАПРОС
+    // Почасовое настроение сохраняется ТОЛЬКО в selectHour()
+    
     currentMood = { ...currentMood, ...data, mood: moodValue, note: note, date: currentDate };
     showMoodDisplay(currentMood);
     showToast('Настроение сохранено!', 'success');
@@ -380,10 +831,6 @@ const saveMoodDebounced = debounce(async function() {
   } finally {
     isSaving = false;
   }
-});
-
-async function saveMood() {
-  saveMoodDebounced();
 }
 
 async function deleteMood() {
@@ -404,7 +851,7 @@ async function deleteMood() {
   }
 }
 
-// ======================== ЗАМЕТКА ДНЯ ========================
+// ======================== ЗАМЕТКА ДНЯ (PATCH) ========================
 async function saveDayNote() {
   const text = document.getElementById("dayNoteInput").value.trim();
   if (!text) return showToast("Введите текст", "error");
@@ -430,26 +877,17 @@ async function saveDayNote() {
   }
 }
 
-// ======================== РАДОСТИ ========================
+// ======================== РАДОСТИ (JOYS) ========================
 async function loadJoys() {
-  if (cache.joys[currentDate] !== undefined) {
-    document.getElementById("joyList").innerHTML = '';
-    cache.joys[currentDate].forEach(renderJoy);
-    return;
-  }
-  
   try {
     const res = await fetch(JOYS_API);
     const data = await res.json();
-    const filtered = data.filter(j => {
-      if (!j.date) return false;
-      const localDate = toLocalDateString(j.date);
-      return localDate === currentDate;
-    }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    
-    cache.joys[currentDate] = filtered;
-    document.getElementById("joyList").innerHTML = '';
-    filtered.forEach(renderJoy);
+    const list = document.getElementById("joyList");
+    list.innerHTML = "";
+    data
+      .filter(j => j.date && j.date.split('T')[0] === currentDate)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .forEach(renderJoy);
   } catch (e) {
     console.error(e);
     showToast("Ошибка загрузки радостей", "error");
@@ -460,11 +898,14 @@ function renderJoy(joy) {
   const list = document.getElementById("joyList");
   const div = document.createElement('div');
   div.className = 'positive-item';
-  div.id = `joy-${joy.id}`;
-  div.innerHTML = `<div class="positive-item-content">🌟 ${escapeHtml(joy.text)}</div>
-                   <div class="positive-item-actions">
-                     <button class="positive-item-btn delete-btn" onclick="deleteJoy(${joy.id})"><i class="fas fa-trash"></i></button>
-                   </div>`;
+  div.innerHTML = `
+    <div class="positive-item-content">🌟 ${escapeHtml(joy.text)}</div>
+    <div class="positive-item-actions">
+      <button class="positive-item-btn delete-btn" onclick="deleteJoy(${joy.id})">
+        <i class="fas fa-trash"></i>
+      </button>
+    </div>
+  `;
   list.appendChild(div);
 }
 
@@ -478,11 +919,8 @@ async function addJoy() {
       body: JSON.stringify({ text, date: currentDate })
     });
     if (res.ok) {
-      const newJoy = await res.json();
       document.getElementById("joyInput").value = "";
-      renderJoy(newJoy);
-      if (!cache.joys[currentDate]) cache.joys[currentDate] = [];
-      cache.joys[currentDate].unshift(newJoy);
+      await loadJoys();
       showToast("Радость добавлена! 🌟", "success");
     } else throw new Error('Ошибка сохранения');
   } catch (e) {
@@ -496,11 +934,7 @@ async function deleteJoy(joyId) {
   try {
     const res = await fetch(`${JOYS_API}/${joyId}`, { method: 'DELETE' });
     if (res.ok) {
-      const element = document.getElementById(`joy-${joyId}`);
-      if (element) element.remove();
-      if (cache.joys[currentDate]) {
-        cache.joys[currentDate] = cache.joys[currentDate].filter(j => j.id !== joyId);
-      }
+      await loadJoys();
       showToast("Запись удалена", "success");
     } else throw new Error('Ошибка удаления');
   } catch (e) {
@@ -509,26 +943,17 @@ async function deleteJoy(joyId) {
   }
 }
 
-// ======================== ЦЕЛИ ========================
+// ======================== ЦЕЛИ (GOALS) ========================
 async function loadGoals() {
-  if (cache.goals[currentDate] !== undefined) {
-    document.getElementById("goalList").innerHTML = '';
-    cache.goals[currentDate].forEach(renderGoal);
-    return;
-  }
-  
   try {
     const res = await fetch(GOALS_API);
     const data = await res.json();
-    const filtered = data.filter(g => {
-      if (!g.date) return false;
-      const localDate = toLocalDateString(g.date);
-      return localDate === currentDate;
-    }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    
-    cache.goals[currentDate] = filtered;
-    document.getElementById("goalList").innerHTML = '';
-    filtered.forEach(renderGoal);
+    const list = document.getElementById("goalList");
+    list.innerHTML = "";
+    data
+      .filter(g => g.date && g.date.split('T')[0] === currentDate)
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .forEach(renderGoal);
   } catch (e) {
     console.error(e);
     showToast("Ошибка загрузки целей", "error");
@@ -539,7 +964,6 @@ function renderGoal(goal) {
   const list = document.getElementById("goalList");
   const div = document.createElement('div');
   div.className = 'positive-item';
-  div.id = `goal-${goal.id}`;
   div.innerHTML = `
     <div class="positive-item-content">
       <label style="display:flex; align-items:center; gap:10px;">
@@ -561,11 +985,8 @@ async function addGoal() {
       body: JSON.stringify({ text, date: currentDate })
     });
     if (res.ok) {
-      const newGoal = await res.json();
       document.getElementById("goalInput").value = "";
-      renderGoal(newGoal);
-      if (!cache.goals[currentDate]) cache.goals[currentDate] = [];
-      cache.goals[currentDate].unshift(newGoal);
+      await loadGoals();
       showToast("Цель добавлена!", "success");
     } else throw new Error('Ошибка сохранения');
   } catch (e) {
@@ -582,18 +1003,6 @@ async function toggleGoalStatus(goalId, isDone) {
       body: JSON.stringify({ completed: isDone })
     });
     if (!res.ok) throw new Error('Ошибка обновления');
-    
-    if (cache.goals[currentDate]) {
-      const goal = cache.goals[currentDate].find(g => g.id === goalId);
-      if (goal) goal.completed = isDone;
-    }
-    
-    const goalElement = document.getElementById(`goal-${goalId}`);
-    if (goalElement) {
-      const checkbox = goalElement.querySelector('input[type="checkbox"]');
-      if (checkbox) checkbox.checked = isDone;
-    }
-    
     showToast(isDone ? "Цель выполнена! 🎉" : "Цель отмечена как невыполненная", "success");
   } catch (e) {
     console.error(e);
@@ -602,80 +1011,44 @@ async function toggleGoalStatus(goalId, isDone) {
 }
 
 // ======================== ПОЧАСОВОЕ НАСТРОЕНИЕ ========================
-function scheduleRender() {
-  if (renderScheduled) return;
-  renderScheduled = true;
-  requestAnimationFrame(() => {
-    renderHourlyMoods();
-    renderScheduled = false;
-  });
-}
-
-function renderHourlyMoods() {
-  for (let hour = 0; hour < 24; hour++) {
-    const el = hourElements[hour];
-    if (!el) continue;
-    const data = hourlyMoods[hour];
-    if (data) {
-      el.mood.textContent = getMoodEmoji(data.mood);
-      el.note.textContent = data.note || '';
-      el.container.className = 'hour-item active ' + getMoodColorClass(data.mood);
-    } else {
-      el.mood.textContent = '-';
-      el.note.textContent = '';
-      el.container.className = 'hour-item';
-    }
-  }
-}
-
 async function updateHourlyMoods() {
-  if (cache.hourly[currentDate]) {
-    hourlyMoods = cache.hourly[currentDate];
-    scheduleRender();
-    return;
-  }
-
   try {
-    const res = await fetch(`${HOURLY_MOODS_API}?date=${currentDate}`);
-    const data = await res.json();
+    const response = await fetch(`${HOURLY_MOODS_API}?date=${currentDate}`);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const hourlyData = await response.json();
     hourlyMoods = {};
-    data.forEach(e => { 
-      const localDate = toLocalDateString(e.date);
-      if (localDate === currentDate) {
-        hourlyMoods[e.hour] = e;
-      }
+    hourlyData.forEach(entry => {
+      hourlyMoods[entry.hour] = { id: entry.id, mood: entry.mood, note: entry.note };
     });
-    cache.hourly[currentDate] = hourlyMoods;
-    scheduleRender();
-  } catch (e) {
+    renderHourlyMoods();
+  } catch (error) {
+    console.error(error);
+    hourlyMoods = {};
+    renderHourlyMoods();
     showToast("Ошибка загрузки почасовых данных", "error");
   }
 }
 
-function initHourlyIfNeeded() {
-  if (hourlyInitialized) return;
-  const hoursGrid = document.getElementById('hoursGrid');
-  if (!hoursGrid) return;
-  
-  let html = '';
+function renderHourlyMoods() {
   for (let hour = 0; hour < 24; hour++) {
-    const hourDisplay = hour.toString().padStart(2, '0');
-    html += `<div class="hour-item" data-hour="${hour}" onclick="selectHour(${hour})">
-               <div class="hour-time">${hourDisplay}:00</div>
-               <div class="hour-mood" id="hourMood${hour}">-</div>
-               <div class="time-note" id="hourNote${hour}"></div>
-             </div>`;
+    const hourItem = document.querySelector(`[data-hour="${hour}"]`);
+    const moodElement = document.getElementById(`hourMood${hour}`);
+    const noteElement = document.getElementById(`hourNote${hour}`);
+    if (hourItem && moodElement && noteElement) {
+      if (hourlyMoods[hour]) {
+        const moodData = hourlyMoods[hour];
+        moodElement.textContent = getMoodEmoji(moodData.mood);
+        noteElement.textContent = moodData.note || '';
+        hourItem.className = 'hour-item active';
+        hourItem.classList.add(getMoodColorClass(moodData.mood));
+      } else {
+        moodElement.textContent = '-';
+        noteElement.textContent = '';
+        hourItem.className = 'hour-item';
+        hourItem.classList.remove('mood-good', 'mood-neutral', 'mood-bad', 'active');
+      }
+    }
   }
-  hoursGrid.innerHTML = html;
-  
-  for (let hour = 0; hour < 24; hour++) {
-    hourElements[hour] = {
-      container: document.querySelector(`[data-hour="${hour}"]`),
-      mood: document.getElementById(`hourMood${hour}`),
-      note: document.getElementById(`hourNote${hour}`)
-    };
-  }
-  hourlyInitialized = true;
 }
 
 async function selectHour(hour) {
@@ -709,8 +1082,28 @@ async function selectHour(hour) {
   hourPromptOpen = false;
 }
 
+function init24HourTracking() {
+  const hoursGrid = document.getElementById('hoursGrid');
+  if (!hoursGrid) return;
+  let html = '';
+  for (let hour = 0; hour < 24; hour++) {
+    const hourDisplay = hour.toString().padStart(2, '0');
+    html += `
+      <div class="hour-item" data-hour="${hour}" onclick="selectHour(${hour})">
+        <div class="hour-time">${hourDisplay}:00</div>
+        <div class="hour-mood" id="hourMood${hour}">-</div>
+        <div class="time-note" id="hourNote${hour}"></div>
+      </div>
+    `;
+  }
+  hoursGrid.innerHTML = html;
+}
+
 // ======================== ОБЩИЕ ФУНКЦИИ ========================
-function goBack() { window.location.href = "{{ url_for('main.calendar') }}"; }
+function goBack() {
+  window.location.href = "{{ url_for('main.calendar') }}";
+}
+
 function showError(message) {
   document.getElementById('dayTitle').textContent = 'Ошибка';
   const moodDisplay = document.getElementById('moodDisplay');
@@ -718,13 +1111,11 @@ function showError(message) {
 }
 
 // ======================== ИНИЦИАЛИЗАЦИЯ ========================
-document.addEventListener('DOMContentLoaded', async function() {
-  initHourlyIfNeeded();
-  await Promise.all([
-    loadDayData(),
-    loadGoals(),
-    loadJoys()
-  ]);
+document.addEventListener('DOMContentLoaded', function() {
+  init24HourTracking();
+  loadDayData();
+  loadGoals();
+  loadJoys();
 });
 </script>
 </body>

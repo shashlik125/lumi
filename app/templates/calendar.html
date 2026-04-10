@@ -143,8 +143,6 @@ h1:after { content: ''; position: absolute; bottom: 0; left: 0; width: 60px; hei
 {% block extra_js %}
 <script>
 // ======================== УНИВЕРСАЛЬНЫЙ МОДУЛЬ РАБОТЫ С ДАННЫМИ ========================
-// Автоматически определяет поля date/text/completed в ответах API
-
 const DateUtils = {
   formatDate(date, options = { day: 'numeric', month: 'long' }) {
     return new Intl.DateTimeFormat('ru-RU', options).format(date);
@@ -164,9 +162,10 @@ const DateUtils = {
   },
   isToday(date) {
     const today = new Date();
-    return date.toDateString() === today.toDateString();
+    return date.getDate() === today.getDate() &&
+           date.getMonth() === today.getMonth() &&
+           date.getFullYear() === today.getFullYear();
   },
-  // Универсальное получение даты из объекта (ищет поля date, created_at, updated_at)
   getDateFromObject(obj) {
     if (!obj) return new Date();
     const possibleFields = ['date', 'created_at', 'updated_at', 'createdAt', 'updatedAt'];
@@ -175,7 +174,6 @@ const DateUtils = {
     }
     return new Date();
   },
-  // Универсальное получение текста (ищет text, content, description)
   getTextFromObject(obj) {
     if (!obj) return '';
     const possibleFields = ['text', 'content', 'description', 'title', 'name'];
@@ -184,7 +182,6 @@ const DateUtils = {
     }
     return '';
   },
-  // Универсальное получение статуса completed (ищет completed, is_completed, done)
   getCompletedFromObject(obj) {
     if (!obj) return false;
     const possibleFields = ['completed', 'is_completed', 'done', 'status'];
@@ -227,9 +224,17 @@ async function loadMoodData() {
   try {
     const resp = await fetch(API_MOOD);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    const all = await resp.json();
+    let all = await resp.json();
+    // Нормализуем даты: приводим к YYYY-MM-DD
+    all = all.map(entry => ({
+      ...entry,
+      date: entry.date ? entry.date.split('T')[0] : ''
+    }));
     const today = new Date(); today.setHours(0,0,0,0);
-    moods = all.filter(entry => DateUtils.parseISO(entry.date) <= today);
+    moods = all.filter(entry => {
+      const entryDate = DateUtils.parseISO(entry.date);
+      return entryDate <= today;
+    });
     return true;
   } catch(e) {
     console.error('Ошибка загрузки настроений:', e);
@@ -269,7 +274,8 @@ async function loadAllNotes() {
   try {
     const resp = await fetch(API_MOOD);
     if (!resp.ok) throw new Error();
-    const entries = await resp.json();
+    let entries = await resp.json();
+    entries = entries.map(e => ({ ...e, date: e.date ? e.date.split('T')[0] : '' }));
     const notes = entries.filter(e => e.note && e.note.trim()).sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,10);
     renderNotesList(notes);
   } catch(e) {
@@ -357,11 +363,13 @@ function renderCalendar() {
     const day = createDayElement(dayNum, 'other-month', true);
     grid.appendChild(day);
   }
+  const todayReal = new Date(); // фиксируем реальную дату один раз
   for (let i = 1; i <= daysInMonth; i++) {
     const dateKey = DateUtils.formatISO(year, month+1, i);
     const day = createDayElement(i, '', false);
-    const today = new Date();
-    if (DateUtils.isToday(new Date(year, month, i)) && DateUtils.isSameMonth(currentDate, today)) {
+    const currentDayDate = new Date(year, month, i);
+    // Подсветка сегодняшнего дня только если месяц совпадает с реальным
+    if (currentDayDate.toDateString() === todayReal.toDateString()) {
       day.classList.add('current-day');
     }
     const dayMoods = moods.filter(m => m.date === dateKey);

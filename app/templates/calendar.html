@@ -32,12 +32,10 @@ h1 { font-size: 28px; color: var(--dark); position: relative; padding-bottom: 10
 h1:after { content: ''; position: absolute; bottom: 0; left: 0; width: 60px; height: 4px; background: linear-gradient(to right, var(--primary), var(--secondary)); border-radius: 2px; }
 .calendar-container { background: var(--white); border-radius: var(--border-radius); box-shadow: var(--shadow); padding: 25px; margin-bottom: 30px; }
 .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
-.calendar-title { font-size: 22px; font-weight: 700; color: var(--dark); }
+.calendar-title { font-size: 22px; font-weight: 700; color: var(--dark); cursor: pointer; }
 .calendar-controls { display: flex; gap: 10px; align-items: center; }
 .calendar-btn { background: var(--primary); border: none; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-weight: bold; transition: var(--transition); color: var(--dark); font-size: 18px; }
 .calendar-btn:hover { background: var(--primary-dark); transform: scale(1.1); }
-.today-btn { padding: 8px 16px; background: var(--white); border: 2px solid var(--primary); border-radius: 20px; font-weight: 600; cursor: pointer; transition: var(--transition); color: var(--dark); }
-.today-btn:hover { background: var(--primary); transform: translateY(-2px); }
 .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-weight: 600; margin-bottom: 10px; color: var(--gray); background: rgba(96,244,227,0.1); border-radius: 10px; padding: 10px 0; }
 .weekday { padding: 10px; }
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
@@ -89,6 +87,16 @@ h1:after { content: ''; position: absolute; bottom: 0; left: 0; width: 60px; hei
 .toast.error { background: var(--danger); }
 @keyframes shake { 0%,100%{transform:translateX(0)} 10%,30%,50%,70%,90%{transform:translateX(-3px)} 20%,40%,60%,80%{transform:translateX(3px)} }
 @media (max-width: 768px) { body { padding-top: 60px; } main { padding: 20px 15px; } h1 { font-size: 24px; } .calendar-container { padding: 20px; } .calendar-header { flex-direction: column; align-items: flex-start; } .calendar-controls { width: 100%; justify-content: space-between; } .weekday { font-size: 13px; padding: 6px 2px; } .calendar-day { min-height: 45px; } .stats-container { grid-template-columns: 1fr; } .content-grid { grid-template-columns: 1fr; } .toast { top: 70px; right: 10px; left: 10px; max-width: none; text-align: center; } }
+.default-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #eee;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
 </style>
 {% endblock %}
 
@@ -97,10 +105,9 @@ h1:after { content: ''; position: absolute; bottom: 0; left: 0; width: 60px; hei
   <div class="page-header"><h1>Календарь настроения</h1></div>
   <div class="calendar-container">
     <div class="calendar-header">
-      <div class="calendar-title" id="monthYear"></div>
+      <div class="calendar-title" id="monthYear" onclick="goToToday()">Загрузка...</div>
       <div class="calendar-controls">
         <button class="calendar-btn" onclick="changeMonth(-1)">←</button>
-        <button class="today-btn" onclick="goToToday()">Сегодня</button>
         <button class="calendar-btn" onclick="changeMonth(1)">→</button>
       </div>
     </div>
@@ -225,7 +232,6 @@ async function loadMoodData() {
     const resp = await fetch(API_MOOD);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
     let all = await resp.json();
-    // Нормализуем даты: приводим к YYYY-MM-DD
     all = all.map(entry => ({
       ...entry,
       date: entry.date ? entry.date.split('T')[0] : ''
@@ -313,6 +319,7 @@ function renderGoalsList() {
   });
 }
 
+// ИСПРАВЛЕННАЯ ФУНКЦИЯ handleGoalToggle (пункт 2)
 async function handleGoalToggle(e) {
   e.stopPropagation();
   const btn = e.currentTarget;
@@ -325,10 +332,21 @@ async function handleGoalToggle(e) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ completed: newCompleted })
     });
-    if (!resp.ok) throw new Error();
-    showToast(newCompleted ? 'Цель выполнена!' : 'Цель отмечена как невыполненная', 'success');
+    if (resp.status === 404) {
+      showToast('Цель уже удалена', 'error');
+      await loadAllGoals();
+      return;
+    }
+    if (resp.status === 405) {
+      showToast('Ошибка сервера (PATCH не поддерживается)', 'error');
+      return;
+    }
+    if (!resp.ok) {
+      throw new Error(`HTTP ${resp.status}`);
+    }
+    showToast(newCompleted ? 'Цель выполнена!' : 'Цель обновлена', 'success');
     await loadAllGoals();
-  } catch(e) {
+  } catch (e) {
     console.error('Ошибка обновления цели:', e);
     showToast('Не удалось обновить цель', 'error');
   }
@@ -363,12 +381,11 @@ function renderCalendar() {
     const day = createDayElement(dayNum, 'other-month', true);
     grid.appendChild(day);
   }
-  const todayReal = new Date(); // фиксируем реальную дату один раз
+  const todayReal = new Date();
   for (let i = 1; i <= daysInMonth; i++) {
     const dateKey = DateUtils.formatISO(year, month+1, i);
     const day = createDayElement(i, '', false);
     const currentDayDate = new Date(year, month, i);
-    // Подсветка сегодняшнего дня только если месяц совпадает с реальным
     if (currentDayDate.toDateString() === todayReal.toDateString()) {
       day.classList.add('current-day');
     }
@@ -503,15 +520,34 @@ document.getElementById('saveJoyBtn').addEventListener('click', async () => {
 // ======================== ЗАЩИТА ОТ XSS ========================
 function escapeHtml(str) { if (!str) return ''; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
 
-// ======================== ИНИЦИАЛИЗАЦИЯ ========================
-document.addEventListener('DOMContentLoaded', async () => {
+// ======================== АВТООБНОВЛЕНИЕ (пункт 5) ========================
+async function refreshAllData() {
   try {
     await loadMoodData();
-    await Promise.all([loadAllGoals(), loadAllJoys(), loadAllNotes()]);
+    await Promise.all([
+      loadAllGoals(),
+      loadAllJoys(),
+      loadAllNotes()
+    ]);
     renderCalendar();
     updateStats();
-  } catch(e) { console.error(e); showToast('Ошибка загрузки страницы', 'error'); }
+  } catch (e) {
+    console.error('Ошибка обновления данных:', e);
+  }
+}
+
+// Обновлять при возврате на вкладку
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    refreshAllData();
+  }
 });
+
+// ======================== ИНИЦИАЛИЗАЦИЯ ========================
+document.addEventListener('DOMContentLoaded', async () => {
+  await refreshAllData();
+});
+
 window.changeMonth = changeMonth;
 window.goToToday = goToToday;
 </script>

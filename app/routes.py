@@ -4,7 +4,7 @@ import io
 import json
 import requests
 import random
-from datetime import datetime,  date, timedelta
+from datetime import datetime, date, timedelta
 from flask import Blueprint, render_template, request, jsonify, send_file, current_app, flash, redirect, url_for
 from flask_login import login_required, current_user
 from app import get_db, close_db
@@ -423,7 +423,6 @@ def generate_ai_insights(stats):
         insights.append(f"Общий балл: {mood_score}/100. Есть пространство для улучшений. Попробуйте добавить ежедневные ритуалы заботы о себе. 🌱")
     
     # 8. Цикличность (для женщин)
-        # 8. Анализ циклов (для женщин)
     if stats['cycle_analysis']:
         insights.append(stats['cycle_analysis'])
     elif 'cycle_entries' in stats:
@@ -644,6 +643,59 @@ def get_fallback_response(user_message):
     
     return random.choice(general_responses)
 
+def generate_smart_response(user_message, context, history):
+    """Генерация умного ответа с учётом контекста и истории (без YandexGPT)"""
+    import random
+    user_message_lower = user_message.lower()
+    
+    # Приветствия
+    if any(w in user_message_lower for w in ['привет', 'здравствуй', 'доброе', 'хай']):
+        return f"Привет! Рада тебя видеть! 🌸 Как твоё настроение сегодня? {context}"
+    
+    # Вопросы о самочувствии
+    if any(w in user_message_lower for w in ['как дела', 'как настроение', 'как ты']):
+        if context:
+            return f"У меня всё отлично, спасибо! А у тебя? {context}"
+        return "У меня всё замечательно! А как твой день проходит? Расскажи! 💫"
+    
+    # Сложные эмоции
+    if any(w in user_message_lower for w in ['плохо', 'грустно', 'тяжело', 'устал', 'стресс']):
+        return "Мне жаль это слышать 😔 Хочешь рассказать, что случилось? Я здесь, чтобы выслушать и поддержать. 🤗"
+    
+    # Позитивные эмоции
+    if any(w in user_message_lower for w in ['хорошо', 'отлично', 'прекрасно', 'радостно', 'счастлив']):
+        return "Это замечательно! 😊 Расскажи, что тебя порадовало? Давай запишем это в копилку радостей! ✨"
+    
+    # Вопросы о возможностях
+    if any(w in user_message_lower for w in ['что ты умеешь', 'помощь', 'функции', 'можешь']):
+        return """Я умею многое! 💫
+
+📊 **Анализировать настроение** — скажи «проанализируй мои данные»
+📅 **Показывать паттерны** — спроси «в какие дни настроение лучше»
+📝 **Читать заметки** — скажи «покажи мои заметки»
+✨ **Рассказывать о радостях** — спроси «что меня радовало»
+🎯 **Отслеживать цели** — скажи «мои цели»
+
+А ещё я просто могу с тобой поговорить и поддержать! Что хочешь? 🌸"""
+    
+    # Благодарности
+    if any(w in user_message_lower for w in ['спасибо', 'благодарю']):
+        return "Пожалуйста! Я всегда рада помочь. Обращайся в любое время! 💖"
+    
+    # Прощания
+    if any(w in user_message_lower for w in ['пока', 'до свидания', 'увидимся']):
+        return "Пока! Хорошего дня! Заглядывай ещё — я всегда здесь, чтобы поддержать тебя. 🌈"
+    
+    # Обычный ответ (дружеский, поддерживающий)
+    responses = [
+        f"Поняла тебя! {context} Расскажи ещё, что у тебя сегодня происходит? 💭",
+        f"Интересно... А что ещё было сегодня? {context}",
+        f"Я тебя слышу. {context} Хочешь обсудить что-то конкретное? 🌸",
+        f"Спасибо, что делишься! {context} Это помогает лучше понимать себя. 💪",
+        f"Продолжай, я внимательно слушаю 👂 {context}"
+    ]
+    return random.choice(responses)
+
 def get_user_notes(conn, user_id):
     cursor = conn.cursor(dictionary=True)
     cursor.execute("""
@@ -716,44 +768,36 @@ def chatbot(conn):
         print(f"Ошибка в chatbot: {e}")
         return jsonify({'response': get_fallback_response(user_message)})
 
-
-
 # ================== ОСНОВНЫЕ МАРШРУТЫ СТРАНИЦ ==================
 
 @main.route('/')
 def index():
     return render_template('index.html')
 
-
 @main.route('/dashboard')
 @login_required
 def dashboard():
     return render_template('dashboard.html')
-
 
 @main.route('/calendar')
 @login_required
 def calendar():
     return render_template('calendar.html')
 
-
 @main.route('/calendar/day/<date>')
 @login_required
 def day_detail(date):
     return render_template('day_detail.html')
-
 
 @main.route('/profile')
 @login_required
 def profile():
     return render_template('profile.html')
 
-
 @main.route('/chart')
 @login_required
 def chart():
     return render_template('chart.html')
-
 
 @main.route('/cycle-diary')
 @login_required
@@ -762,7 +806,6 @@ def cycle_diary():
     if current_user.gender != 'female':
         flash('Эта страница доступна только для пользователей женского пола', 'error')
         return redirect(url_for('main.dashboard'))
-    
     return render_template('cycle_diary.html')
 
 @main.route('/api/pool-status')
@@ -782,7 +825,6 @@ def pool_status():
     except Exception as e:
         return jsonify({'status': 'error', 'error': str(e)})
 
-
 # ================== API МАРШРУТЫ ДЛЯ НАСТРОЕНИЯ ==================
 
 # ================== MOOD ENTRIES ==================
@@ -793,8 +835,6 @@ def mood_entries(conn):
     if request.method == 'GET':
         try:
             date_filter = request.args.get('date')
-            
-            # Используем with + buffered=True
             with conn.cursor(buffered=True, dictionary=True) as cursor:
                 if date_filter:
                     cursor.execute(
@@ -809,8 +849,6 @@ def mood_entries(conn):
                         (current_user.id,)
                     )
                 entries = cursor.fetchall()
-            
-            # Преобразуем данные для JSON
             for entry in entries:
                 if entry.get('mood') is not None:
                     entry['mood'] = float(entry['mood'])
@@ -818,26 +856,20 @@ def mood_entries(conn):
                     entry['date'] = entry['date'].isoformat()
                 if entry.get('created_at'):
                     entry['created_at'] = entry['created_at'].isoformat()
-
             return jsonify(entries)
-        
         except Error as e:
             print(f"Database error in mood_entries GET: {e}")
             return jsonify({'error': str(e)}), 500
-
     elif request.method == 'POST':
         try:
             data = request.get_json()
             if not data:
                 return jsonify({'error': 'No data provided'}), 400
-
             date = data.get('date')
             mood = data.get('mood')
             note = data.get('note', '')
-
             if not date or mood is None:
                 return jsonify({'error': 'Date and mood are required'}), 400
-
             with conn.cursor(buffered=True) as cursor:
                 cursor.execute(
                     """INSERT INTO mood_entries (user_id, date, mood, note)
@@ -846,13 +878,10 @@ def mood_entries(conn):
                     (current_user.id, date, float(mood), note)
                 )
                 conn.commit()
-                
                 cursor.execute("SELECT LAST_INSERT_ID() as id")
                 result = cursor.fetchone()
                 new_id = result[0] if result else None
-
             return jsonify({'message': 'Настроение сохранено успешно', 'id': new_id})
-        
         except Error as e:
             print(f"Database error in mood_entries POST: {e}")
             return jsonify({'error': str(e)}), 500
@@ -874,7 +903,6 @@ def delete_mood_entry(conn, mood_id):
         print(f"Database error in delete_mood_entry: {e}")
         return jsonify({'error': str(e)}), 500
 
-
 @main.route('/api/check-auth')
 @login_required
 def check_auth():
@@ -894,38 +922,31 @@ def hourly_moods(conn):
             date_filter = request.args.get('date')
             if not date_filter:
                 return jsonify({'error': 'Date parameter is required'}), 400
-
             cursor = conn.cursor(buffered=True, dictionary=True)
             cursor.execute(
                 "SELECT id, user_id, date, hour, mood, note FROM hourly_moods WHERE user_id = %s AND date = %s ORDER BY hour",
                 (current_user.id, date_filter)
             )
             entries = cursor.fetchall()
-
             for entry in entries:
                 if 'date' in entry and entry['date']:
                     entry['date'] = entry['date'].isoformat()
-
             cursor.close()
             return jsonify(entries)
         except Error as e:
             print(f"Database error in hourly_moods GET: {e}")
             return jsonify({'error': str(e)}), 500
-
     elif request.method == 'POST':
         try:
             data = request.get_json()
             if not data:
                 return jsonify({'error': 'No data provided'}), 400
-
             date = data.get('date')
             hour = data.get('hour')
             mood = data.get('mood')
             note = data.get('note', '')
-
             if date is None or hour is None or mood is None:
                 return jsonify({'error': 'Date, hour and mood are required'}), 400
-
             cursor = conn.cursor(buffered=True)
             cursor.execute(
                 """INSERT INTO hourly_moods (user_id, date, hour, mood, note)
@@ -935,12 +956,10 @@ def hourly_moods(conn):
             )
             conn.commit()
             cursor.close()
-
             return jsonify({'message': 'Почасовое настроение сохранено успешно'})
         except Error as e:
             print(f"Database error in hourly_moods POST: {e}")
             return jsonify({'error': str(e)}), 500
-
 
 @main.route('/api/hourly_moods/<int:mood_id>', methods=['DELETE'])
 @login_required
@@ -965,7 +984,6 @@ def delete_hourly_mood(conn, mood_id):
 def stats(conn):
     try:
         cursor = conn.cursor(dictionary=True)
-        
         cursor.execute("""
             SELECT 
                 COUNT(*) as total_entries,
@@ -974,26 +992,20 @@ def stats(conn):
             FROM mood_entries 
             WHERE user_id = %s
         """, (current_user.id,))
-        
         stats = cursor.fetchone()
         cursor.close()
-        
-        # Обрабатываем случай, когда нет записей
         total_entries = stats['total_entries'] or 0
         avg_mood = round(float(stats['avg_mood'] or 0), 1) if stats['avg_mood'] is not None else 0.0
         good_days = stats['good_days'] or 0
-        
         return jsonify({
             'total_entries': total_entries,
             'avg_mood': avg_mood,
             'good_days': good_days,
             'current_streak': 0
         })
-        
     except Error as e:
         print(f"Database error in stats: {e}")
         return jsonify({'error': str(e)}), 500
-
 
 @main.route('/api/today_mood')
 @login_required
@@ -1001,16 +1013,12 @@ def stats(conn):
 def today_mood(conn):
     try:
         today = datetime.now().date().isoformat()
-
-        # Используем with для курсора, чтобы он точно закрылся
         with conn.cursor(dictionary=True) as cursor:
             cursor.execute(
                 "SELECT mood, note FROM mood_entries WHERE user_id = %s AND date = %s",
                 (current_user.id, today)
             )
             mood_entry = cursor.fetchone()
-
-        # Проверяем, есть ли запись
         if mood_entry:
             mood_value = mood_entry.get('mood')
             return jsonify({
@@ -1019,14 +1027,12 @@ def today_mood(conn):
             })
         else:
             return jsonify({'mood': None, 'note': ''})
-
     except Error as e:
         print(f"Database error in today_mood: {e}")
         return jsonify({'error': str(e)}), 500
     except Exception as e:
         print(f"Unexpected error in today_mood: {e}")
         return jsonify({'error': str(e)}), 500
-
 
 # ================== API МАРШРУТЫ ДЛЯ ПРОФИЛЯ ==================
 
@@ -1038,16 +1044,11 @@ def update_profile(conn):
         data = request.get_json()
         if not data:
             return jsonify({'error': 'No data provided'}), 400
-
         first_name = data.get('first_name', '').strip()
         last_name = data.get('last_name', '').strip()
         gender = data.get('gender')
-
-        # Проверка корректности пола
         if gender not in (None, '', 'male', 'female'):
             return jsonify({'error': 'Некорректное значение пола'}), 400
-
-        # Создаем буферизированный курсор, чтобы избежать ошибок с "unread result"
         cursor = conn.cursor(buffered=True)
         cursor.execute(
             """
@@ -1060,10 +1061,8 @@ def update_profile(conn):
             (first_name, last_name, gender, current_user.id)
         )
         conn.commit()
-        cursor.close()  # Закрываем курсор после выполнения запроса
-
+        cursor.close()
         return jsonify({'message': 'Профиль успешно обновлен'})
-
     except Error as e:
         print(f"Database error in update_profile: {e}")
         return jsonify({'error': str(e)}), 500
@@ -1076,33 +1075,23 @@ def change_password(conn):
         data = request.get_json()
         if not data:
             return jsonify({'error': 'No data provided'}), 400
-            
         current_password = data.get('current_password')
         new_password = data.get('new_password')
         confirm_password = data.get('confirm_password')
-        
         if not all([current_password, new_password, confirm_password]):
             return jsonify({'error': 'Все поля обязательны для заполнения'}), 400
-            
         if new_password != confirm_password:
             return jsonify({'error': 'Новые пароли не совпадают'}), 400
-            
         if len(new_password) < 8:
             return jsonify({'error': 'Новый пароль должен содержать не менее 8 символов'}), 400
-
-        # Проверяем текущий пароль
         cursor = conn.cursor(dictionary=True)
         cursor.execute("SELECT password FROM users WHERE id = %s", (current_user.id,))
         user_data = cursor.fetchone()
-        
         if not user_data:
             return jsonify({'error': 'Пользователь не найден'}), 404
-            
         from app import bcrypt
         if not bcrypt.check_password_hash(user_data['password'], current_password):
             return jsonify({'error': 'Текущий пароль неверен'}), 400
-        
-        # Обновляем пароль
         hashed_password = bcrypt.generate_password_hash(new_password).decode('utf-8')
         cursor.execute(
             "UPDATE users SET password = %s WHERE id = %s",
@@ -1110,13 +1099,10 @@ def change_password(conn):
         )
         conn.commit()
         cursor.close()
-        
         return jsonify({'message': 'Пароль успешно изменен'})
-        
     except Error as e:
         print(f"Database error in change_password: {e}")
         return jsonify({'error': str(e)}), 500
-
 
 # ================== API МАРШРУТЫ ДЛЯ ЦЕЛЕЙ ==================
 
@@ -1140,12 +1126,9 @@ def goals(conn):
                     (current_user.id,)
                 )
             goals_data = cursor.fetchall()
-            
-            # Преобразуем даты в ISO-формат
             for goal in goals_data:
                 if 'created_at' in goal and goal['created_at']:
                     goal['created_at'] = goal['created_at'].isoformat()
-            
             return jsonify(goals_data)
         except Error as e:
             print(f"Database error in goals GET: {e}")
@@ -1153,18 +1136,15 @@ def goals(conn):
         finally:
             if cursor:
                 cursor.close()
-    
     elif request.method == 'POST':
         cursor = None
         try:
             data = request.get_json()
             if not data:
                 return jsonify({'error': 'No data provided'}), 400
-                
             text = data.get('text', '').strip()
             if not text:
                 return jsonify({'error': 'Текст цели не может быть пустым'}), 400
-            
             date = data.get('date')
             cursor = conn.cursor(buffered=True)
             cursor.execute(
@@ -1173,7 +1153,6 @@ def goals(conn):
             )
             conn.commit()
             goal_id = cursor.lastrowid
-            
             return jsonify({
                 'id': goal_id,
                 'text': text,
@@ -1187,7 +1166,6 @@ def goals(conn):
             if cursor:
                 cursor.close()
 
-
 @main.route("/api/goals/<int:goal_id>", methods=["PUT"])
 @login_required
 @with_db_connection
@@ -1196,7 +1174,6 @@ def update_goal_status(conn, goal_id):
     try:
         data = request.get_json()
         completed = data.get("completed")
-
         cursor = conn.cursor(buffered=True)
         cursor.execute(
             "UPDATE goals SET completed=%s WHERE id=%s AND user_id=%s",
@@ -1219,9 +1196,7 @@ def patch_goal(conn, goal_id):
     data = request.get_json()
     if not data or 'completed' not in data:
         return jsonify({'error': 'Invalid data'}), 400
-
     completed = 1 if data['completed'] else 0
-
     cursor = conn.cursor(buffered=True)
     try:
         cursor.execute(
@@ -1235,7 +1210,6 @@ def patch_goal(conn, goal_id):
         return jsonify({'error': str(e)}), 500
     finally:
         cursor.close()
-
 
 @main.route('/api/goals/<int:goal_id>/toggle', methods=['POST'])
 @login_required
@@ -1256,7 +1230,6 @@ def toggle_goal(conn, goal_id):
     finally:
         if cursor:
             cursor.close()
-
 
 @main.route('/api/goals/<int:goal_id>', methods=['DELETE'])
 @login_required
@@ -1299,12 +1272,9 @@ def joys(conn):
                     (current_user.id,)
                 )
             joys_data = cursor.fetchall()
-            
-            # Преобразуем даты в ISO-формат
             for joy in joys_data:
                 if joy.get('created_at'):
                     joy['created_at'] = joy['created_at'].isoformat()
-            
             return jsonify(joys_data)
         except Error as e:
             print(f"Database error in joys GET: {e}")
@@ -1312,18 +1282,15 @@ def joys(conn):
         finally:
             if cursor:
                 cursor.close()
-    
     elif request.method == 'POST':
         cursor = None
         try:
             data = request.get_json()
             if not data:
                 return jsonify({'error': 'No data provided'}), 400
-                
             text = data.get('text', '').strip()
             if not text:
                 return jsonify({'error': 'Текст не может быть пустым'}), 400
-            
             date = data.get('date')
             cursor = conn.cursor(buffered=True)
             cursor.execute(
@@ -1332,9 +1299,8 @@ def joys(conn):
             )
             conn.commit()
             joy_id = cursor.lastrowid
-            
             return jsonify({
-                'id': joy_id, 
+                'id': joy_id,
                 'text': text,
                 'user_id': current_user.id
             })
@@ -1365,7 +1331,6 @@ def delete_joy(conn, joy_id):
         if cursor:
             cursor.close()
 
-
 # ================== API ДЛЯ ЗАГРУЗКИ АВАТАРА ==================
 @main.route('/api/upload_avatar', methods=['POST'])
 @login_required
@@ -1374,27 +1339,17 @@ def upload_avatar(conn):
     try:
         if 'avatar' not in request.files:
             return jsonify({'error': 'Файл не выбран'}), 400
-            
         file = request.files['avatar']
         if file.filename == '':
             return jsonify({'error': 'Файл не выбран'}), 400
-            
         if not file.content_type.startswith('image/'):
             return jsonify({'error': 'Файл должен быть изображением'}), 400
-        
-        # Создаем папку для аватаров, если её нет
         avatars_dir = os.path.join(current_app.root_path, 'static', 'avatars')
         os.makedirs(avatars_dir, exist_ok=True)
-        
-        # Генерируем уникальное имя файла
         import time
         filename = f"avatar_{current_user.id}_{int(time.time())}.jpg"
         filepath = os.path.join(avatars_dir, filename)
-        
-        # Сохраняем файл
         file.save(filepath)
-        
-        # Обновляем путь в БД
         cursor = None
         try:
             cursor = conn.cursor(buffered=True)
@@ -1404,32 +1359,24 @@ def upload_avatar(conn):
                 (avatar_path, current_user.id)
             )
             conn.commit()
-            return jsonify({
-                'message': 'Аватар успешно загружен', 
-                'path': avatar_path
-            })
+            return jsonify({'message': 'Аватар успешно загружен', 'path': avatar_path})
         except Error as e:
             print(f"Database error in upload_avatar: {e}")
             return jsonify({'error': str(e)}), 500
         finally:
             if cursor:
                 cursor.close()
-        
     except Exception as e:
         print(f"Error in upload_avatar: {e}")
         return jsonify({'error': 'Ошибка загрузки файла'}), 500
 
-
 # ================== ЭКСПОРТ В CSV ==================
-
 @main.route('/api/export/data')
 @login_required
 @with_db_connection
 def export_data(conn):
     try:
         cursor = conn.cursor(dictionary=True)
-        
-        # Получаем данные настроения
         cursor.execute("""
             SELECT date, mood, note, created_at 
             FROM mood_entries 
@@ -1437,8 +1384,6 @@ def export_data(conn):
             ORDER BY date
         """, (current_user.id,))
         mood_data = cursor.fetchall()
-        
-        # Получаем цели
         cursor.execute("""
             SELECT text, completed, created_at 
             FROM goals 
@@ -1446,8 +1391,6 @@ def export_data(conn):
             ORDER BY created_at
         """, (current_user.id,))
         goals_data = cursor.fetchall()
-        
-        # Получаем радости
         cursor.execute("""
             SELECT text, created_at 
             FROM joys 
@@ -1455,73 +1398,43 @@ def export_data(conn):
             ORDER BY created_at
         """, (current_user.id,))
         joys_data = cursor.fetchall()
-        
         cursor.close()
-        
-        # Создаем CSV в памяти
         output = io.StringIO()
         writer = csv.writer(output)
-        
-        # Заголовок файла
         writer.writerow(['Lumi - Экспорт данных'])
         writer.writerow(['Пользователь:', f"{current_user.first_name or ''} {current_user.last_name or ''}".strip()])
         writer.writerow(['Логин:', current_user.username])
         writer.writerow(['Дата экспорта:', datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
         writer.writerow([])
-        
-        # Раздел настроения
         writer.writerow(['=== НАСТРОЕНИЕ ==='])
         writer.writerow(['Дата', 'Настроение (1-10)', 'Заметка', 'Дата создания'])
         for entry in mood_data:
             date = entry['date'].strftime('%Y-%m-%d') if entry['date'] else ''
             created_at = entry['created_at'].strftime('%Y-%m-%d %H:%M') if entry['created_at'] else ''
-            writer.writerow([
-                date,
-                float(entry['mood']) if entry['mood'] else '',
-                entry.get('note', ''),
-                created_at
-            ])
+            writer.writerow([date, float(entry['mood']) if entry['mood'] else '', entry.get('note', ''), created_at])
         writer.writerow([])
-        
-        # Раздел целей
         writer.writerow(['=== ЦЕЛИ ==='])
         writer.writerow(['Текст цели', 'Статус', 'Дата создания'])
         for goal in goals_data:
             status = 'Выполнено' if goal['completed'] else 'Не выполнено'
             created_at = goal['created_at'].strftime('%Y-%m-%d %H:%M') if goal['created_at'] else ''
-            writer.writerow([
-                goal['text'],
-                status,
-                created_at
-            ])
+            writer.writerow([goal['text'], status, created_at])
         writer.writerow([])
-        
-        # Раздел радостей
         writer.writerow(['=== РАДОСТИ ==='])
         writer.writerow(['Текст', 'Дата создания'])
         for joy in joys_data:
             created_at = joy['created_at'].strftime('%Y-%m-%d %H:%M') if joy['created_at'] else ''
-            writer.writerow([
-                joy['text'],
-                created_at
-            ])
-        
-        # Подготовка ответа
+            writer.writerow([joy['text'], created_at])
         output.seek(0)
         response = current_app.response_class(
             output,
             mimetype='text/csv',
-            headers={
-                'Content-Disposition': f'attachment; filename=lumi_export_{datetime.now().strftime("%Y%m%d_%H%M")}.csv'
-            }
+            headers={'Content-Disposition': f'attachment; filename=lumi_export_{datetime.now().strftime("%Y%m%d_%H%M")}.csv'}
         )
-        
         return response
-        
     except Error as e:
         print(f"Database error in export_data: {e}")
         return jsonify({'error': str(e)}), 500
-
 
 @main.route('/api/delete_avatar', methods=['DELETE'])
 @login_required
@@ -1530,7 +1443,6 @@ def delete_avatar(conn):
     cursor = None
     try:
         cursor = conn.cursor(buffered=True)
-        # Устанавливаем avatar_path в NULL для текущего пользователя
         cursor.execute(
             "UPDATE users SET avatar_path = NULL WHERE id = %s",
             (current_user.id,)
@@ -1558,44 +1470,35 @@ def cycle_entries(conn):
                 WHERE user_id = %s
             """
             params = [current_user.id]
-
             if date_filter:
                 query += " AND date = %s"
                 params.append(date_filter)
             else:
                 query += " ORDER BY date DESC"
-
             with conn.cursor(dictionary=True) as cursor:
                 cursor.execute(query, params)
                 entries = cursor.fetchall()
-
-            # Обрабатываем JSON симптомы
             for entry in entries:
                 entry['symptoms'] = json.loads(entry['symptoms']) if entry.get('symptoms') else []
                 if entry.get('date'):
                     entry['date'] = entry['date'].isoformat()
-
             return jsonify(entries)
         except Error as e:
             print(f"Database error in cycle_entries GET: {e}")
             return jsonify({'error': str(e)}), 500
-
     elif request.method == 'POST':
         try:
             data = request.get_json()
             if not data:
                 return jsonify({'error': 'No data provided'}), 400
-
             date = data.get('date')
             if not date:
                 return jsonify({'error': 'Date is required'}), 400
-
             cycle_day = data.get('cycle_day')
             symptoms_json = json.dumps(data.get('symptoms', [])) if data.get('symptoms') else None
             flow_intensity = data.get('flow_intensity')
             mood = data.get('mood')
             notes = data.get('notes', '')
-
             with conn.cursor() as cursor:
                 cursor.execute("""
                     INSERT INTO cycle_entries
@@ -1609,12 +1512,10 @@ def cycle_entries(conn):
                         notes = VALUES(notes)
                 """, (current_user.id, date, cycle_day, symptoms_json, flow_intensity, mood, notes))
                 conn.commit()
-
             return jsonify({'message': 'Данные цикла сохранены успешно'})
         except Error as e:
             print(f"Database error in cycle_entries POST: {e}")
             return jsonify({'error': str(e)}), 500
-
 
 @main.route('/api/cycle_entries/<date>', methods=['DELETE'])
 @login_required
@@ -1628,12 +1529,10 @@ def delete_cycle_entry(conn, date):
             )
             deleted = cursor.rowcount
             conn.commit()
-
         return jsonify({'success': True, 'deleted': deleted})
     except Error as e:
         print(f"Database error in delete_cycle_entry: {e}")
         return jsonify({'error': str(e)}), 500
-
 
 @main.route('/api/cycle_settings', methods=['GET', 'PUT'])
 @login_required
@@ -1644,25 +1543,20 @@ def cycle_settings(conn):
             with conn.cursor(dictionary=True) as cursor:
                 cursor.execute("SELECT * FROM cycle_settings WHERE user_id = %s", (current_user.id,))
                 settings = cursor.fetchone()
-
             if settings and settings.get('last_period_start'):
                 settings['last_period_start'] = settings['last_period_start'].isoformat()
-
             return jsonify(settings or {})
         except Error as e:
             print(f"Database error in cycle_settings GET: {e}")
             return jsonify({'error': str(e)}), 500
-
     elif request.method == 'PUT':
         try:
             data = request.get_json()
             if not data:
                 return jsonify({'error': 'No data provided'}), 400
-
             with conn.cursor() as cursor:
                 cursor.execute("SELECT id FROM cycle_settings WHERE user_id = %s", (current_user.id,))
                 existing = cursor.fetchone()
-
                 if existing:
                     cursor.execute("""
                         UPDATE cycle_settings SET
@@ -1694,12 +1588,10 @@ def cycle_settings(conn):
                         data.get('notify_ovulation', True)
                     ))
                 conn.commit()
-
             return jsonify({'message': 'Настройки цикла обновлены'})
         except Error as e:
             print(f"Database error in cycle_settings PUT: {e}")
             return jsonify({'error': str(e)}), 500
-
 
 # ================== CYCLE STATS ==================
 @main.route('/api/cycle_stats')
@@ -1717,7 +1609,6 @@ def cycle_stats(conn):
                 WHERE user_id = %s
             """, (current_user.id,))
             stats = cursor.fetchone() or {}
-
         return jsonify({
             'total_entries': stats.get('total_entries', 0),
             'avg_mood': round(float(stats.get('avg_mood') or 0), 1),
@@ -1726,7 +1617,6 @@ def cycle_stats(conn):
     except Error as e:
         print(f"Database error in cycle_stats: {e}")
         return jsonify({'error': str(e)}), 500
-
 
 # ================== CYCLE PREDICTIONS ==================
 @main.route('/api/cycle_predictions')
@@ -1737,7 +1627,6 @@ def cycle_predictions(conn):
         cursor = None
         try:
             cursor = conn.cursor(dictionary=True)
-            # Получаем настройки цикла пользователя
             cursor.execute("SELECT * FROM cycle_settings WHERE user_id = %s", (current_user.id,))
             settings = cursor.fetchone()
         except Error as e:
@@ -1746,42 +1635,29 @@ def cycle_predictions(conn):
         finally:
             if cursor:
                 cursor.close()
-                print("✅ Курсор cycle_predictions закрыт")
-
-        # Проверка наличия данных
         if not settings:
             return jsonify({'error': 'Настройки цикла не найдены'}), 400
         if not settings.get('last_period_start'):
             return jsonify({'error': 'Дата последней менструации не указана'}), 400
-
-        # Преобразуем last_period_start в объект date
         last_period = settings['last_period_start']
         if isinstance(last_period, str):
             try:
                 last_period = datetime.strptime(last_period, '%Y-%m-%d').date()
             except ValueError:
                 return jsonify({'error': 'Некорректная дата последней менструации'}), 400
-
         cycle_length = settings.get('cycle_length') or 28
         period_length = settings.get('period_length') or 5
-
-        # Рассчёты
         next_period = last_period + timedelta(days=cycle_length)
         ovulation_date = next_period - timedelta(days=14)
         fertile_start = ovulation_date - timedelta(days=5)
         fertile_end = ovulation_date + timedelta(days=1)
         current_cycle_day = (datetime.now().date() - last_period).days + 1
-
         return jsonify({
             'next_period': next_period.isoformat(),
             'ovulation_date': ovulation_date.isoformat(),
-            'fertile_window': {
-                'start': fertile_start.isoformat(),
-                'end': fertile_end.isoformat()
-            },
+            'fertile_window': {'start': fertile_start.isoformat(), 'end': fertile_end.isoformat()},
             'current_cycle_day': current_cycle_day
         })
-
     except Error as e:
         print(f"Database error in cycle_predictions: {e}")
         return jsonify({'error': str(e)}), 500
@@ -1798,6 +1674,7 @@ def chat_with_asya():
     try:
         data = request.get_json()
         user_message = data.get('message', '').strip()
+        history = data.get('history', [])
         
         if not user_message:
             return jsonify({
@@ -1808,7 +1685,7 @@ def chat_with_asya():
         # ===== ПРОВЕРКА КОМАНД ДЛЯ РАСШИРЕННОГО АНАЛИЗА =====
         user_message_lower = user_message.lower()
         
-        # Если пользователь просит проанализировать данные
+        # Анализ данных
         analysis_commands = [
             'проанализируй', 'анализ данных', 'статистика', 'отчет', 
             'анализируй мои данные', 'покажи статистику', 'дай отчет',
@@ -1816,76 +1693,86 @@ def chat_with_asya():
             'проанализировать', 'отчёт', 'статистику', 'анализ', 'аналитику',
             'что с моим настроением', 'как я себя чувствую по данным'
         ]
-        
         if any(cmd in user_message_lower for cmd in analysis_commands):
             print(f"🔍 Пользователь запросил анализ: {user_message}")
             return generate_deep_analysis(current_user.id)
         
-        # Если пользователь спрашивает о паттернах
+        # Паттерны
         pattern_commands = [
             'паттерны', 'закономерности', 'тренды', 'график', 
             'какие дни', 'в какое время', 'когда у меня',
             'дни недели', 'по дням', 'по времени', 'закономерность',
             'какой день', 'во сколько'
         ]
-        
         if any(cmd in user_message_lower for cmd in pattern_commands):
             print(f"📊 Пользователь запросил паттерны: {user_message}")
             return analyze_patterns(current_user.id, user_message)
         
-        # Если пользователь спрашивает о заметках
+        # Заметки
         notes_commands = ['заметки', 'мои записи', 'что я писал', 'дневник', 'заметок', 'записи', 'текст']
-        
         if any(cmd in user_message_lower for cmd in notes_commands):
             print(f"📝 Пользователь запросил заметки: {user_message}")
             return analyze_notes(current_user.id, user_message)
-                # Если пользователь спрашивает о радостях
-        joys_commands = ['радости', 'радость', 'joys', 'что меня радует', 'мои радости', 'копилка радостей']
         
+        # Радости
+        joys_commands = ['радости', 'радость', 'joys', 'что меня радует', 'мои радости', 'копилка радостей']
         if any(cmd in user_message_lower for cmd in joys_commands):
             print(f"✨ Пользователь запросил радости: {user_message}")
             return analyze_joys(current_user.id)
-                # Если пользователь спрашивает о цикле
-        cycle_commands = ['цикл', 'менструация', 'месячные', 'овуляция', 'пмс', 'фаза цикла', 'дневник цикла']
         
+        # Цели
+        if any(w in user_message_lower for w in ['цели', 'задачи', 'планы', 'прогресс']):
+            print(f"🎯 Пользователь запросил цели: {user_message}")
+            return analyze_goals(current_user.id)
+        
+        # Цикл
+        cycle_commands = ['цикл', 'менструация', 'месячные', 'овуляция', 'пмс', 'фаза цикла', 'дневник цикла']
         if any(cmd in user_message_lower for cmd in cycle_commands):
             print(f"🔄 Пользователь запросил анализ цикла: {user_message}")
             return analyze_cycle(current_user.id)
-        # ШАГ 1: Получаем статистику пользователя (но НЕ используем для обычных ответов)
+        
+        # ===== ОБЫЧНЫЙ ДИАЛОГ С ПАМЯТЬЮ =====
         conn = get_db()
         if conn is None:
-            # Если нет БД - простой ответ без анализа
             return jsonify({
                 'reply': 'Извини, возникла проблема с базой данных. Попробуй позже! 🔄',
                 'success': False,
                 'has_analysis': False
             })
         
-        # Получаем статистику ТОЛЬКО на случай, если понадобится
-        stats = None
+        # Получаем контекст для ответа
+        context = ""
         try:
-            stats = generate_user_statistics(conn, current_user.id)
+            cursor = conn.cursor(dictionary=True)
+            cursor.execute("SELECT AVG(mood) as avg_mood, COUNT(*) as total FROM mood_entries WHERE user_id = %s AND date >= DATE_SUB(CURDATE(), INTERVAL 7 DAY)", (current_user.id,))
+            mood_stats = cursor.fetchone()
+            if mood_stats and mood_stats['total'] and mood_stats['total'] > 0:
+                avg_mood = float(mood_stats['avg_mood'] or 0)
+                if avg_mood >= 7:
+                    context = "У тебя отличное настроение в последнее время! 🌟"
+                elif avg_mood >= 5:
+                    context = "Настроение стабильное! 💪"
+                else:
+                    context = "Я здесь, чтобы поддержать! 🤗"
+            cursor.execute("SELECT COUNT(*) as count FROM joys WHERE user_id = %s", (current_user.id,))
+            joys_count = cursor.fetchone()['count']
+            if joys_count > 0:
+                context += f" (и кстати, у тебя уже {joys_count} радостей в копилке! 🎉)"
         except Exception as e:
-            print(f"⚠️ Не удалось получить статистику: {e}")
+            print(f"⚠️ Ошибка получения контекста: {e}")
         finally:
             close_db(conn)
         
-        # ШАГ 2: Получаем API ключи для YandexGPT
+        # Получаем API ключи для YandexGPT
         api_key = os.environ.get('YANDEX_API_KEY')
         folder_id = os.environ.get('YANDEX_FOLDER_ID')
         
-        # ===== КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: ДЛЯ ОБЫЧНЫХ СООБЩЕНИЙ - БЕЗ АНАЛИЗА =====
+        # Если нет API ключей — используем умный ответ без YandexGPT
         if not api_key or not folder_id:
-            # Если нет ключей API - ТОЛЬКО простые ответы
-            fallback_response = get_fallback_response(user_message)
-            
-            return jsonify({
-                'reply': fallback_response,
-                'success': True,
-                'has_analysis': False  # Никакого анализа в обычных ответах
-            })
+            smart_reply = generate_smart_response(user_message, context, history)
+            return jsonify({'reply': smart_reply, 'success': True, 'has_analysis': False})
         
-        # ШАГ 3: Создаем промпт для психологического помощника БЕЗ анализа
+        # Создаем промпт для психологического помощника
         prompt = f"""Ты - Ася, виртуальный помощник в приложении для отслеживания настроения и ментального здоровья "Lumi".
 
 Твоя роль:
@@ -1906,25 +1793,12 @@ def chat_with_asya():
 
 Твой ответ (максимум 2 предложения, дружеский тон):"""
         
-        # ШАГ 4: Отправляем запрос в YandexGPT API
-        headers = {
-            'Authorization': f'Api-Key {api_key}',
-            'Content-Type': 'application/json'
-        }
-        
+        # Отправляем запрос в YandexGPT API
+        headers = {'Authorization': f'Api-Key {api_key}', 'Content-Type': 'application/json'}
         payload = {
             "modelUri": f"gpt://{folder_id}/yandexgpt-lite",
-            "completionOptions": {
-                "stream": False,
-                "temperature": 0.7,
-                "maxTokens": 200
-            },
-            "messages": [
-                {
-                    "role": "user",
-                    "text": prompt
-                }
-            ]
+            "completionOptions": {"stream": False, "temperature": 0.7, "maxTokens": 200},
+            "messages": [{"role": "user", "text": prompt}]
         }
         
         response = requests.post(
@@ -1937,32 +1811,17 @@ def chat_with_asya():
         if response.status_code == 200:
             data = response.json()
             reply = data['result']['alternatives'][0]['message']['text'].strip()
-            
-            return jsonify({
-                'reply': reply,
-                'success': True,
-                'has_analysis': False  # Обычный ответ - без анализа
-            })
+            return jsonify({'reply': reply, 'success': True, 'has_analysis': False})
         else:
-            # Если API ошибка - ТОЛЬКО простой ответ
-            current_app.logger.error(f"YandexGPT API error: {response.status_code}, response: {response.text}")
+            current_app.logger.error(f"YandexGPT API error: {response.status_code}")
             fallback_response = get_fallback_response(user_message)
-            
-            return jsonify({
-                'reply': fallback_response,
-                'success': True,
-                'has_analysis': False  # Без анализа даже при ошибке
-            })
+            return jsonify({'reply': fallback_response, 'success': True, 'has_analysis': False})
             
     except Exception as e:
         current_app.logger.error(f"Chat error: {str(e)}")
-        # При любой ошибке - локальный ответ без анализа
         fallback_response = get_fallback_response(user_message)
-        return jsonify({
-            'reply': fallback_response,
-            'success': False,
-            'has_analysis': False
-        })
+        return jsonify({'reply': fallback_response, 'success': False, 'has_analysis': False})
+
 # ================== ФУНКЦИИ РАСШИРЕННОГО АНАЛИЗА ==================
 
 def generate_deep_analysis(user_id):
@@ -2041,7 +1900,7 @@ def generate_deep_analysis(user_id):
             """, (user_id,))
             days_stats = cursor.fetchall()
             
-            # ⭐⭐⭐ НОВОЕ: Статистика радостей ⭐⭐⭐
+            # Статистика радостей
             cursor.execute("""
                 SELECT 
                     COUNT(*) as joys_count,
@@ -2051,7 +1910,6 @@ def generate_deep_analysis(user_id):
             """, (user_id,))
             joys_stats = cursor.fetchone()
             
-            # ⭐⭐⭐ НОВОЕ: Последние 3 радости ⭐⭐⭐
             recent_joys_list = []
             if joys_stats and joys_stats['recent_joys_text']:
                 recent_joys_list = joys_stats['recent_joys_text'].split('|||')[:3]
@@ -2061,10 +1919,8 @@ def generate_deep_analysis(user_id):
         finally:
             if cursor:
                 cursor.close()
-                print("✅ Курсор generate_deep_analysis закрыт")
             close_db(conn)
-            print("✅ Соединение generate_deep_analysis закрыто")
-
+        
         # Формируем данные для промпта
         analysis_data = {
             "mood_stats": mood_stats,
@@ -2164,24 +2020,11 @@ def generate_deep_analysis(user_id):
 Используй эмодзи. Ориентируйся на содержание заметок.
 """
         
-        headers = {
-            'Authorization': f'Api-Key {api_key}',
-            'Content-Type': 'application/json'
-        }
-        
+        headers = {'Authorization': f'Api-Key {api_key}', 'Content-Type': 'application/json'}
         payload = {
             "modelUri": f"gpt://{folder_id}/yandexgpt-lite",
-            "completionOptions": {
-                "stream": False,
-                "temperature": 0.8,
-                "maxTokens": 400
-            },
-            "messages": [
-                {
-                    "role": "user",
-                    "text": prompt
-                }
-            ]
+            "completionOptions": {"stream": False, "temperature": 0.8, "maxTokens": 400},
+            "messages": [{"role": "user", "text": prompt}]
         }
         
         response = requests.post(
@@ -2195,11 +2038,9 @@ def generate_deep_analysis(user_id):
             data = response.json()
             reply = data['result']['alternatives'][0]['message']['text'].strip()
         else:
-            # Локальный ответ при ошибке
             joys_block = ""
             if joys_stats and joys_stats['joys_count'] > 0:
                 joys_block = f"\n😊 Твои радости: {joys_stats['joys_count']} записей! 🎉"
-            
             reply = f"""📊 Анализ ваших данных:
 
 Среднее настроение: {float(mood_stats['avg_mood'] or 0):.1f}/10
@@ -2207,30 +2048,22 @@ def generate_deep_analysis(user_id):
 Заметок с текстом: {len(notes_with_text)}{joys_block}
 Продолжай записывать заметки для более подробного анализа! 📝"""
         
-        return jsonify({
-            'reply': reply,
-            'success': True,
-            'analysis_type': 'deep_analysis'
-        })
+        return jsonify({'reply': reply, 'success': True, 'analysis_type': 'deep_analysis'})
         
     except Exception as e:
         current_app.logger.error(f"Deep analysis error: {str(e)}")
-        return jsonify({
-            'reply': 'Извини, не могу проанализировать данные сейчас. Попробуй позже! 🔄',
-            'success': False
-        })
+        return jsonify({'reply': 'Извини, не могу проанализировать данные сейчас. Попробуй позже! 🔄', 'success': False})
+
 def analyze_patterns(user_id, user_message):
     """Анализ паттернов настроения"""
     try:
         print(f"📊 АНАЛИЗ ПАТТЕРНОВ: user_id={user_id}")
-        
         conn = get_db()
         if conn is None:
             return jsonify({'error': 'Ошибка подключения к БД'}), 500
         
         try:
             cursor = conn.cursor(dictionary=True)
-            
             # Анализ по дням недели
             cursor.execute("""
                 SELECT 
@@ -2243,7 +2076,6 @@ def analyze_patterns(user_id, user_message):
                 ORDER BY avg_mood
             """, (user_id,))
             days_stats = cursor.fetchall()
-            
             print(f"📅 Статистика по дням: {len(days_stats)} дней")
             
             # Анализ по времени суток (если есть таблица hourly_moods)
@@ -2270,32 +2102,21 @@ def analyze_patterns(user_id, user_message):
             joys_count = joys_count_result['count'] if joys_count_result else 0
             
             cursor.close()
-            
         finally:
             if cursor:
                 cursor.close()
-                print("✅ Курсор analyze_patterns закрыт")
             close_db(conn)
-            print("✅ Соединение analyze_patterns закрыто")
-
         
-        # Получаем ключи API
         api_key = os.environ.get('YANDEX_API_KEY')
         folder_id = os.environ.get('YANDEX_FOLDER_ID')
         
         if not api_key or not folder_id or not days_stats:
-            # Локальный ответ
             if not days_stats:
                 reply = "Пока недостаточно данных для анализа паттернов. Заполни календарь настроения! 📅"
-                print("ℹ️ Недостаточно данных для анализа паттернов")
             else:
                 days_text = chr(10).join([f"• {day['day_name']}: {float(day['avg_mood'] or 0):.1f}/10" for day in days_stats])
                 hours_text = chr(10).join([f"• {hour['hour']}:00: {float(hour['avg_mood'] or 0):.1f}/10" for hour in hours_stats]) if hours_stats else "Недостаточно данных по времени"
-                
-                joys_text = ""
-                if joys_count > 0:
-                    joys_text = f"\n\n✨ Твоя копилка радостей: {joys_count} записей. Отличная работа!"
-                
+                joys_text = f"\n\n✨ Твоя копилка радостей: {joys_count} записей. Отличная работа!" if joys_count > 0 else ""
                 reply = f"""📈 Паттерны настроения:
 
 📅 ПО ДНЯМ НЕДЕЛИ (от худшего к лучшему):
@@ -2305,17 +2126,9 @@ def analyze_patterns(user_id, user_message):
 {hours_text}{joys_text}
 
 💡 Используй эту информацию для планирования дня!"""
-                print(f"✅ Сформирован локальный ответ с паттернами")
-            
-            return jsonify({
-                'reply': reply,
-                'success': True,
-                'analysis_type': 'patterns'
-            })
+            return jsonify({'reply': reply, 'success': True, 'analysis_type': 'patterns'})
         
         print(f"🔗 Отправляем запрос в YandexGPT для анализа паттернов")
-        
-        # Создаем промпт для YandexGPT
         prompt = f"""
 ПРОАНАЛИЗИРУЙ ПАТТЕРНЫ НАСТРОЕНИЯ ПОЛЬЗОВАТЕЛЯ:
 
@@ -2341,48 +2154,27 @@ def analyze_patterns(user_id, user_message):
 
 Ответ: 3-4 предложения, дружеский тон, с эмодзи.
 """
-        
-        headers = {
-            'Authorization': f'Api-Key {api_key}',
-            'Content-Type': 'application/json'
-        }
-        
+        headers = {'Authorization': f'Api-Key {api_key}', 'Content-Type': 'application/json'}
         payload = {
             "modelUri": f"gpt://{folder_id}/yandexgpt-lite",
-            "completionOptions": {
-                "stream": False,
-                "temperature": 0.7,
-                "maxTokens": 300
-            },
-            "messages": [
-                {
-                    "role": "user",
-                    "text": prompt
-                }
-            ]
+            "completionOptions": {"stream": False, "temperature": 0.7, "maxTokens": 300},
+            "messages": [{"role": "user", "text": prompt}]
         }
-        
         response = requests.post(
             'https://llm.api.cloud.yandex.net/foundationModels/v1/completion',
             headers=headers,
             json=payload,
             timeout=15
         )
-        
         if response.status_code == 200:
             data = response.json()
             reply = data['result']['alternatives'][0]['message']['text'].strip()
             print("✅ Получен ответ от YandexGPT для паттернов")
         else:
             print(f"❌ Ошибка YandexGPT: {response.status_code}")
-            # Локальный ответ
             best_day = max(days_stats, key=lambda x: x['avg_mood']) if days_stats else None
             worst_day = min(days_stats, key=lambda x: x['avg_mood']) if days_stats else None
-            
-            joys_text = ""
-            if joys_count > 0:
-                joys_text = f" И ещё у тебя {joys_count} радостей в копилке! 🎉"
-            
+            joys_text = f" И ещё у тебя {joys_count} радостей в копилке! 🎉" if joys_count > 0 else ""
             if best_day and worst_day:
                 reply = f"""📊 Ваши паттерны настроения:
 
@@ -2392,34 +2184,21 @@ def analyze_patterns(user_id, user_message):
 Планируйте важные дела на {best_day['day_name']}, а на {worst_day['day_name']} оставьте время для отдыха! 💪"""
             else:
                 reply = "Пока недостаточно данных для анализа паттернов."
-        
-        return jsonify({
-            'reply': reply,
-            'success': True,
-            'analysis_type': 'patterns'
-        })
-        
+        return jsonify({'reply': reply, 'success': True, 'analysis_type': 'patterns'})
     except Exception as e:
         current_app.logger.error(f"Patterns analysis error: {str(e)}")
-        print(f"❌ Ошибка анализа паттернов: {str(e)}")
-        return jsonify({
-            'reply': 'Не могу проанализировать паттерны сейчас. Попробуй позже! 📊',
-            'success': False
-        })
-    
+        return jsonify({'reply': 'Не могу проанализировать паттерны сейчас. Попробуй позже! 📊', 'success': False})
+
 def analyze_notes(user_id, user_message):
     """Анализ заметок пользователя из mood_entries"""
     try:
         print(f"📝 АНАЛИЗ ЗАМЕТОК: user_id={user_id}")
-        
         conn = get_db()
         if conn is None:
             return jsonify({'error': 'Ошибка подключения к БД'}), 500
         
         try:
             cursor = conn.cursor(dictionary=True)
-            
-            # 1. Все заметки с текстом
             cursor.execute("""
                 SELECT date, mood, note 
                 FROM mood_entries 
@@ -2431,10 +2210,7 @@ def analyze_notes(user_id, user_message):
                 LIMIT 50
             """, (user_id,))
             all_notes = cursor.fetchall()
-            
             print(f"📋 Найдено заметок: {len(all_notes)}")
-            
-            # 2. Статистика по заметкам
             cursor.execute("""
                 SELECT 
                     COUNT(*) as total_notes,
@@ -2449,18 +2225,12 @@ def analyze_notes(user_id, user_message):
                 AND TRIM(note) != ''
             """, (user_id,))
             notes_stats = cursor.fetchone()
-            
-            # 3. Популярные темы (простые ключевые слова)
             all_texts = ' '.join([note['note'].lower() for note in all_notes])
-            
             cursor.close()
-            
         finally:
             if cursor:
                 cursor.close()
-                print("✅ Курсор analyze_notes закрыт")
             close_db(conn)
-            print("✅ Соединение analyze_notes закрыто")
         
         if not all_notes or len(all_notes) == 0:
             return jsonify({
@@ -2469,11 +2239,9 @@ def analyze_notes(user_id, user_message):
                 'analysis_type': 'notes'
             })
         
-        # Получаем ключи API
         api_key = os.environ.get('YANDEX_API_KEY')
         folder_id = os.environ.get('YANDEX_FOLDER_ID')
         
-        # Если нет API ключей или мало заметок - локальный ответ
         if not api_key or not folder_id or len(all_notes) < 3:
             reply = f"""📝 ТВОИ ЗАМЕТКИ:
 
@@ -2488,26 +2256,17 @@ def analyze_notes(user_id, user_message):
 {chr(10).join([f"• {note['date'].strftime('%d.%m')}: {note['mood']}/10 - {note['note'][:70]}..." for note in all_notes[:5]])}
 
 💡 Записывать мысли и чувства - полезная практика для самоанализа!"""
-            
-            return jsonify({
-                'reply': reply,
-                'success': True,
-                'analysis_type': 'notes'
-            })
+            return jsonify({'reply': reply, 'success': True, 'analysis_type': 'notes'})
         
         print(f"🔗 Отправляем запрос в YandexGPT с {len(all_notes)} заметками")
-        
-        #Подготавливаем заметки для промпта
         notes_for_prompt = []
-        for i, note in enumerate(all_notes[:15], 1):  # Ограничиваем 15 заметками
+        for i, note in enumerate(all_notes[:15], 1):
             note_date = note.get('date')
             if isinstance(note_date, date):
                 date_str = note_date.strftime('%d.%m.%Y')
             else:
                 date_str = str(note_date)
-
-        notes_for_prompt.append(f"{i}. {date_str}: Настроение {note.get('mood', '?')}/10 - '{note.get('note', '')}'")
-        # Создаем промпт для YandexGPT
+            notes_for_prompt.append(f"{i}. {date_str}: Настроение {note.get('mood', '?')}/10 - '{note.get('note', '')}'")
         prompt = f"""
 ПРОАНАЛИЗИРУЙ ЗАМЕТКИ ПОЛЬЗОВАТЕЛЯ ИЗ ДНЕВНИКА НАСТРОЕНИЯ:
 
@@ -2531,41 +2290,24 @@ def analyze_notes(user_id, user_message):
 
 Ответ: 3-4 предложения, дружеский тон, с эмодзи. Обращай внимание на содержание заметок.
 """
-        
-        headers = {
-            'Authorization': f'Api-Key {api_key}',
-            'Content-Type': 'application/json'
-        }
-        
+        headers = {'Authorization': f'Api-Key {api_key}', 'Content-Type': 'application/json'}
         payload = {
             "modelUri": f"gpt://{folder_id}/yandexgpt-lite",
-            "completionOptions": {
-                "stream": False,
-                "temperature": 0.7,
-                "maxTokens": 350
-            },
-            "messages": [
-                {
-                    "role": "user",
-                    "text": prompt
-                }
-            ]
+            "completionOptions": {"stream": False, "temperature": 0.7, "maxTokens": 350},
+            "messages": [{"role": "user", "text": prompt}]
         }
-        
         response = requests.post(
             'https://llm.api.cloud.yandex.net/foundationModels/v1/completion',
             headers=headers,
             json=payload,
             timeout=15
         )
-        
         if response.status_code == 200:
             data = response.json()
             reply = data['result']['alternatives'][0]['message']['text'].strip()
             print("✅ Получен ответ от YandexGPT для заметок")
         else:
             print(f"❌ Ошибка YandexGPT: {response.status_code}")
-            # Локальный ответ при ошибке
             if len(all_notes) >= 5:
                 latest_notes = chr(10).join([f"• {note['date'].strftime('%d.%m')}: {note['mood']}/10" for note in all_notes[:5]])
                 reply = f"""📝 Твои заметки:
@@ -2580,42 +2322,23 @@ def analyze_notes(user_id, user_message):
 Продолжай вести заметки для более глубокого анализа!"""
             else:
                 reply = f"У тебя {len(all_notes)} заметок. Продолжай записывать свои мысли для анализа! 📝"
-        
-        return jsonify({
-            'reply': reply,
-            'success': True,
-            'analysis_type': 'notes'
-        })
-        
+        return jsonify({'reply': reply, 'success': True, 'analysis_type': 'notes'})
     except Exception as e:
         current_app.logger.error(f"Notes analysis error: {str(e)}")
-        print(f"❌ Ошибка анализа заметок: {str(e)}")
-        return jsonify({
-            'reply': 'Не могу проанализировать заметки сейчас. Попробуй позже! 📝',
-            'success': False
-        })
+        return jsonify({'reply': 'Не могу проанализировать заметки сейчас. Попробуй позже! 📝', 'success': False})
 
 def analyze_joys(user_id):
     """Анализ радостей пользователя"""
     try:
         print(f"✨ АНАЛИЗ РАДОСТЕЙ: user_id={user_id}")
-        
         conn = get_db()
         if conn is None:
-            return jsonify({
-                'reply': 'Не могу подключиться к базе данных. Попробуй позже! 🔄',
-                'success': False
-            })
-        
+            return jsonify({'reply': 'Не могу подключиться к базе данных. Попробуй позже! 🔄', 'success': False})
         cursor = None
         try:
             cursor = conn.cursor(dictionary=True)
-            
-            # Считаем общее количество радостей
             cursor.execute("SELECT COUNT(*) as count FROM joys WHERE user_id = %s", (user_id,))
             joys_count = cursor.fetchone()['count']
-            
-            # Получаем последние 5 радостей
             cursor.execute("""
                 SELECT text, created_at 
                 FROM joys 
@@ -2624,78 +2347,76 @@ def analyze_joys(user_id):
                 LIMIT 5
             """, (user_id,))
             recent_joys = cursor.fetchall()
-            
         except Exception as e:
             print(f"❌ Ошибка при получении данных: {e}")
-            return jsonify({
-                'reply': 'Не могу получить данные о радостях. Попробуй позже! 🔄',
-                'success': False
-            })
+            return jsonify({'reply': 'Не могу получить данные о радостях. Попробуй позже! 🔄', 'success': False})
         finally:
             if cursor:
                 cursor.close()
-                print("✅ Курсор analyze_joys закрыт")
             close_db(conn)
-            print("✅ Соединение analyze_joys закрыто")
         
-
-        
-        # Формируем ответ
         if joys_count == 0:
             reply = "📭 У тебя пока нет записей о радостях. Попробуй каждый день записывать хотя бы одну маленькую радость — это помогает замечать хорошее! ✨"
-        
         elif joys_count == 1:
             reply = f"🌸 У тебя 1 радость в копилке! Это первый шаг к осознанности. Не забывай пополнять коллекцию! 💖"
-        
         else:
-            # Показываем примеры радостей
             joys_examples = []
             for joy in recent_joys[:3]:
                 date = joy['created_at'].strftime('%d.%m') if joy['created_at'] else ''
                 joys_examples.append(f"• {joy['text']} ({date})")
-            
             joys_text = "\n".join(joys_examples)
-            
             if joys_count >= 10:
                 reply = f"🎉 У тебя уже {joys_count} радостей! Ты настоящий коллекционер счастья! Вот твои последние:\n\n{joys_text}\n\nПродолжай в том же духе! 🌟"
             elif joys_count >= 5:
                 reply = f"✨ У тебя {joys_count} радостей. Отличная привычка! Недавно ты радовался(ась):\n\n{joys_text}\n\n💖"
             else:
                 reply = f"😊 У тебя {joys_count} радостей. Продолжай копить позитивные моменты!\n\n{joys_text}"
-        
-        return jsonify({
-            'reply': reply,
-            'success': True,
-            'analysis_type': 'joys'
-        })
-        
+        return jsonify({'reply': reply, 'success': True, 'analysis_type': 'joys'})
     except Exception as e:
         current_app.logger.error(f"Joys analysis error: {str(e)}")
-        print(f"❌ Ошибка анализа радостей: {str(e)}")
-        return jsonify({
-            'reply': 'Не могу проанализировать радости сейчас. Попробуй позже! 🔄',
-            'success': False
-        })
+        return jsonify({'reply': 'Не могу проанализировать радости сейчас. Попробуй позже! 🔄', 'success': False})
+
+def analyze_goals(user_id):
+    """Анализ целей пользователя"""
+    conn = get_db()
+    if not conn:
+        return jsonify({'reply': 'Не могу подключиться к базе данных. Попробуй позже! 🔄', 'success': False})
+    try:
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT COUNT(*) as total, SUM(completed) as completed FROM goals WHERE user_id = %s", (user_id,))
+        stats = cursor.fetchone()
+        cursor.execute("SELECT text, completed, created_at FROM goals WHERE user_id = %s ORDER BY created_at DESC LIMIT 5", (user_id,))
+        recent = cursor.fetchall()
+        total = stats['total'] or 0
+        completed = stats['completed'] or 0
+        if total == 0:
+            reply = "У тебя пока нет целей. Начни ставить небольшие цели на день — это помогает двигаться вперёд! 🎯"
+        else:
+            progress = round(completed / total * 100)
+            reply = f"📊 У тебя {total} целей, из них выполнено {completed} ({progress}%)!\n\n"
+            if recent:
+                reply += "🎯 Последние цели:\n"
+                for g in recent[:3]:
+                    status = "✅" if g['completed'] else "◻️"
+                    reply += f"{status} {g['text']}\n"
+            reply += "\nПродолжай ставить цели и отмечать выполненные — это мотивирует! 💪"
+        return jsonify({'reply': reply, 'success': True})
+    except Exception as e:
+        return jsonify({'reply': 'Ошибка анализа целей', 'success': False})
+    finally:
+        close_db(conn)
+
 def analyze_cycle(user_id):
     """Анализ данных менструального цикла"""
     try:
         print(f"🔄 АНАЛИЗ ЦИКЛА: user_id={user_id}")
-        
         conn = get_db()
         if conn is None:
-            return jsonify({
-                'reply': 'Не могу подключиться к базе данных. Попробуй позже! 🔄',
-                'success': False
-            })
-        
+            return jsonify({'reply': 'Не могу подключиться к базе данных. Попробуй позже! 🔄', 'success': False})
         try:
             cursor = conn.cursor(dictionary=True)
-            
-            # 1. Получаем настройки цикла
             cursor.execute("SELECT * FROM cycle_settings WHERE user_id = %s", (user_id,))
             settings = cursor.fetchone()
-            
-            # 2. Получаем записи цикла
             cursor.execute("""
                 SELECT date, cycle_day, symptoms, flow_intensity, mood, notes
                 FROM cycle_entries 
@@ -2704,8 +2425,6 @@ def analyze_cycle(user_id):
                 LIMIT 30
             """, (user_id,))
             cycle_entries = cursor.fetchall()
-            
-            # 3. Статистика по циклу
             cursor.execute("""
                 SELECT 
                     COUNT(*) as total_entries,
@@ -2715,29 +2434,21 @@ def analyze_cycle(user_id):
                 WHERE user_id = %s
             """, (user_id,))
             stats = cursor.fetchone()
-            
             cursor.close()
-            
         finally:
             close_db(conn)
-        
-        # Формируем ответ
         if len(cycle_entries) == 0:
             return jsonify({
                 'reply': "🌸 У тебя пока нет записей о цикле. Начни отмечать дни в дневнике цикла — это поможет лучше понимать своё тело!",
                 'success': True,
                 'analysis_type': 'cycle'
             })
-        
         reply_parts = []
-        
-        # Информация о настройках
         if settings and settings.get('last_period_start'):
             try:
                 last_period = datetime.strptime(str(settings['last_period_start']), '%Y-%m-%d').date()
                 today = datetime.now().date()
                 days_since = (today - last_period).days
-                
                 if days_since <= settings.get('period_length', 5):
                     reply_parts.append(f"🩸 У тебя сейчас менструация (день {days_since}).")
                 else:
@@ -2747,12 +2458,9 @@ def analyze_cycle(user_id):
                         reply_parts.append(f"📅 Следующая менструация предположительно через {days_to} дней.")
             except:
                 pass
-        
-        # Статистика записей
         if stats and stats['total_entries'] > 0:
             if stats['period_days'] > 0:
                 reply_parts.append(f"📊 Отмечено {stats['period_days']} дней менструации.")
-            
             if stats['avg_mood_period']:
                 avg_mood = float(stats['avg_mood_period'])
                 if avg_mood >= 7:
@@ -2761,40 +2469,26 @@ def analyze_cycle(user_id):
                     reply_parts.append(f"😐 Настроение в дни цикла: {avg_mood:.1f}/10.")
                 else:
                     reply_parts.append(f"😔 В дни цикла настроение снижено ({avg_mood:.1f}/10). Обрати внимание на отдых.")
-        
-        # Анализ симптомов
         all_symptoms = []
         for entry in cycle_entries:
             if entry.get('symptoms') and isinstance(entry['symptoms'], list):
                 all_symptoms.extend(entry['symptoms'])
-        
         if all_symptoms:
             from collections import Counter
             symptom_counts = Counter(all_symptoms)
             top_symptoms = symptom_counts.most_common(3)
-            
             symptoms_text = ", ".join([f"{s} ({c} раз)" for s, c in top_symptoms])
             reply_parts.append(f"🔍 Частые симптомы: {symptoms_text}.")
-        
-        # Советы по фазам
         reply_parts.append("\n💡 Советы по фазам цикла:")
         reply_parts.append("• Менструация: отдых, тепло, меньше нагрузок")
         reply_parts.append("• Фолликулярная: энергия растёт — время для новых дел")
         reply_parts.append("• Овуляция: пик коммуникабельности")
         reply_parts.append("• Лютеиновая и ПМС: будь добрее к себе, больше отдыха")
-        
-        return jsonify({
-            'reply': "\n".join(reply_parts),
-            'success': True,
-            'analysis_type': 'cycle'
-        })
-        
+        return jsonify({'reply': "\n".join(reply_parts), 'success': True, 'analysis_type': 'cycle'})
     except Exception as e:
         current_app.logger.error(f"Cycle analysis error: {str(e)}")
-        return jsonify({
-            'reply': 'Не могу проанализировать цикл сейчас. Попробуй позже! 🔄',
-            'success': False
-        })
+        return jsonify({'reply': 'Не могу проанализировать цикл сейчас. Попробуй позже! 🔄', 'success': False})
+
 # ================== ДОПОЛНИТЕЛЬНЫЙ API ДЛЯ ПОЛУЧЕНИЯ АНАЛИЗА ==================
 
 @main.route('/api/ai_insights')
@@ -2805,11 +2499,9 @@ def get_ai_insights():
         conn = get_db()
         if conn is None:
             return jsonify({'error': 'Ошибка подключения к базе данных'}), 500
-        
         try:
             stats = generate_user_statistics(conn, current_user.id)
             insights = generate_ai_insights(stats)
-            
             return jsonify({
                 'success': True,
                 'insights': insights,
@@ -2824,7 +2516,6 @@ def get_ai_insights():
             })
         finally:
             close_db(conn)
-            
     except Exception as e:
         current_app.logger.error(f"AI Insights error: {str(e)}")
         return jsonify({
@@ -2832,8 +2523,7 @@ def get_ai_insights():
             'error': 'Не удалось сгенерировать анализ',
             'insights': 'Продолжай отслеживать настроение, чтобы получить персональные рекомендации!'
         })
-        
-        
+
 @main.route('/health')
 def health_check():
     """Маршрут для проверки здоровья приложения Railway"""

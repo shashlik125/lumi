@@ -209,9 +209,19 @@ const hourElements = {};
 const cache = {
   moods: {},
   hourly: {},
-  goals: null,
-  joys: null
+  goals: {},
+  joys: {}
 };
+
+// ======================== ФУНКЦИЯ ДЛЯ НОРМАЛИЗАЦИИ ДАТЫ (FIX ЧАСОВОГО ПОЯСА) ========================
+function toLocalDateString(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr.split('T')[0] || '';
+  return d.getFullYear() + '-' +
+    String(d.getMonth() + 1).padStart(2, '0') + '-' +
+    String(d.getDate()).padStart(2, '0');
+}
 
 // ======================== ESCAPE HTML ========================
 function escapeHtml(str) {
@@ -422,7 +432,8 @@ async function saveDayNote() {
 
 // ======================== РАДОСТИ ========================
 async function loadJoys() {
-  if (cache.joys && cache.joys[currentDate]) {
+  if (cache.joys[currentDate] !== undefined) {
+    document.getElementById("joyList").innerHTML = '';
     cache.joys[currentDate].forEach(renderJoy);
     return;
   }
@@ -430,9 +441,14 @@ async function loadJoys() {
   try {
     const res = await fetch(JOYS_API);
     const data = await res.json();
-    const filtered = data.filter(j => j.date && j.date.split('T')[0] === currentDate)
-                         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    cache.joys = { [currentDate]: filtered };
+    const filtered = data.filter(j => {
+      if (!j.date) return false;
+      const localDate = toLocalDateString(j.date);
+      return localDate === currentDate;
+    }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    
+    cache.joys[currentDate] = filtered;
+    document.getElementById("joyList").innerHTML = '';
     filtered.forEach(renderJoy);
   } catch (e) {
     console.error(e);
@@ -444,6 +460,7 @@ function renderJoy(joy) {
   const list = document.getElementById("joyList");
   const div = document.createElement('div');
   div.className = 'positive-item';
+  div.id = `joy-${joy.id}`;
   div.innerHTML = `<div class="positive-item-content">🌟 ${escapeHtml(joy.text)}</div>
                    <div class="positive-item-actions">
                      <button class="positive-item-btn delete-btn" onclick="deleteJoy(${joy.id})"><i class="fas fa-trash"></i></button>
@@ -464,7 +481,6 @@ async function addJoy() {
       const newJoy = await res.json();
       document.getElementById("joyInput").value = "";
       renderJoy(newJoy);
-      if (!cache.joys) cache.joys = {};
       if (!cache.joys[currentDate]) cache.joys[currentDate] = [];
       cache.joys[currentDate].unshift(newJoy);
       showToast("Радость добавлена! 🌟", "success");
@@ -480,8 +496,9 @@ async function deleteJoy(joyId) {
   try {
     const res = await fetch(`${JOYS_API}/${joyId}`, { method: 'DELETE' });
     if (res.ok) {
-      document.getElementById(`joy-${joyId}`)?.remove();
-      if (cache.joys && cache.joys[currentDate]) {
+      const element = document.getElementById(`joy-${joyId}`);
+      if (element) element.remove();
+      if (cache.joys[currentDate]) {
         cache.joys[currentDate] = cache.joys[currentDate].filter(j => j.id !== joyId);
       }
       showToast("Запись удалена", "success");
@@ -494,7 +511,8 @@ async function deleteJoy(joyId) {
 
 // ======================== ЦЕЛИ ========================
 async function loadGoals() {
-  if (cache.goals && cache.goals[currentDate]) {
+  if (cache.goals[currentDate] !== undefined) {
+    document.getElementById("goalList").innerHTML = '';
     cache.goals[currentDate].forEach(renderGoal);
     return;
   }
@@ -502,9 +520,14 @@ async function loadGoals() {
   try {
     const res = await fetch(GOALS_API);
     const data = await res.json();
-    const filtered = data.filter(g => g.date && g.date.split('T')[0] === currentDate)
-                         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-    cache.goals = { [currentDate]: filtered };
+    const filtered = data.filter(g => {
+      if (!g.date) return false;
+      const localDate = toLocalDateString(g.date);
+      return localDate === currentDate;
+    }).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    
+    cache.goals[currentDate] = filtered;
+    document.getElementById("goalList").innerHTML = '';
     filtered.forEach(renderGoal);
   } catch (e) {
     console.error(e);
@@ -516,6 +539,7 @@ function renderGoal(goal) {
   const list = document.getElementById("goalList");
   const div = document.createElement('div');
   div.className = 'positive-item';
+  div.id = `goal-${goal.id}`;
   div.innerHTML = `
     <div class="positive-item-content">
       <label style="display:flex; align-items:center; gap:10px;">
@@ -540,7 +564,6 @@ async function addGoal() {
       const newGoal = await res.json();
       document.getElementById("goalInput").value = "";
       renderGoal(newGoal);
-      if (!cache.goals) cache.goals = {};
       if (!cache.goals[currentDate]) cache.goals[currentDate] = [];
       cache.goals[currentDate].unshift(newGoal);
       showToast("Цель добавлена!", "success");
@@ -559,18 +582,26 @@ async function toggleGoalStatus(goalId, isDone) {
       body: JSON.stringify({ completed: isDone })
     });
     if (!res.ok) throw new Error('Ошибка обновления');
-    showToast(isDone ? "Цель выполнена! 🎉" : "Цель отмечена как невыполненная", "success");
-    if (cache.goals && cache.goals[currentDate]) {
+    
+    if (cache.goals[currentDate]) {
       const goal = cache.goals[currentDate].find(g => g.id === goalId);
       if (goal) goal.completed = isDone;
     }
+    
+    const goalElement = document.getElementById(`goal-${goalId}`);
+    if (goalElement) {
+      const checkbox = goalElement.querySelector('input[type="checkbox"]');
+      if (checkbox) checkbox.checked = isDone;
+    }
+    
+    showToast(isDone ? "Цель выполнена! 🎉" : "Цель отмечена как невыполненная", "success");
   } catch (e) {
     console.error(e);
     showToast("Ошибка при обновлении цели", "error");
   }
 }
 
-// ======================== ПОЧАСОВОЕ НАСТРОЕНИЕ (ОПТИМИЗИРОВАНО) ========================
+// ======================== ПОЧАСОВОЕ НАСТРОЕНИЕ ========================
 function scheduleRender() {
   if (renderScheduled) return;
   renderScheduled = true;
@@ -608,7 +639,12 @@ async function updateHourlyMoods() {
     const res = await fetch(`${HOURLY_MOODS_API}?date=${currentDate}`);
     const data = await res.json();
     hourlyMoods = {};
-    data.forEach(e => { hourlyMoods[e.hour] = e; });
+    data.forEach(e => { 
+      const localDate = toLocalDateString(e.date);
+      if (localDate === currentDate) {
+        hourlyMoods[e.hour] = e;
+      }
+    });
     cache.hourly[currentDate] = hourlyMoods;
     scheduleRender();
   } catch (e) {

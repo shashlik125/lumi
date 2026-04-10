@@ -1211,6 +1211,31 @@ def update_goal_status(conn, goal_id):
         if cursor:
             cursor.close()
 
+@main.route('/api/goals/<int:goal_id>', methods=['PATCH'])
+@login_required
+@with_db_connection
+def patch_goal(conn, goal_id):
+    """Обновление цели через PATCH (для отметки выполнения)"""
+    data = request.get_json()
+    if not data or 'completed' not in data:
+        return jsonify({'error': 'Invalid data'}), 400
+
+    completed = 1 if data['completed'] else 0
+
+    cursor = conn.cursor(buffered=True)
+    try:
+        cursor.execute(
+            "UPDATE goals SET completed = %s WHERE id = %s AND user_id = %s",
+            (completed, goal_id, current_user.id)
+        )
+        conn.commit()
+        return jsonify({'success': True})
+    except Error as e:
+        print(f"Database error in patch_goal: {e}")
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+
 
 @main.route('/api/goals/<int:goal_id>/toggle', methods=['POST'])
 @login_required

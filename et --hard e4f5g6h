@@ -1,0 +1,156 @@
+[33m822098d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m что происходит
+[33maed6d13[m убираем ошибку 403
+[33m3d8a6b9[m вернула изменения
+[33m8964b22[m ошибка 403
+[33me742b7c[m ищем ошибку 403
+[33ma7b2522[m пипец
+[33mff0e90d[m проверка продлолжается
+[33mecfc508[m проверка
+[33m7b1723e[m Update routes.py
+[33mce0f971[m Update asya_widget.html
+[33md956627[m Update day_detail.html
+[33mbd732a7[m Update day_detail.html
+[33m8aa7ad7[m Update day_detail.html
+[33mc76ae0e[m Update day_detail.html
+[33m9814e47[m Update routes.py
+[33m523e2d7[m Update calendar.html
+[33m3703873[m Update calendar.html
+[33m763d070[m Update calendar.html
+[33m44cd574[m Update calendar.html
+[33mb8a09a0[m Update calendar.html
+[33mc7f2a13[m Update calendar.html
+[33m3216665[m Update login.html
+[33m3be9854[m Update login.html
+[33m3da37b3[m Update register.html
+[33mef569b4[m Update login.html
+[33mba4d7ca[m Update auth.py
+[33m638b457[m Update auth.py
+[33mc817a72[m Update calendar.html
+[33m59e360e[m убрала надпись запомнить меня
+[33m93ba4d5[m Update register.html
+[33m41b47c0[m проверка связи
+[33mfa743d9[m Update register.html
+[33m0dc4b9f[m Update register.html
+[33m701082a[m Update register.html
+[33m6785b10[m Update register.html
+[33mf61dd16[m Update register.html
+[33md3e30d0[m  модальные окна должны открываться
+[33m0ed00d1[m Update register.html
+[33m88c3505[m Update auth.py
+[33m97a31aa[m Merge branch 'main' of https://github.com/shashlik125/lumi
+[33mdc9f6d8[m переделка
+[33mf70722b[m Update routes.py
+[33ma4ceb8d[m добавляем заметки в календарь
+[33m9f07fed[m добавляем заметки в календарь
+[33macba1e0[m внешний вид вневника цикла
+[33m51f1fc5[m график цикла
+[33mcf425ff[m график цикла
+[33m2b1086e[m график цикла
+[33m9105db6[m график цикла
+[33md9dcf5d[m полные изменения в дневнике
+[33m2ca3c3a[m полные изменения в дневнике
+[33m633c10e[m график в дневнике цикла
+[33mdd7864b[m график в дневнике цикла
+[33m1e205bf[m график в дневнике цикла
+[33ma031c84[m что-то делаем с пулом
+[33md5a9e27[m что-то делаем с пулом
+[33m161ed4d[m дневник цика графики
+[33m5809e41[m дневник цика графики
+[33m11df088[m дневник цика графики
+[33m6f16ca3[m дневник цика графики
+[33m39bff93[m дневник цика графики
+[33m3ebffa2[m дневник цика графики
+[33m6dace69[m дневник цика графики
+[33m5bdd056[m неправельный пароль
+[33ma63913d[m добавили библиотеку для иконок
+[33m6abc6d6[m добавили библиотеку для иконок
+[33m4a39b59[m убрали закрытие аси при прокрутке в мобильной версии
+[33m1063e7e[m жесткие изменения2
+[33m987452b[m жесткие изменения2
+[33mc396569[m изменила регистрацию
+[33mbd080b3[m изменила маршрут настроения
+[33m37f1644[m поменяла api в цикле
+[33mbb76c68[m поменяла api в цикле
+[33m21f87c2[m проставила табуляцию дневник цикла
+[33mb431a03[m чиним дневник цикла
+[33m5fbda10[m чиним дневник цикла
+[33m152ac67[m проверка цели исправляю жеска
+[33m55c3b4e[m проверка цели исправляю жеска
+[33mdc92f03[m проверка цели исправляю жеска
+[33m80abb43[m проверка цели исправляю жеска
+[33m9ea5901[m проверка цели исправляю жеска
+[33m3adc5eb[m проверка цели
+[33m96b05bd[m не выводились цели
+[33m72b77b6[m что-то непонятное с ботом
+[33mbe7f67e[m что-то непонятное с ботом
+[33mbb706c6[m вывод целей и радостей
+[33m5fc0c7c[m добавила маршруты для целей и радостей
+[33mb0e1275[m добавила маршруты для целей и радостей
+[33md751e3b[m редактируем цели
+[33m20b48c0[m добавляем полня цели и радости
+[33m40bece0[m проверка что именно изменила
+[33me10fc73[m проверка что именно изменила
+[33mfffc95d[m Update routes.py
+[33mbfae783[m Update day_detail.html
+[33md02017a[m Update models.py
+[33m224f961[m Update routes.py
+[33me940d7a[m календарь цвет
+[33m1497948[m для корректной работы календаря
+[33m86de7d2[m Исправления
+[33m9e3b489[m исправлено сохранение настроения и добавлен анализ радостей
+[33m8c549f4[m исправляю бд, добавила тайминг
+[33me29b874[m бд сломалась
+[33m4440ffa[m подключили яндекс
+[33m99c5f82[m тетируем яндекс
+[33m37d0df9[m тетируем яндекс
+[33mfdf7325[m тетируем яндекс
+[33m3f0be68[m тетируем яндекс
+[33m51bce51[m тетируем яндекс
+[33m90be480[m тетируем яндекс
+[33m6248168[m тетируем яндекс
+[33mc5660ef[m подключили яндекс
+[33m7265662[m подключили яндекс
+[33m0116089[m проверяем ключ
+[33m8eceee4[m проверяем ключ
+[33m6306f10[m Fix database connection for Railway
+[33meb961aa[m Fix database connection for Railway
+[33mfc3b979[m Fix database connection for Railway
+[33m724eb44[m Fix database connection for Railway
+[33mc320eea[m Fix database connection for Railway
+[33m4dc31d0[m Fix database connection for Railway
+[33m9699d6f[m Fix database connection for Railway
+[33mb0787ee[m Fix database connection for Railway
+[33m87875c1[m Fix database connection for Railway
+[33ma2a89df[m Fix database connection for Railway
+[33mf97c026[m Fix database connection for Railway
+[33mdc1d425[m Fix database connection for Railway
+[33m15f8d6c[m Fix database connection for Railway
+[33mff6ae74[m Fix database connection for Railway
+[33m6824ed0[m Fix database connection for Railway
+[33m2f05396[m Fix database connection for Railway
+[33m330ce72[m Fix database connection for Railway
+[33mc602e81[m Fix database connection for Railway
+[33m4b58779[m Fix database connection for Railway
+[33me7997a1[m Fix database connection for Railway
+[33mde594a3[m Fix database connection for Railway
+[33m3ceac17[m Fix database connection for Railway
+[33m245fd2a[m Fix database connection for Railway
+[33m6ca56b0[m Fix database connection for Railway
+[33m74cca2b[m Fix database connection for Railway
+[33m911f307[m Fix database connection for Railway
+[33m644db69[m Fix database connection for Railway
+[33md8d7031[m Fix database connection for Railway
+[33mbe7b8d7[m Fix database connection for Railway
+[33m5ec8be2[m Fix database connection for Railway
+[33m9dc5bb8[m Fix database connection for Railway
+[33mf910fb2[m Fix database connection for Railway
+[33ma85dc46[m Fix database connection for Railway
+[33m8bf7f1a[m Fix database connection for Railway
+[33m566af34[m Add debug logging
+[33m118cbc1[m Add requests dependency
+[33m50a128e[m Remove .env from git
+[33m1682ca7[m Жесткие изменения
+[33m1ea5bbb[m Жесткие изменения
+[33meb81383[m Обновил текст на дневнике цикла
+[33m8200240[m Обновил текст на дневнике цикла
+[33m53619e4[m Обновил текст на дневнике ц

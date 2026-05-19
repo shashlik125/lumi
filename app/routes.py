@@ -1680,7 +1680,7 @@ def chat_with_asya():
         api_key = os.environ.get('YANDEX_API_KEY')
         folder_id = os.environ.get('YANDEX_FOLDER_ID')
 
-         # ВЫВОДИМ В ЛОГИ (ЭТО ВАЖНО!)
+        # ВЫВОДИМ В ЛОГИ (ЭТО ВАЖНО!)
         print("=" * 50)
         print("🔍 ОТЛАДКА YANDEXGPT:")
         print(f"API_KEY exists: {bool(api_key)}")
@@ -1694,15 +1694,6 @@ def chat_with_asya():
         if not api_key:
             print("❌ ОШИБКА: YANDEX_API_KEY не найдена в переменных окружения!")
             return jsonify({'reply': 'Ошибка: API ключ не настроен', 'success': False})
-        
-        if not folder_id:
-            print("❌ ОШИБКА: FOLDER_ID не найдена в переменных окружения!")
-            # Пробуем альтернативное имя
-            folder_id = os.environ.get('YANDEX_FOLDER_ID')
-            print(f"Пробуем YANDEX_FOLDER_ID: {folder_id}")
-            if not folder_id:
-                return jsonify({'reply': 'Ошибка: ID каталога не настроен', 'success': False})
-
 
         
         if not user_message:
@@ -1825,7 +1816,7 @@ def chat_with_asya():
         # Отправляем запрос в YandexGPT API
         headers = {'Authorization': f'Api-Key {api_key}', 'Content-Type': 'application/json'}
         payload = {
-            "modelUri": f"gpt://{folder_id}/yandexgpt-lite",
+            "modelUri": f"gpt://{folder_id}/yandexgpt/latest",
             "completionOptions": {"stream": False, "temperature": 0.7, "maxTokens": 200},
             "messages": [{"role": "user", "text": prompt}]
         }
@@ -2051,7 +2042,7 @@ def generate_deep_analysis(user_id):
         
         headers = {'Authorization': f'Api-Key {api_key}', 'Content-Type': 'application/json'}
         payload = {
-            "modelUri": f"gpt://{folder_id}/yandexgpt-lite",
+            "modelUri": f"gpt://{folder_id}/yandexgpt/latest",
             "completionOptions": {"stream": False, "temperature": 0.8, "maxTokens": 400},
             "messages": [{"role": "user", "text": prompt}]
         }
@@ -2185,7 +2176,7 @@ def analyze_patterns(user_id, user_message):
 """
         headers = {'Authorization': f'Api-Key {api_key}', 'Content-Type': 'application/json'}
         payload = {
-            "modelUri": f"gpt://{folder_id}/yandexgpt-lite",
+            "modelUri": f"gpt://{folder_id}/yandexgpt/latest",
             "completionOptions": {"stream": False, "temperature": 0.7, "maxTokens": 300},
             "messages": [{"role": "user", "text": prompt}]
         }
@@ -2321,7 +2312,7 @@ def analyze_notes(user_id, user_message):
 """
         headers = {'Authorization': f'Api-Key {api_key}', 'Content-Type': 'application/json'}
         payload = {
-            "modelUri": f"gpt://{folder_id}/yandexgpt-lite",
+            "modelUri": f"gpt://{folder_id}/yandexgpt/latest",
             "completionOptions": {"stream": False, "temperature": 0.7, "maxTokens": 350},
             "messages": [{"role": "user", "text": prompt}]
         }

@@ -1678,7 +1678,7 @@ def chat_with_asya():
 
         # ===== ВРЕМЕННАЯ ОТЛАДКА - ПОСМОТРИМ ЧТО ПРИХОДИТ =====
         api_key = os.environ.get('YANDEX_API_KEY')
-        folder_id = os.environ.get('FOLDER_ID')
+        folder_id = os.environ.get('YANDEX_FOLDER_ID')
 
          # ВЫВОДИМ В ЛОГИ (ЭТО ВАЖНО!)
         print("=" * 50)

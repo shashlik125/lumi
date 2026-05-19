@@ -1675,6 +1675,35 @@ def chat_with_asya():
         data = request.get_json()
         user_message = data.get('message', '').strip()
         history = data.get('history', [])
+
+        # ===== ВРЕМЕННАЯ ОТЛАДКА - ПОСМОТРИМ ЧТО ПРИХОДИТ =====
+        api_key = os.environ.get('YANDEX_API_KEY')
+        folder_id = os.environ.get('FOLDER_ID')
+
+         # ВЫВОДИМ В ЛОГИ (ЭТО ВАЖНО!)
+        print("=" * 50)
+        print("🔍 ОТЛАДКА YANDEXGPT:")
+        print(f"API_KEY exists: {bool(api_key)}")
+        print(f"API_KEY length: {len(api_key) if api_key else 0}")
+        print(f"API_KEY first 10 chars: {api_key[:10] if api_key else 'None'}...")
+        print(f"FOLDER_ID: {folder_id}")
+        print(f"FOLDER_ID type: {type(folder_id)}")
+        print("=" * 50)
+        
+        # Проверяем, есть ли ключ и папка
+        if not api_key:
+            print("❌ ОШИБКА: YANDEX_API_KEY не найдена в переменных окружения!")
+            return jsonify({'reply': 'Ошибка: API ключ не настроен', 'success': False})
+        
+        if not folder_id:
+            print("❌ ОШИБКА: FOLDER_ID не найдена в переменных окружения!")
+            # Пробуем альтернативное имя
+            folder_id = os.environ.get('YANDEX_FOLDER_ID')
+            print(f"Пробуем YANDEX_FOLDER_ID: {folder_id}")
+            if not folder_id:
+                return jsonify({'reply': 'Ошибка: ID каталога не настроен', 'success': False})
+
+
         
         if not user_message:
             return jsonify({
